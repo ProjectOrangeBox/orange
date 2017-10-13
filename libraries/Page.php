@@ -192,6 +192,8 @@ class Page {
 		if ($_view === false) {
 			if (DEBUG == 'development') {
 				@mkdir(ROOTPATH . '/application/views/' . $dirname, 0777, true);
+				
+				file_put_contents(ROOTPATH . '/application/views/' . $dirname . '/' . $filename . '.php', '<?php' . PHP_EOL . PHP_EOL . ' echo "Error View File: ".__FILE__;' . PHP_EOL);
 
 				die('View File views/' . $_view_file . '.php Not Found - because you are in development mode it has been automatically created for you.');
 			}

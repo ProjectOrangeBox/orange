@@ -222,7 +222,7 @@ class Errors {
 
 				file_put_contents(ROOTPATH . '/application/views/' . $view_path, '<?php' . PHP_EOL . PHP_EOL . ' echo "Error View File: ".__FILE__;' . PHP_EOL);
 
-				die('View File ../views/' . $view_path . ' Not Found - because you are in development mode it has been automatically created for you.');
+				die('Error View File ../views/' . $view_path . ' Not Found - because you are in development mode it has been automatically created for you.');
 			}
 		}
 
