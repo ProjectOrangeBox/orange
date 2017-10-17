@@ -17,6 +17,7 @@
 
 class MY_Loader extends CI_Loader {
 	protected $cache_drivers_loaded = false;
+	protected $loaded_plugins = [];
 
 	/**
 	 * Internal CI Library Loader
@@ -203,21 +204,29 @@ class MY_Loader extends CI_Loader {
 
 	/* Load a Plugin */
 	public function plugin($name='') {
-		$class = 'Plugin_' . strtolower($name);
-
-		if ($match = stream_resolve_include_path('libraries/plugins/' . $class . '.php')) {
-			include_once $match;
-	
-			new $class;
-		} else {
-			throw new Exception('Plugin missing "'.$class.'"');
-		}
-		
-		return true;
+		$this->plugin_exists($name,true);
 	}
 
-	public function plugin_exists($resource, $load = false) {
-		return $this->_exists('plugins/Plugin_' . str_replace('plugin_','',strtolower($resource)), $load, 'libraries', 'library');
+	public function plugin_exists($name, $load = false) {
+		$class = 'Plugin_' . str_replace('plugin_','',strtolower($name));
+
+		if (!isset($this->loaded_plugins[$class])) {
+			if ($match = stream_resolve_include_path('libraries/plugins/' . $class . '.php')) {
+				if ($load) {
+					require $match;
+		
+					new $class;
+	
+					$this->loaded_plugins[$class] = $match;
+				}
+			} else {
+				throw new Exception('Plugin missing "'.$class.'"');
+			}
+		} else {
+			$match = $this->loaded_plugins[$class];
+		}
+
+		return $match;
 	}
 
 	/**

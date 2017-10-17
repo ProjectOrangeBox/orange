@@ -226,5 +226,5 @@ function d2r() {
 		}
 	}
 
-	file_put_contents(ROOTPATH.'/dtd.log','{'.date('H:i:s').'} '.implode('::',$args).chr(10),FILE_APPEND | LOCK_EX);
+	file_put_contents(ROOTPATH.'/'.__METHOD__.'.log','{'.date('H:i:s').'} '.implode('::',$args).chr(10),FILE_APPEND | LOCK_EX);
 }

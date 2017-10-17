@@ -15,7 +15,7 @@
  *
  * Static Library
  *
- * This is a big static wrapper around numours helpers
+ * This is a big static wrapper around numorus helpers
  *
  */
 
@@ -30,6 +30,9 @@ class Html {
 			self::$helper_loaded = true;
 		}
 		
+		/* Try to load the plugin if it's there */
+		ci()->load->plugin_exists($name,true);
+
 		/* has it been attach or override a function */
 		if (isset(self::$attached[$name])) {
 			return call_user_func_array(self::$attached[$name],$arguments);
@@ -45,15 +48,6 @@ class Html {
 			return call_user_func_array($name,$arguments);
 		}
 		
-		/* Try to load the plugin an instantiate? */
-		if (ci()->load->plugin($name)) {
-			/* did it attach a "function" */
-			if (isset(self::$attached[$name])) {
-				/* yes */
-				return call_user_func_array(self::$attached[$name],$arguments);
-			}
-		}
-	
 		throw new Exception('HTML helper missing "html_'.$name.'"');
 	}
 
