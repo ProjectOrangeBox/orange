@@ -207,7 +207,7 @@ class MY_Loader extends CI_Loader {
 		$this->plugin_exists($name,true);
 	}
 
-	public function plugin_exists($name, $load = false) {
+	public function plugin_exists($name,$load = false) {
 		$class = 'Plugin_' . str_replace('plugin_','',strtolower($name));
 
 		if (!isset($this->loaded_plugins[$class])) {
@@ -220,7 +220,7 @@ class MY_Loader extends CI_Loader {
 					$this->loaded_plugins[$class] = $match;
 				}
 			} else {
-				throw new Exception('Plugin missing "'.$class.'"');
+				$match = false;
 			}
 		} else {
 			$match = $this->loaded_plugins[$class];
