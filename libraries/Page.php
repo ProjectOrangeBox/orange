@@ -552,24 +552,10 @@ class Page {
 		$names = explode(',',$names);
 		
 		foreach ($names as $name) {
-			page::plugin($name);
+			ci()->load->plugin($name);
 		}
 		
 		ci()->page->prepend = false;	
 	}
 	
-	public static function plugin($name='') {
-		$class = 'Plugin_' . strtolower($name);
-
-		if ($match = stream_resolve_include_path('libraries/plugins/' . $class . '.php')) {
-			include_once $match;
-	
-			new $class;
-		} else {
-			throw new Exception('Plugin missing "'.$class.'"');
-		}
-		
-		return true;
-	}
-
 } /* end class */

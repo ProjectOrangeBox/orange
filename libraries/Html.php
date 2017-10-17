@@ -45,9 +45,11 @@ class Html {
 			return call_user_func_array($name,$arguments);
 		}
 		
-		/* Plugin_????? = html::?????() */
-		if (page::plugin($name)) {
+		/* Try to load the plugin an instantiate? */
+		if (ci()->load->plugin($name)) {
+			/* did it attach a "function" */
 			if (isset(self::$attached[$name])) {
+				/* yes */
 				return call_user_func_array(self::$attached[$name],$arguments);
 			}
 		}

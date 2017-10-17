@@ -201,6 +201,25 @@ class MY_Loader extends CI_Loader {
 		return $this->_ci_init_library($library_name, $prefix, $params, $object_name);
 	}
 
+	/* Load a Plugin */
+	public function plugin($name='') {
+		$class = 'Plugin_' . strtolower($name);
+
+		if ($match = stream_resolve_include_path('libraries/plugins/' . $class . '.php')) {
+			include_once $match;
+	
+			new $class;
+		} else {
+			throw new Exception('Plugin missing "'.$class.'"');
+		}
+		
+		return true;
+	}
+
+	public function plugin_exists($resource, $load = false) {
+		return $this->_exists('plugins/Plugin_' . str_replace('plugin_','',strtolower($resource)), $load, 'libraries', 'library');
+	}
+
 	/**
 	 * model_exists function.
 	 * 
