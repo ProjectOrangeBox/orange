@@ -213,20 +213,23 @@ class Errors {
 		
 		log_message('error', 'Error: '.$view_path.' '.$status_code.' '.print_r($data,true));
 
+		$view_file = stream_resolve_include_path('views/' . $view_path);
+
 		/* if we are in development mode create the file in the application folder */
-		if (DEBUG == 'development') {
-			/* is CodeIgniter going to find this view file? */
-			if (stream_resolve_include_path('views/' . $view_path) === false) {
+		if ($view_file === false) {
+			if (DEBUG == 'development') {
 				/* then create it */
 				@mkdir(ROOTPATH . '/application/views/' . dirname($view_path), 0777, true);
 
 				file_put_contents(ROOTPATH . '/application/views/' . $view_path, '<?php' . PHP_EOL . PHP_EOL . ' echo "Error View File: ".__FILE__;' . PHP_EOL);
 
 				die('Error View File ../views/' . $view_path . ' Not Found - because you are in development mode it has been automatically created for you.');
+			} else {
+				show_error('could not locate view');
 			}
 		}
 
-		$output = ci()->load->view($view_path, $data, true);
+		$output = self::view($view_file,$data);
 
 		event::trigger('death.show');
 
@@ -240,6 +243,19 @@ class Errors {
 
 		/* exit with the appropriate code */
 		exit($exit_status);
+	}
+	
+	static protected function view($_view,$_data) {
+		extract($_data, EXTR_PREFIX_INVALID, '_');
+
+		/* start output cache */
+		ob_start();
+
+		/* load in view (which now has access to the in scope view data */
+		include $_view;
+
+		/* capture cache and return */
+		return ob_get_clean();
 	}
 
 } /* end class */

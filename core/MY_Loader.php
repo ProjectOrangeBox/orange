@@ -151,21 +151,6 @@ class MY_Loader extends CI_Loader {
 	 *
 	 */
 	protected function _ci_load_stock_library($library_name, $file_path, $params, $object_name) {
-
-		/* graph on our emailer */
-		if ($library_name == 'Email') {
-			require ROOTPATH . '/vendor/codeigniter/framework/system/libraries/Email.php';
-			require ROOTPATH . '/vendor/projectorangebox/theme-orange/libraries/MY_Email.php';
-
-			// Save the class name and object name
-			$this->_ci_classes['email'] = true;
-
-			// Instantiate the class
-			get_instance()->email = ($params) ? new MY_Email($params) : new MY_Email();
-
-			return;
-		}
-
 		$prefix = 'CI_';
 
 		if (class_exists($prefix . $library_name, FALSE)) {
