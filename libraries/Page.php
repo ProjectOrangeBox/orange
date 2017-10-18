@@ -180,40 +180,7 @@ class Page {
 	 * @return void
 	 */
 	public function view($_view_file = null, $_data = [], $_return = true) {
-		$pathinfo = pathinfo($_view_file);
-
-		$dirname  = $pathinfo['dirname'];
-		$filename = $pathinfo['filename'];
-
-		/* what file are we looking for? */
-		$_view = stream_resolve_include_path('views/' . $dirname . '/' . $filename . '.php');
-
-		/* is it there? if not return nothing */
-		if ($_view === false) {
-			if (DEBUG == 'development') {
-				@mkdir(ROOTPATH . '/application/views/' . $dirname, 0777, true);
-				
-				file_put_contents(ROOTPATH . '/application/views/' . $dirname . '/' . $filename . '.php', '<?php' . PHP_EOL . PHP_EOL . ' echo "Error View File: ".__FILE__;' . PHP_EOL);
-
-				die('View File views/' . $_view_file . '.php Not Found - because you are in development mode it has been automatically created for you.');
-			}
-
-			/* file not found so bail */
-			die('View File views/' . $_view_file . '.php Not Found');
-		}
-
-		/* this creates $__1 and $__2 etc... for number variable keys */
-		extract(ci()->load->get_vars(), EXTR_PREFIX_INVALID, '_');
-		extract($_data, EXTR_PREFIX_INVALID, '_');
-
-		/* start output cache */
-		ob_start();
-
-		/* load in view (which now has access to the in scope view data */
-		include $_view;
-
-		/* capture cache and return */
-		$_buffer = ob_get_clean();
+		$_buffer = o::view($_view_file,array_merge(ci()->load->get_vars(),$_data));
 
 		if (is_string($_return)) {
 			ci()->load->vars([$_return => $_buffer]);

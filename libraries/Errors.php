@@ -199,7 +199,7 @@ class Errors {
 		$view_folder = ($extra['view_folder']) ? $extra['view_folder'] : $view_folder;
 
 		/* what is the view path? */
-		$view_path = 'errors/' . $view_folder . '/error_' . str_replace('.php', '', $view) . '.php';
+		$view_path = 'errors/' . $view_folder . '/error_' . str_replace('.php', '', $view);
 
 		/* clean up the status code and setup the exit status code (taken from the CodeIgniter error handler) */
 		$status_code = abs($status_code);
@@ -213,24 +213,6 @@ class Errors {
 		
 		log_message('error', 'Error: '.$view_path.' '.$status_code.' '.print_r($data,true));
 
-		$view_file = stream_resolve_include_path('views/' . $view_path);
-
-		/* if we are in development mode create the file in the application folder */
-		if ($view_file === false) {
-			if (DEBUG == 'development') {
-				/* then create it */
-				@mkdir(ROOTPATH . '/application/views/' . dirname($view_path), 0777, true);
-
-				file_put_contents(ROOTPATH . '/application/views/' . $view_path, '<?php' . PHP_EOL . PHP_EOL . ' echo "Error View File: ".__FILE__;' . PHP_EOL);
-
-				die('Error View File ../views/' . $view_path . ' Not Found - because you are in development mode it has been automatically created for you.');
-			} else {
-				show_error('could not locate view');
-			}
-		}
-
-		$output = self::view($view_file,$data);
-
 		event::trigger('death.show');
 
 		/* send it out */
@@ -238,24 +220,11 @@ class Errors {
 			->enable_profiler(false)
 			->set_status_header($status_code)
 			->set_content_type($mime_type, $charset)
-			->set_output($output)
+			->set_output(o::view($view_path,$data))
 			->_display();
 
 		/* exit with the appropriate code */
 		exit($exit_status);
-	}
-	
-	static protected function view($_view,$_data) {
-		extract($_data, EXTR_PREFIX_INVALID, '_');
-
-		/* start output cache */
-		ob_start();
-
-		/* load in view (which now has access to the in scope view data */
-		include $_view;
-
-		/* capture cache and return */
-		return ob_get_clean();
 	}
 
 } /* end class */

@@ -299,4 +299,33 @@ class O {
 		}
 	}
 
+	public static function view($_view,$_data) {
+		$_view = stream_resolve_include_path('views/' . str_replace('.php','',$_view) . '.php');
+
+		/* if we are in development mode create the file in the application folder */
+		if ($_view === false) {
+			if (DEBUG == 'development') {
+				/* then create it */
+				@mkdir(ROOTPATH . '/application/views/' . dirname($view_path), 0777, true);
+
+				file_put_contents(ROOTPATH . '/application/views/' . $view_path, '<?php' . PHP_EOL . PHP_EOL . ' echo "Error View File: ".__FILE__;' . PHP_EOL);
+
+				die('Error View File ../views/' . $view_path . ' Not Found - because you are in development mode it has been automatically created for you.');
+			} else {
+				die('could not locate view');
+			}
+		}
+	
+		extract($_data, EXTR_PREFIX_INVALID, '_');
+
+		/* start output cache */
+		ob_start();
+
+		/* load in view (which now has access to the in scope view data */
+		include $_view;
+
+		/* capture cache and return */
+		return ob_get_clean();
+	}
+	
 } /*end class */
