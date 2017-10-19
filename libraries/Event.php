@@ -20,28 +20,24 @@
 class Event {
 	protected static $listeners = [];
 
-	/*
-	No External Dependencies
-
-	priorities are set using the unix nice levels
-	http://www.computerhope.com/unix/unice.htm
-
-	In short - the lower the number the higher the priority
-	100 High
-	0	 Normal
-	-100 Low
+	/**
+	 * No External Dependencies
+   *
+	 * priorities are set using the unix nice levels
+	 * http://www.computerhope.com/unix/unice.htm
+	 *
+	 * In short - the lower the number the higher the priority
+	 * 100 High
+	 * 0	 Normal
+	 * -100 Low
 	 */
 
 	/**
-	 * Register a new event
-	 *
-	 * This event will be called if and when the trigger matching it is called
-	 *
-	 * @param	string $name name of the event
-	 * @param closure $closure event to happen as a PHP Anonymous function
-	 * @param priority $priority order in which matching events should trigger priorities are set using the unix nice levels
-	 *
-	 * @return Event $this allow chaining
+	 * register a event handler
+	 * @author Don Myers
+	 * @param  string $name event to listen for
+	 * @param  closure $closure function to call on event trigger
+	 * @param  int [$priority = 0] priority level of the event
 	 */
 	public static function register($name, $closure, $priority = 0) {
 		/* if they want to attach the same event to multiple triggers */
@@ -50,7 +46,7 @@ class Event {
 				self::register($n, $closure, $priority = 0);
 			}
 
-			return $this;
+			return;
 		}
 
 		$name = self::_normalize_name($name);
@@ -61,15 +57,17 @@ class Event {
 	}
 
 	/**
-	 * Trigger a event
-	 *
-	 * Triggers a event optionally passing between 1 and 8 variables by reference
-	 * if a event returns false this stop the processing of other events in the priority chain
-	 *
-	 * @param	string $name	name of the event
-	 * @params between 1 - 8 variables passed by reference an event changes them directly
-	 *
-	 * @return Event $this allow chaining
+	 * trigger a event
+	 * @author Don Myers
+	 * @param string $name event to trigger
+	 * @param mixed [&$a1 = null] argument 1
+	 * @param mixed [&$a2 = null] argument 2
+	 * @param mixed [&$a3 = null] argument 3
+	 * @param mixed [&$a4 = null] argument 4
+	 * @param mixed [&$a5 = null] argument 5
+	 * @param mixed [&$a6 = null] argument 6
+	 * @param mixed [&$a7 = null] argument 7
+	 * @param mixed [&$a8 = null] argument 8
 	 */
 	public static function trigger($name, &$a1 = null, &$a2 = null, &$a3 = null, &$a4 = null, &$a5 = null, &$a6 = null, &$a7 = null, &$a8 = null) {
 		$name = self::_normalize_name($name);
@@ -96,9 +94,10 @@ class Event {
 	}
 
 	/**
-	 * Are there any events matching this name
-	 *
-	 * @return boolean
+	 * to check if a event has any listeners
+	 * @author Don Myers
+	 * @param  string $name event to check
+	 * @return bool if there are any listeners for this event
 	 */
 	public static function has($name) {
 		$name = self::_normalize_name($name);
@@ -107,18 +106,19 @@ class Event {
 	}
 
 	/**
-	 * return array of events trigger names
-	 *
-	 * @return array
+	 * return a array of listeners for a certain event
+	 * @author Don Myers
+	 * @return array list of event (this function is more for debugging purpose)
 	 */
 	public static function events() {
 		return array_keys(self::$listeners);
 	}
 
 	/**
-	 * return count of attached events to a trigger
-	 *
-	 * @return integer
+	 * Get the count of the listeners attached
+	 * @author Don Myers
+	 * @param  string $name event to get the count of
+	 * @return int how many listeners are registered
 	 */
 	public static function count($name) {
 		$name = self::_normalize_name($name);
@@ -127,10 +127,11 @@ class Event {
 	}
 
 	/**
-	 * normalize the name
-	 *
-	 * @param	string $name name of the event
-	 * @return string
+	 * normalize a event trigger name
+	 * @private
+	 * @author Don Myers
+	 * @param  string $name event trigger name
+	 * @return string cleaned name
 	 */
 	protected static function _normalize_name($name) {
 		/*

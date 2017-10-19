@@ -17,14 +17,25 @@ class Validate_base {
 	protected $field_data;
 	protected $field; /* reference to variable */
 
+	/**
+	 * wrapper to setup the validation base information
+	 * @author Don Myers
+	 * @param array &$field_data all of the fields being validated 
+	 * this is helpful if you want to create a "the same as" or "different than" and you need to "look" at other columns
+	 * in the validation set
+	 * @param string &$error_string storage for the error message
+	 */
 	public function __construct(&$field_data, &$error_string) {
 		$this->field_data   = &$field_data;
 		$this->error_string = &$error_string;
 	}
 
-	public function filter(&$field, $options) {
-	}
-
+	/**
+	 * field which needs to be validated
+	 * @author Don Myers
+	 * @param  string &$field reference to the field which needs to be validated
+	 * @return $this chain-able
+	 */
 	public function field(&$field) {
 		$this->field = &$field;
 
@@ -32,6 +43,20 @@ class Validate_base {
 		return $this;
 	}
 
+	/**
+	 * wrapper
+	 * @author Don Myers
+	 * @param mixed &$field field need filtering
+	 * @param string $options usually comma seperated list of options
+	 */
+	public function validate(&$field, $options) {}
+	
+	/**
+	 * child callable method to shorten the fields content
+	 * @author Don Myers
+	 * @param  integer [$length = null] length to shorten the field
+	 * @return $this chain-able
+	 */
 	public function length($length = null) {
 		/* Did they send in a number for the max length? */
 		if (is_numeric($length)) {
@@ -45,6 +70,11 @@ class Validate_base {
 		return $this;
 	}
 
+	/**
+	 * child callable method to trim the fields content
+	 * @author Don Myers
+	 * @return $this chain-able
+	 */
 	public function trim() {
 		$this->field = trim($this->field);
 
@@ -52,6 +82,11 @@ class Validate_base {
 		return $this;
 	}
 
+	/**
+	 * child callable method to clean the input for visible character
+	 * @author Don Myers
+	 * @return $this chain-able
+	 */
 	public function human() {
 		/* human characters only */
 		$this->field = preg_replace("/[^\\x20-\\x7E]/mi", '', $this->field);
@@ -60,6 +95,11 @@ class Validate_base {
 		return $this;
 	}
 
+	/**
+	 * child callable method to clean the input for visible character + return, line feed, tab
+	 * @author Don Myers
+	 * @return $this chain-able
+	 */
 	public function human_plus() {
 		/* human,tab,linefeed,return */
 		$this->field = preg_replace("/[^\\x20-\\x7E\\n\\t\\r]/mi", '', $this->field);
@@ -68,6 +108,12 @@ class Validate_base {
 		return $this;
 	}
 
+	/**
+	 * child callable method to strip chracters passed
+	 * @author Don Myers
+	 * @param  string $strip chracters to strip from the field
+	 * @return $this chain-able
+	 */
 	public function strip($strip) {
 		$field = str_replace(str_split($strip), '', $field);
 
@@ -75,7 +121,12 @@ class Validate_base {
 		return $this;
 	}
 
-	/* is this a boolean value (in general terms) */
+	/**
+	 * child callable method convert a value into a boolean value
+	 * @author Don Myers
+	 * @param  string $field value to test
+	 * @return bool
+	 */
 	public function is_bol($field) {
 		return (in_array(strtolower($field), array_merge($this->true_array, $this->false_array), true)) ? true : false;
 	}

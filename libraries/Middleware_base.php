@@ -20,15 +20,19 @@
 class Middleware_base {
 	protected $controller;
 
+	/**
+	 * Constructor
+	 * @private
+	 * @author Don Myers
+	 * @param object &$controller current controller reference
+	 */
 	public function __construct(&$controller) {
 		$this->controller = &$controller;
 	}
 
 	/**
-	 * run function.
-	 *
-	 * @access public
-	 * @return void
+	 * wrapper - extend this
+	 * @author Don Myers
 	 */
 	public function run() {
 	}
@@ -39,6 +43,7 @@ class Middleware_base {
 	 * Allows Middleware to access CI's loaded classes using the same
 	 * syntax as controllers.
 	 *
+	 * @author Don Myers
 	 * @param	string	$key
 	 */
 	public function __get($key) {

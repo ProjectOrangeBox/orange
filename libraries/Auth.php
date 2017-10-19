@@ -21,6 +21,11 @@
 class Auth {
 	protected $session_key = 'user::data';
 
+	/**
+	 * load the required models and setup the user
+	 * @private
+	 * @author Don Myers
+	 */
 	public function __construct() {
 		ci()->load->model('o_user_model');
 
@@ -41,12 +46,11 @@ class Auth {
 	}
 
 	/**
-	 * login function.
-	 * 
-	 * @access public
-	 * @param mixed $email
-	 * @param mixed $password
-	 * @return void
+	 * Login handler
+	 * @author Don Myers
+	 * @param  string $email users email address
+	 * @param  string $password users password
+	 * @return bool
 	 */
 	public function login($email, $password) {
 		$ajax = ci()->input->is_ajax_request();
@@ -61,14 +65,14 @@ class Auth {
 	}
 
 	/**
-	 * logout function.
-	 * 
-	 * @access public
-	 * @return void
+	 * Logout handler
+	 * @author Don Myers
+	 * @return bool
 	 */
 	public function logout() {
 		event::trigger('auth.logout');
-
+		
+		/* make them a guest */
 		$this->refresh_userdata(config('auth.guest role id'));
 
 		log_message('info', 'Auth Class logout');
@@ -77,11 +81,10 @@ class Auth {
 	}
 
 	/**
-	 * refresh_userdata function.
-	 * 
-	 * @access public
-	 * @param mixed $user_id (default: null)
-	 * @return void
+	 * Refresh the users data from the database
+	 * @author Don Myers
+	 * @param  integer [$user_id = null] The Id of the user you want to refresh them as
+	 * @return bool
 	 */
 	public function refresh_userdata($user_id = null) {
 		if (is_object(ci()->user) && $user_id == null) {
@@ -102,12 +105,12 @@ class Auth {
 	}
 
 	/**
-	 * _login function.
-	 * 
-	 * @access protected
-	 * @param mixed $login
-	 * @param mixed $password
-	 * @return void
+	 * The Login heavy lifter with all the tests
+	 * @private
+	 * @author Don Myers
+	 * @param  string $email users email address
+	 * @param  string $password users password
+	 * @return bool
 	 */
 	protected function _login($login, $password) {
 		/* TEST -- did they send anything in? */

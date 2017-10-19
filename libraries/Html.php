@@ -23,6 +23,14 @@ class Html {
 	public static $helper_loaded = false;
 	public static $attached = [];
 
+	/**
+	 * Static function to capture static method calls
+	 * @private
+	 * @author Don Myers
+	 * @param  string $name the name of the attached function to call
+	 * @param  array $arguments the arguments to pass to the function
+	 * @return string html helper output
+	 */
 	public static function __callStatic($name,$arguments) {
 		if (!self::$helper_loaded) {
 			ci()->load->helper(['html','form','date','inflector','language','number','text']);
@@ -51,6 +59,12 @@ class Html {
 		throw new Exception('HTML helper missing "html_'.$name.'"');
 	}
 
+	/**
+	 * attach a closure as a html function
+	 * @author Don Myers
+	 * @param string $name name of the html function
+	 * @param closure $closure function to call
+	 */
 	public static function attach($name,$closure) {
 		self::$attached[$name] = $closure;
 	}

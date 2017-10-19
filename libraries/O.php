@@ -19,6 +19,10 @@
 
 class O {
 
+	/**
+	 * Release the Session Lock placed on a Page
+	 * @author Don Myers
+	 */
 	public static function unlock_session() {
 		/*
 		Database Sessions:
@@ -31,47 +35,63 @@ class O {
 	}
 
 	/**
-	 * normalize function.
-	 *
-	 * @access public
-	 * @static
-	 * @param mixed $name
-	 * @param string $replace (default: '.')
-	 * @return void
-	 */
-	public static function normalize($name, $replace = '.') {
-		/*
-		look for any sequence of non-alphanumeric characters and replaces it with a single '.'.
-		using + you also avoid having two consecutive .'s in your output.
-		we also lowercase and trim any leading and trailing .'s
-		 */
-		return trim(preg_replace('/[^a-z0-9]+/', $replace, strtolower($name)), $replace);
-	}
-
-	/**
-	 * console function.
-	 *
-	 * @access public
-	 * @static
-	 * @param mixed $var
-	 * @param string $type (default: 'log')
-	 * @return void
+	 * dump something to the browser javascript console
+	 * @author Don Myers
+	 * @param mixed $var            
+	 * @param string [$type = 'log'] the javascript console method to call
 	 */
 	public static function console($var, $type = 'log') {
 		echo '<script type="text/javascript">console.' . $type . '(' . json_encode($var) . ')</script>';
 	}
 
 	/**
+	 * Generic View Method which searches the include path for view files.
+	 * @author Don Myers
+	 * @param  string $_view view file we are searching for ie. admin/dashboard/index
+	 * @param  array $_data view variables to extract for the view
+	 * @return string contents of the view file
+	 */
+	public static function view($_view,$_data) {
+		$_view = 'views/'.ltrim(str_replace('.php','',$_view),'/') . '.php';
+	
+		$_view_file = stream_resolve_include_path($_view);
+
+		/* if we are in development mode create the file in the application folder */
+		if ($_view_file === false) {
+			if (DEBUG == 'development') {
+				/* then create it */
+				@mkdir(APPPATH . dirname($_view), 0777, true);
+
+				file_put_contents(APPPATH . $_view, '<?php' . PHP_EOL . PHP_EOL . ' echo "Error View File: ".__FILE__;' . PHP_EOL);
+
+				die('Error View File ../' . $_view . ' Not Found - because you are in development mode it has been automatically created for you in your application folder.');
+			} else {
+				errors::show('Could not locate view "'.$_view.'"');
+			}
+		}
+	
+		extract($_data, EXTR_PREFIX_INVALID, '_');
+
+		/* start output cache */
+		ob_start();
+
+		/* load in view (which now has access to the in scope view data */
+		include $_view_file;
+
+		/* capture cache and return */
+		return ob_get_clean();
+	}
+	
+	/**
 	 * atomic_file_put_contents function.
 	 *
 	 * this is a atomic function to write a file while still allowing access to the previous file until the file is completely rewritten
 	 * this keeps other processes from getting a half written file or 2 process from trying to write the same file
 	 *
-	 * @access public
-	 * @static
-	 * @param mixed $filepath
-	 * @param mixed $content
-	 * @return void
+	 * @author Don Myers
+	 * @param  string $filepath name of the cache file
+	 * @param  string $content  contents of the cache file
+	 * @return int bytes written or false on fail
 	 */
 	public static function atomic_file_put_contents($filepath, $content) {
 		/* get a temporary file */
@@ -113,17 +133,13 @@ class O {
 	}
 
 	/**
-	 * remove_php_file function.
-	 *
-	 * remove a PHP cached file if it exists
-	 *
-	 * @access public
-	 * @static
-	 * @param mixed $fullpath
-	 * @return void
+	 * remove a php file from op or apc cache
+	 * @author Don Myers
+	 * @param  string $fullpath full file path as seen in op or apc cache
+	 * @return bool true success
 	 */
 	public static function remove_php_file($fullpath) {
-		$success = (is_file($fullpath)) ? unlink($fullpath) : true/* success because it not there */;
+		$success = (is_file($fullpath)) ? unlink($fullpath) : true; /* success because it not there */
 
 		/* if we are using opcache or apccache we need to remove it from the cache */
 		if (function_exists('opcache_invalidate')) {
@@ -136,14 +152,10 @@ class O {
 	}
 
 	/**
-	 * convert_to_real function.
-	 *
-	 * convert to real value from string
-	 *
-	 * @access public
-	 * @static
-	 * @param mixed $value
-	 * @return void
+	 * Convert a value from one value to it's native value
+	 * @author Don Myers
+	 * @param  string $value value to convert
+	 * @return mixed converted value
 	 */
 	public static function convert_to_real($value) {
 		/* try the easy ones first */
@@ -174,14 +186,10 @@ class O {
 	}
 
 	/**
-	 * convert_to_string function.
-	 *
-	 * convert values to string and return asap
-	 *
-	 * @access public
-	 * @static
-	 * @param mixed $value
-	 * @return void
+	 * Convert a value from it's native to a string
+	 * @author Don Myers
+	 * @param  mixed $value native value to convert
+	 * @return string string version of a value
 	 */
 	public static function convert_to_string($value) {
 		if (is_array($value)) {
@@ -204,17 +212,14 @@ class O {
 	}
 
 	/**
-	 * simple_array function.
-	 *
-	 * @access public
-	 * @static
-	 * @param mixed $array
-	 * @param mixed $key (default: null)
-	 * @param mixed $value (default: null)
-	 * @return void
+	 * Convert from complex array of arrays or objects to a simple key/value pair
+	 * @author Don Myers
+	 * @param  array $array complex array of arrays or objects
+	 * @param  string [$key = id] simple array key value
+	 * @param  string [$value = null] simple array value from each array entry
+	 * @return array simple array
 	 */
-	public static function simple_array($array, $key = null, $value = null) {
-		$key   = ($key) ? $key : 'id';
+	public static function simple_array($array, $key = 'id', $value = null) {
 		$value = ($value) ? $value : $key;
 
 		$new_array = [];
@@ -235,14 +240,12 @@ class O {
 	# +-+-+-+-+-+ +-+-+-+-+-+-+-+-+-+
 
 	/**
-	 * cache function.
-	 *
-	 * @access public
-	 * @static
-	 * @param mixed $key
-	 * @param mixed $closure
-	 * @param mixed $ttl (default: null)
-	 * @return void
+	 * cache data using a closure for simplity
+	 * @author Don Myers
+	 * @param  string $key cache key with optional . separators for tags
+	 * @param  closure $closure closure function (nothing passed in)
+	 * @param  int [$ttl = null] ttl for the cache entry (default is to use config ttl +)
+	 * @return mixed cached data
 	 */
 	public static function cache($key, $closure, $ttl = null) {
 		$ci = &get_instance();
@@ -260,11 +263,10 @@ class O {
 	}
 
 	/**
-	 * ttl function.
-	 *
-	 * @access public
-	 * @static
-	 * @return void
+	 * Get the TTL + 10 - 30 seconds
+	 * defaults to 1 second in the development environment
+	 * @author Don Myers
+	 * @return int numbers of seconds
 	 */
 	public static function ttl() {
 		/* add a between 10 to 30 seconds so multiple caches created at once timeout at random times this is helpful on high traffic sites */
@@ -272,14 +274,9 @@ class O {
 	}
 
 	/**
-	 * delete_cache_by_tags function.
-	 *
-	 * delete cache entries based on period separators
-	 * if the cache items contain at least 1 it is added to the returned array
-	 *
-	 * @access public
-	 * @static
-	 * @return void
+	 * delete cache items based on . separators for tags
+	 * ie. o::delete_cache_by_tags('user','admin','gui');
+	 * @author Don Myers
 	 */
 	public static function delete_cache_by_tags() {
 		$tags = func_get_args();
@@ -298,37 +295,5 @@ class O {
 			}
 		}
 	}
-	
-	/* this searches the include paths */
-	public static function view($_view,$_data) {
-		$_view = 'views/'.ltrim(str_replace('.php','',$_view),'/') . '.php';
-	
-		$_view_file = stream_resolve_include_path($_view);
-
-		/* if we are in development mode create the file in the application folder */
-		if ($_view_file === false) {
-			if (DEBUG == 'development') {
-				/* then create it */
-				@mkdir(APPPATH . dirname($_view), 0777, true);
-
-				file_put_contents(APPPATH . $_view, '<?php' . PHP_EOL . PHP_EOL . ' echo "Error View File: ".__FILE__;' . PHP_EOL);
-
-				die('Error View File ../' . $_view . ' Not Found - because you are in development mode it has been automatically created for you in your application folder.');
-			} else {
-				errors::show('Could not locate view "'.$_view.'"');
-			}
-		}
-	
-		extract($_data, EXTR_PREFIX_INVALID, '_');
-
-		/* start output cache */
-		ob_start();
-
-		/* load in view (which now has access to the in scope view data */
-		include $_view_file;
-
-		/* capture cache and return */
-		return ob_get_clean();
-	}
-	
+		
 } /*end class */
