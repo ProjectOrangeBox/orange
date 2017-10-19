@@ -137,6 +137,11 @@ class User_entity extends model_entity {
 		return !$this->can($resource);
 	}
 
+	public function is_guest() {
+		/* is this person the guest id? */
+		return ($this->id === config('auth.guest user id',-1));
+	}
+
 	protected function _lazy_load() {
 		if (!$this->lazy_loaded) {
 			$user_id = (int) $this->id;
