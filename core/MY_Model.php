@@ -110,7 +110,7 @@ class MY_Model extends CI_Model {
 		}
 
 		/* remove all fields not part of the rule set */
-		$this->only_columns_using_rules($data, $rules);
+		$this->only_columns_with_rules($data, $rules);
 
 		/* run the model rules */
 		if (count($rules)) {
@@ -169,7 +169,7 @@ class MY_Model extends CI_Model {
 	}
 
 	/**
-	 * only_columns_using_rules function.
+	 * only_columns_with_rules function.
 	 * 
 	 * @author Don Myers
 	 * @access protected
@@ -177,13 +177,16 @@ class MY_Model extends CI_Model {
 	 * @param mixed $rules (default: null)
 	 * @return void
 	 */
-	protected function only_columns_using_rules(&$data, $rules = null) {
+	protected function only_columns_with_rules(&$data, $rules = null) {
 		$rule_fields = [];
 
 		$rules = ($rules) ? $rules : $this->rules;
 
 		foreach ($rules as $key => $rule) {
-			$rule_fields[] = $rule['field'];
+			/* do we have a rule for this field? */
+			if (isset($rule['field'])) {
+				$rule_fields[] = $rule['field'];
+			}
 		}
 
 		$this->only_columns($data, $rule_fields);

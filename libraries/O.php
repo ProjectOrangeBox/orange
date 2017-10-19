@@ -298,21 +298,24 @@ class O {
 			}
 		}
 	}
-
+	
+	/* this searches the include paths */
 	public static function view($_view,$_data) {
-		$_view = stream_resolve_include_path('views/' . str_replace('.php','',$_view) . '.php');
+		$_view = 'views/'.ltrim(str_replace('.php','',$_view),'/') . '.php';
+	
+		$_view_file = stream_resolve_include_path($_view);
 
 		/* if we are in development mode create the file in the application folder */
-		if ($_view === false) {
+		if ($_view_file === false) {
 			if (DEBUG == 'development') {
 				/* then create it */
-				@mkdir(ROOTPATH . '/application/views/' . dirname($view_path), 0777, true);
+				@mkdir(APPPATH . dirname($_view), 0777, true);
 
-				file_put_contents(ROOTPATH . '/application/views/' . $view_path, '<?php' . PHP_EOL . PHP_EOL . ' echo "Error View File: ".__FILE__;' . PHP_EOL);
+				file_put_contents(APPPATH . $_view, '<?php' . PHP_EOL . PHP_EOL . ' echo "Error View File: ".__FILE__;' . PHP_EOL);
 
-				die('Error View File ../views/' . $view_path . ' Not Found - because you are in development mode it has been automatically created for you.');
+				die('Error View File ../' . $_view . ' Not Found - because you are in development mode it has been automatically created for you in your application folder.');
 			} else {
-				die('could not locate view');
+				errors::show('Could not locate view "'.$_view.'"');
 			}
 		}
 	
@@ -322,7 +325,7 @@ class O {
 		ob_start();
 
 		/* load in view (which now has access to the in scope view data */
-		include $_view;
+		include $_view_file;
 
 		/* capture cache and return */
 		return ob_get_clean();

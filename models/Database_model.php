@@ -107,6 +107,8 @@ class Database_model extends MY_Model {
 
 	protected $single_column_name    = null;
 	protected $additional_cache_tags = ''; /* example '.tag1.tag2.tag' don't forget the first "." */
+	
+	protected $skip_rules = false;
 
 	/* Initialise the model,tie into the CodeIgniter superobject */
 	public function __construct() {
@@ -279,7 +281,7 @@ class Database_model extends MY_Model {
 	 */
 	public function insert($data) {
 		$this->switch_database('write');
-		
+
 		$data = (array)$data;
 
 		/* unset the primary key if it's set in the data array */
@@ -287,14 +289,7 @@ class Database_model extends MY_Model {
 			unset($data[$this->primary_key]);
 		}
 
-		$this->only_columns_using_rules($data);
-
-		/*
-		validate based on the insert rule set
-		because some things that may not have been sent
-		in that are required to create a new record
-		 */
-		$success = $this->validate($data, 'insert');
+		$success = (!$this->skip_rules) ? $this->only_columns_with_rules($data)->validate($data) : true;
 
 		if ($success) {
 			/* delete cache data with same cache prefix as this object */
@@ -356,9 +351,7 @@ class Database_model extends MY_Model {
 
 		$data = (array)$data;
 
-		$this->only_columns_using_rules($data);
-
-		$success = $this->validate($data);
+		$success = (!$this->skip_rules) ? $this->only_columns_with_rules($data)->validate($data) : true;
 
 		/*
 		unset the primary key field because we are either
@@ -426,7 +419,9 @@ class Database_model extends MY_Model {
 
 		$data = (array)$data;
 
-		if ($success = $this->validate($data)) {
+		$success = (!$this->skip_rules) ? $this->validate($data) : true;
+
+		if ($success) {
 			/* delete cache data with same cache prefix as this object */
 			$this->delete_cache_by_tags();
 
