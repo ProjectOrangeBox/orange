@@ -20,22 +20,20 @@
 class Cache_var_export {
 	protected static $config;
 
-	/**
-	 * Fetch from cache
-	 *
-	 * @param	string	$id Cache ID
-	 * @return mixed Data on success,FALSE on failure
-	 */
+	 /**
+	  * initilize the class
+	  * @author Don Myers
+	  * @param array $config [[Description]]
+	  */
 	 public static function init($config) {
 			self::$config = $config;
 	 }
 
 	/**
-	 * get function.
-	 * 
-	 * @access public
-	 * @param mixed $id
-	 * @return void
+	 * [[Description]]
+	 * @author Don Myers
+	 * @param  string $id cache key
+	 * @return array
 	 */
 	public static function get($id) {
 		/* if it's not enabled always return false */
@@ -58,16 +56,14 @@ class Cache_var_export {
 		return $get;
 	}
 
-	// ------------------------------------------------------------------------
-
 	/**
-	 * Save into cache
-	 *
-	 * @param	string	$id Cache ID
-	 * @param	mixed $data Data to store
-	 * @param	int $ttl	 Time to live in seconds
-	 * @param	bool $include after we save the php file load it
-	 * @return bool	 TRUE on success,FALSE on failure
+	 * [[Description]]
+	 * @author Don Myers
+	 * @param  string $id cache key
+	 * @param  mixed $data data to cache
+	 * @param  int [$ttl = null] time to live in seconds
+	 * @param  bool [$include = FALSE] include the file after saving it if false it will return the number of bytes saved
+	 * @return mixed
 	 */
 	public static function save($id, $data, $ttl = null, $include = FALSE) {
 		$ttl = ($ttl) ? $ttl : o::ttl();
@@ -92,53 +88,105 @@ class Cache_var_export {
 		return $save;
 	}
 
-	// ------------------------------------------------------------------------
-
 	/**
-	 * Get Cache Metadata
-	 *
-	 * @param	mixed key to get cache metadata on
-	 * @return mixed FALSE on failure,array on success.
+	 * [[Description]]
+	 * @author Don Myers
+	 * @param  string $id cache key
+	 * @return array
 	 */
 	public static function get_metadata($id) {
 		return (!is_file(self::$config['cache_path'] . $id . '.meta.php') || !is_file(self::$config['cache_path'] . $id . '.php')) ? FALSE : include self::$config['cache_path'] . $id . '.meta.php';
 	}
 
+	/**
+	 * [[Description]]
+	 * @author Don Myers
+	 * @param  string $id cache key
+	 * @param  int $ttl time to live in seconds
+	 * @param  integer $strlen length of data to save for validation
+	 * @return int the number of bytes saved
+	 */
 	public static function save_metadata($id, $ttl, $strlen) {
 		return o::atomic_file_put_contents(self::$config['cache_path'] . $id . '.meta.php', '<?php return ' . var_export(['strlen' => $strlen, 'time' => time(), 'ttl' => (int) $ttl, 'expire' => (time() + $ttl)], true) . ';');
 	}
 
-	// ------------------------------------------------------------------------
-
 	/**
-	 * Delete from Cache
-	 *
-	 * @param	mixed unique identifier of item in cache
-	 * @return bool	true on success/false on failure
+	 * delete a cache by key
+	 * @author Don Myers
+	 * @param  string $id cache key
+	 * @return bool
 	 */
 	public static function delete($id) {
 		return (self::$config['cache_multiple_servers']) ? self::multi_delete($id) : self::single_delete($id);
 	}
 
-	// ------------------------------------------------------------------------
+	/**
+	 * end point for multi server setup
+	 * @author Don Myers
+	 * @param string $request the key passed from the other server
+	 */
+	public static function endpoint_delete($request) {
+		/* is it a allowed remote address */
+		if (!in_array(ci()->input->ip_address(), self::$config['cache_allowed'])) {
+			exit(13); /* die hard */
+		}
+
+		list($hmac, $id) = explode(chr(0), hex2bin($request));
+
+		/* verify the incoming request */
+		if (md5(self::$config['encryption_key'] . $id) !== $hmac) {
+			exit(13); /* die hard */
+		}
+
+		self::single_delete($id);
+
+		echo $request;
+		exit(200);
+	}
 
 	/**
-	 * Delete from Cache
-	 *
-	 * @param	mixed unique identifier of item in cache
-	 * @return bool	true on success/false on failure
+	 * simple verson of getting and settings
+	 * @author Don Myers
+	 * @param  string $key the cache key
+	 * @param  closure $closure closure function to call to build the cache if it doesn't exist
+	 * @param  int [$ttl = null] time to live in seconds
+	 * @return [[Type]] [[Description]]
 	 */
+	public static function cache($key, $closure, $ttl = null) {
+		if (!$cache = self::get($key)) {
+			/* make a reference we can pass into the closure */
+			$ci = ci();
 
+			$cache = $closure($ci);
+
+			/* There's been a miss, so run our closure, save the cache php file and load to make it active */
+			self::save($key, $cache, $ttl);
+		}
+
+		return $cache;
+	}
+
+	/**
+	 * handle a single server delete function
+	 * @author Don Myers
+	 * @param  boolean $id cache key
+	 * @return bool
+	 */
 	protected static function single_delete($id) {
 		return (o::remove_php_file(self::$config['cache_path'] . $id . '.php') && o::remove_php_file(self::$config['cache_path'] . $id . '.meta.php'));
 	}
 
 	/**
-	 * multi_delete function.
+	 * handle a multiple server delete
 	 * 
-	 * @access protected
-	 * @param mixed $id
-	 * @return void
+	 * config.php must have the following setup
+	 * cache_servers = array of servers to call by ip or domain name
+	 * cache_server_secure = boolean to use http or https
+	 * cache_url = url to call on the remote servers
+	 * 
+	 * @author Don Myers
+	 * @param  string $id cache key
+	 * @return boolean
 	 */
 	protected static function multi_delete($id) {
 		/* issue delete to each server */
@@ -187,56 +235,7 @@ class Cache_var_export {
 		/* close the multi connection */
 		curl_multi_close($mh);
 
-		return TRUE;
+		return true;
 	}
-
-	/**
-	 * endpoint_delete function.
-	 * 
-	 * @access public
-	 * @param mixed $request
-	 * @return void
-	 */
-	public static function endpoint_delete($request) {
-		/* is it a allowed remote address */
-		if (!in_array(ci()->input->ip_address(), self::$config['cache_allowed'])) {
-			exit(13); /* die hard */
-		}
-
-		list($hmac, $id) = explode(chr(0), hex2bin($request));
-
-		/* verify the incoming request */
-		if (md5(self::$config['encryption_key'] . $id) !== $hmac) {
-			exit(13); /* die hard */
-		}
-
-		self::single_delete($id);
-
-		echo $request;
-		exit(200);
-	}
-
-	/**
-	 * cache function.
-	 * 
-	 * @access public
-	 * @param mixed $key
-	 * @param mixed $closure
-	 * @param mixed $ttl (default: null)
-	 * @return void
-	 */
-	public static function cache($key, $closure, $ttl = null) {
-		if (!$cache = self::get($key)) {
-			/* make a reference we can pass into the closure */
-			$ci = ci();
-
-			$cache = $closure($ci);
-
-			/* There's been a miss, so run our closure, save the cache php file and load to make it active */
-			self::save($key, $cache, $ttl);
-		}
-
-		return $cache;
-	}
-
+	
 } /* end class */
