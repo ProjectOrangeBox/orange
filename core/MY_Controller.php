@@ -70,13 +70,10 @@ class MY_Controller extends CI_Controller {
 		}
 
 		foreach ((array) $middleware_files as $middleware_file) {
-			$middleware_found_file = stream_resolve_include_path('middleware/' . $middleware_file . '.php');
-
-			if ($middleware_found_file !== false) {
+			if (class_exists($middleware_file)) {
 				$this->controller_middleware_as_body_classes[] = substr($middleware_file, 0, -10);
 				$this->controller_middleware_ran[]             = $middleware_file;
 
-				require $middleware_found_file;
 
 				(new $middleware_file($this))->run();
 			} else {

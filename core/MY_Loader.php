@@ -17,7 +17,6 @@
 
 class MY_Loader extends CI_Loader {
 	protected $cache_drivers_loaded = false;
-	protected $loaded_plugins = [];
 
 	/**
 	 * Internal CI Library Loader
@@ -49,10 +48,11 @@ class MY_Loader extends CI_Loader {
 			cache_var_export::init(ci()->config->config);
 		}
 
-		/* let's do this only once */
-		$lowercase_class = strtolower($class);
-
-		if (!$this->orange_known($lowercase_class)) {
+		/* 
+		if we are trying to load any orange classes load them all at once
+		
+		*/
+		if (!$this->orange_known($lowercase_class = strtolower($class))) {
 			// Is there an associated config file for this class? Note: these should always be lowercase
 			if ($config === NULL) {
 				$found       = FALSE;
@@ -204,96 +204,13 @@ class MY_Loader extends CI_Loader {
 
 	/* Load a Plugin */
 	public function plugin($name='') {
-		$this->plugin_exists($name,true);
-	}
-
-	public function plugin_exists($name,$load = false) {
 		$class = 'Plugin_' . str_replace('plugin_','',strtolower($name));
 
-		if (!isset($this->loaded_plugins[$class])) {
-			if ($match = stream_resolve_include_path('libraries/plugins/' . $class . '.php')) {
-				if ($load) {
-					require $match;
-		
-					new $class;
-	
-					$this->loaded_plugins[$class] = $match;
-				}
-			} else {
-				$match = false;
-			}
-		} else {
-			$match = $this->loaded_plugins[$class];
-		}
-
-		return $match;
-	}
-
-	/**
-	 * model_exists function.
-	 * 
-	 * @author Don Myers
-	 * @access public
-	 * @param mixed $resource
-	 * @param bool $load (default: false)
-	 * @return void
-	 */
-	public function model_exists($resource, $load = false) {
-		return $this->_exists($resource, $load, 'models', 'model');
-	}
-
-	/**
-	 * library_exists function.
-	 * 
-	 * @author Don Myers
-	 * @access public
-	 * @param mixed $resource
-	 * @param bool $load (default: false)
-	 * @return void
-	 */
-	public function library_exists($resource, $load = false) {
-		return $this->_exists($resource, $load, 'libraries', 'library');
-	}
-
-	/**
-	 * helper_exists function.
-	 * 
-	 * @access public
-	 * @param mixed $resource
-	 * @param bool $load (default: false)
-	 * @return void
-	 */
-	public function helper_exists($resource, $load = false) {
-		return $this->_exists($resource, $load, 'helpers', 'helper');
-	}
-
-	/**
-	 * _exists function.
-	 * 
-	 * @author Don Myers
-	 * @access protected
-	 * @param mixed $resource
-	 * @param mixed $load
-	 * @param mixed $folder
-	 * @param mixed $method
-	 * @return void
-	 */
-	protected function _exists($resource, $load, $folder, $method) {
-		log_message('debug', 'MY_Loader::_exists ' . $resource . ' ' . (string) $load . ' ' . $folder . ' ' . $method);
-
-		$path_parts = pathinfo(trim($resource, '/'));
-
-		$exists = stream_resolve_include_path($folder . '/' . $path_parts['dirname'] . '/' . ucfirst(strtolower($path_parts['filename'])) . '.php');
+		$exists = class_exists($class,true);
 
 		if ($exists) {
-			if ($load == 'load' || $load === true) {
-				$this->$method($resource);
-			} elseif ($load == 'include') {
-				include_once $exists;
-			}
+			new $class; /* instantiate the class */
 		}
-
-		return $exists;
 	}
 
 } /* end class */

@@ -353,26 +353,8 @@ class Validate {
 		$plugin = false;
 		
 		/* all variables passed by reference */
-		
-		if (class_exists($class_name,false)) {
-			if ($is_filter) {
-				$plugin = new $class_name($this->field_data);
-			} else {
-				$plugin = new $class_name($this->field_data, $this->error_string);
-			}
-		} else {
-			$folder = ($is_filter) ? 'filters' : 'validations';
-			
-			/* is it in the traditional validations folder in libraries? */
-			if ($exists = stream_resolve_include_path('libraries/'.$folder.'/' . $class_name . '.php')) {
-				include_once $exists;
-				
-				if ($is_filter) {
-					$plugin = new $class_name($this->field_data);
-				} else {
-					$plugin = new $class_name($this->field_data, $this->error_string);
-				}
-			}
+		if (class_exists($class_name,true)) {
+			$plugin = ($is_filter) ? new $class_name($this->field_data) : new $class_name($this->field_data, $this->error_string);
 		}
 
 		return $plugin;

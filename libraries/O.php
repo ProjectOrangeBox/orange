@@ -61,7 +61,7 @@ class O {
 	 */
 	public static function view($_view,$_data) {
 		$_view = 'views/'.ltrim(str_replace('.php','',$_view),'/') . '.php';
-	
+
 		$_view_file = stream_resolve_include_path($_view);
 
 		/* if we are in development mode create the file in the application folder */

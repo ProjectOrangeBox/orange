@@ -39,7 +39,7 @@ class Html {
 		}
 		
 		/* Try to load the plugin if it's there */
-		ci()->load->plugin_exists($name,true);
+		ci()->load->plugin($name);
 
 		/* has it been attach or override a function */
 		if (isset(self::$attached[$name])) {

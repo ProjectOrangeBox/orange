@@ -124,12 +124,12 @@ function &load_class($class, $directory = 'libraries', $param = NULL) {
  */
 function codeigniter_autoload($class) {
 	/* composer autoloader knows where controller base classes are */
-	if ($file = stream_resolve_include_path($class . '.php')) { /* is it on any of the include pathes? */
+	if ($file = stream_resolve_include_path($class . '.php')) { /* is it on any of the include paths? */
 		require_once $file;
 
 		return true;
 	} elseif (substr($class, -6) == '_model') { /* is it a CI model? */
-		if (stream_resolve_include_path('models/' . $class . '.php')) {
+		if ($file = stream_resolve_include_path('models/' . $class . '.php')) {
 			ci()->load->model($class);
 
 			return true;
@@ -150,8 +150,32 @@ function codeigniter_autoload($class) {
 		ci()->load->library($class);
 
 		return true;
+	} elseif (substr($class, -10) == 'Middleware') {	
+		if ($file = stream_resolve_include_path('middleware/' . $class . '.php')) {
+			include $file;
+		
+			return true;
+		}
+	} elseif (substr($class,0,7) == 'Plugin_') {	
+		if ($file = stream_resolve_include_path('libraries/plugins/' . $class . '.php')) {
+			include $file;
+		
+			return true;
+		}
+	} elseif (substr($class,0,9) == 'Validate_') {	
+		if ($file = stream_resolve_include_path('libraries/validations/' . $class . '.php')) {
+			include $file;
+		
+			return true;
+		}
+	} elseif (substr($class,0,7) == 'Filter_') {	
+		if ($file = stream_resolve_include_path('libraries/filters/' . $class . '.php')) {
+			include $file;
+		
+			return true;
+		}
 	}
-
+	
 	/* beat's me let the next autoloader give it a shot */
 	return false;
 }
