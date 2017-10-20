@@ -48,93 +48,63 @@ class MY_Loader extends CI_Loader {
 			cache_var_export::init(ci()->config->config);
 		}
 
-		/* 
-		if we are trying to load any orange classes load them all at once
-		
-		*/
-		if (!$this->orange_known($lowercase_class = strtolower($class))) {
-			// Is there an associated config file for this class? Note: these should always be lowercase
-			if ($config === NULL) {
-				$found       = FALSE;
-				$config_file = stream_resolve_include_path('config/' . $lowercase_class . '.php');
-	
+		/* Is there an associated config file for this class? Note: these should always be lowercase */
+		if ($config === NULL) {
+			$found       = FALSE;
+			$config_file = stream_resolve_include_path('config/' . strtolower($class) . '.php');
+
+			if ($config_file) {
+				$found = true;
+				include $config_file;
+			} else {
+				$config_file = stream_resolve_include_path('config/' . ENVIRONMENT . '/' . strtolower($class) . '.php');
+
 				if ($config_file) {
 					$found = true;
 					include $config_file;
-				} else {
-					$config_file = stream_resolve_include_path('config/' . ENVIRONMENT . '/' . $lowercase_class . '.php');
-	
-					if ($config_file) {
-						$found = true;
-						include $config_file;
-					}
 				}
-			}
-	
-			$class_name = $prefix . $class;
-	
-			// Is the class name valid?
-			if (!class_exists($class_name, FALSE)) {
-				log_message('error', 'Non-existent class: ' . $class_name);
-				throw new Exception('Non-existent class: ' . $class_name);
-			}
-	
-			// Set the variable name we will assign the class to
-			// Was a custom class name supplied? If so we'll use it
-			if (empty($object_name)) {
-				$object_name = $lowercase_class;
-				if (isset($this->_ci_varmap[$object_name])) {
-					$object_name = $this->_ci_varmap[$object_name];
-				}
-			}
-	
-			// Don't overwrite existing properties
-			$CI = &get_instance();
-	
-			if (isset($CI->$object_name)) {
-	
-				if ($CI->$object_name instanceof $class_name || PHPUNIT) {
-					log_message('debug', $class_name . " has already been instantiated as '" . $object_name . "'. Second attempt aborted.");
-					return;
-				}
-	
-				throw new Exception("Resource '" . $object_name . "' already exists and is not a " . $class_name . " instance.");
-			}
-	
-			// Save the class name and object name
-			$this->_ci_classes[$object_name] = $class;
-
-			// Instantiate the class
-			$CI->$object_name = isset($config) ? new $class_name($config) : new $class_name();
-		}
-	}
-	
-	/* we already know about our stuff so no need for additional processing */
-	protected function orange_known($lowercase_class) {
-		$loaded = false;
-		
-		$known_orange_classes = ['errors','event','validate','wallet','html','auth','page','user'];
-		$static = ['errors','event','html','user'];
-
-		if (in_array($lowercase_class,$known_orange_classes)) {
-			$loaded = true;
-
-			$class = ucfirst($lowercase_class);
-	
-			// Save the class name and object name
-			$this->_ci_classes[$lowercase_class] = $class;
-
-			if (!in_array($lowercase_class,$static)) {
-				$CI = &get_instance();
-
-				// Instantiate the class
-				$CI->$lowercase_class = new $class();
 			}
 		}
-	
-		return $loaded;
-	}
 
+		$class_name = $prefix . $class;
+
+		// Is the class name valid?
+		if (!class_exists($class_name, FALSE)) {
+			log_message('error', 'Non-existent class: ' . $class_name);
+			
+			throw new Exception('Non-existent class: ' . $class_name);
+		}
+
+		// Set the variable name we will assign the class to
+		// Was a custom class name supplied? If so we'll use it
+		if (empty($object_name)) {
+			$object_name = strtolower($class);
+			
+			if (isset($this->_ci_varmap[$object_name])) {
+				$object_name = $this->_ci_varmap[$object_name];
+			}
+		}
+
+		// Don't overwrite existing properties
+		$CI = &get_instance();
+
+		if (isset($CI->$object_name)) {
+
+			if ($CI->$object_name instanceof $class_name || PHPUNIT) {
+				log_message('debug', $class_name . " has already been instantiated as '" . $object_name . "'. Second attempt aborted.");
+				return;
+			}
+
+			throw new Exception("Resource '" . $object_name . "' already exists and is not a " . $class_name . " instance.");
+		}
+
+		// Save the class name and object name
+		$this->_ci_classes[$object_name] = $class;
+
+		// Instantiate the class
+		$CI->$object_name = isset($config) ? new $class_name($config) : new $class_name();
+	}
+	
 	/**
 	 * Internal CI Stock Library Loader
 	 *
