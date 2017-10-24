@@ -28,23 +28,17 @@ class Model_entity {
 		log_message('info', 'Model_entity Class Initialized');
 	}
 
-	public function save() {
-		$primary_key = $this->{$this->entity_of_model_name}->get_primary_key();
-
+	public function update() {
 		if ($this->save_columns) {
 			foreach ($this->save_columns as $col) {
 				$data[$col] = $this->$col;
 			}
 		} else {
-			$data = get_object_vars($this);
+			$data = getPublicObjectVars($this);
 		}
 
-		/* unset these */
-		unset($data['entity_of_model_name']);
-		unset($data['save_columns']);
-
-		/* update or insert? */
-		return (!empty($data[$primary_key])) ? $this->{$this->entity_of_model_name}->update($data) : $this->{$this->entity_of_model_name}->insert($data);
+		/* update */
+		return $this->{$this->entity_of_model_name}->update($data);
 	}
 
 	/*

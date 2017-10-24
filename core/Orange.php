@@ -187,11 +187,12 @@ function codeigniter_autoload($class) {
  * To provide replacement of "tags" loaded from /config/paths.php
  *
  * @author Don Myers
- * @param  mixed [$uri = '']        [[Description]]
- * @param  [[Type]] [$protocol = NULL] [[Description]]
- * @return array    [[Description]]
+ * @param  string [$uri = ''] URI string
+ * @param  string [$protocol = NULL] Protocol, e.g. ‘http’ or ‘https’
+ * @return string
  */
-function site_url($uri = '', $protocol = NULL) {
+ function site_url($uri = '', $protocol = NULL) {
+ 	/* call the parent feature first */
 	$uri = ci()->config->site_url($uri, $protocol);
 
 	/* load or create the cache file */
@@ -207,7 +208,7 @@ function site_url($uri = '', $protocol = NULL) {
 		return ['keys' => array_keys($array), 'values' => array_values($array)];
 	});
 
-	/* replace array with array & remove any double // */
+	/* replace array with array */
 	return str_replace($paths['keys'], $paths['values'], $uri);
 }
 
@@ -238,6 +239,10 @@ function esc($string) {
 /* html escape */
 function e($string) {
 	return htmlspecialchars($string, ENT_QUOTES, 'UTF-8');
+}
+
+function getPublicObjectVars($obj) {
+  return get_object_vars($obj);
 }
 
 /* dump to root */
