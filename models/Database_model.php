@@ -109,6 +109,8 @@ class Database_model extends MY_Model {
 	protected $additional_cache_tags = ''; /* example '.tag1.tag2.tag' don't forget the first "." */
 	
 	protected $skip_rules = false; /* wether to skip all rule validation (probably because you don't have rules) */
+	protected $return_false_nothing_found = false; /* boolean */
+
 
 	/* Initialize the model, tie into the CodeIgniter super-object */
 	public function __construct() {
@@ -494,7 +496,7 @@ class Database_model extends MY_Model {
 	 * @return [[Type]] [[Description]]
 	 */
 	public function build_sql_boolean_match($column_name, $match = null, $not_match = null) {
-		$sql         = false;
+		$sql = false;
 		$match_where = '';
 
 		if (is_array($match) > 0) {
@@ -510,28 +512,6 @@ class Database_model extends MY_Model {
 		}
 
 		return $sql; /* one exit */
-	}
-
-	/**
-	 * [[Description]]
-	 * @author Don Myers
-	 * @param	 [[Type]] $array [[Description]]
-	 * @return [[Type]] [[Description]]
-	 */
-	public function build_sql_where_in($array) {
-		/* because we need to escape we need to run it through a loop */
-		$sql = '(';
-
-		/* add proper escaping */
-		foreach ($array as $a) {
-			if (is_numeric($a)) {
-				$sql .= $this->_database->escape($a + 0) . ",";
-			} else {
-				$sql .= "'" . $this->_database->escape($a) . "',";
-			}
-		}
-
-		return rtrim($sql, ',') . ')';
 	}
 
 	/**
@@ -604,33 +584,31 @@ class Database_model extends MY_Model {
 	 * catalog('id','name,foo,bar'); associated array key->array pair
    *
 	 * @author Don Myers
-	 * @param	 [[Type]] [$array_key = null] [[Description]]
-	 * @param	 [[Type]] [$select = null]		[[Description]]
+	 * @param	 string [$array_key = null] The returned array key value if empty this will use the primary key
+	 * @param	 string [$select = null] The value to use for the array value if empty this will use the entire record
 	 * @param	 [[Type]] [$where = null]			[[Description]]
 	 * @param	 [[Type]] [$order_by = null]	[[Description]]
 	 * @return [[Type]] [[Description]]
 	 */
-	public function catalog($array_key = null, $select = null, $where = null, $order_by = null) {
+	public function catalog($array_key = null, $select_columns = null, $where = null, $order_by = null) {
 		$results = [];
 
-		/* is this a simple associated array? */
-		$simple = false;
+		/* is this a single column associated array? */
+		$single_column = false;
 		
 		/* what's the primary key? */
 		$array_key = ($array_key) ? $array_key : $this->primary_key;
 
-		if (is_string($select)) {
-			if (strpos($select, ',') === false && $select !== '*') {
-				/* if it's a string and they aren't looking for multiple columns it's a simple key->value pair array */
-				$simple = $select;
-			}
-		}
-		
 		/* what columns are they looking for? */
-		if (!$select || $select == '*') {
+		if ($select_columns === null || $select_columns == '*') {
 			$select = '*';
 		} else {
-			$select = $array_key . ',' . implode(',', (array) $select);
+			$select = $array_key . ',' . $select_columns;
+			
+			if (strpos($select_columns,',') === false) {
+				$single_column = $select_columns;
+			}
+			
 		}
 		
 		/* add them */
@@ -647,19 +625,19 @@ class Database_model extends MY_Model {
 			if (strpos($order_by,' ') === false) {
 				$this->_database->order_by($order_by);
 			} else {
-				list($orderby,$direction) = explode($order_by,' ',2);
+				list($order_by,$direction) = explode($order_by,' ',2);
 
-				$this->_database->order_by($orderby,$direction);
+				$this->_database->order_by($order_by,$direction);
 			}
 		}
 		
 		/* run the query */
-		$dbc = $this->get_query(true);
+		$dbc = $this->get_query(true); /* return multiple */
 
 		foreach ($dbc as $dbr) {
-			if ($simple) {
-				/* if it's simple it's a key->value pair */
-				$results[$dbr->$array_key] = $dbr->$simple;
+			if ($single_column) {
+				/* if it's single column it's a key->value pair */
+				$results[$dbr->$array_key] = $dbr->$single_column;
 			} else {
 				/* if it's not then it's a key -> record pair */
 				$results[$dbr->$array_key] = $dbr;
@@ -913,33 +891,36 @@ class Database_model extends MY_Model {
 	 * @return [[Type]] [[Description]]
 	 */
 	public function format_result($dbc, $multiple = true) {
+		$return = ($this->return_false_nothing_found) ? false : (object)[];
+	
 		if ($multiple) {
-			/* returns a array of objects */
+			/* multiple records */
 			if (!is_object($dbc)) {
-				$result = [];
+				$result = $return;
 			} else {
 				if ($this->entity) {
-					$result = ($dbc->num_rows()) ? $dbc->custom_result_object($this->entity) : [];
+					$result = ($dbc->num_rows()) ? $dbc->custom_result_object($this->entity) : $return;
 				} else {
-					$result = ($dbc->num_rows()) ? $dbc->result() : [];
+					$result = ($dbc->num_rows()) ? $dbc->result() : $return;
 				}
 			}
 		} else {
+			/* single record */
 			if ($this->single_column_name) {
 				$record = ($dbc->num_rows()) ? $dbc->row() : (object) [];
 
 				$result = $record->{$this->single_column_name};
-
-				$this->single_column_name = null;
 			} else {
 				/* returns a single object */
 				if ($this->entity) {
 					$result = ($dbc->num_rows()) ? $dbc->custom_row_object(0, $this->entity) : new $this->entity();
 				} else {
-					$result = ($dbc->num_rows()) ? $dbc->row() : (object) [];
+					$result = ($dbc->num_rows()) ? $dbc->row() : $return;
 				}
 			}
 		}
+
+		$this->single_column_name = null;
 
 		return $result;
 	}
