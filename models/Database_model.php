@@ -586,8 +586,7 @@ class Database_model extends MY_Model {
 
 	/**
 	 * Create a associated array
-	 * this can be used for dropdowns or easy access to model values based on the primary ID for example
-	 * these are also automatically cached so the ci cache engine needs to be setup
+	 * this can be used for drop-downs or easy access to model values based on the primary ID for example
 	 *
 	 * if select is a single column name the created array will a simple name & value associated array pair
 	 *
@@ -596,10 +595,9 @@ class Database_model extends MY_Model {
 	 * where: https://www.codeigniter.com/user_guide/database/query_builder.html#looking-for-specific-data
 	 * order by: https://www.codeigniter.com/user_guide/database/query_builder.html#ordering-results
 	 *
-	 * 
 	 * catalog = [
 	 *  'bar_catalog'=>'bar_model', = select * from bar_model_table where the primary id is the array key and array value is the record
-	 *  'foo_catalog'=>['model'=>'foo_catalog','array_key'=>'id{defaults to primary id}','select'=>'id,color{defaults to *}','where'=>['soft_delete'=>0]{defaults to none},'order_by'=>'color [asc|desc]'{defaults to none}],
+	 *  'foo_catalog'=>['array_key'=>'id{defaults to primary id}','select'=>'id,color{defaults to *}','where'=>['soft_delete'=>0]{defaults to none},'order_by'=>'color [asc|desc]'{defaults to none}],
 	 * ]
 	 * 
 	 * catalog('id','name'); simple associated array key->value pair
@@ -613,72 +611,60 @@ class Database_model extends MY_Model {
 	 * @return [[Type]] [[Description]]
 	 */
 	public function catalog($array_key = null, $select = null, $where = null, $order_by = null) {
-		$cache_key = $this->cache_prefix . '.' . md5(json_encode(func_get_args())) . '.catalog';
-
 		$results = [];
 
-		/* is this already in the objects page "request" cache */
-		if ($this->caches[$cache_key]) {
-			$results = $this->caches[$cache_key];
-		} else {
-			if (!$results = $this->cache->get($cache_key)) {
-				/* is this a simple associated array? */
-				$simple = false;
-				
-				/* what's the primary key? */
-				$array_key = ($array_key) ? $array_key : $this->primary_key;
+		/* is this a simple associated array? */
+		$simple = false;
 		
-				if (is_string($select)) {
-					if (strpos($select, ',') === false) {
-						/* if it's a string and they aren't looking for multiple columns it's a simple key->value pair array */
-						$simple = $select;
-					}
-				}
-				
-				/* what columns are they looking for? */
-				if (!$select) {
-					$select = '*';
-				} else {
-					$select = $array_key . ',' . implode(',', (array) $select);
-				}
-				
-				/* add them */
-				$this->_database->select($select);
-				
-				/* did they include a where clause? */
-				if ($where) {
-					/* add it */
-					$this->_database->where($where);
-				}
-				
-				/* did they include a order by clause? */
-				if ($order_by) {
-					list($orderby,$direction) = explode($order_by,' ',2);
-					
-					/* add it */
-					$this->_database->order_by($orderby,$direction);
-				}
-				
-				/* run the query */
-				$dbc = $this->get_query(true);
+		/* what's the primary key? */
+		$array_key = ($array_key) ? $array_key : $this->primary_key;
 
-				foreach ($dbc as $dbr) {
-					if ($simple) {
-						/* if it's simple it's a key->value pair */
-						$results[$dbr->$array_key] = $dbr->$simple;
-					} else {
-						/* if it's not then it's a key -> record pair */
-						$results[$dbr->$array_key] = $dbr;
-					}
-				}
-
-				/* let's save this puppy */
-				$this->cache->save($cache_key, $results, o::ttl());
+		if (is_string($select)) {
+			if (strpos($select, ',') === false && $select !== '*') {
+				/* if it's a string and they aren't looking for multiple columns it's a simple key->value pair array */
+				$simple = $select;
 			}
 		}
 		
-		/* put it in the page "request" cache */
-		$this->caches[$cache_key] = $results;
+		/* what columns are they looking for? */
+		if (!$select || $select == '*') {
+			$select = '*';
+		} else {
+			$select = $array_key . ',' . implode(',', (array) $select);
+		}
+		
+		/* add them */
+		$this->_database->select($select);
+		
+		/* did they include a where clause? */
+		if ($where) {
+			/* add it */
+			$this->_database->where($where);
+		}
+		
+		/* did they include a order by clause? */
+		if ($order_by) {
+			if (strpos($order_by,' ') === false) {
+				$this->_database->order_by($order_by);
+			} else {
+				list($orderby,$direction) = explode($order_by,' ',2);
+
+				$this->_database->order_by($orderby,$direction);
+			}
+		}
+		
+		/* run the query */
+		$dbc = $this->get_query(true);
+
+		foreach ($dbc as $dbr) {
+			if ($simple) {
+				/* if it's simple it's a key->value pair */
+				$results[$dbr->$array_key] = $dbr->$simple;
+			} else {
+				/* if it's not then it's a key -> record pair */
+				$results[$dbr->$array_key] = $dbr;
+			}
+		}
 
 		/* return out results */
 		return $results;

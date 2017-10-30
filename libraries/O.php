@@ -297,7 +297,7 @@ class O {
 
 		if (is_array($cached_keys)) {
 			foreach ($cached_keys as $key) {
-				if (array_intersect(explode('.', $key['name']), $tags)) {
+				if (count(array_intersect(explode('.', $key['name']), $tags))) {
 					ci()->cache->delete($key['name']);
 				}
 			}
