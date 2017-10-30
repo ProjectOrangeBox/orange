@@ -188,7 +188,7 @@ class MY_Config extends CI_Config {
 			cache_var_export::save('config',$built_config);
 		}
 
-		/* now config's array contains these */
+		/* now configs array contains these */
 		$this->config = $built_config;
 	}
 

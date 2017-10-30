@@ -17,8 +17,8 @@
 
 class MY_Router extends CI_Router {
 	protected $package = ''; /* what package are we currently looking for a controller in? */
-	protected $clean_controller = null;
-	protected $clean_method = null;
+	protected $clean_controller = null; /* storage for the controller name without Controller on the end */
+	protected $clean_method = null; /* storage for the method without the request Method + Action on the end */
 	
 	/**
 	 * Set default controller

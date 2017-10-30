@@ -108,9 +108,9 @@ class Database_model extends MY_Model {
 	protected $single_column_name    = null;
 	protected $additional_cache_tags = ''; /* example '.tag1.tag2.tag' don't forget the first "." */
 	
-	protected $skip_rules = false;
+	protected $skip_rules = false; /* wether to skip all rule validation (probably because you don't have rules) */
 
-	/* Initialise the model,tie into the CodeIgniter superobject */
+	/* Initialize the model, tie into the CodeIgniter super-object */
 	public function __construct() {
 		parent::__construct();
 
@@ -160,10 +160,8 @@ class Database_model extends MY_Model {
 		return $this->cache_prefix;
 	}
 
-	/* Getter for the table name */
-
 	/**
-	 * [[Description]]
+	 * Getter for the table name
 	 * @author Don Myers
 	 * @return [[Type]] [[Description]]
 	 */
@@ -203,10 +201,6 @@ class Database_model extends MY_Model {
 
 	/**
 	 * Fetch a single record based on the primary key. Returns an object.
-	 */
-
-	/**
-	 * [[Description]]
 	 * @author Don Myers
 	 * @param	 [[Type]] [$primary_value=null] [[Description]]
 	 * @return [[Type]] [[Description]]
@@ -269,12 +263,7 @@ class Database_model extends MY_Model {
 	}
 
 	/**
-	 * Insert a new row into the table. $data should be an associative array
-	 * of data to be inserted. Returns newly created ID.
-	 */
-
-	/**
-	 * [[Description]]
+	 * Insert a new row into the table. $data should be an associative array of data to be inserted. Returns newly created ID.
 	 * @author Don Myers
 	 * @param	 [[Type]] $data [[Description]]
 	 * @return [[Type]] [[Description]]
@@ -314,10 +303,6 @@ class Database_model extends MY_Model {
 
 	/**
 	 * Updated a record based on the primary value.
-	 */
-
-	/**
-	 * [[Description]]
 	 * @author Don Myers
 	 * @param	 [[Type]] $data [[Description]]
 	 * @return [[Type]] [[Description]]
@@ -326,21 +311,20 @@ class Database_model extends MY_Model {
 		/*
 		this uses the primary key
 		if it's not set then set it to null so the required rule on a dynamically generated rule set picks it up
-		 */
+		*/
 		 
 		$data = (array)$data;
-		 
-		$data[$this->primary_key] = ($data[$this->primary_key]) ? $data[$this->primary_key] : null;
+		
+		/* is the primary key present? */
+		if (!isset($data[$this->primary_key])) {
+			show_error('Database Model update primary key missing');
+		}
 
 		return $this->update_by($data, [$this->primary_key => $data[$this->primary_key]]);
 	}
 
 	/**
 	 * Updated a record based on an arbitrary WHERE clause.
-	 */
-
-	/**
-	 * [[Description]]
 	 * @author Don Myers
 	 * @param	 [[Type]] $data				[[Description]]
 	 * @param	 [[Type]] [$where=[]] [[Description]]
@@ -383,10 +367,6 @@ class Database_model extends MY_Model {
 
 	/**
 	 * Delete a row from the table by the primary value
-	 */
-
-	/**
-	 * [[Description]]
 	 * @author Don Myers
 	 * @param	 [[Type]] $data [[Description]]
 	 * @return [[Type]] [[Description]]
@@ -396,20 +376,24 @@ class Database_model extends MY_Model {
 		this uses the primary key
 		if it's not set then set it to null so the required rule on a dynamically generated rule set picks it up
  	  */
+		if (is_object($data)) {
+			$data = (array)$data;
+		}
 		
-		$data = (array)$data;
-
-		$data[$this->primary_key] = ($data[$this->primary_key]) ? $data[$this->primary_key] : null;
-
+		if (is_array($data)) {
+			/* is the primary key present? */
+			if (!isset($data[$this->primary_key])) {
+				show_error('Database Model delete primary key missing');
+			}
+		} elseif (is_scalar($data)) {
+			$data[$this->primary_key] = $data;
+		}
+		
 		return $this->delete_by($data);
 	}
 
 	/**
 	 * Delete a row from the database table by an arbitrary WHERE clause
-	 */
-
-	/**
-	 * [[Description]]
 	 * @author Don Myers
 	 * @param	 [[Type]] $data [[Description]]
 	 * @return [[Type]] [[Description]]
@@ -564,10 +548,6 @@ class Database_model extends MY_Model {
 
 	/**
 	 * Don't care about soft deleted rows on the next call
-	 */
-
-	/**
-	 * [[Description]]
 	 * @author Don Myers
 	 * @return [[Type]] [[Description]]
 	 */
@@ -579,10 +559,6 @@ class Database_model extends MY_Model {
 
 	/**
 	 * Only get deleted rows on the next call
-	 */
-
-	/**
-	 * [[Description]]
 	 * @author Don Myers
 	 * @return [[Type]] [[Description]]
 	 */
@@ -593,12 +569,7 @@ class Database_model extends MY_Model {
 	}
 
 	/**
-	 * Restore
-	 * Set soft delete column to null again
-	 */
-
-	/**
-	 * [[Description]]
+	 * Restore Set soft delete column to null again
 	 * @author Don Myers
 	 * @param	 [[Type]] $id [[Description]]
 	 * @return boolean	[[Description]]
@@ -634,10 +605,6 @@ class Database_model extends MY_Model {
 	 * catalog('id','name'); simple associated array key->value pair
 	 * catalog('id','name,foo,bar'); associated array key->array pair
    *
-   */
-
-	/**
-	 * [[Description]]
 	 * @author Don Myers
 	 * @param	 [[Type]] [$array_key = null] [[Description]]
 	 * @param	 [[Type]] [$select = null]		[[Description]]
@@ -728,10 +695,6 @@ class Database_model extends MY_Model {
 	 * where: https://www.codeigniter.com/user_guide/database/query_builder.html#looking-for-specific-data
 	 * select: https://www.codeigniter.com/user_guide/database/query_builder.html#selecting-data
 	 *
-	 */
-
-	/**
-	 * [[Description]]
 	 * @author Don Myers
 	 * @param	 [[Type]] [$order_by = null] [[Description]]
 	 * @param	 [[Type]] [$limit = null]		 [[Description]]
@@ -924,8 +887,7 @@ class Database_model extends MY_Model {
 	}
 
 	/**
-	 * 	set soft delete as tinyint `o_is_deleted` tinyint(1) unsigned DEFAULT 0,
-	 *
+	 * set soft delete as tinyint `o_is_deleted` tinyint(1) unsigned DEFAULT 0,
 	 * @author Don Myers
 	 * @return [[Type]] [[Description]]
 	 */
@@ -957,13 +919,8 @@ class Database_model extends MY_Model {
 		return $this->format_result($dbc, $as_array);
 	}
 
-	/*
-	if the results should be a array then $multiple = true
-	else if you expect a single record then $multiple = false
-	 */
-
 	/**
-	 * [[Description]]
+	 * if the results should be a array then $multiple = true else if you expect a single record then $multiple = false
 	 * @author Don Myers
 	 * @param	 [[Type]] $dbc							 [[Description]]
 	 * @param	 [[Type]] [$multiple = true] [[Description]]

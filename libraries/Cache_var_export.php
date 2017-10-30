@@ -8,11 +8,11 @@
  * @link https://github.com/ProjectOrangeBox
  *
  * required
- * core: 
+ * core: input
  * libraries: 
  * models: 
  * helpers:
- * functions: 
+ * functions: o::ttl(), o::atomic_file_put_contents, o::remove_php_file
  *
  * Static Library
  */
