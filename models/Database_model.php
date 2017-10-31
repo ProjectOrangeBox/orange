@@ -109,8 +109,9 @@ class Database_model extends MY_Model {
 	protected $additional_cache_tags = ''; /* example '.tag1.tag2.tag' don't forget the first "." */
 	
 	protected $skip_rules = false; /* wether to skip all rule validation (probably because you don't have rules) */
+	
 	protected $return_false_nothing_found = false; /* boolean */
-
+	protected $temp_return_false_nothing_found = false;
 
 	/* Initialize the model, tie into the CodeIgniter super-object */
 	public function __construct() {
@@ -152,7 +153,7 @@ class Database_model extends MY_Model {
 
 		log_message('info', 'Database_model Class Initialized');
 	}
-
+	
 	/* adding this make "most" other database methods work */
 	public function __call($name, $arguments) {
 		if (method_exists($this->_database,$name)) {
@@ -163,7 +164,13 @@ class Database_model extends MY_Model {
 		
 		return $this;
 	}
+
+	public function return_false_nothing_found($value) {
+		$this->temp_return_false_nothing_found = $value;
 	
+		return $this;
+	}
+
 	/**
 	 * [[Description]]
 	 * @author Don Myers
@@ -902,37 +909,58 @@ class Database_model extends MY_Model {
 	 * @return [[Type]] [[Description]]
 	 */
 	public function format_result($dbc, $multiple = true) {
-		$return = ($this->return_false_nothing_found) ? false : (object)[];
-	
-		if ($multiple) {
-			/* multiple records */
-			if (!is_object($dbc)) {
-				$result = $return;
-			} else {
-				if ($this->entity) {
-					$result = ($dbc->num_rows()) ? $dbc->custom_result_object($this->entity) : $return;
-				} else {
-					$result = ($dbc->num_rows()) ? $dbc->result() : $return;
-				}
-			}
-		} else {
-			/* single record */
-			if ($this->single_column_name) {
-				$record = ($dbc->num_rows()) ? $dbc->row() : (object) [];
+		$result = ($multiple) ? $this->_multiple($dbc) : $this->_single($dbc);
 
-				$result = $record->{$this->single_column_name};
-			} else {
-				/* returns a single object */
-				if ($this->entity) {
-					$result = ($dbc->num_rows()) ? $dbc->custom_row_object(0, $this->entity) : new $this->entity();
-				} else {
-					$result = ($dbc->num_rows()) ? $dbc->row() : $return;
-				}
-			}
+		if ($this->single_column_name && is_object($result)) {
+			$result = $result->{$this->single_column_name};
 		}
 
+		/* clear this out to not interfere with the next query */
 		$this->single_column_name = null;
+		$this->temp_return_false_nothing_found = null;
 
+		return $result;
+	}
+
+	protected function _multiple($dbc) {
+		/* default return */
+		$return = ($this->return_false_nothing_found) ? false : [];
+	
+		/* is there a temp value set? */
+		if ($this->temp_return_false_nothing_found) {
+			$return = false;
+		}
+	
+		/* multiple records */
+		if (!is_object($dbc)) {
+			$result = $return;
+		} else {
+			if ($this->entity) {
+				$result = ($dbc->num_rows()) ? $dbc->custom_result_object($this->entity) : $return;
+			} else {
+				$result = ($dbc->num_rows()) ? $dbc->result() : $return;
+			}
+		}
+	
+		return $result;
+	}
+	
+	protected function _single($dbc) {
+		/* default return */
+		$return = ($this->return_false_nothing_found) ? false : (object)[];
+	
+		/* is there a temp value set? */
+		if ($this->temp_return_false_nothing_found) {
+			$return = false;
+		}
+
+		/* single record */
+		if ($this->entity) {
+			$result = ($dbc->num_rows()) ? $dbc->custom_row_object(0, $this->entity) : new $this->entity();
+		} else {
+			$result = ($dbc->num_rows()) ? $dbc->row() : $return;
+		}
+		
 		return $result;
 	}
 
