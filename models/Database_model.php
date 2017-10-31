@@ -153,6 +153,17 @@ class Database_model extends MY_Model {
 		log_message('info', 'Database_model Class Initialized');
 	}
 
+	/* adding this make "most" other database methods work */
+	public function __call($name, $arguments) {
+		if (method_exists($this->_database,$name)) {
+			call_user_func_array([$this->_database,$name],$arguments);
+		} else {
+			throw new Exception("Database Model method $name not found");
+		}
+		
+		return $this;
+	}
+	
 	/**
 	 * [[Description]]
 	 * @author Don Myers
