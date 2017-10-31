@@ -165,7 +165,7 @@ class Database_model extends MY_Model {
 		return $this;
 	}
 
-	public function return_false_nothing_found($value) {
+	public function return_false_nothing_found($value=true) {
 		$this->temp_return_false_nothing_found = $value;
 	
 		return $this;
