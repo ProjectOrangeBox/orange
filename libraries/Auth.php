@@ -99,6 +99,9 @@ class Auth {
 			$profile = ci()->o_user_model->get((int) config('auth.guest role id'));
 		}
 
+		/* clear password */
+		unset($profile->password);
+
 		ci()->user = &$profile;
 
 		return true;

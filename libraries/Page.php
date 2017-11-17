@@ -155,7 +155,10 @@ class Page {
 		$view = ($view) ? $view : str_replace('-', '_', $this->route);
 
 		/* anyone need to process something before build? */
-		event::trigger('page.build', $this, $view);
+		event::trigger('page.render', $this, $view);
+		
+		/* more specific */
+		event::trigger('page.render.'.str_replace('/','.',$view),$this, $view);
 
 		/* build this view */
 		$view_content = $this->view($view, $data);

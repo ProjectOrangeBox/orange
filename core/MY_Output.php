@@ -26,12 +26,16 @@ class MY_Output extends CI_Output {
 	 * @param		mixed		if the first value is not a array this would be the value of the key value pair
 	 * @return $this allow chaining
 	 */
-	public function json($data = [], $val = null) {
+	public function json($data = null, $val = null) {
 		log_message('debug', 'my_output::json');
-
-		$data = ($val !== NULL) ? [$data => $val] : $data;
-
-		$json = (is_array($data) || is_object($data)) ? json_encode($data) : $data;
+		
+		if ($data === null) {
+			$json = json_encode(ci()->load->get_vars());
+		} else {
+			$data = ($val !== NULL) ? [$data => $val] : $data;
+	
+			$json = (is_array($data) || is_object($data)) ? json_encode($data) : $data;
+		}
 
 		$this
 			->enable_profiler(false)
