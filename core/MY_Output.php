@@ -29,6 +29,7 @@ class MY_Output extends CI_Output {
 	public function json($data = null, $val = null) {
 		log_message('debug', 'my_output::json');
 		
+		/* if nothing sent in use the views data */
 		if ($data === null) {
 			$json = json_encode(ci()->load->get_vars());
 		} else {
