@@ -176,9 +176,7 @@ class MY_Loader extends CI_Loader {
 	public function plugin($name='') {
 		$class = 'Plugin_' . str_replace('plugin_','',strtolower($name));
 
-		$exists = class_exists($class,true);
-
-		if ($exists) {
+		if (class_exists($class,true)) {
 			new $class; /* instantiate the class */
 		}
 	}
