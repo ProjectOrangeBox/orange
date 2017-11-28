@@ -81,11 +81,11 @@ class Database_model extends MY_Model {
 	protected $soft_delete_key = 'is_deleted';
 	protected $soft_delete     = false;
 
-	protected $view_role_column_name   = 'view_role_id';
+	protected $read_role_column_name   = 'read_role_id';
 	protected $edit_role_column_name   = 'edit_role_id';
 	protected $delete_role_column_name = 'delete_role_id';
 
-	protected $has_view_role           = false;
+	protected $has_read_role           = false;
 	protected $has_edit_role           = false;
 	protected $has_delete_role         = false;
 
@@ -307,7 +307,7 @@ class Database_model extends MY_Model {
 			/* remove the protected columns */
 			$this->remove_columns($data, $this->protected);
 
-			$this->add_user_n_date('created', $data);
+			$this->add_user_n_date('created', $data)->add_umask($data);
 
 			if (count($data)) {
 				$this->_database->insert($this->table, $data);
@@ -371,7 +371,7 @@ class Database_model extends MY_Model {
 			/* remove the protected columns */
 			$this->remove_columns($data, $this->protected);
 
-			$this->add_user_n_date('updated', $data);
+			$this->add_user_n_date('updated', $data)->add_umask($data);
 
 			if (count($data)) {
 				$this->_database->where($where)->update($this->table, $data);
@@ -1004,6 +1004,22 @@ class Database_model extends MY_Model {
 		return $this;
 	}
 
+	protected function add_umask(&$data) {
+		if ($this->has_read_role) {
+			$data[$this->read_role_column_name] = ci()->user->user_read_role_id;
+		}
+	
+		if ($this->has_edit_role) {
+			$data[$this->edit_role_column_name] = ci()->user->user_edit_role_id;
+		}
+
+		if ($this->has_delete_role) {
+			$data[$this->delete_role_column_name] = ci()->user->user_delete_role_id;
+		}
+	
+		return $this;
+	}
+
 	/**
 	 * [[Description]]
 	 * @author Don Myers
@@ -1012,9 +1028,9 @@ class Database_model extends MY_Model {
 	protected function add_default_columns() {
 		$dbforge = $this->load->dbforge($this->_database, true);
 
-		$dbforge->add_column($this->table, $this->view_role_column_name . ' INT(11) UNSIGNED NULL DEFAULT '.config('auth.root role id'));
-		$dbforge->add_column($this->table, $this->edit_role_column_name . ' INT(11) UNSIGNED NULL DEFAULT '.config('auth.root role id'));
-		$dbforge->add_column($this->table, $this->delete_role_column_name . ' INT(11) UNSIGNED NULL DEFAULT '.config('auth.root role id'));
+		$dbforge->add_column($this->table, $this->read_role_column_name . ' INT(11) UNSIGNED NULL DEFAULT '.config('auth.admin role id'));
+		$dbforge->add_column($this->table, $this->edit_role_column_name . ' INT(11) UNSIGNED NULL DEFAULT '.config('auth.admin role id'));
+		$dbforge->add_column($this->table, $this->delete_role_column_name . ' INT(11) UNSIGNED NULL DEFAULT '.config('auth.admin role id'));
 
 		$dbforge->add_column($this->table, $this->created_on_column_name . ' DATETIME NULL DEFAULT NULL');
 		$dbforge->add_column($this->table, $this->created_by_column_name . ' INT(11) UNSIGNED NULL DEFAULT '.config('auth.nobody role id'));

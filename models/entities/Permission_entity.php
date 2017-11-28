@@ -21,8 +21,23 @@ class Permission_entity extends model_entity {
 	public $group;
 	public $description;
 
+	/**
+	 * [[Description]]
+	 * @private
+	 * @author Don Myers
+	 * @param  [[Type]] $name [[Description]]
+	 * @return [[Type]] [[Description]]
+	 */
+	public function __get($name) {
+		switch ($name) {
+			case 'roles':
+				return $this->roles();
+			break;
+		}
+	}
+
 	public function roles() {
-		ci()->o_permission_model->roles($this->id);
+		return ci()->o_permission_model->roles($this->id);
 	}
 
 } /* end class */

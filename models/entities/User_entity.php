@@ -22,7 +22,6 @@ class User_entity extends model_entity {
 
 	protected $roles       = [];
 	protected $permissions = [];
-	protected $is_root = false;
 
 	protected $lazy_loaded = false;
 
@@ -35,10 +34,6 @@ class User_entity extends model_entity {
 	 */
 	public function __get($name) {
 		switch ($name) {
-		case 'is_root':
-			$this->_lazy_load();
-		
-			return $this->is_root;
 		case 'roles':
 			$this->_lazy_load();
 
@@ -89,11 +84,6 @@ class User_entity extends model_entity {
 	 */
 	public function has_role($role_id) {
 		$this->_lazy_load();
-
-		/* root "has" all roles */
-		if ($this->is_root === true) {
-			return true;
-		}
 
 		return array_key_exists($role_id, $this->roles);
 	}
@@ -182,11 +172,6 @@ class User_entity extends model_entity {
 	public function can($resource) {
 		$this->_lazy_load();
 
-		/* root "has" all permissions */
-		if ($this->is_root === true) {
-			return true;
-		}
-
 		return (in_array($resource, $this->permissions, true));
 	}
 
@@ -206,8 +191,14 @@ class User_entity extends model_entity {
 	 * @return [[Type]] [[Description]]
 	 */
 	public function is_guest() {
-		/* is this person the guest id? */
-		return ($this->id === config('auth.guest user id',-1));
+		/* is this person the user id? */
+		return ($this->id === config('auth.user user id',-1));
+	}
+	
+	
+	public function is_nobody() {
+		/* is this person the user id? */
+		return ($this->id === config('auth.nobody user id',-1));
 	}
 
 	/**
@@ -217,58 +208,58 @@ class User_entity extends model_entity {
 	 * @return [[Type]] [[Description]]
 	 */
 	protected function _lazy_load() {
+		$user_id = (int)$this->id;
+		$cache_key = 'database.user_entity.'.$user_id.'.acl.php';
+	
 		if (!$this->lazy_loaded) {
-			$user_id = (int) $this->id;
-
-			ci()->config->set_item('user_id', $user_id);
-
-			/* cache this */
-			$roles_permissions = o::cache(ci()->o_user_model->get_cache_prefix() . '.' . $user_id, function (){
-				/* add the roles */
-				$roles_permissions = [];
-
-				$sql = "select
-					`user_id`,
-					`orange_roles`.`id` `orange_roles_id`,
-					`orange_roles`.`name` `orange_roles_name`,
-					`permission_id`,
-					`key`
-					from orange_user_role
-					left join orange_roles on orange_roles.id = orange_user_role.role_id
-					left join orange_role_permission on orange_role_permission.role_id = orange_roles.id
-					left join orange_permission on orange_permission.id = orange_role_permission.permission_id
-					where orange_user_role.user_id = " . ci()->config->item('user_id');
-
-				$dbc = ci()->db->query($sql);
-
-				foreach ($dbc->result() as $dbr) {
-					if ($dbr->orange_roles_name) {
-						$roles_permissions['roles'][(int) $dbr->orange_roles_id] = $dbr->orange_roles_name;
-					}
-
-					if ($dbr->key) {
-						$roles_permissions['permissions'][(int) $dbr->permission_id] = $dbr->key;
-					}
-				}
-
-				return $roles_permissions;
-			});
+			if (!$roles_permissions = ci()->cache->get($cache_key)) {
+				$roles_permissions = $this->_lazy_loader($user_id);
+				
+				ci()->cache->save($cache_key,$roles_permissions,o::ttl());
+			}
 
 			$this->roles       = (array) $roles_permissions['roles'];
 			$this->permissions = (array) $roles_permissions['permissions'];
 
-			/* are they the super user? */
-			if ($this->id == config('auth.root user id', -1)) {
-				$this->is_root = true;
-			}
-
-			/* Do they have the super user role */
-			if (in_array(config('auth.root role id', -1), $this->permissions) === true) {
-				$this->is_root = true;
-			}
-
 			$this->lazy_loaded = true;
 		}
+	}
+	
+	protected function _lazy_loader($user_id) {
+		$roles_permissions = [];
+
+		$sql = "select
+			`user_id`,
+			`orange_roles`.`id` `orange_roles_id`,
+			`orange_roles`.`name` `orange_roles_name`,
+			`permission_id`,
+			`key`
+			from orange_user_role
+			left join orange_roles on orange_roles.id = orange_user_role.role_id
+			left join orange_role_permission on orange_role_permission.role_id = orange_roles.id
+			left join orange_permission on orange_permission.id = orange_role_permission.permission_id 
+			where orange_user_role.user_id = ".$user_id;
+	
+		$dbc = ci()->db->query($sql);
+	
+		foreach ($dbc->result() as $dbr) {
+			if ($dbr->orange_roles_name) {
+				$roles_permissions['roles'][(int) $dbr->orange_roles_id] = $dbr->orange_roles_name;
+			}
+	
+			if ($dbr->key) {
+				$roles_permissions['permissions'][(int) $dbr->permission_id] = $dbr->key;
+			}
+		}
+		
+		return $roles_permissions;
+	}
+	
+	/* internal for lazy loader */
+	protected function _has_role($user_id,$role_id) {
+		$dbc = ci()->db->get_where('orange_user_role',['user_id'=>(int)$user_id,'role_id'=>(int)$role_id], 1);
+
+		return ($dbc->num_rows() === 1);
 	}
 
 } /* end class */

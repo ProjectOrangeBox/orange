@@ -31,11 +31,15 @@ class Auth {
 
 		/* if this is a cli request we don't need to setup the user profile */
 		if (!is_cli()) {
-			$user_id = config('auth.guest role id');
+			/* default to nobody */
+			$user_id = config('auth.nobody user id');
 
+			/* load a session saved user id - if any */
 			$session_user_id = ci()->session->userdata($this->session_key);
-
+			
+			/* is it valid? */
 			if ((int) $session_user_id > 0) {
+				/* yes set it as the user id */
 				$user_id = $session_user_id;
 			}
 
@@ -73,7 +77,7 @@ class Auth {
 		event::trigger('auth.logout');
 		
 		/* make them a guest */
-		$this->refresh_userdata(config('auth.guest role id'));
+		$this->refresh_userdata(config('auth.user role id'));
 
 		log_message('info', 'Auth Class logout');
 
@@ -87,16 +91,19 @@ class Auth {
 	 * @return bool
 	 */
 	public function refresh_userdata($user_id = null) {
+		/* get the user id from the user object */
 		if (is_object(ci()->user) && $user_id == null) {
 			$user_id = ci()->user->id;
 		}
-
+		
+		/* double check user id is a integer greater than 0 */
 		if ((int) $user_id > 0) {
+			/* load the profile */
 			$profile = ci()->o_user_model->get((int) $user_id);
 
 			ci()->session->set_userdata([$this->session_key => $profile->id]);
 		} else {
-			$profile = ci()->o_user_model->get((int) config('auth.guest role id'));
+			$profile = ci()->o_user_model->get((int) config('auth.user role id'));
 		}
 
 		/* clear password */

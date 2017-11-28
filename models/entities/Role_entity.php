@@ -20,20 +20,38 @@ class Role_entity extends model_entity {
 	public $description;
 	public $name;
 
+	/**
+	 * [[Description]]
+	 * @private
+	 * @author Don Myers
+	 * @param  [[Type]] $name [[Description]]
+	 * @return [[Type]] [[Description]]
+	 */
+	public function __get($name) {
+		switch ($name) {
+			case 'users':
+				return $this->users();
+			break;
+			case 'permissions':
+				return $this->permissions();
+			break;
+		}
+	}
+
 	public function add_permission($permission) {
-		ci()->o_role_model->add_permission($this->id, $permission);
+		return ci()->o_role_model->add_permission((int)$this->id, $permission);
 	}
 
 	public function remove_permission($permission) {
-		ci()->o_role_model->remove_permission($this->id, $permission);
+		return ci()->o_role_model->remove_permission((int)$this->id, $permission);
 	}
 
 	public function permissions() {
-		ci()->o_role_model->permissions($this->id);
+		return ci()->o_role_model->permissions((int)$this->id);
 	}
 
 	public function users() {
-		ci()->o_role_model->users($this->id);
+		return ci()->o_role_model->users((int)$this->id);
 	}
 
 } /* end class */
