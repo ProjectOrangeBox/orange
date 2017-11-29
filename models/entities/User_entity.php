@@ -230,15 +230,15 @@ class User_entity extends model_entity {
 
 		$sql = "select
 			`user_id`,
-			`orange_roles`.`id` `orange_roles_id`,
-			`orange_roles`.`name` `orange_roles_name`,
+			`".config('auth.role table')."`.`id` `orange_roles_id`,
+			`".config('auth.role table')."`.`name` `orange_roles_name`,
 			`permission_id`,
 			`key`
-			from orange_user_role
-			left join orange_roles on orange_roles.id = orange_user_role.role_id
-			left join orange_role_permission on orange_role_permission.role_id = orange_roles.id
-			left join orange_permission on orange_permission.id = orange_role_permission.permission_id 
-			where orange_user_role.user_id = ".$user_id;
+			from ".config('auth.user role table')."
+			left join ".config('auth.role table')." on ".config('auth.role table').".id = ".config('auth.user role table').".role_id
+			left join ".config('auth.role permission table')." on ".config('auth.role permission table').".role_id = ".config('auth.role table').".id
+			left join ".config('auth.permission table')." on ".config('auth.permission table').".id = ".config('auth.role permission table').".permission_id 
+			where ".config('auth.user role table').".user_id = ".$user_id;
 	
 		$dbc = ci()->db->query($sql);
 	
