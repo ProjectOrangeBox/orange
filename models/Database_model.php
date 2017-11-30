@@ -540,7 +540,7 @@ class Database_model extends MY_Model {
 		if ($this->debug) {
 			$query  = $this->_database->last_query();
 			$output = (is_array($query)) ? print_r($query, true) : $query;
-			file_put_contents($this->debug, $output . chr(10), FILE_APPEND);
+			file_put_contents(ROOTPATH.'/'.$this->debug, $output . chr(10), FILE_APPEND);
 		}
 	}
 
