@@ -272,7 +272,7 @@ class Validate {
 					}
 				} elseif (function_exists($rule)) {
 					/* is it a PHP method? */
-					$success = ($param !== null) ? call_user_func($rule, $field, $param) : call_user_func($rule, $field);
+					$success = ($param !== null) ? $rule($field,$param) : $rule($field);
 				} elseif (isset($this->attached['validate_' . $rule])) {
 					/* field data, current field, current field param, validation object */
 					$success = $this->attached['validate_' . $rule]($field, $param, $this->error_string, $this->field_data, $this);
