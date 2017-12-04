@@ -16,8 +16,8 @@
  *
  */
 class Page {
-	public $prepend = false; /* when adding plugins they are added before current view variable content */
-	
+	public $plugins_loading = false; /* when adding plugins they are added before current view variable content */
+
 	protected $route; /* used for auto loading of views */
 	protected $page_prefix = 'page_'; /* page view variable prefix */
 
@@ -33,7 +33,7 @@ class Page {
 
 	public function __construct() {
 		$this->route = strtolower(trim(ci()->router->fetch_directory() . ci()->router->fetch_class(true) . '/' . ci()->router->fetch_method(true), '/'));
-						
+
 		if (isset(ci()->user)) {
 			$userid = md5(ci()->user->id . config('config.encryption_key'));
 
@@ -156,7 +156,7 @@ class Page {
 
 		/* anyone need to process something before build? */
 		event::trigger('page.render', $this, $view);
-		
+
 		/* more specific */
 		event::trigger('page.render.'.str_replace('/','.',$view),$this, $view);
 
@@ -403,27 +403,27 @@ class Page {
 
 		return trim($output);
 	}
-	
+
 	# +-+-+-+-+-+-+-+-+-+
 	# |p|r|o|t|e|c|t|e|d|
 	# +-+-+-+-+-+-+-+-+-+
 
 	protected function _asset_add($name,$value) {
 		$key = md5($value);
-	
+
 		if (!isset($this->assets_added[$key])) {
 			$this->assets_added[$key] = true;
-			
+
 			$complete_name = $this->page_prefix . $name;
-			
+
 			/* if we are adding plugins they come before on page content */
-			if ($this->prepend) {
+			if ($this->plugins_loading) {
 				ci()->load->vars([$complete_name => $value.chr(10).ci()->load->get_var($complete_name)]);
 			} else {
 				ci()->load->vars([$complete_name => ci()->load->get_var($complete_name).$value.chr(10)]);
 			}
 		}
-	
+
 		return $this;
 	}
 
@@ -444,7 +444,7 @@ class Page {
 			ci()->load->vars([$name => $value]);
 		} else {
 			self::$fragment[$name] = $name;
-	
+
 			ob_start();
 		}
 	}
@@ -517,15 +517,12 @@ class Page {
 	}
 
 	public static function plugins($names='') {
-		ci()->page->prepend = true;
-		
-		$names = explode(',',$names);
-		
-		foreach ($names as $name) {
-			ci()->load->plugin($name);
-		}
-		
-		ci()->page->prepend = false;	
+		/* plugins always load first */
+		ci()->page->plugins_loading = true;
+
+		ci()->load->plugin($names);
+
+		ci()->page->plugins_loading = false;
 	}
-	
+
 } /* end class */
