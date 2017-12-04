@@ -16,7 +16,7 @@
  *
  */
 class Page {
-	public $plugins_loading = false; /* when adding plugins they are added before current view variable content */
+	protected $prepend_asset = false; /* when adding plugins they are added before current view variable content */
 
 	protected $route; /* used for auto loading of views */
 	protected $page_prefix = 'page_'; /* page view variable prefix */
@@ -27,9 +27,6 @@ class Page {
 
 	/* this is the default also configurable in config page->domready */
 	protected $domready_javascript = 'document.addEventListener("DOMContentLoaded",function(e){%%});';
-
-	protected static $extends  = null;
-	protected static $fragment = null;
 
 	public function __construct() {
 		$this->route = strtolower(trim(ci()->router->fetch_directory() . ci()->router->fetch_class(true) . '/' . ci()->router->fetch_method(true), '/'));
@@ -164,8 +161,8 @@ class Page {
 		$view_content = $this->view($view, $data);
 
 		/* Are they extending another view? */
-		if (page::is_extending()) {
-			$view_content = $this->view(page::is_extending());
+		if (pear::is_extending()) {
+			$view_content = $this->view(pear::is_extending());
 		}
 
 		ci()->output->append_output($view_content);
@@ -404,6 +401,10 @@ class Page {
 		return trim($output);
 	}
 
+	public function prepend_asset($bol = true) {
+		$this->prepend_asset = $bol;
+	}
+
 	# +-+-+-+-+-+-+-+-+-+
 	# |p|r|o|t|e|c|t|e|d|
 	# +-+-+-+-+-+-+-+-+-+
@@ -417,7 +418,7 @@ class Page {
 			$complete_name = $this->page_prefix . $name;
 
 			/* if we are adding plugins they come before on page content */
-			if ($this->plugins_loading) {
+			if ($this->prepend_asset) {
 				ci()->load->vars([$complete_name => $value.chr(10).ci()->load->get_var($complete_name)]);
 			} else {
 				ci()->load->vars([$complete_name => ci()->load->get_var($complete_name).$value.chr(10)]);
@@ -425,104 +426,6 @@ class Page {
 		}
 
 		return $this;
-	}
-
-	# +-+-+-+-+-+-+-+-+ +-+-+-+-+-+-+ +-+-+-+-+-+-+-+-+-+
-	# |t|e|m|p|l|a|t|e| |s|t|a|t|i|c| |f|u|n|c|t|i|o|n|s|
-	# +-+-+-+-+-+-+-+-+ +-+-+-+-+-+-+ +-+-+-+-+-+-+-+-+-+
-
-	/**
-	 * section function.
-	 *
-	 * @access public
-	 * @static
-	 * @param mixed $name
-	 * @return void
-	 */
-	public static function section($name,$value=null) {
-		if ($value) {
-			ci()->load->vars([$name => $value]);
-		} else {
-			self::$fragment[$name] = $name;
-
-			ob_start();
-		}
-	}
-
-	/**
-	 * parent function.
-	 *
-	 * @access public
-	 * @static
-	 * @param mixed $name (default: null)
-	 * @return void
-	 */
-	public static function parent($name=null) {
-		$name = ($name) ? $name : end(self::$fragment);
-
-		echo ci()->load->get_var($name);
-	}
-
-	/**
-	 * end function.
-	 *
-	 * @access public
-	 * @static
-	 * @return void
-	 */
-	public static function end() {
-		$name = array_pop(self::$fragment);
-
-		$buffer = ob_get_contents();
-
-		ob_end_clean();
-
-		ci()->load->vars([$name => $buffer]);
-	}
-
-	/**
-	 * extends function.
-	 *
-	 * @access public
-	 * @static
-	 * @param mixed $name
-	 * @return void
-	 */
-	public static function extends($name) {
-		self::$extends = $name;
-	}
-
-	/**
-	 * include function.
-	 *
-	 * @access public
-	 * @static
-	 * @param mixed $view (default: null)
-	 * @param mixed $data (default: [])
-	 * @param bool $name (default: true)
-	 * @return void
-	 */
-	public static function include($view = null, $data = [], $name = true) {
-		if ($name === true) {
-			/* if name is true then we want to echo this */
-			echo ci()->page->view($view, $data, $name);
-		} else {
-			/* if else put a variable */
-			ci()->page->view($view, $data, $name);
-		}
-	}
-
-	public static function is_extending() {
-		return self::$extends;
-	}
-
-	public static function plugins($names='') {
-		/* plugins always load first */
-		ci()->page->plugins_loading = true;
-
-		ci()->load->plugin($names);
-
-		ci()->page->plugins_loading = false;
 	}
 
 } /* end class */

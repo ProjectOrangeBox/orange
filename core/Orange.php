@@ -157,7 +157,7 @@ function codeigniter_autoload($class) {
 			return true;
 		}
 	} elseif (substr($class,0,7) == 'Plugin_') {	
-		if ($file = stream_resolve_include_path('libraries/plugins/' . $class . '.php')) {
+		if ($file = stream_resolve_include_path('libraries/pear_plugins/' . $class . '.php')) {
 			include $file;
 		
 			return true;

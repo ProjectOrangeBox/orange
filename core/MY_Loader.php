@@ -173,14 +173,14 @@ class MY_Loader extends CI_Loader {
 	}
 
 	/* Load a Plugin - these are loaded and instantiated but not attached */
-	public function plugin($name='') {
+	public function pear_plugin($name='') {
 		if (strpos($name,',') !== false) {
 			$name = explode(',',$name);
 		}
 
 		if (is_array($name)) {
 			foreach ($name as $n) {
-				$this->plugin($n);
+				$this->pear_plugin($n);
 			}
 
 			return;
