@@ -44,7 +44,7 @@ class MY_Loader extends CI_Loader {
 
 			/* our orange custom var export php file cache library */
 			include __DIR__.'/../libraries/Cache_var_export.php';
-			
+
 			cache_var_export::init(ci()->config->config);
 		}
 
@@ -71,7 +71,7 @@ class MY_Loader extends CI_Loader {
 		// Is the class name valid?
 		if (!class_exists($class_name, FALSE)) {
 			log_message('error', 'Non-existent class: ' . $class_name);
-			
+
 			throw new Exception('Non-existent class: ' . $class_name);
 		}
 
@@ -79,7 +79,7 @@ class MY_Loader extends CI_Loader {
 		// Was a custom class name supplied? If so we'll use it
 		if (empty($object_name)) {
 			$object_name = strtolower($class);
-			
+
 			if (isset($this->_ci_varmap[$object_name])) {
 				$object_name = $this->_ci_varmap[$object_name];
 			}
@@ -104,7 +104,7 @@ class MY_Loader extends CI_Loader {
 		// Instantiate the class
 		$CI->$object_name = isset($config) ? new $class_name($config) : new $class_name();
 	}
-	
+
 	/**
 	 * Internal CI Stock Library Loader
 	 *
@@ -172,8 +172,20 @@ class MY_Loader extends CI_Loader {
 		return $this->_ci_init_library($library_name, $prefix, $params, $object_name);
 	}
 
-	/* Load a Plugin */
+	/* Load a Plugin - these are loaded and instantiated but not attached */
 	public function plugin($name='') {
+		if (strpos($name,',') !== false) {
+			$name = explode(',',$name);
+		}
+
+		if (is_array($name)) {
+			foreach ($name as $n) {
+				$this->plugin($n);
+			}
+
+			return;
+		}
+
 		$class = 'Plugin_' . str_replace('plugin_','',strtolower($name));
 
 		if (class_exists($class,true)) {

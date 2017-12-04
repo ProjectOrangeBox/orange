@@ -42,9 +42,10 @@ class o_setting_model extends Database_model {
 
 	/* override parent */
 	protected function delete_cache_by_tags() {
-		/* anytime the model calls this to flush the cache also tell the loader which creates it's own cache */
+		/* anytime the model calls this to flush the cache also tell the core config which creates it's own cache */
 		$this->config->flush();
 
+		/* now tell the parent */
 		parent::delete_cache_by_tags();
 	}
 
