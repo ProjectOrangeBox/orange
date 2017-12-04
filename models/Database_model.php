@@ -65,28 +65,28 @@ class Database_model extends MY_Model {
 	protected $created_on_column_name = 'created_at';
 	protected $created_by_column_name = 'created_by';
 	protected $created_ip_column_name = 'created_ip';
+	protected $has_created = false;
 
 	protected $updated_on_column_name = 'updated_on';
 	protected $updated_by_column_name = 'updated_by';
 	protected $updated_ip_column_name = 'updated_ip';
+	protected $has_updated = false;
 
 	protected $deleted_on_column_name = 'deleted_on';
 	protected $deleted_by_column_name = 'deleted_by';
 	protected $deleted_ip_column_name = 'deleted_ip';
-
-	protected $has_created = false;
-	protected $has_updated = false;
 	protected $has_deleted = false;
 
 	protected $soft_delete_key = 'is_deleted';
 	protected $soft_delete     = false;
 
 	protected $read_role_column_name   = 'read_role_id';
-	protected $edit_role_column_name   = 'edit_role_id';
-	protected $delete_role_column_name = 'delete_role_id';
-
 	protected $has_read_role           = false;
+
+	protected $edit_role_column_name   = 'edit_role_id';
 	protected $has_edit_role           = false;
+
+	protected $delete_role_column_name = 'delete_role_id';
 	protected $has_delete_role         = false;
 
 	/* internal */
@@ -738,100 +738,26 @@ class Database_model extends MY_Model {
 		return $dbr->codeigniter_column_count;
 	}
 
+
 	/**
-	 * [[Description]]
+	 * if the results should be a array then $multiple = true else if you expect a single record then $multiple = false
 	 * @author Don Myers
-	 * @param	 [[Type]] [$ensure = false] [[Description]]
+	 * @param	 [[Type]] $dbc							 [[Description]]
+	 * @param	 [[Type]] [$multiple = true] [[Description]]
 	 * @return [[Type]] [[Description]]
 	 */
-	public function drop_table($ensure = false) {
-		if ($ensure !== true) {
-			throw new Exception(__METHOD__ . ' please provide "true" to drop table');
+	public function format_result($dbc, $multiple = true) {
+		$result = ($multiple) ? $this->_multiple($dbc) : $this->_single($dbc);
+
+		if ($this->single_column_name && is_object($result)) {
+			$result = $result->{$this->single_column_name};
 		}
 
-		return $dbforge->drop_table($this->table);
-	}
+		/* clear this out to not interfere with the next query */
+		$this->single_column_name = null;
+		$this->temp_return_false_nothing_found = null;
 
-	/**
-	 * [[Description]]
-	 * @author Don Myers
-	 * @param	 [[Type]] [$ensure = false] [[Description]]
-	 * @return [[Type]] [[Description]]
-	 */
-	public function truncate($ensure = false) {
-		if ($ensure !== true) {
-			throw new Exception(__METHOD__ . ' please provide "true" to truncate a database model');
-		}
-
-		return $this->_database->truncate($this->table);
-	}
-
-	/* EXAMPLE - add this to a model then to call $foo_model->seed(100);
-	public function seed($count=1) {
-	$seeds = [
-	'name'=>function($faker) { return $faker->name; },
-	'created_on'=>function($faker) { return $faker->dateTimeBetween($startDate = '-1 year','now')->format('Y-m-d H:i:s'); },
-	'created_by'=>1,
-	'created_ip'=>$this->input->ip_address(),
-	'updated_on'=>date('Y-m-d H:i:s'),
-	'updated_by'=>1,
-	'updated_ip'=>$this->input->ip_address(),
-	'is_editable'=>function($faker) { return mt_rand(0,1); },
-	'is_deletable'=>function($faker) { return mt_rand(0,1); },
-	'description'=>function($faker) { return $faker->sentence(8); },
-	'group'=>['faker','foo','bar'],
-	'internal'=>'faker',
-	];
-
-	return $this->_seed($seeds,$count);
-	}
-
-	make sure support package is in autoload
-
-	php index.php cli/orange/seed/rewards_bank_model/10000
-
-	 */
-
-	/**
-	 * [[Description]]
-	 * @private
-	 * @author Don Myers
-	 * @param	 [[Type]] $seeds [[Description]]
-	 * @param	 [[Type]] $count [[Description]]
-	 * @return boolean	[[Description]]
-	 */
-	public function _seed($seeds, $count) {
-		if (class_exists('\Faker\Factory')) {
-			$faker = Faker\Factory::create();
-
-			for ($i = 0; $i < $count; $i++) {
-				$data = [];
-
-				foreach ($seeds as $name => $s) {
-					if (is_callable($s)) {
-						$data[$name] = $s($faker, $data);
-					} elseif (is_array($s)) {
-						$data[$name] = $s[mt_rand(0, count($s) - 1)];
-					} elseif (is_scalar($s)) {
-						$data[$name] = $s;
-					}
-				}
-
-				if (!$this->_database->insert($this->table, $data)) {
-					echo 'ERROR' . chr(10);
-					var_dump($this->_database->error());
-					var_dump($this->_database->last_query());
-					die();
-				}
-
-			}
-
-			$this->delete_cache_by_tags();
-		} else {
-			throw new Exception('Trying to use database_model seeding and Faker is not installed. Please include it in your composer.json file by using composer require fzaninotto/faker');
-		}
-
-		return true;
+		return $result;
 	}
 
 	/**
@@ -899,27 +825,6 @@ class Database_model extends MY_Model {
 
 		/* get returns a single object so return the first record or an empty record */
 		return $this->format_result($dbc, $as_array);
-	}
-
-	/**
-	 * if the results should be a array then $multiple = true else if you expect a single record then $multiple = false
-	 * @author Don Myers
-	 * @param	 [[Type]] $dbc							 [[Description]]
-	 * @param	 [[Type]] [$multiple = true] [[Description]]
-	 * @return [[Type]] [[Description]]
-	 */
-	public function format_result($dbc, $multiple = true) {
-		$result = ($multiple) ? $this->_multiple($dbc) : $this->_single($dbc);
-
-		if ($this->single_column_name && is_object($result)) {
-			$result = $result->{$this->single_column_name};
-		}
-
-		/* clear this out to not interfere with the next query */
-		$this->single_column_name = null;
-		$this->temp_return_false_nothing_found = null;
-
-		return $result;
 	}
 
 	protected function _multiple($dbc) {
@@ -1018,35 +923,6 @@ class Database_model extends MY_Model {
 		}
 	
 		return $this;
-	}
-
-	/**
-	 * [[Description]]
-	 * @author Don Myers
-	 * @return string [[Description]]
-	 */
-	protected function add_default_columns() {
-		$dbforge = $this->load->dbforge($this->_database, true);
-
-		$dbforge->add_column($this->table, $this->read_role_column_name . ' INT(11) UNSIGNED NULL DEFAULT '.config('auth.admin role id'));
-		$dbforge->add_column($this->table, $this->edit_role_column_name . ' INT(11) UNSIGNED NULL DEFAULT '.config('auth.admin role id'));
-		$dbforge->add_column($this->table, $this->delete_role_column_name . ' INT(11) UNSIGNED NULL DEFAULT '.config('auth.admin role id'));
-
-		$dbforge->add_column($this->table, $this->created_on_column_name . ' DATETIME NULL DEFAULT NULL');
-		$dbforge->add_column($this->table, $this->created_by_column_name . ' INT(11) UNSIGNED NULL DEFAULT '.config('auth.nobody role id'));
-		$dbforge->add_column($this->table, $this->created_ip_column_name . ' VARCHAR(15) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT \'0.0.0.0\'');
-
-		$dbforge->add_column($this->table, $this->updated_on_column_name . ' DATETIME NULL DEFAULT NULL');
-		$dbforge->add_column($this->table, $this->updated_by_column_name . ' INT(11) UNSIGNED NULL DEFAULT '.config('auth.nobody role id'));
-		$dbforge->add_column($this->table, $this->updated_ip_column_name . ' VARCHAR(15) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT \'0.0.0.0\'');
-
-		$dbforge->add_column($this->table, $this->deleted_on_column_name . ' DATETIME NULL DEFAULT NULL');
-		$dbforge->add_column($this->table, $this->deleted_by_column_name . ' INT(11) UNSIGNED NULL DEFAULT '.config('auth.nobody role id'));
-		$dbforge->add_column($this->table, $this->deleted_ip_column_name . ' VARCHAR(15) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT \'0.0.0.0\'');
-
-		$dbforge->add_column($this->table, $this->soft_delete_key . ' TINYINT(1) UNSIGNED NULL DEFAULT 0');
-
-		return 'finished';
 	}
 
 	/**

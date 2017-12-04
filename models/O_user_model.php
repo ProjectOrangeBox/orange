@@ -21,11 +21,13 @@
 class o_user_model extends Database_model {
 	protected $table                 = 'orange_users';
 	protected $entity                = 'entities/user_entity';
+	protected $soft_delete           = true; /* soft delete users */
+	protected $additional_cache_tags = '.acl';
+
 	protected $has_created           = true;
 	protected $has_updated           = true;
 	protected $has_deleted           = true;
-	protected $soft_delete           = true; /* soft delete users */
-	protected $additional_cache_tags = '.acl';
+
 	protected $has_read_role           = true;
 	protected $has_edit_role           = true;
 	protected $has_delete_role         = true;
@@ -36,9 +38,11 @@ class o_user_model extends Database_model {
 		'password'        => ['field' => 'password', 'label' => 'Password', 'rules' => 'required|user_password|max_length[255]|filter_input[255]'],
 		'email'           => ['field' => 'email', 'label' => 'Email', 'rules' => 'required|strtolower|valid_email|is_uniquem[o_user_model.email.id]|max_length[255]|filter_input[255]'],
 		'is_active'       => ['field' => 'is_active', 'label' => 'Active', 'rules' => 'if_empty[0]|in_list[0,1]|filter_int[1]|max_length[1]|less_than[2]'],
+
 		'user_read_role_id'    => ['field' => 'user_read_role_id', 'label' => 'User Read Role', 'rules' => 'required|integer|max_length[10]|less_than[4294967295]|filter_int[10]'],
 		'user_edit_role_id'    => ['field' => 'user_edit_role_id', 'label' => 'User Edit Role', 'rules' => 'required|integer|max_length[10]|less_than[4294967295]|filter_int[10]'],
 		'user_delete_role_id'  => ['field' => 'user_delete_role_id', 'label' => 'User Delete Role', 'rules' => 'required|integer|max_length[10]|less_than[4294967295]|filter_int[10]'],
+
 		'read_role_id'   => ['field' => 'read_role_id', 'label' => 'Read Role', 'rules' => 'required|integer|max_length[10]|less_than[4294967295]|filter_int[10]'],
 		'edit_role_id'   => ['field' => 'edit_role_id', 'label' => 'Edit Role', 'rules' => 'required|integer|max_length[10]|less_than[4294967295]|filter_int[10]'],
 		'delete_role_id' => ['field' => 'delete_role_id', 'label' => 'Delete Role', 'rules' => 'required|integer|max_length[10]|less_than[4294967295]|filter_int[10]'],

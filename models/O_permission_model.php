@@ -19,9 +19,13 @@
  */
  
 class o_permission_model extends Database_model {
-	protected $table                 = 'orange_permission';
+	protected $table                 = 'orange_permissions';
 	protected $entity                = 'entities/permission_entity';
 	protected $additional_cache_tags = '.acl';
+
+	protected $has_created           = true;
+	protected $has_updated           = true;
+
 	protected $has_read_role           = true;
 	protected $has_edit_role           = true;
 	protected $has_delete_role         = true;
@@ -31,6 +35,7 @@ class o_permission_model extends Database_model {
 		'description' => ['field' => 'description', 'label' => 'Description', 'rules' => 'required|max_length[255]|filter_input[255]|is_uniquem[o_permission_model.description.id]'],
 		'group'       => ['field' => 'group', 'label' => 'Group', 'rules' => 'required|max_length[255]|filter_input[255]'],
 		'key'         => ['field' => 'key', 'label' => 'Key', 'rules' => 'required|strtolower|max_length[255]|filter_input[255]|is_uniquem[o_permission_model.key.id]'],
+
 		'read_role_id'   => ['field' => 'read_role_id', 'label' => 'Read Role', 'rules' => 'required|integer|max_length[10]|less_than[4294967295]|filter_int[10]'],
 		'edit_role_id'   => ['field' => 'edit_role_id', 'label' => 'Edit Role', 'rules' => 'required|integer|max_length[10]|less_than[4294967295]|filter_int[10]'],
 		'delete_role_id' => ['field' => 'delete_role_id', 'label' => 'Delete Role', 'rules' => 'required|integer|max_length[10]|less_than[4294967295]|filter_int[10]'],

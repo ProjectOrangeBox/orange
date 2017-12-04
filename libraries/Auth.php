@@ -28,6 +28,16 @@ class Auth {
 	 */
 	public function __construct() {
 		ci()->load->model('o_user_model');
+		
+		/* set some constants */
+		define('ADMIN_USER_ID',config('auth.admin user id'));
+		define('ADMIN_ROLE_ID',config('auth.admin role id'));
+
+		define('USER_USER_ID',config('auth.user user id'));
+		define('USER_ROLE_ID',config('auth.user role id'));
+
+		define('NOBODY_USER_ID',config('auth.nobody user id'));
+		define('NOBODY_ROLE_ID',config('auth.nobody role id'));
 
 		/* if this is a cli request we don't need to setup the user profile */
 		if (!is_cli()) {

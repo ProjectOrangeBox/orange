@@ -146,7 +146,7 @@ class User_entity extends model_entity {
 
 		return true;
 	}
-
+	
 	/**
 	 * [[Description]]
 	 * @author Don Myers
@@ -173,6 +173,10 @@ class User_entity extends model_entity {
 		$this->_lazy_load();
 
 		return (in_array($resource, $this->permissions, true));
+	}
+
+	public function has_permission($resource) {
+		return $this->can($resource);
 	}
 
 	/**
