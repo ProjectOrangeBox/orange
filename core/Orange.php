@@ -22,9 +22,6 @@ define('ROOTPATHS', get_include_path());
 /* register loader */
 spl_autoload_register('codeigniter_autoload');
 
-/* our "orange" tools */
-require __DIR__ . '/../libraries/O.php';
-
 /* bring in CodeIgniter core */
 require_once BASEPATH.'core/CodeIgniter.php';
 
@@ -305,16 +302,7 @@ function view($_view,$_data) {
 
 	/* if we are in development mode create the file in the application folder */
 	if ($_view_file === false) {
-		if (DEBUG == 'development') {
-			/* then create it */
-			@mkdir(APPPATH . dirname($_view), 0777, true);
-
-			file_put_contents(APPPATH . $_view, '<?php' . PHP_EOL . PHP_EOL . ' echo "Error View File: ".__FILE__;' . PHP_EOL);
-
-			die('Error View File ../' . $_view . ' Not Found - because you are in development mode it has been automatically created for you in your application folder.');
-		} else {
-			errors::show('Could not locate view "'.$_view.'"');
-		}
+		throw new Exception('Could not locate view "'.$_view.'"');
 	}
 
 	extract($_data, EXTR_PREFIX_INVALID, '_');

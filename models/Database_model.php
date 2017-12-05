@@ -307,7 +307,7 @@ class Database_model extends MY_Model {
 			/* remove the protected columns */
 			$this->remove_columns($data, $this->protected);
 
-			$this->add_user_n_date('created', $data)->add_umask($data);
+			$this->add_user_n_date('created', $data)->add_umask($data,'insert');
 
 			if (count($data)) {
 				$this->_database->insert($this->table, $data);
@@ -371,8 +371,8 @@ class Database_model extends MY_Model {
 			/* remove the protected columns */
 			$this->remove_columns($data, $this->protected);
 
-			$this->add_user_n_date('updated', $data)->add_umask($data);
-
+			$this->add_user_n_date('updated', $data)->add_umask($data,'update');
+			
 			if (count($data)) {
 				$this->_database->where($where)->update($this->table, $data);
 			}
@@ -909,17 +909,30 @@ class Database_model extends MY_Model {
 		return $this;
 	}
 
-	protected function add_umask(&$data) {
-		if ($this->has_read_role) {
-			$data[$this->read_role_column_name] = ci()->user->user_read_role_id;
-		}
-	
-		if ($this->has_edit_role) {
-			$data[$this->edit_role_column_name] = ci()->user->user_edit_role_id;
-		}
-
-		if ($this->has_delete_role) {
-			$data[$this->delete_role_column_name] = ci()->user->user_delete_role_id;
+	protected function add_umask(&$data,$mode='skip') {
+		switch ($mode) {
+			case 'insert':
+				if ($this->has_read_role) {
+					if (!isset($data[$this->read_role_column_name])) {
+						$data[$this->read_role_column_name] = ci()->user->user_read_role_id;
+					}
+				}
+			
+				if ($this->has_edit_role) {
+					if (!isset($data[$this->edit_role_column_name])) {
+						$data[$this->edit_role_column_name] = ci()->user->user_edit_role_id;
+					}
+				}
+		
+				if ($this->has_delete_role) {
+					if (!isset($data[$this->delete_role_column_name])) {
+						$data[$this->delete_role_column_name] = ci()->user->user_delete_role_id;
+					}
+				}
+			break;
+			case 'update':
+				/* no auto-magic */
+			break;
 		}
 	
 		return $this;

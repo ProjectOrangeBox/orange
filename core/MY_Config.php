@@ -191,26 +191,5 @@ class MY_Config extends CI_Config {
 		/* now configs array contains these */
 		$this->config = $built_config;
 	}
-	
-	/**
-	 * Set a config file item
-	 *
-	 * @param	string	$item	Config item key
-	 * @param	string	$value	Config item value
-	 * @return	void
-	 */
-	public function set_item($item, $value) {
-		if (strpos($item,'.') !== false) {
-			list($file,$key) = explode('.', strtolower($item), 2);
-
-			if (!$key) {
-				$this->config[$file] = $value;
-			} else {
-				$this->config[$file][$key] = $value;
-			}
-		} else {
-			parent::set_item($item,$value);
-		}
-	}
 
 } /* end class */

@@ -27,7 +27,7 @@ class Auth {
 	 * @author Don Myers
 	 */
 	public function __construct() {
-		ci()->load->model('o_user_model');
+		ci()->load->model(['o_permission_model','o_role_model','o_user_model']);
 		
 		/* set some constants */
 		define('ADMIN_USER_ID',config('auth.admin user id'));

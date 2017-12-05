@@ -57,8 +57,6 @@ class o_user_model extends Database_model {
 		
 		parent::__construct();
 
-		$this->load->model(['o_role_model', 'o_permission_model']);
-
 		$this->validate->attach('user_password', function (&$field, &$param, &$error_string, &$field_data, &$validate) {
 			/* field data,current field,current field param,validation object */
 			$error_string = 'Your password is not in the correct format.';
