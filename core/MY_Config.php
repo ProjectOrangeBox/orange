@@ -9,7 +9,7 @@
  *
  * required
  * core:
- * libraries: o::convert_to_real, cache_var_export
+ * libraries: convert_to_real, cache_var_export
  * models o_setting_model
  * helpers:
  *
@@ -174,7 +174,7 @@ class MY_Config extends CI_Config {
 				if (is_array($db_array)) {
 					foreach ($db_array as $record) {
 						/* let's make sure a boolean is a boolean and a integer is a integer etc... */
-						$built_config[strtolower($record->group)][strtolower($record->name)] = o::convert_to_real($record->value);
+						$built_config[strtolower($record->group)][strtolower($record->name)] = convert_to_real($record->value);
 					}
 				}
 			}

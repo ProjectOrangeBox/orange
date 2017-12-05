@@ -206,7 +206,7 @@ class Errors {
 			->enable_profiler(false)
 			->set_status_header($status_code)
 			->set_content_type($mime_type, $charset)
-			->set_output(o::view($view_path,$data))
+			->set_output(view($view_path,$data))
 			->_display();
 
 		/* exit with the appropriate code */

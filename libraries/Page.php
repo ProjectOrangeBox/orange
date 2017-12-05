@@ -44,7 +44,7 @@ class Page {
 			$this->body_class(str_replace('/',' ',$this->route) . ' not-active uid' . $userid);
 		}
 
-		ci()->load->helper('url');
+		ci()->load->library('pear')->helper('url');
 
 		$base_url = trim(base_url(), '/');
 
@@ -180,7 +180,7 @@ class Page {
 	 * @return void
 	 */
 	public function view($_view_file = null, $_data = [], $_return = true) {
-		$_buffer = o::view($_view_file,array_merge(ci()->load->get_vars(),$_data));
+		$_buffer = view($_view_file,array_merge(ci()->load->get_vars(),$_data));
 
 		if (is_string($_return)) {
 			ci()->load->vars([$_return => $_buffer]);

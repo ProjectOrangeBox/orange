@@ -22,7 +22,7 @@
  * libraries:
  * models:
  * helpers:
- * functions: o::delete_cache_by_tags
+ * functions: delete_cache_by_tags
  *
  */
 
@@ -930,7 +930,7 @@ class Database_model extends MY_Model {
 	 * @author Don Myers
 	 */
 	protected function delete_cache_by_tags() {
-		o::delete_cache_by_tags(explode('.', $this->cache_prefix));
+		delete_cache_by_tags(explode('.', $this->cache_prefix));
 	}
 
 } /* end DB Model */

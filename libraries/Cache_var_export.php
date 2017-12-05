@@ -12,7 +12,7 @@
  * libraries: 
  * models: 
  * helpers:
- * functions: o::ttl(), o::atomic_file_put_contents, o::remove_php_file
+ * functions: cache_ttl(), atomic_file_put_contents, remove_php_file_from_opcache
  *
  * Static Library
  */
@@ -66,7 +66,7 @@ class Cache_var_export {
 	 * @return mixed
 	 */
 	public static function save($id, $data, $ttl = null, $include = FALSE) {
-		$ttl = ($ttl) ? $ttl : o::ttl();
+		$ttl = ($ttl) ? $ttl : cache_ttl();
 
 		/* convert to php */
 		if (is_array($data) || is_object($data)) {
@@ -79,7 +79,7 @@ class Cache_var_export {
 		self::save_metadata($id, $ttl, strlen($data));
 
 		/* save the cache php file */
-		$save = o::atomic_file_put_contents(self::$config['cache_path'] . $id . '.php', $data);
+		$save = atomic_file_put_contents(self::$config['cache_path'] . $id . '.php', $data);
 
 		if ($include) {
 			$save = include self::$config['cache_path'] . $id . '.php';
@@ -107,7 +107,7 @@ class Cache_var_export {
 	 * @return int the number of bytes saved
 	 */
 	public static function save_metadata($id, $ttl, $strlen) {
-		return o::atomic_file_put_contents(self::$config['cache_path'] . $id . '.meta.php', '<?php return ' . var_export(['strlen' => $strlen, 'time' => time(), 'ttl' => (int) $ttl, 'expire' => (time() + $ttl)], true) . ';');
+		return atomic_file_put_contents(self::$config['cache_path'] . $id . '.meta.php', '<?php return ' . var_export(['strlen' => $strlen, 'time' => time(), 'ttl' => (int) $ttl, 'expire' => (time() + $ttl)], true) . ';');
 	}
 
 	/**
@@ -173,7 +173,7 @@ class Cache_var_export {
 	 * @return bool
 	 */
 	protected static function single_delete($id) {
-		return (o::remove_php_file(self::$config['cache_path'] . $id . '.php') && o::remove_php_file(self::$config['cache_path'] . $id . '.meta.php'));
+		return (remove_php_file_from_opcache(self::$config['cache_path'] . $id . '.php') && remove_php_file_from_opcache(self::$config['cache_path'] . $id . '.meta.php'));
 	}
 
 	/**

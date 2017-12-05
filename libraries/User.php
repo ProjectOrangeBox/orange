@@ -18,6 +18,7 @@
  */
 
 class User {
+	protected static $user;
 
 	/* call static functions on the user entity if they are there */
 	/**
@@ -39,6 +40,10 @@ class User {
 		}
 
 		return false;
+	}
+	
+	public static function attach_user(&$user) {
+		self::$user = $user;
 	}
 
 } /* end class */

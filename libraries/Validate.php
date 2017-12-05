@@ -174,10 +174,11 @@ class Validate {
 	 * @access public
 	 * @param mixed $rules
 	 * @param mixed &$field
-	 * @param string $human (default: '')
+	 * @param mixed $human or return value (default: '')
 	 * @return void
 	 */
 	public function variable($rules = '',&$field, $human = null) {
+		/* field modified by reference */
 		return $this->single($rules, $field, $human);
 	}
 
@@ -191,7 +192,7 @@ class Validate {
 		/* now let's put it back incase they are filtering or something else */
 		ci()->input->request_replace($key,$field);
 		
-		return $this;
+		return ($human === true) ? $field : $this;
 	}
 
 	/**
