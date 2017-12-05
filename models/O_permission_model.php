@@ -19,7 +19,7 @@
  */
  
 class o_permission_model extends Database_model {
-	protected $table                 = 'orange_permissions';
+	protected $table; /* this is retrieved in the constructor from the config file */
 	protected $entity                = 'entities/permission_entity';
 	protected $additional_cache_tags = '.acl';
 
@@ -43,6 +43,12 @@ class o_permission_model extends Database_model {
 	protected $rule_sets = [
 		'insert' => 'group,key,description',
 	];
+
+	public function __construct() {
+		$this->table = config('auth.permission table');
+	
+		parent::__construct();
+	}
 
 	public function roles($role) {
 		$dbc = $this->_database
@@ -79,7 +85,7 @@ class o_permission_model extends Database_model {
 		$records = $this->get_many();
 		
 		foreach ($records as $record) {
-			$this->o_role_model->add_permission(config('auth.admin role id'),$record->id);
+			$this->o_role_model->add_permission(ADMIN_ROLE_ID,$record->id);
 		}
 	}
 

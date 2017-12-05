@@ -19,7 +19,7 @@
  */
  
 class o_user_model extends Database_model {
-	protected $table                 = 'orange_users';
+	protected $table; /* this is retrieved in the constructor from the config file */
 	protected $entity                = 'entities/user_entity';
 	protected $soft_delete           = true; /* soft delete users */
 	protected $additional_cache_tags = '.acl';
@@ -53,6 +53,8 @@ class o_user_model extends Database_model {
 	];
 
 	public function __construct() {
+		$this->table = config('auth.user table');
+		
 		parent::__construct();
 
 		$this->load->model(['o_role_model', 'o_permission_model']);

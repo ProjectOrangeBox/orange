@@ -196,13 +196,13 @@ class User_entity extends model_entity {
 	 */
 	public function is_guest() {
 		/* is this person the user id? */
-		return ($this->id === config('auth.user user id',-1));
+		return ($this->id === USER_USER_ID);
 	}
 	
 	
 	public function is_nobody() {
 		/* is this person the user id? */
-		return ($this->id === config('auth.nobody user id',-1));
+		return ($this->id === NOBODY_USER_ID);
 	}
 
 	/**

@@ -42,7 +42,7 @@ class Auth {
 		/* if this is a cli request we don't need to setup the user profile */
 		if (!is_cli()) {
 			/* default to nobody */
-			$user_id = config('auth.nobody user id');
+			$user_id = NOBODY_USER_ID;
 
 			/* load a session saved user id - if any */
 			$session_user_id = ci()->session->userdata($this->session_key);
@@ -87,7 +87,7 @@ class Auth {
 		event::trigger('auth.logout');
 		
 		/* make them a guest */
-		$this->refresh_userdata(config('auth.user role id'));
+		$this->refresh_userdata(USER_ROLE_ID);
 
 		log_message('info', 'Auth Class logout');
 
@@ -113,7 +113,7 @@ class Auth {
 
 			ci()->session->set_userdata([$this->session_key => $profile->id]);
 		} else {
-			$profile = ci()->o_user_model->get((int) config('auth.user role id'));
+			$profile = ci()->o_user_model->get(USER_ROLE_ID);
 		}
 
 		/* clear password */

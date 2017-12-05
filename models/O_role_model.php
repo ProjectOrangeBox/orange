@@ -19,7 +19,7 @@
  */
  
 class o_role_model extends Database_model {
-	protected $table                 = 'orange_roles';
+	protected $table; /* this is retrieved in the constructor from the config file */
 	protected $entity                = 'entities/role_entity';
 	protected $additional_cache_tags = '.acl';
 
@@ -42,6 +42,12 @@ class o_role_model extends Database_model {
 	protected $rule_sets = [
 		'insert' => 'name,description',
 	];
+
+	public function __construct() {
+		$this->table = config('auth.role table');
+	
+		parent::__construct();
+	}
 
 	public function add_permission($role, $permission) {
 		if (is_array($permission)) {
