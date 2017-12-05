@@ -18,28 +18,13 @@
  *
  *
  * required
- * core: cache, load, dbforge
+ * core:
  * libraries:
  * models:
  * helpers:
  * functions: delete_cache_by_tags
  *
  */
-
-	/*
-	upsert example
-	
-	if (!$dbr = $this->exists(['item_no_core'=>$item_no_core])) {
-		# insert
-
-		$results = $this->insert(['item_no_core'=>$item_no_core,'foo'=>'bar']);
-	} else {
-		# update
-		$dbr->foo = 'bar';
-		
-		$results = $this->update($dbr);
-	}	
-	*/
  
 class Database_model extends MY_Model {
 	/**
@@ -58,9 +43,6 @@ class Database_model extends MY_Model {
 	protected $table; /* table name - this is also used as the resource object name */
 
 	protected $debug = false; /* path to debug file to write - used naturally for local debugging */
-
-	protected $caches = []; /* place for internal page caches */
-	protected $cache_prefix; /* this is auto generated in the constructor */
 
 	protected $created_on_column_name = 'created_at';
 	protected $created_by_column_name = 'created_by';
@@ -106,12 +88,14 @@ class Database_model extends MY_Model {
 	protected $entity = null; /* location of entity class file ie. entities/user_entity.php */
 
 	protected $single_column_name    = null;
+
+	protected $cache_prefix; /* this is auto generated in the constructor */
 	protected $additional_cache_tags = ''; /* example '.tag1.tag2.tag' don't forget the first "." */
 	
 	protected $skip_rules = false; /* wether to skip all rule validation (probably because you don't have rules) */
 	
 	protected $return_false_nothing_found = false; /* boolean */
-	protected $temp_return_false_nothing_found = false;
+	protected $temp_return_false_nothing_found = false; /* boolean */
 
 	/* Initialize the model, tie into the CodeIgniter super-object */
 	public function __construct() {
@@ -229,7 +213,7 @@ class Database_model extends MY_Model {
 	 * @return [[Type]] [[Description]]
 	 */
 	public function get($primary_value = null) {
-		return ($primary_value === null) ? ($this->entity) ? new $this->entity() : stdClass() : $this->get_by([$this->primary_key => $primary_value]);
+		return ($primary_value === null) ? ($this->entity) ? new $this->entity() : new stdClass() : $this->get_by([$this->primary_key => $primary_value]);
 	}
 
 	/**
@@ -779,8 +763,8 @@ class Database_model extends MY_Model {
 		return $this;
 	}
 
-	protected function where_can_view() {
-		$this->_database->where_in('view_role_id',user::roles());
+	protected function where_can_read() {
+		$this->_database->where_in('read_role_id',user::roles());
 
 		return $this;
 	}
@@ -949,4 +933,4 @@ class Database_model extends MY_Model {
 		delete_cache_by_tags(explode('.', $this->cache_prefix));
 	}
 
-} /* end DB Model */
+} /* end class */

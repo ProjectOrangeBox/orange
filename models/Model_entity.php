@@ -28,17 +28,33 @@ class Model_entity {
 		log_message('info', 'Model_entity Class Initialized');
 	}
 
-	public function update() {
+	public function save() {
+		$model = ci()->{$this->entity_of_model_name};
+		$primary_id = $model->get_primary_key();
+	
 		if ($this->save_columns) {
 			foreach ($this->save_columns as $col) {
 				$data[$col] = $this->$col;
 			}
 		} else {
-			$data = getPublicObjectVars($this);
+			$data = get_object_vars($this);
 		}
 
-		/* update */
-		return $this->{$this->entity_of_model_name}->update($data);
+		if ($data[$primary_id] == null) {
+			/* let's make sure it's removed then */
+			unset($data[$primary_id]);
+			
+			$success = $model->insert($data);
+			
+			/* put it on this entity so they can update it on the next save call */
+			if ($success !== false) {
+				$this->$primary_id = $success;
+			}			
+		} else {
+			$success = $model->update($data);
+		}
+		
+		return $success;
 	}
 
 	/*
