@@ -66,7 +66,7 @@ class MY_Model extends CI_Model {
 	 * @return void
 	 */
 	public function rule($name, $second = null) {
-		return ($second) ? $this->rule[$name][$second] : $this->rule[$name];
+		return ($second) ? $this->rules[$name][$second] : $this->rules[$name];
 	}
 
 	/**

@@ -221,6 +221,9 @@ class Database_model extends MY_Model {
 
 	/**
 	 * Fetch a single record based on the primary key. Returns an object.
+	 * 
+	 * if empty returns a stdClass or Entity
+	 * 
 	 * @author Don Myers
 	 * @param	 [[Type]] [$primary_value=null] [[Description]]
 	 * @return [[Type]] [[Description]]

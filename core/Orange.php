@@ -138,10 +138,28 @@ function codeigniter_autoload($class) {
 			return true;
 		}
 	} elseif (substr($class, -6) == '_trait') { /* is it a CI Controller trait? */
-		if ($file = stream_resolve_include_path('controllers/traits/' . $class . '.php')) {
-			include $file;
+		if (substr($class, -17) == '_controller_trait') {
+			if ($file = stream_resolve_include_path('controllers/traits/' . $class . '.php')) {
+				include $file;
+	
+				return true;
+			}
+		}
 
-			return true;
+		if (substr($class, -12) == '_model_trait') {
+			if ($file = stream_resolve_include_path('model/traits/' . $class . '.php')) {
+				include $file;
+	
+				return true;
+			}
+		}
+
+		if (substr($class, -14) == '_library_trait') {
+			if ($file = stream_resolve_include_path('library/traits/' . $class . '.php')) {
+				include $file;
+	
+				return true;
+			}
 		}
 	} elseif ($file = stream_resolve_include_path('libraries/' . $class . '.php')) {
 		ci()->load->library($class);
@@ -271,9 +289,12 @@ function unlock_session() {
 }
 
 function delete_all_cookies() {
+	/* Return current Unix timestamp */
 	$past = time() - 3600;
 	
+	/* iterate over HTTP Cookies array */
 	foreach ($_COOKIE as $key=>$value) {
+		/* Send a cookie */
     setcookie($key,$value,$past,config('config.cookie_path','/'));
 	}
 }
@@ -285,7 +306,7 @@ function delete_all_cookies() {
  * @param string [$type = 'log'] the javascript console method to call
  */
 function console($var, $type = 'log') {
-	echo '<script type="text/javascript">console.' . $type . '(' . json_encode($var) . ')</script>';
+	echo '<script type="text/javascript">console.'.$type.'(' . json_encode($var) . ')</script>';
 }
 
 /**
@@ -296,15 +317,18 @@ function console($var, $type = 'log') {
  * @return string contents of the view file
  */
 function view($_view,$_data) {
+	/* clean up view file name */
 	$_view = 'views/'.ltrim(str_replace('.php','',$_view),'/') . '.php';
-
+	
+	/* Resolve filename against the include path */
 	$_view_file = stream_resolve_include_path($_view);
 
 	/* if we are in development mode create the file in the application folder */
 	if ($_view_file === false) {
 		throw new Exception('Could not locate view "'.$_view.'"');
 	}
-
+	
+	/* Import variables into the current symbol table from an array */
 	extract($_data, EXTR_PREFIX_INVALID, '_');
 
 	/* start output cache */
@@ -329,7 +353,7 @@ function view($_view,$_data) {
  * @return int bytes written or false on fail
  */
 function atomic_file_put_contents($filepath, $content) {
-	/* get a temporary file */
+	/* Create file with unique file name */
 	$tmpfname = tempnam(dirname($filepath), 'afpc_');
 
 	/* did we get one? - fatal error */
@@ -338,7 +362,7 @@ function atomic_file_put_contents($filepath, $content) {
 		throw new Exception('atomic file put contents could not create temp file');
 	}
 
-	/* write the contents of our file to the temporary file and grab the bytes written */
+	/* Write a string to a file and return the number of bytes that were written to the file, or FALSE on failure */
 	$bytes = file_put_contents($tmpfname, $content);
 
 	/* did it fail to write? - fatal error */
@@ -347,7 +371,7 @@ function atomic_file_put_contents($filepath, $content) {
 		throw new Exception('atomic file put contents could not file put contents');
 	}
 
-	/* rename the temp file to the real file on unix/linux this is a atomic action */
+	/* Renames a file or directory on unix/linux this is a atomic action - return TRUE on success or FALSE on failure.*/
 	if (rename($tmpfname, $filepath) === false) {
 		/* fatal error */
 		throw new Exception('atomic file put contents could not make atomic switch');
@@ -355,8 +379,10 @@ function atomic_file_put_contents($filepath, $content) {
 
 	/* if we are using opcache or apccache we need to remove it from the cache */
 	if (function_exists('opcache_invalidate')) {
+		/* Invalidates a cached script */
 		opcache_invalidate($filepath, true);
 	} elseif (function_exists('apc_delete_file')) {
+		/* Deletes files from the opcode cache */
 		apc_delete_file($filepath);
 	}
 
@@ -378,9 +404,11 @@ function remove_php_file_from_opcache($fullpath) {
 
 	/* if we are using opcache or apccache we need to remove it from the cache */
 	if (function_exists('opcache_invalidate')) {
-		opcache_invalidate($fullpath, true);
+		/* Invalidates a cached script */
+		opcache_invalidate($filepath, true);
 	} elseif (function_exists('apc_delete_file')) {
-		apc_delete_file($fullpath);
+		/* Deletes files from the opcode cache */
+		apc_delete_file($filepath);
 	}
 
 	return $success;
@@ -408,15 +436,16 @@ function convert_to_real($value) {
 		return null;
 		break;
 	default:
+		/* Finds whether a variable is a number or a numeric string */
 		if (is_numeric($value)) {
+			/* Finds whether the type of a variable is float */
 			return (is_float($value)) ? (float) $value : (int) $value;
 		}
 	}
 
-	/* is it JSON? if not this will return null */
+	/* Takes a JSON encoded string and converts it into a PHP variable. - NULL is returned if the json cannot be decoded */
 	$json = @json_decode($value, true);
 
-	/* if it's not then I guess it's a regular string */
 	return ($json !== null) ? $json : $value;
 }
 
@@ -458,7 +487,8 @@ function simple_array($array, $key = 'id', $value = null) {
 	$value = ($value) ? $value : $key;
 
 	$new_array = [];
-
+	
+	/* iterate over array */
 	foreach ($array as $row) {
 		if (is_object($row)) {
 			$new_array[$row->$key] = $row->$value;
@@ -483,15 +513,13 @@ function simple_array($array, $key = 'id', $value = null) {
  * @return mixed cached data
  */
 function cache($key, $closure, $ttl = null) {
-	$ci = &get_instance();
-
-	if (!$cache = $ci->cache->get($key)) {
+	if (!$cache = ci()->cache->get($key)) {
 		/* There's been a miss,so run our data function and store it */
 		$cache = $closure();
 
 		$ttl = ($ttl) ? (int) $ttl : cache_ttl();
 
-		$ci->cache->save($key, $cache, $ttl);
+		ci()->cache->save($key, $cache, $ttl);
 	}
 
 	return $cache;
@@ -514,6 +542,7 @@ function cache_ttl() {
  * @author Don Myers
  */
 function delete_cache_by_tags() {
+	/* Returns an array comprising a function's argument list */
 	$tags = func_get_args();
 
 	log_message('debug', 'delete_cache_by_tags ' . implode(', ', $tags));
