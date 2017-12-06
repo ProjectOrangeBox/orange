@@ -133,7 +133,7 @@ class MY_Model extends CI_Model {
 	 */
 	protected function remove_columns(&$data, $columns) {
 		$columns = (!is_array($columns)) ? explode(',', $columns) : $columns;
-
+		
 		foreach ($columns as $attr) {
 			if (is_object($row)) {
 				unset($row->$attr);

@@ -15,7 +15,7 @@
  *
  */
 
-class Role_entity extends model_entity {
+class O_role_entity extends model_entity {
 	public $id;
 	public $description;
 	public $name;

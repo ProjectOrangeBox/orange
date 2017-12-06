@@ -16,20 +16,18 @@
  */
  
 class Model_entity {
-	protected $entity_of_model_name = null; /* name of the "parent" model */
-	protected $save_columns         = null; /* when saving only use these columns */
+	protected $_model_name = null;
+	protected $save_columns = null; /* when saving only use these columns */
 
 	public function __construct() {
-		if (!$this->entity_of_model_name) {
-			/* remove _entity add _model */
-			$this->entity_of_model_name = strtolower(substr(get_called_class(), 0, -7) . '_model');
-		}
-
+		$this->_model_name = strtolower(substr(get_called_class(),0,-7).'_model');
+	
 		log_message('info', 'Model_entity Class Initialized');
 	}
 
 	public function save() {
-		$model = ci()->{$this->entity_of_model_name};
+		$model = ci()->{$this->_model_name};
+
 		$primary_id = $model->get_primary_key();
 	
 		if ($this->save_columns) {
@@ -49,12 +47,12 @@ class Model_entity {
 			/* put it on this entity so they can update it on the next save call */
 			if ($success !== false) {
 				$this->$primary_id = $success;
-			}			
+			}		
 		} else {
 			$success = $model->update($data);
 		}
 		
-		return $success;
+		return (bool)$success;
 	}
 
 	/*

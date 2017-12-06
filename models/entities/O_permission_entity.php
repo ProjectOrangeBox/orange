@@ -15,7 +15,7 @@
  *
  */
 
-class Permission_entity extends model_entity {
+class O_permission_entity extends model_entity {
 	public $id;
 	public $key;
 	public $group;

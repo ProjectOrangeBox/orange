@@ -15,7 +15,7 @@
  *
  */
 
-class User_entity extends model_entity {
+class O_user_entity extends model_entity {
 	public $id;
 	public $email;
 	public $username;
