@@ -147,7 +147,7 @@ function codeigniter_autoload($class) {
 		}
 
 		if (substr($class, -12) == '_model_trait') {
-			if ($file = stream_resolve_include_path('model/traits/' . $class . '.php')) {
+			if ($file = stream_resolve_include_path('models/traits/' . $class . '.php')) {
 				include $file;
 	
 				return true;
