@@ -19,10 +19,13 @@
  */
  
 class o_user_model extends Database_model {
-	use Database_stamp_model_trait, Database_role_model_trait, Database_soft_delete_model_trait, Database_entity_model_trait;
-
 	protected $table; /* this is retrieved in the constructor from the config file */
 	protected $additional_cache_tags = '.acl';
+	protected $has_roles = true;
+	protected $has_stamps = true;
+	protected $has_soft_delete = true;
+	protected $entity = true;
+	protected $debug = true;
 
 	protected $rules = [
 		'id'              => ['field' => 'id', 'label' => 'Id', 'rules' => 'required|integer|max_length[10]|less_than[4294967295]|filter_int[10]'],
@@ -34,10 +37,6 @@ class o_user_model extends Database_model {
 		'user_read_role_id'    => ['field' => 'user_read_role_id', 'label' => 'User Read Role', 'rules' => 'required|integer|max_length[10]|less_than[4294967295]|filter_int[10]'],
 		'user_edit_role_id'    => ['field' => 'user_edit_role_id', 'label' => 'User Edit Role', 'rules' => 'required|integer|max_length[10]|less_than[4294967295]|filter_int[10]'],
 		'user_delete_role_id'  => ['field' => 'user_delete_role_id', 'label' => 'User Delete Role', 'rules' => 'required|integer|max_length[10]|less_than[4294967295]|filter_int[10]'],
-	];
-
-	protected $rule_sets = [
-		'insert' => 'email,username,password,user_read_role_id,user_edit_role_id,user_delete_role_id,is_active',
 	];
 
 	public function __construct() {

@@ -25,18 +25,11 @@
 * functions: delete_cache_by_tags
 *
 */
-
 class Database_model extends MY_Model {
-	use Database_extras_model_trait;
-
-	/**
-	* The database connection object. Will be set to the default
-	* connection. This allows individual models to use different DBs
-	* without overwriting CI's global $this->db connection.
-	*/
-	protected $_database; /* connection to database resource */
-
 	protected $db_group = null; /* database config group to use */
+
+	protected $read_db_group = null; /* read only database group */
+	protected $write_db_group = null; /* write database group */
 	
 	protected $table; /* table name - this is also used as the resource object name */
 	protected $protected = []; /* protect these columns from auto set */
@@ -49,61 +42,92 @@ class Database_model extends MY_Model {
 	/* auto remove the primary key from inserts */
 	protected $remove_primary_on_insert = true;
 
-	protected $single_column_name = null;
-
-	protected $cache_prefix; /* this is auto generated in the constructor */
 	protected $additional_cache_tags = ''; /* example 'tag1.tag2.tag' */
 	
 	protected $skip_rules = false; /* wether to skip all rule validation (probably because you don't have rules) */
 	
-	protected $default_return_on_multi;
+	protected $entity = null;
+
+	protected $has_roles = false;
+	protected $has_stamps = false;
+	protected $has_soft_delete = false;
+
+	/* Internal */
+	protected $default_return_on_many;
 	protected $default_return_on_single;
-	
-	protected $uses = [];
-	protected $trait_events = [
-		'get where'=>[],
 
-		'add fields insert'=>[],
-		'add fields update'=>[],
-		'add fields delete'=>[],
+	protected $_temporary_with_deleted = false;
+	protected $_temporary_only_deleted = false;
 
-		'before select'=>[],
-		'before delete'=>[],
-		'before update'=>[],
-		'before insert'=>[],
-	];
+	protected $read_database = null; /* read only database resource */
+	protected $write_database = null; /* write database resource */
+
+	/**
+	* The database connection object. Will be set to the default
+	* connection. This allows individual models to use different DBs
+	* without overwriting CI's global $this->db connection.
+	*/
+	protected $_database;
+	protected $single_column_name = null;
+	protected $cache_prefix; /* this is auto generated in the constructor */
 	
 	/* Initialize the model, tie into the CodeIgniter super-object */
 	public function __construct() {
 		parent::__construct();
 		
-		/* defaults return types */
-		$this->default_return_on_multi = [];
-		$this->default_return_on_single = new stdClass();
-
 		/* the parent model expects a more generic object "name" */
 		$this->object = strtolower($this->table);
 
 		$this->cache_prefix = trim('database.' . $this->object . '.' . trim($this->additional_cache_tags,'.'),'.');
 
 		/* use a custom database connection or default? */
+		$group_attach = false;
+		
 		if (isset($this->db_group)) {
 			$this->_database = $this->load->database($this->db_group, true);
-		} else {
+
+			$group_attach = true;
+		}
+
+		if (isset($this->read_db_group)) {
+			$this->read_database = $this->load->database($this->read_db_group, true);
+
+			$group_attach = true;
+		}
+	
+		if (isset($this->write_db_group)) {
+			$this->write_database = $this->load->database($this->write_db_group, true);
+
+			$group_attach = true;
+		}
+
+		if (!$group_attach) {
 			$this->_database = $this->db;
 		}
 
-		$this->uses = class_uses($this,false);
-		
-		/* give the traits a chance to do some __construct stuff */
-		foreach ($this->uses as $use) {
-			$method = $use.'__construct';
-		
-			if (method_exists($this,$method)) {
-				log_message('info', $method);
-		
-				$this->$method();
-			}
+		if ($this->has_roles) {
+			$this->rules = $this->rules + [
+				'read_role_id'   => ['field' => 'read_role_id', 	'label' => 'Read Role', 	'rules' => 'required|integer|max_length[10]|less_than[4294967295]|filter_int[10]'],
+				'edit_role_id'   => ['field' => 'edit_role_id', 	'label' => 'Edit Role', 	'rules' => 'required|integer|max_length[10]|less_than[4294967295]|filter_int[10]'],
+				'delete_role_id' => ['field' => 'delete_role_id', 'label' => 'Delete Role', 'rules' => 'required|integer|max_length[10]|less_than[4294967295]|filter_int[10]'],
+			];
+		}
+
+		if ($this->entity) {
+			$this->entity = ($this->entity === true) ? ucfirst(strtolower(substr(get_class($this),0,-5)).'entity') : $this->entity;
+			
+			/* load root the entity this does not need to be attached to the CI super global */
+			require_once 'models/Model_entity.php';
+	
+			/* load supplied entity */
+			require_once 'models/entities/'.$this->entity.'.php';
+	
+			/* override the models */
+			$this->default_return_on_many = [];
+			$this->default_return_on_single = new $this->entity();
+		} else {
+			$this->default_return_on_many = [];
+			$this->default_return_on_single = new stdClass();
 		}
 
 		log_message('info', 'Database_model Class Initialized');
@@ -134,19 +158,7 @@ class Database_model extends MY_Model {
 
 	public function column($name) {
 		$this->single_column_name = $name;
-
-		return $this;
-	}
-
-	public function empty_many_returns($returns){
-		$this->default_return_on_multi = $returns;
 		
-		return $this;
-	}
-	
-	public function empty_returns($returns) {
-		$this->default_return_on_single = $returns;
-
 		return $this;
 	}
 
@@ -170,14 +182,44 @@ class Database_model extends MY_Model {
 		if ($where) {
 			$this->_database->where($where);
 		}
-		
-		foreach ($this->trait_events['get where'] as $event) $event();
 
 		return $this->_get(true);
 	}
 
+	protected function _get($as_array = true, $table = null) {
+		$this->switch_database('read');
+
+		$table = ($table) ? $table : $this->table;
+
+		$this->add_where_on_select($data);
+
+		$dbc = $this->_database->get($table);
+
+		$this->log_last_query();
+
+		if ($as_array) {
+			$results = $this->_as_array($dbc);
+		} else {
+			$results = $this->_as_row($dbc);
+			
+			if ($this->single_column_name && is_object($results)) {
+				$results = $results->{$this->single_column_name};
+			}
+		}
+
+		$this->_clear();
+		
+		/* get returns a single object so return the first record or an empty record */
+		return $results;
+	}
+
+	public function _clear() {
+		/* clear this out to not interfere with the next query */
+		$this->single_column_name = false;
+	}
+
 	public function insert($data) {
-		foreach ($this->trait_events['before insert'] as $event) $event();
+		$this->switch_database('write');
 
 		$data = (array)$data;
 
@@ -192,17 +234,19 @@ class Database_model extends MY_Model {
 			/* remove the protected columns */
 			$this->remove_columns($data, $this->protected);
 
-			foreach ($this->trait_events['add fields insert'] as $event) $event($data);
+			$this->add_fields_on_insert($data)->add_where_on_insert($data);
 
 			if (count($data)) {
 				$this->_database->insert($this->table, $data);
 			}
 
 			/* delete cache data with same cache prefix as this object */
-			$this->delete_cache_by_tags()->_log_last_query();
+			$this->delete_cache_by_tags()->log_last_query();
 
 			$success = (int) $this->_database->insert_id();
 		}
+
+		$this->_clear();
 
 		return $success;
 	}
@@ -219,7 +263,7 @@ class Database_model extends MY_Model {
 	}
 
 	public function update_by($data, $where = []) {
-		foreach ($this->trait_events['before update'] as $event) $event();
+		$this->switch_database('write');
 
 		$data = (array)$data;
 
@@ -236,14 +280,14 @@ class Database_model extends MY_Model {
 			/* remove the protected columns */
 			$this->remove_columns($data, $this->protected);
 
-			foreach ($this->trait_events['add fields update'] as $event) $event($data);
+			$this->add_fields_on_update($data)->add_where_on_update($data);
 			
 			if (count($data)) {
 				$this->_database->where($where)->update($this->table, $data);
 			}
 
 			/* delete cache data with same cache prefix as this object */
-			$this->delete_cache_by_tags()->_log_last_query();
+			$this->delete_cache_by_tags()->log_last_query();
 
 			$success = (int) $this->_database->affected_rows();
 		}
@@ -251,82 +295,50 @@ class Database_model extends MY_Model {
 		return $success;
 	}
 
-	public function delete($data) {
-		if (is_object($data) || is_array($data)) {
-			$data = (array)$data;
-
-			/* is the primary key present? */
-			if (!isset($data[$this->primary_key])) {
-				show_error('Database Model delete primary key missing');
-			}
-		} elseif (is_scalar($data)) {
-			$data[$this->primary_key] = $data;
-		}
-		
-		return $this->delete_by($data);
+	public function delete($arg) {
+		return $this->delete_by($this->create_where($arg,true));
 	}
 
 	public function delete_by($data) {
-		foreach ($this->trait_events['before delete'] as $event) $event();
+		$this->switch_database('write');
 
 		$data = (array)$data;
 
-		$success = (!$this->skip_rules) ? $this->validate($data) : true;
+		$success = (!$this->skip_rules) ? $this->only_columns_with_rules($data)->validate($data) : true;
 
 		if ($success) {
-			$this->_database->where($data)->delete($this->table);
-
-			$this->delete_cache_by_tags()->_log_last_query();
+			if ($this->has_soft_delete) {
+				/* save the name/value pairs as the where clause */
+				$where = $data;
+	
+				$data = $data + ['is_deleted'=>1];
+	
+				$this->add_fields_on_delete($data);
+	
+				$this->_database->where($where)->set($data)->update($this->table);
+			} else {
+				$this->_database->where($data)->delete($this->table);
+			}
+			
+			$this->delete_cache_by_tags()->log_last_query();
 
 			$success = (int) $this->_database->affected_rows();
 		}
 
 		return $success;
 	}
-
-	public function format_result($dbc, $as_array = true) {
-		$result = ($as_array) ? $this->_as_array($dbc) : $this->_as_row($dbc);
-
-		if ($as_array == false && $this->single_column_name && is_object($result)) {
-			$result = $result->{$this->single_column_name};
-		}
-
-		/* clear this out to not interfere with the next query */
-		$this->single_column_name = false;
-
-		return $result;
-	}
-
-	protected function _log_last_query() {
-		if ($this->debug) {
-			$query  = $this->_database->last_query();
-			$output = (is_array($query)) ? print_r($query, true) : $query;
-			file_put_contents(ROOTPATH.'/var/logs/database.'.__CLASS__.'.'.$this->debug,$output.chr(10), FILE_APPEND);
-		}
-		
-		return $this;
-	}
-
-	protected function _get($as_array = true, $table = null) {
-		foreach ($this->trait_events['before select'] as $event) $event();
-
-		$table = ($table) ? $table : $this->table;
-
-		$dbc = $this->_database->get($table);
-
-		$this->_log_last_query();
-
-		/* get returns a single object so return the first record or an empty record */
-		return $this->format_result($dbc, $as_array);
-	}
-
+	
 	protected function _as_array($dbc) {
-		$result = $this->default_return_on_multi;
+		$result = $this->default_return_on_many;
 
 		/* multiple records */
 		if (is_object($dbc)) {
 			if ($dbc->num_rows()) {
-				$result = $dbc->result();
+				if ($this->entity) {
+					$result = $dbc->custom_result_object($this->entity);
+				} else {
+					$result = $dbc->result();
+				}
 			}
 		}
 	
@@ -338,11 +350,426 @@ class Database_model extends MY_Model {
 	
 		if (is_object($dbc)) {
 			if ($dbc->num_rows()) {
-				$result = $dbc->row();
+				if ($this->entity) {
+					$result = $dbc->custom_row_object(0, $this->entity);
+				} else {
+					$result = $dbc->row();
+				}
 			}
 		}
 		
 		return $result;
 	}
 
+	protected function log_last_query() {
+		if ($this->debug) {
+			$query  = $this->_database->last_query();
+			$output = (is_array($query)) ? print_r($query, true) : $query;
+			file_put_contents(ROOTPATH.'/var/logs/model.'.get_called_class().'.log',$output.chr(10), FILE_APPEND);
+		}
+		
+		return $this;
+	}
+
+	protected function delete_cache_by_tags() {
+		delete_cache_by_tags(explode('.', $this->cache_prefix));
+		
+		return $this;
+	}
+
+	/**
+	 * Create a associated array
+	 * this can be used for drop-downs or easy access to model values based on the primary ID for example
+	 *
+	 * if select is a single column name the created array will a simple name & value associated array pair
+	 *
+	 * The order by and where clause must follow the CodeIgniter function syntax
+	 *
+	 * where: https://www.codeigniter.com/user_guide/database/query_builder.html#looking-for-specific-data
+	 * order by: https://www.codeigniter.com/user_guide/database/query_builder.html#ordering-results
+	 *
+	 * catalog = [
+	 *  'bar_catalog'=>'bar_model', = select * from bar_model_table where the primary id is the array key and array value is the record
+	 *  'foo_catalog'=>['array_key'=>'id{defaults to primary id}','select'=>'id,color{defaults to *}','where'=>['is_deleted'=>0]{defaults to none},'order_by'=>'color [asc|desc]'{defaults to none}],
+	 * ]
+	 * 
+	 * catalog('id','name'); simple associated array key->value pair
+	 * catalog('id','name,foo,bar'); associated array key->array pair
+   *
+	 * @author Don Myers
+	 * @param	 string [$array_key = null] The returned array key value if empty this will use the primary key
+	 * @param	 string [$select = null] The value to use for the array value if empty this will use the entire record
+	 * @param	 [[Type]] [$where = null]			[[Description]]
+	 * @param	 [[Type]] [$order_by = null]	[[Description]]
+	 * @return [[Type]] [[Description]]
+	 */
+	public function catalog($array_key = null, $select_columns = null, $where = null, $order_by = null) {
+		$results = [];
+
+		/* is this a single column associated array? */
+		$single_column = false;
+		
+		/* what's the primary key? */
+		$array_key = ($array_key) ? $array_key : $this->primary_key;
+
+		/* what columns are they looking for? */
+		if ($select_columns === null || $select_columns == '*') {
+			$select = '*';
+		} else {
+			$select = $array_key . ',' . $select_columns;
+			
+			if (strpos($select_columns,',') === false) {
+				$single_column = $select_columns;
+			}
+			
+		}
+		
+		/* add them */
+		$this->_database->select($select);
+		
+		/* did they include a where clause? */
+		if ($where) {
+			/* add it */
+			$this->_database->where($where);
+		}
+		
+		/* did they include a order by clause? */
+		if ($order_by) {
+			if (strpos($order_by,' ') === false) {
+				$this->_database->order_by($order_by);
+			} else {
+				list($order_by,$direction) = explode($order_by,' ',2);
+
+				$this->_database->order_by($order_by,$direction);
+			}
+		}
+		
+		/* run the query */
+		$dbc = $this->_get(true); /* return multiple */
+
+		foreach ($dbc as $dbr) {
+			if ($single_column) {
+				/* if it's single column it's a key->value pair */
+				$results[$dbr->$array_key] = $dbr->$single_column;
+			} else {
+				/* if it's not then it's a key -> record pair */
+				$results[$dbr->$array_key] = $dbr;
+			}
+		}
+
+		/* return out results */
+		return $results;
+	}
+
+	/*
+	used by form validation to find unique
+	
+	is_uniquem[model.column.post_key]
+	is_uniquem[o_user_model.email.id]
+	
+	*/
+	public function is_uniquem($field, $column, $form_key) {
+		$dbc = $this->_database
+			->select($column . ',' . $this->primary_key)
+			->where($column, $field)
+			->get($this->table, 3); /* more than 1 but less than 4 */
+
+		/* how many did we find? */
+		$rows_found = $dbc->num_rows();
+
+		if ($rows_found == 0) {
+			/* nothing else named this exists */
+			return true;
+		}
+
+		if ($rows_found > 1) {
+			/* we found more than 1 so that is for sure a error! */
+			return false;
+		}
+
+		/* does id on the record match the current record from a previous save? */
+		return ($dbc->row()->{$this->primary_key} == $this->input->request($form_key));
+	}
+
+	/* boolean full text search column */
+	public function build_sql_boolean_match($column_name, $match = null, $not_match = null) {
+		$sql = false;
+		$match_where = '';
+
+		if (is_array($match) > 0) {
+			$match_where .= ' +' . implode(' +', $match);
+		}
+
+		if (is_array($not_match) > 0) {
+			$match_where .= ' -' . implode(' -', $not_match);
+		}
+
+		if (!empty($match_where)) {
+			$sql = "match(`" . $column_name . "`) against('" . trim($match_where) . "' in boolean mode)";
+		}
+
+		return $sql; /* one exit */
+	}
+
+	public function exists($arg) {
+		/* save this to put it back after we switch it to return false on empty */
+		$saved = $this->default_return_on_single;
+
+		/* if nothing found return false */
+		$this->default_return_on_single = false;
+
+		$results = $this->get_by($this->create_where($arg));
+
+		/* put this back to what ever it was before we switched it */
+		$this->default_return_on_single = $saved;
+
+		return $results;
+	}
+
+	public function count() {
+		return $this->count_by();
+	}
+
+	public function count_by($where = null) {
+		$this->_database->select("count('" . $this->primary_key . "') as codeigniter_column_count");
+
+		if ($where) {
+			$this->_database->where($where);
+		}
+
+		$results = $this->_get(false);
+
+		return (int)$results->codeigniter_column_count;
+	}
+
+	/*
+	 * default method called to produce the index view records
+	 *
+	 *
+	 * The order by, limit, where clause, and select must follow the CodeIgniter function syntax
+	 *
+	 * order by: https://www.codeigniter.com/user_guide/database/query_builder.html#ordering-results
+	 * limit: https://www.codeigniter.com/user_guide/database/query_builder.html#limiting-or-counting-results
+	 * where: https://www.codeigniter.com/user_guide/database/query_builder.html#looking-for-specific-data
+	 * select: https://www.codeigniter.com/user_guide/database/query_builder.html#selecting-data
+	 *
+	 * @author Don Myers
+	 * @param	 [[Type]] [$order_by = null] [[Description]]
+	 * @param	 [[Type]] [$limit = null]		 [[Description]]
+	 * @param	 [[Type]] [$where = null]		 [[Description]]
+	 * @param	 [[Type]] [$select=null]		 [[Description]]
+	 * @return [[Type]] [[Description]]
+	 */
+	public function index($order_by = null, $limit = null, $where = null, $select = null) {
+		if ($order_by) {
+			$this->_database->order_by($order_by);
+		}
+
+		if ($limit) {
+			$this->_database->limit($limit);
+		}
+
+		if ($select) {
+			$this->_database->select($select);
+		}
+
+		if ($where) {
+			$this->_database->where($where);
+		}
+
+		return $this->_get(true);
+	}
+
+	protected function switch_database($which) {
+		if ($which == 'read' && $this->read_database) {
+			$this->_database = $this->read_database;
+		} elseif ($which == 'write' && $this->write_database) {
+			$this->_database = $this->write_database;
+		}
+
+		return $this;
+	}
+
+	public function get_soft_delete() {
+		return $this->has_soft_delete;
+	}
+
+	public function with_deleted() {
+		$this->_temporary_with_deleted = true;
+
+		return $this;
+	}
+
+	public function only_deleted() {
+		$this->_temporary_only_deleted = true;
+
+		return $this;
+	}
+
+	public function restore($id) {
+		/* set */
+		$data['is_deleted'] = 0;
+
+		if ($this->stamps) {
+			$this->_add_fields_on_update($data);
+		}
+
+		$this->_database->update($this->table, $data, $this->create_where($id,true));
+
+		/* delete cache data with same cache prefix as this object */
+		$this->delete_cache_by_tags()->log_last_query();
+
+		return (int) $this->_database->affected_rows();
+	}
+
+	protected function create_where($arg,$primary_id_required=false) {
+		if (is_scalar($arg)) {
+			$where[$this->primary_key] = $arg;
+		} elseif (is_array($arg)) {
+			$where = $arg;
+		} else {
+			throw new Exception('Unable to determine where clause in "'.__CLASS__.'"');
+		}
+		
+		if ($primary_id_required) {
+			if (!isset($where[$this->primary_key])) {
+				throw new Exception('Unable to determine primary id where clause in "'.__CLASS__.'"');
+			}
+		}
+
+		return $where;
+	}
+
+	protected function where_can_read() {
+		$this->_database->where_in('read_role_id',ci()->user->roles());
+
+		return $this;
+	}
+
+	protected function where_can_edit() {
+		$this->_database->where_in('edit_role_id',ci()->user->roles());
+
+		return $this;
+	}
+
+	protected function where_can_delete() {
+		$this->_database->where_in('delete_role_id',ci()->user->roles());
+
+		return $this;
+	}
+
+	protected function add_fields_on_insert(&$data) {
+		if ($this->has_stamps) {
+			$data['created_by'] = (is_object(ci()->user)) ? ci()->user->id : NOBODY_USER_ID;
+			$data['created_on'] = date('Y-m-d H:i:s');
+			$data['created_ip'] = ci()->input->ip_address();
+		}
+
+		if ($this->has_roles) {
+			if (!isset($data['read_role_id'])) {
+				$data['read_role_id'] = ci()->user->user_read_role_id;
+			}
+	
+			if (!isset($data['edit_role_id'])) {
+				$data['edit_role_id'] = ci()->user->user_edit_role_id;
+			}
+	
+			if (!isset($data['delete_role_id'])) {
+				$data['delete_role_id'] = ci()->user->user_delete_role_id;
+			}
+		}
+
+		return $this;
+	}
+	
+	protected function add_fields_on_update(&$data) {
+		if ($this->has_stamps) {
+			$data['updated_by'] = (is_object(ci()->user)) ? ci()->user->id : NOBODY_USER_ID;
+			$data['updated_on'] = date('Y-m-d H:i:s');
+			$data['updated_ip'] = ci()->input->ip_address();
+		}
+
+		return $this;
+	}
+	
+	protected function add_fields_on_delete(&$data) {
+		if ($this->has_soft_delete && $this->has_stamps) {
+			$data['deleted_by'] = (is_object(ci()->user)) ? ci()->user->id : NOBODY_USER_ID;
+			$data['deleted_on'] = date('Y-m-d H:i:s');
+			$data['deleted_ip'] = ci()->input->ip_address();
+		}
+
+		return $this;
+	}
+
+	protected function add_where_on_select(&$data) {
+		if ($this->has_soft_delete) {
+			if ($this->_temporary_with_deleted !== true) {
+				$this->_database->where('is_deleted', (($this->_temporary_only_deleted) ? 1 : 0));
+			}
+		}
+
+		return $this;
+	}
+	
+	protected function add_where_on_update(&$data) {
+		return $this;
+	}
+
+	protected function add_where_on_insert(&$data) {
+		return $this;
+	}
+
+	public function add_soft_delete_default_columns($tablename,$connection='default') {
+		require ROOTPATH.'/application/config/database.php';
+
+		$config = $db[$connection];
+		
+		$mysqli = new mysqli($config['hostname'],$config['username'],$config['password'],$config['database']);
+		
+		$mysqli->query('ALTER TABLE `'.$tablename.'` ADD COLUMN is_deleted TINYINT(1) UNSIGNED NULL DEFAULT 0');
+
+		echo 'finished';
+	}
+
+	public function add_role_default_columns($tablename,$connection='default') {
+		require ROOTPATH.'/application/config/database.php';
+
+		$config = $db[$connection];
+		
+		$mysqli = new mysqli($config['hostname'],$config['username'],$config['password'],$config['database']);
+		
+		$mysqli->query('ALTER TABLE `'.$tablename.'` ADD COLUMN read_role_id INT(11) UNSIGNED NULL DEFAULT '.ADMIN_ROLE_ID);
+		$mysqli->query('ALTER TABLE `'.$tablename.'` ADD COLUMN edit_role_id INT(11) UNSIGNED NULL DEFAULT '.ADMIN_ROLE_ID);
+		$mysqli->query('ALTER TABLE `'.$tablename.'` ADD COLUMN delete_role_id INT(11) UNSIGNED NULL DEFAULT '.ADMIN_ROLE_ID);
+
+		echo 'finished';
+	}
+
+	public function add_stamp_default_columns($tablename,$connection='default') {
+		require ROOTPATH.'/application/config/database.php';
+
+		$config = $db[$connection];
+		
+		$mysqli = new mysqli($config['hostname'],$config['username'],$config['password'],$config['database']);
+		
+		$mysqli->query('ALTER TABLE `'.$tablename.'` ADD COLUMN created_on DATETIME NULL DEFAULT NULL');
+		$mysqli->query('ALTER TABLE `'.$tablename.'` ADD COLUMN created_by INT(11) UNSIGNED NULL DEFAULT '.NOBODY_ROLE_ID);
+		$mysqli->query('ALTER TABLE `'.$tablename.'` ADD COLUMN created_ip VARCHAR(15) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT \'0.0.0.0\'');
+
+		$mysqli->query('ALTER TABLE `'.$tablename.'` ADD COLUMN updated_on DATETIME NULL DEFAULT NULL');
+		$mysqli->query('ALTER TABLE `'.$tablename.'` ADD COLUMN updated_by INT(11) UNSIGNED NULL DEFAULT '.NOBODY_ROLE_ID);
+		$mysqli->query('ALTER TABLE `'.$tablename.'` ADD COLUMN updated_ip VARCHAR(15) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT \'0.0.0.0\'');
+
+		if ($this->has_soft_delete) {
+			$mysqli->query('ALTER TABLE `'.$tablename.'` ADD COLUMN deleted_on DATETIME NULL DEFAULT NULL');
+			$mysqli->query('ALTER TABLE `'.$tablename.'` ADD COLUMN deleted_by INT(11) UNSIGNED NULL DEFAULT '.NOBODY_ROLE_ID);
+			$mysqli->query('ALTER TABLE `'.$tablename.'` ADD COLUMN deleted_ip VARCHAR(15) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT \'0.0.0.0\'');
+	
+			$mysqli->query('ALTER TABLE `'.$tablename.'` ADD COLUMN is_deleted TINYINT(1) UNSIGNED NULL DEFAULT 0');
+		}
+
+		echo 'finished';
+	}
+	
 } /* end class */

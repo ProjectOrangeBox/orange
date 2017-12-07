@@ -19,18 +19,17 @@
  */
  
 class o_role_model extends Database_model {
-	use Database_stamp_model_trait, Database_role_model_trait, Database_entity_model_trait;
-
 	protected $table; /* this is retrieved in the constructor from the config file */
 	protected $additional_cache_tags = '.acl';
+	protected $has_roles = true;
+	protected $has_stamps = true;
+	protected $entity = true;
+	protected $debug = true;
 
 	protected $rules = [
 		'id'          => ['field' => 'id', 'label' => 'Id', 'rules' => 'required|integer|max_length[10]|less_than[4294967295]|filter_int[10]'],
 		'name'        => ['field' => 'name', 'label' => 'Name', 'rules' => 'required|is_uniquem[o_role_model.name.id]|max_length[64]|filter_input[64]|is_uniquem[o_role_model.name.id]'],
 		'description' => ['field' => 'description', 'label' => 'Description', 'rules' => 'max_length[255]|filter_input[255]|is_uniquem[o_role_model.description.id]'],
-	];
-	protected $rule_sets = [
-		'insert' => 'name,description',
 	];
 
 	public function __construct() {

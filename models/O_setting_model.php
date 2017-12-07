@@ -20,9 +20,10 @@
  */
 
 class o_setting_model extends Database_model {
-	use Database_stamp_model_trait, Database_role_model_trait;
-
 	protected $table = 'orange_settings';
+	protected $has_roles = true;
+	protected $has_stamps = true;
+	protected $debug = true;
 	
 	protected $rules = [
 		'id'             => ['field' => 'id', 'label' => 'Id', 'rules' => 'required|integer|max_length[10]|less_than[4294967295]|filter_int[10]'],
@@ -32,9 +33,6 @@ class o_setting_model extends Database_model {
 		'enabled'        => ['field' => 'enabled', 'label' => 'Enabled', 'rules' => 'if_empty[0]|in_list[0,1]|filter_int[1]|max_length[1]|less_than[2]'],
 		'help'           => ['field' => 'help', 'label' => 'Help', 'rules' => 'max_length[255]|filter_input[255]'],
 		'options'        => ['field' => 'options', 'label' => 'Options', 'rules' => 'max_length[16384]|filter_textarea[16384]'],
-	];
-	protected $rule_sets = [
-		'insert' => 'group,name,value,help,enabled,options',
 	];
 
 	/* override parent */

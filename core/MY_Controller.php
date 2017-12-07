@@ -133,7 +133,7 @@ class MY_Controller extends CI_Controller {
 					/* catalog($array_key = null, $select = null, $where = null, $order_by = null) */
 					$this->load->vars($variable_name, $this->$model_name->catalog($args['array_key'], $args['select'], $args['where'], $args['order_by']));
 				} else {
-					throw new Exception('error', 'Method "catalog" doesn\'t exist on "' . $model_name . '"');
+					throw new Exception('Method "catalog" doesn\'t exist on "' . $model_name . '"');
 				}
 			}
 		}

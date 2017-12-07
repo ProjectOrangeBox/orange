@@ -19,19 +19,18 @@
  */
  
 class o_permission_model extends Database_model {
-	use Database_stamp_model_trait, Database_role_model_trait, Database_entity_model_trait;
-	
 	protected $table; /* this is retrieved in the constructor from the config file */
 	protected $additional_cache_tags = '.acl';
-
+	protected $has_roles = true;
+	protected $has_stamps = true;
+	protected $entity = true;
+	protected $debug = true;
+	
 	protected $rules = [
 		'id'          => ['field' => 'id', 'label' => 'Id', 'rules' => 'required|integer|max_length[10]|less_than[4294967295]|filter_int[10]'],
 		'description' => ['field' => 'description', 'label' => 'Description', 'rules' => 'required|max_length[255]|filter_input[255]|is_uniquem[o_permission_model.description.id]'],
 		'group'       => ['field' => 'group', 'label' => 'Group', 'rules' => 'required|max_length[255]|filter_input[255]'],
 		'key'         => ['field' => 'key', 'label' => 'Key', 'rules' => 'required|strtolower|max_length[255]|filter_input[255]|is_uniquem[o_permission_model.key.id]'],
-	];
-	protected $rule_sets = [
-		'insert' => 'group,key,description',
 	];
 
 	public function __construct() {
