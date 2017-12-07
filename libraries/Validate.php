@@ -157,6 +157,20 @@ class Validate {
 
 		return $this;
 	}
+	
+	/*
+	 * $this->validate->multiple($this->o_setting_model->add_rules($form_rules['form1']), $this->input->request())->ci_errors_on_fail();
+	 */
+	public function ci_errors_on_fail() {
+		if (errors::has()) {
+			/* show errors and die */
+			ci()->output->json(['ci_errors'=>errors::as_data()])->_display();
+
+			exit(1);
+		}
+	
+		return $this;
+	}
 
 	/**
 	 * success function.

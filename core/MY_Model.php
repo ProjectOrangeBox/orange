@@ -70,6 +70,30 @@ class MY_Model extends CI_Model {
 	}
 
 	/**
+	 * add_rules function.
+	 *
+	 * return a array of model rules adding yours in front of the models
+	 * 
+	 * $this->validate->multiple($this->o_setting_model->add_rules($form_rules['form1']), $this->input->request())->ci_errors_on_fail();
+	 * 
+	 * @author Don Myers
+	 * @access public
+	 * @param array $rules
+	 * @return array
+	 */
+	public function add_rules($rules=[]) {
+		$merged = [];
+	
+		foreach ($rules as $key=>$rule) {
+			$merged[$key] = $this->rule($key);
+			
+			$merged[$key]['rules'] = trim($rule.'|'.$merged[$key]['rules'],'|');
+		}
+		
+		return $merged;
+	}
+
+	/**
 	 * clear function.
 	 *
 	 * clear all errors - wrapper 
@@ -215,5 +239,5 @@ class MY_Model extends CI_Model {
 
 		return $new_array;
 	}
-
+	
 } /* end MY_Model */
