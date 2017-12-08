@@ -62,7 +62,7 @@ function &load_class($class, $directory = 'libraries', $param = NULL) {
 		}
 
 		/* add packages - hardcore fast */
-		set_include_path(ROOTPATHS . PATH_SEPARATOR . APPPATH . PATH_SEPARATOR . implode('/' . PATH_SEPARATOR, $autoload['packages']) . PATH_SEPARATOR . BASEPATH);
+		set_include_path(ROOTPATHS . PATH_SEPARATOR . rtrim(APPPATH,'/') . PATH_SEPARATOR . implode(PATH_SEPARATOR, $autoload['packages']) . PATH_SEPARATOR . rtrim(BASEPATH,'/'));
 	}
 
 	// Does the class exist? If so, we're done...
@@ -260,8 +260,8 @@ function getPublicObjectVars($obj) {
   return get_object_vars($obj);
 }
 
-/* dump to root */
-function d2r() {
+/* dump to log in var/logs */
+function l() {
 	$args = func_get_args();
 
 	foreach ($args as $idx=>$arg) {
@@ -270,7 +270,13 @@ function d2r() {
 		}
 	}
 
-	file_put_contents(ROOTPATH.'/'.__METHOD__.'.log','{'.date('H:i:s').'} '.implode('::',$args).chr(10),FILE_APPEND | LOCK_EX);
+	$build  = date('H:i:s').chr(10);
+	
+	foreach ($args as $a) {
+		$build .= chr(9).$a.chr(10);
+	}
+
+	file_put_contents(ROOTPATH.'/var/logs/'.__METHOD__.'.log',$build,FILE_APPEND | LOCK_EX);
 }
 
 /**

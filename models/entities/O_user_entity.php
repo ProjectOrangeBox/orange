@@ -194,15 +194,9 @@ class O_user_entity extends model_entity {
 	 * @author Don Myers
 	 * @return [[Type]] [[Description]]
 	 */
-	public function is_guest() {
-		/* is this person the user id? */
-		return ($this->id === USER_USER_ID);
-	}
-	
-	
-	public function is_nobody() {
-		/* is this person the user id? */
-		return ($this->id === NOBODY_USER_ID);
+	public function logged_in() {
+		/* is this person not nobody */
+		return ($this->id !== NOBODY_USER_ID);
 	}
 
 	/**
