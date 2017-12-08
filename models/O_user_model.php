@@ -25,7 +25,6 @@ class o_user_model extends Database_model {
 	protected $has_stamps = true;
 	protected $has_soft_delete = true;
 	protected $entity = true;
-	protected $debug = true;
 
 	protected $rules = [
 		'id'              => ['field' => 'id', 'label' => 'Id', 'rules' => 'required|integer|max_length[10]|less_than[4294967295]|filter_int[10]'],
@@ -179,9 +178,7 @@ class o_user_model extends Database_model {
 	 * @return [[Type]] [[Description]]
 	 */
 	public function get_user_by_login($login) {
-		$dbc = $this->_database->where('LOWER(username)=', strtolower($login))->or_where('LOWER(email)=', strtolower($login))->get($this->table);
-
-		return ($dbc->num_rows() == 1) ? $dbc->row() : null;
+		return $this->where('LOWER(username)=', strtolower($login))->or_where('LOWER(email)=', strtolower($login))->set_temp_return_on_single(false)->_get(false);
 	}
 
 	/**
@@ -191,9 +188,7 @@ class o_user_model extends Database_model {
 	 * @return [[Type]] [[Description]]
 	 */
 	public function get_user_by_username($username) {
-		$dbc = $this->_database->where('LOWER(username)=', strtolower($username))->get($this->table);
-
-		return ($dbc->num_rows() == 1) ? $dbc->row() : null;
+		return $this->where('LOWER(username)=', strtolower($username))->set_temp_return_on_single(false)->_get(false);
 	}
 
 	/**
@@ -203,9 +198,7 @@ class o_user_model extends Database_model {
 	 * @return [[Type]] [[Description]]
 	 */
 	public function get_user_by_email($email) {
-		$dbc = $this->_database->where('LOWER(email)=', strtolower($email))->get($this->table);
-
-		return ($dbc->num_rows() == 1) ? $dbc->row() : null;
+		return $this->where('LOWER(email)=', strtolower($email))->set_temp_return_on_single(false)->_get(false);
 	}
 
 	/**

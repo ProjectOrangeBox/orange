@@ -30,30 +30,12 @@ class Auth {
 		ci()->load->model(['o_permission_model','o_role_model','o_user_model']);
 		
 		/* set some constants */
-		define('ADMIN_USER_ID',config('auth.admin user id'));
 		define('ADMIN_ROLE_ID',config('auth.admin role id'));
-
-		define('USER_USER_ID',config('auth.user user id'));
-		define('USER_ROLE_ID',config('auth.user role id'));
-
 		define('NOBODY_USER_ID',config('auth.nobody user id'));
-		define('NOBODY_ROLE_ID',config('auth.nobody role id'));
 
 		/* if this is a cli request we don't need to setup the user profile */
 		if (!is_cli()) {
-			/* default to nobody */
-			$user_id = NOBODY_USER_ID;
-
-			/* load a session saved user id - if any */
-			$session_user_id = ci()->session->userdata($this->session_key);
-			
-			/* is it valid? */
-			if ((int) $session_user_id > 0) {
-				/* yes set it as the user id */
-				$user_id = $session_user_id;
-			}
-
-			$this->refresh_userdata($user_id);
+			$this->refresh_userdata((int)ci()->session->userdata($this->session_key));
 		}
 
 		log_message('info', 'Auth Class Initialized');
@@ -87,7 +69,7 @@ class Auth {
 		event::trigger('auth.logout');
 		
 		/* make them a guest */
-		$this->refresh_userdata(USER_ROLE_ID);
+		$this->refresh_userdata(NOBODY_USER_ID);
 
 		log_message('info', 'Auth Class logout');
 
@@ -100,28 +82,33 @@ class Auth {
 	 * @param  integer [$user_id = null] The Id of the user you want to refresh them as
 	 * @return bool
 	 */
-	public function refresh_userdata($user_id = null) {
-		/* get the user id from the user object */
-		if (is_object(ci()->user) && $user_id == null) {
-			$user_id = ci()->user->id;
-		}
-		
+	public function refresh_userdata($user_id) {
 		/* double check user id is a integer greater than 0 */
-		if ((int) $user_id > 0) {
-			/* load the profile */
-			$profile = ci()->o_user_model->get((int) $user_id);
+		$user_id = ((int)$user_id > 0) ? (int)$user_id : NOBODY_USER_ID;
 
-			ci()->session->set_userdata([$this->session_key => $profile->id]);
+		$profile = ci()->o_user_model->get($user_id);
+
+		/* let's make sure they are still active? */
+		if ((int)$profile->is_active == 1 && $profile instanceof O_user_entity) {
+			/* clear password */
+			unset($profile->password);
+	
+			ci()->user = &$profile;
+			
+			if ((int)$profile->id !== NOBODY_USER_ID) {
+				ci()->session->set_userdata([$this->session_key => $profile->id]);
+			} else {
+				/* this will set them up for nobody on the next visit */
+				ci()->session->unset_userdata($this->session_key);
+			}
+			
 		} else {
-			$profile = ci()->o_user_model->get(USER_ROLE_ID);
+			/* user not active or not a instance of user entity */
+			ci()->session->unset_userdata($this->session_key);
+	
+			/* therefore make them nobody */
+			$this->refresh_userdata(NOBODY_USER_ID);
 		}
-
-		/* clear password */
-		unset($profile->password);
-
-		ci()->user = &$profile;
-
-		return true;
 	}
 
 	/**
@@ -146,7 +133,7 @@ class Auth {
 		event::trigger('user.login.init', $login);
 
 		/* TEST -- ok does this users email exists? */
-		if (is_null($user = ci()->o_user_model->get_user_by_email($login))) {
+		if (!$user = ci()->o_user_model->get_user_by_email($login)) {
 			log_message('debug', 'Auth Get User by email returned NULL');
 
 			errors::add(config('auth.general failure error'));
@@ -155,7 +142,7 @@ class Auth {
 		}
 
 		/* TEST -- another safety check - is user a object */
-		if (!is_object($user)) {
+		if (!$user instanceof O_user_entity) {
 			log_message('debug', 'Auth $user not an object');
 
 			errors::add(config('auth.general failure error'));
@@ -189,16 +176,16 @@ class Auth {
 			/* this is the real password wrong error */
 			event::trigger('user.login.in active', $login);
 
-			errors::add(config('auth.account not active error'));
-
 			log_message('debug', 'auth->user ' . config('auth.account not active error'));
+
+			errors::add(config('auth.account not active error'));
 
 			return false;
 		}
 
 		/* attach it to CI */
 		$this->refresh_userdata($user->id);
-
+		
 		return true;
 	}
 

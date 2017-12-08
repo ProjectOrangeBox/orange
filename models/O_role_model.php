@@ -24,7 +24,6 @@ class o_role_model extends Database_model {
 	protected $has_roles = true;
 	protected $has_stamps = true;
 	protected $entity = true;
-	protected $debug = true;
 
 	protected $rules = [
 		'id'          => ['field' => 'id', 'label' => 'Id', 'rules' => 'required|integer|max_length[10]|less_than[4294967295]|filter_int[10]'],

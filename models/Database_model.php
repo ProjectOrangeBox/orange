@@ -56,9 +56,6 @@ class Database_model extends MY_Model {
 	protected $default_return_on_many;
 	protected $default_return_on_single;
 
-	protected $_temporary_with_deleted = false;
-	protected $_temporary_only_deleted = false;
-
 	protected $read_database = null; /* read only database resource */
 	protected $write_database = null; /* write database resource */
 
@@ -68,8 +65,13 @@ class Database_model extends MY_Model {
 	* without overwriting CI's global $this->db connection.
 	*/
 	protected $_database;
-	protected $single_column_name = null;
 	protected $cache_prefix; /* this is auto generated in the constructor */
+
+	protected $temporary_with_deleted = false;
+	protected $temporary_only_deleted = false;
+	protected $temporary_return_on_single = null;
+	protected $temporary_return_on_many = null;
+	protected $temporary_column_name = null;
 	
 	/* Initialize the model, tie into the CodeIgniter super-object */
 	public function __construct() {
@@ -159,9 +161,21 @@ class Database_model extends MY_Model {
 	public function get_soft_delete() {
 		return $this->has_soft_delete;
 	}
+	
+	public function set_temp_return_on_single($value) {
+		$this->temporary_return_on_single = $value;
+	
+		return $this;
+	}
+	
+	public function set_temp_return_on_many($value) {
+		$this->temporary_return_on_many = $value;
+	
+		return $this;
+	}
 
 	public function column($name) {
-		$this->single_column_name = $name;
+		$this->temporary_column_name = $name;
 		
 		return $this;
 	}
@@ -206,8 +220,8 @@ class Database_model extends MY_Model {
 		} else {
 			$results = $this->_as_row($dbc);
 			
-			if ($this->single_column_name && is_object($results)) {
-				$results = $results->{$this->single_column_name};
+			if ($this->temporary_column_name && is_object($results)) {
+				$results = $results->{$this->temporary_column_name};
 			}
 		}
 
@@ -219,7 +233,11 @@ class Database_model extends MY_Model {
 
 	public function _clear() {
 		/* clear this out to not interfere with the next query */
-		$this->single_column_name = false;
+		$this->temporary_column_name = null;
+		$this->temporary_return_on_single = null;
+		$this->temporary_return_on_many = null;
+		
+		return $this;
 	}
 
 	public function insert($data) {
@@ -296,6 +314,8 @@ class Database_model extends MY_Model {
 			$success = (int) $this->_database->affected_rows();
 		}
 
+		$this->_clear();
+
 		return $success;
 	}
 
@@ -329,11 +349,13 @@ class Database_model extends MY_Model {
 			$success = (int) $this->_database->affected_rows();
 		}
 
+		$this->_clear();
+
 		return $success;
 	}
 	
 	protected function _as_array($dbc) {
-		$result = $this->default_return_on_many;
+		$result = ($this->temporary_return_on_many) ? $this->temporary_return_on_many : $this->default_return_on_many;
 
 		/* multiple records */
 		if (is_object($dbc)) {
@@ -350,7 +372,7 @@ class Database_model extends MY_Model {
 	}
 	
 	protected function _as_row($dbc) {
-		$result = $this->default_return_on_single;
+		$result = ($this->temporary_return_on_single) ? $this->temporary_return_on_single : $this->default_return_on_single;
 	
 		if (is_object($dbc)) {
 			if ($dbc->num_rows()) {
@@ -516,18 +538,7 @@ class Database_model extends MY_Model {
 	}
 
 	public function exists($arg) {
-		/* save this to put it back after we switch it to return false on empty */
-		$saved = $this->default_return_on_single;
-
-		/* if nothing found return false */
-		$this->default_return_on_single = false;
-
-		$results = $this->get_by($this->create_where($arg));
-
-		/* put this back to what ever it was before we switched it */
-		$this->default_return_on_single = $saved;
-
-		return $results;
+		return $this->set_temp_return_on_single(false)->get_by($this->create_where($arg));
 	}
 
 	public function count() {
@@ -595,13 +606,13 @@ class Database_model extends MY_Model {
 	}
 
 	public function with_deleted() {
-		$this->_temporary_with_deleted = true;
+		$this->temporary_with_deleted = true;
 
 		return $this;
 	}
 
 	public function only_deleted() {
-		$this->_temporary_only_deleted = true;
+		$this->temporary_only_deleted = true;
 
 		return $this;
 	}
@@ -704,8 +715,8 @@ class Database_model extends MY_Model {
 
 	protected function add_where_on_select(&$data) {
 		if ($this->has_soft_delete) {
-			if ($this->_temporary_with_deleted !== true) {
-				$this->_database->where('is_deleted', (($this->_temporary_only_deleted) ? 1 : 0));
+			if ($this->temporary_with_deleted !== true) {
+				$this->_database->where('is_deleted', (($this->temporary_only_deleted) ? 1 : 0));
 			}
 		}
 
