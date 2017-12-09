@@ -139,8 +139,6 @@ class Database_model extends MY_Model {
 	public function __call($name, $arguments) {
 		if (method_exists($this->_database,$name)) {
 			call_user_func_array([$this->_database,$name],$arguments);
-		} else {
-			throw new Exception("Database Model method $name not found");
 		}
 		
 		return $this;
@@ -538,7 +536,9 @@ class Database_model extends MY_Model {
 	}
 
 	public function exists($arg) {
-		return $this->set_temp_return_on_single(false)->get_by($this->create_where($arg));
+		$record = $this->get_by($this->create_where($arg));
+		
+		return (isset($record->{$this->primary_key})) ? $record : false;
 	}
 
 	public function count() {
