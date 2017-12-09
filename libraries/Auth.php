@@ -95,17 +95,8 @@ class Auth {
 	
 			ci()->user = &$profile;
 			
-			if ((int)$profile->id !== NOBODY_USER_ID) {
-				ci()->session->set_userdata([$this->session_key => $profile->id]);
-			} else {
-				/* this will set them up for nobody on the next visit */
-				ci()->session->unset_userdata($this->session_key);
-			}
-			
+			ci()->session->set_userdata([$this->session_key => $profile->id]);
 		} else {
-			/* user not active or not a instance of user entity */
-			ci()->session->unset_userdata($this->session_key);
-	
 			/* therefore make them nobody */
 			$this->refresh_userdata(NOBODY_USER_ID);
 		}
@@ -171,14 +162,13 @@ class Auth {
 			return false;
 		}
 
-		/* TEST -- Ok login looks good but is the user active? */
 		if ((int) $user->is_active == 0) {
 			/* this is the real password wrong error */
 			event::trigger('user.login.in active', $login);
 
-			log_message('debug', 'auth->user ' . config('auth.account not active error'));
+			log_message('debug', 'auth->user Incorrect Login and/or Password');
 
-			errors::add(config('auth.account not active error'));
+			errors::add(config('auth.general failure error'));
 
 			return false;
 		}
