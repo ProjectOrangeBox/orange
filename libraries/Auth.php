@@ -100,6 +100,8 @@ class Auth {
 			/* therefore make them nobody */
 			$this->refresh_userdata(NOBODY_USER_ID);
 		}
+
+		log_message('info', 'Auth Class Refreshed');
 	}
 
 	/**
@@ -133,7 +135,7 @@ class Auth {
 		}
 
 		/* TEST -- another safety check - is user a object */
-		if (!$user instanceof O_user_entity) {
+		if (!($user instanceof O_user_entity)) {
 			log_message('debug', 'Auth $user not an object');
 
 			errors::add(config('auth.general failure error'));
