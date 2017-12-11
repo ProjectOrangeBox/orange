@@ -286,7 +286,8 @@ class Wallet {
 		event::trigger('wallet.msg', $msg, $type, $sticky, $redirect);
 
 		if (is_string($redirect) || $redirect === true) {
-			$redirect = ($redirect) ? $redirect : ci()->input->server('HTTP_REFERER');
+			/* if they provided a string (url) use that. If not then use the page we came from */
+			$redirect = (is_string($redirect)) ? $redirect : ci()->input->server('HTTP_REFERER');
 
 			$this->redirect_messages[md5(trim($msg))] = ['msg' => trim($msg), 'type' => $type, 'sticky' => $sticky];
 
