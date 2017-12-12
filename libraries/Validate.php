@@ -267,8 +267,10 @@ class Validate {
 				
 				$lowercase = strtolower($rule);
 				
+				/* if it starts with the prefix 'filter' then it's a filter */
 				$is_filter = (substr($lowercase,0,6) == 'filter');
 				
+				/* fix up the PHP class name */
 				$class_name = ($is_filter) ? ucfirst($lowercase) : 'Validate_' . $lowercase;
 
 				/* now we need to find this bugger */
@@ -280,6 +282,7 @@ class Validate {
 						/* filters don't fail */
 						$success = true;
 						
+						/* run the filter */
 						$plugin->filter($field, $param);
 					} else {
 						/* validation can fail */
