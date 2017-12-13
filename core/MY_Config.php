@@ -104,20 +104,13 @@ class MY_Config extends CI_Config {
 			# |e|n|v|i|r|o|n|m|e|n|t|a|l|
 			# +-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-			if (!file_exists(ROOTPATH . '/_env')) {
-				die('_env file missing');
-			}
-
-			/* bring in the system .env files */
-			$e = require ROOTPATH . '/_env';
-
-			foreach ($e as $key => $value) {
+			foreach ($_ENV as $key => $value) {
 				$built_config['env'][strtolower($key)] = $value;
 			}
 
-			# +-+-+-+-+ +-+-+-+-+-+-+
+			# +-+-+-+-+-+-+-+-+-+-+-+
 			# |f|i|l|e| |c|o|n|f|i|g|
-			# +-+-+-+-+ +-+-+-+-+-+-+
+			# +-+-+-+-+-+-+-+-+-+-+-+
 			$config_files = glob(APPPATH . 'config/*.php');
 
 			foreach ($config_files as $file) {
@@ -137,9 +130,9 @@ class MY_Config extends CI_Config {
 				}
 			}
 
-			# +-+-+-+-+-+-+-+-+-+-+-+-+-+ +-+-+-+-+ +-+-+-+-+-+-+
+			# +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 			# |e|n|v|i|r|o|n|m|e|n|t|a|l| |f|i|l|e| |c|o|n|f|i|g|
-			# +-+-+-+-+-+-+-+-+-+-+-+-+-+ +-+-+-+-+ +-+-+-+-+-+-+
+			# +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 			if (ENVIRONMENT) {
 				$config_files = glob(APPPATH . 'config/' . ENVIRONMENT . '/*.php');
 
@@ -160,9 +153,9 @@ class MY_Config extends CI_Config {
 				}
 			}
 
-			# +-+-+-+-+-+-+-+-+ +-+-+-+-+-+-+-+-+
+			# +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 			# |d|a|t|a|b|a|s|e| |s|e|t|t|i|n|g|s|
-			# +-+-+-+-+-+-+-+-+ +-+-+-+-+-+-+-+-+
+			# +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
 			/* are they using the database settings? */
 			if (parent::item('no_database_settings') !== true) {
