@@ -547,9 +547,9 @@ function cache_ttl() {
  * ie. delete_cache_by_tags('user','admin','gui');
  * @author Don Myers
  */
-function delete_cache_by_tags() {
+function delete_cache_by_tags($args) {
 	/* Returns an array comprising a function's argument list */
-	$tags = func_get_args();
+	$tags = (is_array($args)) ? $args : func_get_args();
 
 	log_message('debug', 'delete_cache_by_tags ' . implode(', ', $tags));
 
