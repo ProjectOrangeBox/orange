@@ -138,6 +138,8 @@ class Pear {
 
 	/**
 	 * include function.
+	 * 
+	 * if $data = ['foo','bar'] then $__0 == foo and $__1 = bar when extract for the view
 	 *
 	 * @access public
 	 * @static
