@@ -548,13 +548,19 @@ function cache_ttl() {
  * @author Don Myers
  */
 function delete_cache_by_tags($args) {
-	/* Returns an array comprising a function's argument list */
-	$tags = (is_array($args)) ? $args : func_get_args();
-
+	if (is_array($args)) {
+		$tags = $args;
+	} elseif(strpos($args,'.') !== false) {
+		$tags = explode('.', $args);
+	} else {
+		$tags = func_get_args();
+	}
+	
 	log_message('debug', 'delete_cache_by_tags ' . implode(', ', $tags));
 
 	event::trigger('delete cache by tags', $tags);
-
+	
+	/* get all the cache keys */
 	$cached_keys = ci()->cache->cache_info();
 
 	if (is_array($cached_keys)) {
