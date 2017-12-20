@@ -26,7 +26,21 @@ spl_autoload_register('codeigniter_autoload');
 require_once BASEPATH.'core/CodeIgniter.php';
 
 /* NEW - shorter syntax */
-function &ci() {
+function &ci($class=null) {
+	if ($class) {
+		/* is this already loaded by CodeIgniter */
+		if (ci()->load->is_loaded($class)) {
+			return CI_Controller::get_instance()->$class;
+		} else {
+			/* let the autoloader give it a shot */
+			if (class_exists($class,true)) {
+				return CI_Controller::get_instance()->$class;
+			} else {
+				die('ci('.$class.') not found');
+			}
+		}
+	}
+
 	return CI_Controller::get_instance();
 }
 
@@ -189,6 +203,10 @@ function codeigniter_autoload($class) {
 		
 			return true;
 		}
+	} elseif (stream_resolve_include_path('libraries/' . ucfirst($class) . '.php') !== false) {
+		ci()->load->library($class);
+
+		return true;
 	}
 	
 	/* beat's me let the next autoloader give it a shot */
@@ -570,4 +588,26 @@ function delete_cache_by_tags($args) {
 			}
 		}
 	}
+}
+
+function filter_filename($str,$ext=null) {
+	/*
+	\W Match a non-word character
+		Non-word characters include characters other than alphanumeric characters (a-z, A-Z and 0-9) and underscore (_).
+	+ Match 1 or more times
+	*/
+
+	$str = strtolower(trim(preg_replace('#\W+#', '_', $str), '_'));
+
+	return ($ext) ? $str.'.'.$ext : $str;
+}
+
+function filter_human($str) {
+	/*
+	\W Match a non-word character
+		Non-word characters include characters other than alphanumeric characters (a-z, A-Z and 0-9) and underscore (_).
+	+ Match 1 or more times
+	*/
+
+	return ucwords(str_replace('_',' ',strtolower(trim(preg_replace('#\W+#',' ', $str),' '))));
 }

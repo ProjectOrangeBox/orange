@@ -323,24 +323,7 @@ class Page {
 		return $this->ary2element('script', array_merge($this->script_attributes, ['src' => $file]), '');
 	}
 
-	/**
-	 * js_variables function.
-	 *
-	 * @access public
-	 * @param mixed $key
-	 * @param mixed $value (default: null)
-	 * @return void
-	 */
-	public function js_variables($key, $value = null) {
-		/* handle it if it's a array */
-		if (is_array($key) && $value === true) {
-			foreach ($key as $k => $v) {
-				$this->js_variables($k, $v);
-			}
-
-			return $this;
-		}
-
+	public function js_variable($key,$value) {
 		/* if value is true then insert the key verbatim else insert it as a string */
 		if (is_scalar($value)) {
 			$var = 'var ' . $key . '="' . str_replace('"', '\"', $value) . '";';
@@ -349,6 +332,22 @@ class Page {
 		}
 
 		return $this->_asset_add('js_variables',$var);
+	}
+
+	/**
+	 * js_variables function.
+	 *
+	 * @access public
+	 * @param mixed $key
+	 * @param mixed $value (default: null)
+	 * @return void
+	 */
+	public function js_variables($array) {
+		foreach ($array as $k => $v) {
+			$this->js_variable($k, $v);
+		}
+
+		return $this;
 	}
 
 	/* place inside <script> */
