@@ -134,19 +134,21 @@ function &load_class($class, $directory = 'libraries', $param = NULL) {
  * @return void
  */
 function codeigniter_autoload($class) {
+	$uclass = ucfirst($class);
+
 	/* composer autoloader knows where controller base classes are */
 	if ($file = stream_resolve_include_path($class . '.php')) { /* is it on any of the include paths? */
 		require_once $file;
 
 		return true;
 	} elseif (substr($class, -6) == '_model') { /* is it a CI model? */
-		if ($file = stream_resolve_include_path('models/' . $class . '.php')) {
+		if ($file = stream_resolve_include_path('models/' . $uclass . '.php')) {
 			ci()->load->model($class);
 
 			return true;
 		}
 	} elseif (substr($class, -10) == 'Controller') { /* is it a CI Controller? */
-		if ($file = stream_resolve_include_path('controllers/' . $class . '.php')) {
+		if ($file = stream_resolve_include_path('controllers/' . $uclass . '.php')) {
 			include $file;
 
 			return true;
@@ -175,38 +177,34 @@ function codeigniter_autoload($class) {
 				return true;
 			}
 		}
-	} elseif ($file = stream_resolve_include_path('libraries/' . $class . '.php')) {
+	} elseif (stream_resolve_include_path('libraries/' . $uclass . '.php')) {
 		ci()->load->library($class);
 
 		return true;
 	} elseif (substr($class, -10) == 'Middleware') {	
-		if ($file = stream_resolve_include_path('middleware/' . $class . '.php')) {
+		if ($file = stream_resolve_include_path('middleware/' . $uclass . '.php')) {
 			include $file;
 		
 			return true;
 		}
 	} elseif (substr($class,0,7) == 'Plugin_') {	
-		if ($file = stream_resolve_include_path('libraries/pear_plugins/' . $class . '.php')) {
+		if ($file = stream_resolve_include_path('libraries/pear_plugins/' . $uclass . '.php')) {
 			include $file;
 		
 			return true;
 		}
 	} elseif (substr($class,0,9) == 'Validate_') {	
-		if ($file = stream_resolve_include_path('libraries/validations/' . $class . '.php')) {
+		if ($file = stream_resolve_include_path('libraries/validations/' . $uclass . '.php')) {
 			include $file;
 		
 			return true;
 		}
 	} elseif (substr($class,0,7) == 'Filter_') {	
-		if ($file = stream_resolve_include_path('libraries/filters/' . $class . '.php')) {
+		if ($file = stream_resolve_include_path('libraries/filters/' . $uclass . '.php')) {
 			include $file;
 		
 			return true;
 		}
-	} elseif (stream_resolve_include_path('libraries/' . ucfirst($class) . '.php') !== false) {
-		ci()->load->library($class);
-
-		return true;
 	}
 	
 	/* beat's me let the next autoloader give it a shot */
@@ -573,7 +571,7 @@ function delete_cache_by_tags($args) {
 	} else {
 		$tags = func_get_args();
 	}
-	
+
 	log_message('debug', 'delete_cache_by_tags ' . implode(', ', $tags));
 
 	event::trigger('delete cache by tags', $tags);

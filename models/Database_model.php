@@ -396,7 +396,7 @@ class Database_model extends MY_Model {
 	}
 
 	protected function delete_cache_by_tags() {
-		delete_cache_by_tags(explode('.', $this->cache_prefix));
+		delete_cache_by_tags($this->cache_prefix);
 		
 		return $this;
 	}
@@ -535,6 +535,14 @@ class Database_model extends MY_Model {
 		return $sql; /* one exit */
 	}
 
+	public function update_if_exists($data,$where=false) {
+		$where = ($where) ? $where : [$this->primary_key=>$data[$this->primary_key]];
+	
+		$record = $this->exists($where);
+
+		return (isset($record->{$this->primary_key})) ? $this->update_by($data,[$this->primary_key=>$record->{$this->primary_key}]) : $this->insert($data);
+	}
+
 	public function exists($arg) {
 		$record = $this->get_by($this->create_where($arg));
 		
@@ -669,9 +677,21 @@ class Database_model extends MY_Model {
 		return $this;
 	}
 
+	protected function _get_userid() {
+		$user_id = NOBODY_USER_ID;
+	
+		if (is_object(ci()->user)) {
+			if (ci()->user->id) {
+				$user_id = ci()->user->id;
+			}
+		}
+
+		return $user_id;
+	}
+
 	protected function add_fields_on_insert(&$data) {
 		if ($this->has_stamps) {
-			$data['created_by'] = (is_object(ci()->user)) ? ci()->user->id : NOBODY_USER_ID;
+			$data['created_by'] = $this->_get_userid();
 			$data['created_on'] = date('Y-m-d H:i:s');
 			$data['created_ip'] = ci()->input->ip_address();
 		}
@@ -695,7 +715,7 @@ class Database_model extends MY_Model {
 	
 	protected function add_fields_on_update(&$data) {
 		if ($this->has_stamps) {
-			$data['updated_by'] = (is_object(ci()->user)) ? ci()->user->id : NOBODY_USER_ID;
+			$data['updated_by'] = $this->_get_userid();;
 			$data['updated_on'] = date('Y-m-d H:i:s');
 			$data['updated_ip'] = ci()->input->ip_address();
 		}
@@ -705,7 +725,7 @@ class Database_model extends MY_Model {
 	
 	protected function add_fields_on_delete(&$data) {
 		if ($this->has_soft_delete && $this->has_stamps) {
-			$data['deleted_by'] = (is_object(ci()->user)) ? ci()->user->id : NOBODY_USER_ID;
+			$data['deleted_by'] = $this->_get_userid();;
 			$data['deleted_on'] = date('Y-m-d H:i:s');
 			$data['deleted_ip'] = ci()->input->ip_address();
 		}

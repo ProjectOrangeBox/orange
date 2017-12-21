@@ -87,7 +87,7 @@ class MY_Controller extends CI_Controller {
 		/* it's always open on the command line */
 		if (php_sapi_name() !== 'cli') {
 			/* test the setting */
-			if (config('application.site open') !== true) {
+			if (!config('application.site open')) {
 				/* but do they have the correct ISOPEN cookie? */
 				if ($_COOKIE['ISOPEN'] !== config('application.is open cookie', md5(uniqid(true)))) {
 					/* nope! */
