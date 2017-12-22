@@ -72,6 +72,7 @@ class Database_model extends MY_Model {
 	protected $temporary_return_on_single = null;
 	protected $temporary_return_on_many = null;
 	protected $temporary_column_name = null;
+	protected $temporary_return_as_array = null;
 	
 	/* Initialize the model, tie into the CodeIgniter super-object */
 	public function __construct() {
@@ -171,6 +172,12 @@ class Database_model extends MY_Model {
 	
 		return $this;
 	}
+	
+	public function set_temp_return_as_array() {
+		$this->temporary_return_as_array = true;
+		
+		return $this;
+	}
 
 	public function column($name) {
 		$this->temporary_column_name = $name;
@@ -234,6 +241,7 @@ class Database_model extends MY_Model {
 		$this->temporary_column_name = null;
 		$this->temporary_return_on_single = null;
 		$this->temporary_return_on_many = null;
+		$this->temporary_return_as_array = null;
 		
 		return $this;
 	}
@@ -358,8 +366,10 @@ class Database_model extends MY_Model {
 		/* multiple records */
 		if (is_object($dbc)) {
 			if ($dbc->num_rows()) {
-				if ($this->entity) {
+				if ($this->entity && $this->temporary_return_as_array !== true) {
 					$result = $dbc->custom_result_object($this->entity);
+				} elseif ($this->temporary_return_as_array) {
+					$result = $dbc->result_array();
 				} else {
 					$result = $dbc->result();
 				}
@@ -374,14 +384,16 @@ class Database_model extends MY_Model {
 	
 		if (is_object($dbc)) {
 			if ($dbc->num_rows()) {
-				if ($this->entity) {
+				if ($this->entity && $this->temporary_return_as_array !== true) {
 					$result = $dbc->custom_row_object(0, $this->entity);
+				} elseif($this->temporary_return_as_array)  {
+					$result = $dbc->row_array();
 				} else {
 					$result = $dbc->row();
 				}
 			}
 		}
-		
+
 		return $result;
 	}
 
