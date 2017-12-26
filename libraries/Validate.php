@@ -254,7 +254,7 @@ class Validate {
 				/*
 				Strip the parameter (if exists) from the rule
 				Rules can contain a parameter: max_length[5]
-				 */
+				*/
 				$param = null;
 
 				if (preg_match("/(.*?)\[(.*?)\]/", $rule, $match)) {

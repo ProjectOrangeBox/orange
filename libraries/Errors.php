@@ -165,7 +165,7 @@ class Errors {
 			$message     = '';
 
 			foreach ($data as $key => $val) {
-				$message .= chr(9) . $key . ' ' . strip_tags($val) . chr(10);
+				$message .= '  ' . $key . ': ' . strip_tags($val) . chr(10);
 			}
 
 			$data['message'] = $message;

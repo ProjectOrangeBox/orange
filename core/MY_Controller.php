@@ -21,10 +21,10 @@ class MY_Controller extends CI_Controller {
 	public $cache_page_for = null;
 
 	/* your basic admin scaffolding */
-	public $controller        = ''; /* controller name */
+	public $controller        = null; /* controller name */
 	public $controller_path   = null; /* url to this controller */
-	public $controller_title  = ''; /* used in various places human singular */
-	public $controller_titles = ''; /* used in various places human plural */
+	public $controller_title  = null; /* used in various places human singular */
+	public $controller_titles = null; /* used in various places human plural */
 
 	/* the children controllers can set these to have additional objects auto loaded */
 	public $libraries = null;
@@ -54,6 +54,18 @@ class MY_Controller extends CI_Controller {
 		require ORANGEPATH . '/libraries/Middleware_base.php';
 
 		require APPPATH . '/config/middleware.php';
+
+		if (!$this->controller_title) {
+			ci()->load->helper('inflector');
+			
+			$this->controller_title = ucwords(singular(strtolower($this->controller)));
+		}
+
+		if (!$this->controller_titles) {
+			ci()->load->helper('inflector');
+			
+			$this->controller_titles = ucwords(plural(strtolower($this->controller)));
+		}
 
 		$base_middleware = $middleware;
 		

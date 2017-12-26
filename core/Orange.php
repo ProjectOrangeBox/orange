@@ -33,7 +33,7 @@ function &ci($class=null) {
 			return CI_Controller::get_instance()->$class;
 		} else {
 			/* let the autoloader give it a shot */
-			if (class_exists($class,true)) {
+			if (codeigniter_autoload($class)) {
 				return CI_Controller::get_instance()->$class;
 			} else {
 				die('ci('.$class.') not found');
@@ -142,7 +142,7 @@ function codeigniter_autoload($class) {
 
 		return true;
 	} elseif (substr($class, -6) == '_model') { /* is it a CI model? */
-		if ($file = stream_resolve_include_path('models/' . $uclass . '.php')) {
+		if (stream_resolve_include_path('models/' . $uclass . '.php')) {
 			ci()->load->model($class);
 
 			return true;

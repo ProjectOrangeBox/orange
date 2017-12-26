@@ -655,7 +655,7 @@ class Database_model extends MY_Model {
 
 	protected function create_where($arg,$primary_id_required=false) {
 		if (is_scalar($arg)) {
-			$where[$this->primary_key] = $arg;
+			$where = [$this->primary_key=>$arg];
 		} elseif (is_array($arg)) {
 			$where = $arg;
 		} else {
