@@ -31,6 +31,7 @@ class MY_Input extends CI_Input {
     }
     
 		public function request_replace($index = null, $replace_value = null) {
+			/* are we using $_POST? if it contains something we are */
 			if (count($_POST)) {
 				$_POST[$index] = $replace_value;
 			} else {
