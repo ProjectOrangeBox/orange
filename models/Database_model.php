@@ -448,6 +448,8 @@ class Database_model extends MY_Model {
 		/* what's the primary key? */
 		$array_key = ($array_key) ? $array_key : $this->primary_key;
 
+		$select_columns = is_array($select_columns) ? implode(',',$select_columns) : $select_columns;
+
 		/* what columns are they looking for? */
 		if ($select_columns === null || $select_columns == '*') {
 			$select = '*';
@@ -457,7 +459,6 @@ class Database_model extends MY_Model {
 			if (strpos($select_columns,',') === false) {
 				$single_column = $select_columns;
 			}
-			
 		}
 		
 		/* add them */
