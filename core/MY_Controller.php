@@ -58,13 +58,13 @@ class MY_Controller extends CI_Controller {
 		if (!$this->controller_title) {
 			ci()->load->helper('inflector');
 			
-			$this->controller_title = ucwords(singular(strtolower($this->controller)));
+			$this->controller_title = singular(filter_human($this->controller));
 		}
 
 		if (!$this->controller_titles) {
 			ci()->load->helper('inflector');
 			
-			$this->controller_titles = ucwords(plural(strtolower($this->controller)));
+			$this->controller_titles = plural(filter_human($this->controller));
 		}
 
 		$base_middleware = $middleware;
