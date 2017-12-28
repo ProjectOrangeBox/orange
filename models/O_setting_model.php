@@ -34,6 +34,10 @@ class o_setting_model extends Database_model {
 		'options'        => ['field' => 'options', 'label' => 'Options', 'rules' => 'max_length[16384]|filter_textarea[16384]'],
 	];
 
+	public function pull() {
+		return $this->get_many_by(['enabled' => 1]);
+	}
+
 	/* override parent */
 	protected function delete_cache_by_tags() {
 		/* anytime the model calls this to flush the cache also tell the core config which creates it's own cache */

@@ -162,7 +162,7 @@ class MY_Config extends CI_Config {
 				/* let's make sure the model is loaded */
 				ci()->load->model('o_setting_model');
 
-				$db_array = ci()->o_setting_model->get_many_by(['enabled' => 1]);
+				$db_array = ci()->o_setting_model->pull();
 
 				if (is_array($db_array)) {
 					foreach ($db_array as $record) {

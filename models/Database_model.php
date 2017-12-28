@@ -39,9 +39,6 @@ class Database_model extends MY_Model {
 	/* This model's default primary key or unique identifier. Used by the get(),update() and delete() functions. */
 	protected $primary_key = 'id';
 	
-	/* auto remove the primary key from inserts */
-	protected $remove_primary_on_insert = true;
-
 	protected $additional_cache_tags = ''; /* example 'tag1.tag2.tag' */
 	
 	protected $skip_rules = false; /* wether to skip all rule validation (probably because you don't have rules) */
@@ -249,16 +246,25 @@ class Database_model extends MY_Model {
 		$this->switch_database('write');
 
 		$data = (array)$data;
-
-		/* unset the primary key if it's set in the data array */
-		if (isset($data[$this->primary_key]) && $this->remove_primary_on_insert) {
+		
+		/* this is the standard new record value */
+		if ($data[$this->primary_key] == '$new.record') {
 			unset($data[$this->primary_key]);
 		}
-
-		/* add the insert required rules */
-		$rules_set = (isset($this->rules_set['insert'])) ? 'insert' : null;
 		
-		$success = (!$this->skip_rules) ? $this->only_columns_with_rules($data)->validate($data,$rules_set) : true;
+		/* strip columns that don't have rules */
+		$this->only_columns_with_rules($data);
+		
+		/* make sure we add the rules for insert to enforce those rules incase they don't include them in the input array ($data) */
+		if (isset($this->rule_sets['insert'])) {
+			$required_insert_fields = explode(',',$this->rule_sets['insert']);
+			
+			foreach ($required_insert_fields as $required_insert_field) {
+				$data[$required_insert_field] = ''; /* they are now part of the data array but empty */
+			}
+		}
+		
+		$success = (!$this->skip_rules) ? $this->validate($data) : true;
 
 		if ($success) {
 			/* remove the protected columns */
@@ -297,7 +303,19 @@ class Database_model extends MY_Model {
 
 		$data = (array)$data;
 
-		$success = (!$this->skip_rules) ? $this->only_columns_with_rules($data)->validate($data) : true;
+		/* strip columns that don't have rules */
+		$this->only_columns_with_rules($data);
+		
+		/* make sure we add the rules for update to enforce those rules incase they don't include them in the input array ($data) */
+		if (isset($this->rule_sets['update'])) {
+			$required_insert_fields = explode(',',$this->rule_sets['update']);
+			
+			foreach ($required_insert_fields as $required_insert_field) {
+				$data[$required_insert_field] = ''; /* they are now part of the data array but empty */
+			}
+		}
+		
+		$success = (!$this->skip_rules) ? $this->validate($data) : true;
 
 		/*
 		unset the primary key field because we are either
@@ -618,6 +636,10 @@ class Database_model extends MY_Model {
 		if ($where) {
 			$this->_database->where($where);
 		}
+		
+		if ($this->has_roles) {
+			$this->where_can_read();
+		}
 
 		return $this->_get(true);
 	}
@@ -679,19 +701,19 @@ class Database_model extends MY_Model {
 	}
 
 	protected function where_can_read() {
-		$this->_database->where_in('read_role_id',ci()->user->roles());
+		$this->_database->where_in('read_role_id',array_keys(user::roles()));
 
 		return $this;
 	}
 
 	protected function where_can_edit() {
-		$this->_database->where_in('edit_role_id',ci()->user->roles());
+		$this->_database->where_in('edit_role_id',array_keys(user::roles()));
 
 		return $this;
 	}
 
 	protected function where_can_delete() {
-		$this->_database->where_in('delete_role_id',ci()->user->roles());
+		$this->_database->where_in('delete_role_id',array_keys(user::roles()));
 
 		return $this;
 	}
