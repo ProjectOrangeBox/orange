@@ -71,6 +71,8 @@ class Database_model extends MY_Model {
 	protected $temporary_column_name = null;
 	protected $temporary_return_as_array = null;
 	
+	protected $auto_generated_primary = true;
+	
 	/* Initialize the model, tie into the CodeIgniter super-object */
 	public function __construct() {
 		parent::__construct();
@@ -247,8 +249,8 @@ class Database_model extends MY_Model {
 
 		$data = (array)$data;
 		
-		/* if the primary id is empty then set it to something random now and clear it later */
-		if (empty($data[$this->primary_key])) {
+		/* if the primary id is empty but it will be auto generated set it to something */
+		if (empty($data[$this->primary_key]) && $this->auto_generated_primary) {
 			$data[$this->primary_key] = '-1';
 		}
 		
@@ -268,8 +270,8 @@ class Database_model extends MY_Model {
 		
 		$success = (!$this->skip_rules) ? $this->validate($data) : true;
 		
-		/* is it still the temp primary key? if yes remove it */
-		if ($data[$this->primary_key] == '-1') {
+		/* if the primary key is auto generated and it's the "temp" key clear it out */
+		if ($data[$this->primary_key] == '-1' && $this->auto_generated_primary) {
 			unset($data[$this->primary_key]);
 		}
 
