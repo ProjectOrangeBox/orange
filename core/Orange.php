@@ -28,8 +28,11 @@ require_once BASEPATH.'core/CodeIgniter.php';
 /* NEW - shorter syntax */
 function &ci($class=null) {
 	if ($class) {
+		/* special handler for the loader */
+		if ($class == 'load') {
+			return ci()->load;
 		/* is this already loaded by CodeIgniter */
-		if (ci()->load->is_loaded($class)) {
+		} elseif (ci()->load->is_loaded($class)) {
 			return CI_Controller::get_instance()->$class;
 		} else {
 			/* let the autoloader give it a shot */
