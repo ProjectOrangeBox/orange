@@ -255,7 +255,10 @@ class Database_model extends MY_Model {
 			unset($data[$this->primary_key]);
 		}
 
-		$success = (!$this->skip_rules) ? $this->only_columns_with_rules($data)->validate($data) : true;
+		/* add the insert required rules */
+		$rules_set = (isset($this->rules_set['insert'])) ? 'insert' : null;
+		
+		$success = (!$this->skip_rules) ? $this->only_columns_with_rules($data)->validate($data,$rules_set) : true;
 
 		if ($success) {
 			/* remove the protected columns */
