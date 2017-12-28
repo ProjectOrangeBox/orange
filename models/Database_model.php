@@ -247,24 +247,31 @@ class Database_model extends MY_Model {
 
 		$data = (array)$data;
 		
-		/* this is the standard new record value */
-		if ($data[$this->primary_key] == '$new.record') {
-			unset($data[$this->primary_key]);
+		/* if the primary id is empty then set it to something random now and clear it later */
+		if (empty($data[$this->primary_key])) {
+			$data[$this->primary_key] = '-1';
 		}
 		
 		/* strip columns that don't have rules */
 		$this->only_columns_with_rules($data);
-		
+
 		/* make sure we add the rules for insert to enforce those rules incase they don't include them in the input array ($data) */
 		if (isset($this->rule_sets['insert'])) {
 			$required_insert_fields = explode(',',$this->rule_sets['insert']);
 			
 			foreach ($required_insert_fields as $required_insert_field) {
-				$data[$required_insert_field] = ''; /* they are now part of the data array but empty */
+				if (!isset($data[$required_insert_field])) {
+					$data[$required_insert_field] = ''; /* they are now part of the data array but empty */
+				}
 			}
 		}
 		
 		$success = (!$this->skip_rules) ? $this->validate($data) : true;
+		
+		/* is it still the temp primary key? if yes remove it */
+		if ($data[$this->primary_key] == '-1') {
+			unset($data[$this->primary_key]);
+		}
 
 		if ($success) {
 			/* remove the protected columns */
@@ -311,7 +318,9 @@ class Database_model extends MY_Model {
 			$required_insert_fields = explode(',',$this->rule_sets['update']);
 			
 			foreach ($required_insert_fields as $required_insert_field) {
-				$data[$required_insert_field] = ''; /* they are now part of the data array but empty */
+				if (!isset($data[$required_insert_field])) {
+					$data[$required_insert_field] = ''; /* they are now part of the data array but empty */
+				}
 			}
 		}
 		
