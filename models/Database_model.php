@@ -214,25 +214,24 @@ class Database_model extends MY_Model {
 
 		$table = ($table) ? $table : $this->table;
 
-		$this->add_where_on_select($data);
-
 		$dbc = $this->_database->get($table);
 
 		$this->log_last_query();
 
-		if ($as_array) {
-			$results = $this->_as_array($dbc);
-		} else {
-			$results = $this->_as_row($dbc);
-			
-			if ($this->temporary_column_name && is_object($results)) {
+		$results = ($as_array) ? $this->_as_array($dbc) : $this->_as_row($dbc);
+
+		/* is this a single column we are looking for? */
+		if ($this->temporary_column_name) {
+			if (is_array($results)) {
+				$results = $results[$this->temporary_column_name];
+			} elseif (is_object($results)) {
 				$results = $results->{$this->temporary_column_name};
 			}
 		}
-
+		
+		/* clean up after everything */
 		$this->_clear();
 		
-		/* get returns a single object so return the first record or an empty record */
 		return $results;
 	}
 
@@ -361,11 +360,13 @@ class Database_model extends MY_Model {
 	}
 	
 	protected function _as_array($dbc) {
+		/* if database cursor is empty return by default what? */
 		$result = ($this->temporary_return_on_many) ? $this->temporary_return_on_many : $this->default_return_on_many;
 
 		/* multiple records */
 		if (is_object($dbc)) {
 			if ($dbc->num_rows()) {
+				/* ok database cursor is valid what type of results set do we need */
 				if ($this->entity && $this->temporary_return_as_array !== true) {
 					$result = $dbc->custom_result_object($this->entity);
 				} elseif ($this->temporary_return_as_array) {
@@ -380,10 +381,12 @@ class Database_model extends MY_Model {
 	}
 	
 	protected function _as_row($dbc) {
+		/* if database cursor is empty return by default what? */
 		$result = ($this->temporary_return_on_single) ? $this->temporary_return_on_single : $this->default_return_on_single;
 	
 		if (is_object($dbc)) {
 			if ($dbc->num_rows()) {
+				/* ok database cursor is valid what type of results set do we need */
 				if ($this->entity && $this->temporary_return_as_array !== true) {
 					$result = $dbc->custom_row_object(0, $this->entity);
 				} elseif($this->temporary_return_as_array)  {
