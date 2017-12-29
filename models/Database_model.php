@@ -249,32 +249,16 @@ class Database_model extends MY_Model {
 
 		$data = (array)$data;
 		
-		/* if the primary id is empty but it will be auto generated set it to something */
-		if (empty($data[$this->primary_key]) && $this->auto_generated_primary) {
-			$data[$this->primary_key] = '-1';
+		/* if the primary id is auto generated then remove it */
+		if ($this->auto_generated_primary) {
+			unset($data[$this->primary_key]);
 		}
 		
 		/* strip columns that don't have rules */
-		$this->only_columns_with_rules($data);
-
-		/* make sure we add the rules for insert to enforce those rules incase they don't include them in the input array ($data) */
-		if (isset($this->rule_sets['insert'])) {
-			$required_insert_fields = explode(',',$this->rule_sets['insert']);
-			
-			foreach ($required_insert_fields as $required_insert_field) {
-				if (!isset($data[$required_insert_field])) {
-					$data[$required_insert_field] = ''; /* they are now part of the data array but empty */
-				}
-			}
-		}
+		$this->only_columns_with_rules($data)->add_rule_set_columns($data,'insert');
 		
 		$success = (!$this->skip_rules) ? $this->validate($data) : true;
 		
-		/* if the primary key is auto generated and it's the "temp" key clear it out */
-		if ($data[$this->primary_key] == '-1' && $this->auto_generated_primary) {
-			unset($data[$this->primary_key]);
-		}
-
 		if ($success) {
 			/* remove the protected columns */
 			$this->remove_columns($data, $this->protected);
@@ -296,6 +280,21 @@ class Database_model extends MY_Model {
 		return $success;
 	}
 
+	protected function add_rule_set_columns(&$data,$which_set) {
+		/* make sure we add the rules for update to enforce those rules incase they don't include them in the input array ($data) */
+		if (isset($this->rule_sets[$which_set])) {
+			$required_fields = explode(',',$this->rule_sets[$which_set]);
+			
+			foreach ($required_fields as $required_field) {
+				if (!isset($data[$required_field])) {
+					$data[$required_field] = ''; /* they are now part of the data array but empty */
+				}
+			}
+		}
+		
+		return $this;
+	}
+
 	public function update($data) {
 		$data = (array)$data;
 		
@@ -313,18 +312,7 @@ class Database_model extends MY_Model {
 		$data = (array)$data;
 
 		/* strip columns that don't have rules */
-		$this->only_columns_with_rules($data);
-		
-		/* make sure we add the rules for update to enforce those rules incase they don't include them in the input array ($data) */
-		if (isset($this->rule_sets['update'])) {
-			$required_insert_fields = explode(',',$this->rule_sets['update']);
-			
-			foreach ($required_insert_fields as $required_insert_field) {
-				if (!isset($data[$required_insert_field])) {
-					$data[$required_insert_field] = ''; /* they are now part of the data array but empty */
-				}
-			}
-		}
+		$this->only_columns_with_rules($data)->add_rule_set_columns($data,'update');
 		
 		$success = (!$this->skip_rules) ? $this->validate($data) : true;
 
