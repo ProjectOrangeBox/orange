@@ -135,14 +135,16 @@ class MY_Loader extends CI_Loader {
 				$this->pear_plugin($n);
 			}
 
-			return;
+			return $this;
 		}
 
-		$class = 'Plugin_'.str_replace('plugin_','',strtolower($name));
+		$class = 'Pear_'.str_replace('pear_','',strtolower($name));
 
 		if (class_exists($class,true)) {
 			new $class;
 		}
+		
+		return $this;
 	}
 
 } /* end file */

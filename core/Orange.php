@@ -134,17 +134,17 @@ function codeigniter_autoload($class) {
 			include $file;
 			return true;
 		}
-	} elseif (substr($class,0,7) == 'Plugin_') {
+	} elseif (substr($uclass,0,5) == 'Pear_') {
 		if ($file = stream_resolve_include_path('libraries/pear_plugins/'.$uclass.'.php')) {
 			include $file;
 			return true;
 		}
-	} elseif (substr($class,0,9) == 'Validate_') {
+	} elseif (substr($uclass,0,9) == 'Validate_') {
 		if ($file = stream_resolve_include_path('libraries/validations/'.$uclass.'.php')) {
 			include $file;
 			return true;
 		}
-	} elseif (substr($class,0,7) == 'Filter_') {
+	} elseif (substr($uclass,0,7) == 'Filter_') {
 		if ($file = stream_resolve_include_path('libraries/filters/'.$uclass.'.php')) {
 			include $file;
 			return true;

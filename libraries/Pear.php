@@ -26,11 +26,13 @@ class Pear {
 	public static function __callStatic($name,$arguments) {
 		if (!self::$helper_loaded) {
 			ci()->load->helper(['html','form','date','inflector','language','number','text']);
+			
 			self::$helper_loaded = true;
 		}
 
 		if (!self::$loaded_plugin[$name]) {
 			ci()->load->pear_plugin($name);
+			
 			self::$loaded_plugin[$name] = true;
 		}
 
