@@ -23,8 +23,7 @@ class Middleware_base {
 		$this->controller = &$controller;
 	}
 
-	public function run() {
-	}
+	public function run() {}
 
 	public function __get($key) {
 		return get_instance()->$key;

@@ -20,7 +20,6 @@ class Event {
 	protected static $listeners = [];
 
 	public static function register($name, $closure, $priority = 0) {
-
 		if (is_array($name)) {
 			foreach ($name as $n) {
 				self::register($n, $closure, $priority = 0);

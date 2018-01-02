@@ -37,7 +37,6 @@ class Validate_base {
 	public function validate(&$field, $options) {}
 
 	public function length($length = null) {
-
 		if (is_numeric($length)) {
 			if ((int) $length > 0) {
 				$this->field = substr($this->field, 0, $length);

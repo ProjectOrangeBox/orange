@@ -68,7 +68,6 @@ class Auth {
 	}
 
 	protected function _login($login, $password) {
-
 		if ((strlen(trim($login)) == 0) or (strlen(trim($password)) == 0)) {
 			errors::add(config('auth.empty fields error'));
 			log_message('debug', 'auth->user '.config('auth.empty fields error'));

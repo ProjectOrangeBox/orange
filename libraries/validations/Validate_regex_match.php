@@ -19,6 +19,7 @@
 class Validate_regex_match extends Validate_base {
 	public function validate(&$field, $options) {
 		$this->error_string = '%s is not in the correct format.';
+
 		return (bool) preg_match($options, $field);
 	}
 } /* end file */

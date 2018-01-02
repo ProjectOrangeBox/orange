@@ -39,7 +39,6 @@ class Wallet {
 		'updated' => 'Record Updated',
 		'deleted' => 'Record Deleted',
 	];
-
 	protected $initial_pause;
 	protected $pause_for_each;
 

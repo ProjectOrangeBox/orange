@@ -23,7 +23,6 @@ class Validate {
 	protected $field_data = [];
 
 	public function __construct() {
-
 		$this->config = config('validate');
 
 		require_once __DIR__.'/Validate_base.php';

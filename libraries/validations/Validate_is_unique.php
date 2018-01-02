@@ -19,13 +19,17 @@
 class Validate_is_unique extends Validate_base {
 	public function validate(&$field, $options) {
 		$this->error_string = '%s must contain a unique value.';
+
 		list($tablename, $columnname) = explode('.', $options, 2);
+
 		if (empty($tablename)) {
 			return false;
 		}
+
 		if (empty($columnname)) {
 			return false;
 		}
+
 		return isset(ci()->db) ? (ci()->db->limit(1)->get_where($tablename, [$columnname => $field])->num_rows() === 0) : false;
 	}
 } /* end file */

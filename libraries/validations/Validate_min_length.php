@@ -19,9 +19,11 @@
 class Validate_min_length extends Validate_base {
 	public function validate(&$field, $options) {
 		$this->error_string = '%s must be at least %s characters in length.';
+
 		if (!is_numeric($options)) {
 			return false;
 		}
+
 		return (MB_ENABLED === TRUE) ? ($options <= mb_strlen($field)) : ($options <= strlen($field));
 	}
 } /* end file */

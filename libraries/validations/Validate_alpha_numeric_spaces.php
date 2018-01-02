@@ -19,6 +19,7 @@
 class Validate_alpha_numeric_spaces extends Validate_base {
 	public function validate(&$field, $options) {
 		$this->error_string = '%s may only contain alpha-numeric characters and spaces.';
+
 		return (bool) preg_match('/^[A-Z0-9 ]+$/i', $field);
 	}
 } /* end file */

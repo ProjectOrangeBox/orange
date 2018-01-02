@@ -19,6 +19,7 @@
 class Validate_alpha_numeric extends Validate_base {
 	public function validate(&$field, $options) {
 		$this->error_string = '%s may only contain alpha-numeric characters.';
+
 		return ctype_alnum((string) $field);
 	}
 } /* end file */

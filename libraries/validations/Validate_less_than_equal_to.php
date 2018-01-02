@@ -19,9 +19,11 @@
 class Validate_less_than_equal_to extends Validate_base {
 	public function validate(&$field, $options) {
 		$this->error_string = '%s must contain a number less than or equal to %s.';
+
 		if (!is_numeric($field)) {
 			return false;
 		}
+
 		return is_numeric($field) ? ($field <= $options) : false;
 	}
 } /* end file */

@@ -19,6 +19,7 @@
 class Validate_required extends Validate_base {
 	public function validate(&$field, $options) {
 		$this->error_string = '%s is required.';
+
 		return is_array($field) ? (bool) count($field) : (trim($field) !== '');
 	}
 } /* end file */

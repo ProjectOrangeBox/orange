@@ -23,7 +23,6 @@ class Page {
 	protected $assets            = [];
 	protected $script_attributes = ['src' => '', 'type' => 'text/javascript', 'charset' => 'utf-8'];
 	protected $link_attributes   = ['href' => '', 'type' => 'text/css', 'rel' => 'stylesheet'];
-
 	protected $domready_javascript = 'document.addEventListener("DOMContentLoaded",function(e){%%});';
 
 	public function __construct() {
