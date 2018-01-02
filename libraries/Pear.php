@@ -19,14 +19,11 @@
 class Pear {
 	protected static $setup = false;
 	protected static $attached = [];
-	protected static $loaded_plugin = [];
 	protected static $extends  = null;
 	protected static $fragment = null;
 
 	public static function __callStatic($name,$arguments) {
-		if (!self::$loaded_plugin[$name]) {
-			self::_loader($name);
-		}
+		self::_loader($name);
 
 		if (isset(self::$attached[$name])) {
 			return call_user_func_array(self::$attached[$name],$arguments);
