@@ -53,23 +53,18 @@ class MY_Input extends CI_Input {
 			foreach ($map as $new_key => $old_key) {
 				$mapped_form_data[$new_key] = $this->request($old_key,null);
 			}
+
+			$new_data = ($keep_current) ? array_merge((array)$this->request(),$mapped_form_data) : $mapped_form_data;
 			
-			/* put it into $_POST so we can grab it from there using request */
-			$_POST = ($keep_current) ? array_merge_recursive((array)$this->request(),$mapped_form_data) : $mapped_form_data;
+			if (count($_POST)) {
+				$_POST = $new_data;
+			} else {
+				$this->_input_stream = $new_data;
+			}
 			
 			return $this;
     }
     
-    /**
-    * Remap form data to another key/value incase the form element names don't match the model column names
-    * $this->input->remap(['name'=>'fullname','age'=>'years'])->request('fullname');
-    *
-    * @author Don Myers
-    * @param	 string $index
-    * @param	 string $default
-    * @param	 boolean $xss_clean
-    * @return string
-    */
     public function cookie($index = null, $default = null, $xss_clean = null) {
       $cookie = $this->_fetch_from_array($_COOKIE, $index, $xss_clean);
       

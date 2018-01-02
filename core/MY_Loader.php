@@ -10,7 +10,7 @@
  * required
  * core: load, config
  * libraries: event, cache_var_export
- * models: o_setting_model, o_packages_model
+ * models: o_setting_model
  * helpers:
  *
  */

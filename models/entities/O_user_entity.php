@@ -25,13 +25,6 @@ class O_user_entity extends model_entity {
 
 	protected $lazy_loaded = false;
 
-	/**
-	 * [[Description]]
-	 * @private
-	 * @author Don Myers
-	 * @param  [[Type]] $name [[Description]]
-	 * @return [[Type]] [[Description]]
-	 */
 	public function __get($name) {
 		switch ($name) {
 		case 'roles':
@@ -47,53 +40,38 @@ class O_user_entity extends model_entity {
 		}
 	}
 
-	/**
-	 * [[Description]]
-	 * @author Don Myers
-	 * @param [[Type]] $role [[Description]]
-	 */
 	public function add_role($role) {
 		ci()->o_user_model->add_role($this->id, $role);
 	}
 
-	/**
-	 * [[Description]]
-	 * @author Don Myers
-	 * @param [[Type]] $role [[Description]]
-	 */
 	public function remove_role($role) {
 		ci()->o_user_model->remove_role($this->id, $role);
 	}
 
-	/**
-	 * [[Description]]
-	 * @author Don Myers
-	 * @return [[Type]] [[Description]]
-	 */
 	public function roles() {
 		$this->_lazy_load();
 	
 		return $this->roles;
 	}
 
-	/**
-	 * [[Description]]
-	 * @author Don Myers
-	 * @param  [[Type]] $role_id [[Description]]
-	 * @return boolean  [[Description]]
-	 */
 	public function has_role($role_id) {
 		$this->_lazy_load();
 
 		return array_key_exists($role_id, $this->roles);
 	}
 
-	/**
-	 * [[Description]]
-	 * @author Don Myers
-	 * @param  [[Type]] [$role_ary = []] [[Description]]
-	 * @return boolean  [[Description]]
-	 */
+	public function can($resource) {
+		$this->_lazy_load();
+
+		return (in_array($resource, $this->permissions, true));
+	}
+
+	public function permissions() {
+		$this->_lazy_load();
+
+		return $this->permissions;
+	}
+
 	public function has_roles($role_ary = []) {
 		foreach ((array) $roles_ary as $r) {
 			if (!$this->has_role($r)) {
@@ -104,12 +82,6 @@ class O_user_entity extends model_entity {
 		return true;
 	}
 
-	/**
-	 * [[Description]]
-	 * @author Don Myers
-	 * @param  [[Type]] [$role_ary = []] [[Description]]
-	 * @return boolean  [[Description]]
-	 */
 	public function has_one_role_of($role_ary = []) {
 		foreach ((array) $roles_ary as $r) {
 			if ($this->has_role($r)) {
@@ -120,23 +92,6 @@ class O_user_entity extends model_entity {
 		return false;
 	}
 
-	/**
-	 * [[Description]]
-	 * @author Don Myers
-	 * @return [[Type]] [[Description]]
-	 */
-	public function permissions() {
-		$this->_lazy_load();
-
-		return $this->permissions;
-	}
-
-	/**
-	 * [[Description]]
-	 * @author Don Myers
-	 * @param  [[Type]] [$permission_ary = []] [[Description]]
-	 * @return boolean  [[Description]]
-	 */
 	public function has_permissions($permission_ary = []) {
 		foreach ((array) $permission_ary as $p) {
 			if ($this->cannot($p)) {
@@ -147,12 +102,6 @@ class O_user_entity extends model_entity {
 		return true;
 	}
 	
-	/**
-	 * [[Description]]
-	 * @author Don Myers
-	 * @param  [[Type]] [$permission_ary = []] [[Description]]
-	 * @return boolean  [[Description]]
-	 */
 	public function has_one_permission_of($permission_ary = []) {
 		foreach ((array) $permission_ary as $p) {
 			if ($this->can($p)) {
@@ -163,48 +112,19 @@ class O_user_entity extends model_entity {
 		return false;
 	}
 
-	/**
-	 * [[Description]]
-	 * @author Don Myers
-	 * @param  [[Type]] $resource [[Description]]
-	 * @return boolean  [[Description]]
-	 */
-	public function can($resource) {
-		$this->_lazy_load();
-
-		return (in_array($resource, $this->permissions, true));
-	}
-
 	public function has_permission($resource) {
 		return $this->can($resource);
 	}
 
-	/**
-	 * [[Description]]
-	 * @author Don Myers
-	 * @param  [[Type]] $resource [[Description]]
-	 * @return [[Type]] [[Description]]
-	 */
 	public function cannot($resource) {
 		return !$this->can($resource);
 	}
 
-	/**
-	 * [[Description]]
-	 * @author Don Myers
-	 * @return [[Type]] [[Description]]
-	 */
 	public function logged_in() {
 		/* is this person not nobody */
 		return ($this->id !== NOBODY_USER_ID);
 	}
 
-	/**
-	 * [[Description]]
-	 * @private
-	 * @author Don Myers
-	 * @return [[Type]] [[Description]]
-	 */
 	protected function _lazy_load() {
 		$user_id = (int)$this->id;
 		$cache_key = 'database.user_entity.'.$user_id.'.acl.php';
@@ -251,13 +171,6 @@ class O_user_entity extends model_entity {
 		}
 		
 		return $roles_permissions;
-	}
-	
-	/* internal for lazy loader */
-	protected function _has_role($user_id,$role_id) {
-		$dbc = ci()->db->get_where('orange_user_role',['user_id'=>(int)$user_id,'role_id'=>(int)$role_id], 1);
-
-		return ($dbc->num_rows() === 1);
 	}
 
 } /* end class */

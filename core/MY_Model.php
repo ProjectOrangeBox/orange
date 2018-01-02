@@ -97,9 +97,6 @@ class MY_Model extends CI_Model {
 	 * @return void
 	 */
 	public function validate(&$data, $rules = true) {
-		/* load the validate library if it's not already loaded */
-		$this->load->library('validate');
-
 		/* rules needs to be a array of rule sets to use for validation */
 		if ($rules === true) {
 			/* dynamically build the rules from the associated keys in $data */
@@ -114,7 +111,7 @@ class MY_Model extends CI_Model {
 
 		/* run the model rules */
 		if (count($rules)) {
-			ci()->validate->multiple($rules, $data);
+			ci('validate')->multiple($rules, $data);
 		}
 
 		return !errors::has();

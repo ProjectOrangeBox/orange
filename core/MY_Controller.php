@@ -50,11 +50,21 @@ class MY_Controller extends CI_Controller {
 	public function __construct() {
 		parent::__construct();
 
-		/* start middleware */
-		require ORANGEPATH . '/libraries/Middleware_base.php';
+		/* is the site even open? */
 
-		require APPPATH . '/config/middleware.php';
-
+		/* it's always open on the command line */
+		if (php_sapi_name() !== 'cli') {
+			/* test the setting */
+			if (!config('application.site open')) {
+				/* but do they have the correct ISOPEN cookie? */
+				if ($_COOKIE['ISOPEN'] !== config('application.is open cookie', md5(uniqid(true)))) {
+					/* nope! */
+					errors::display(503, ['heading' => 'Please Stand By', 'message' => 'Site Down for Maintenance']);
+				}
+			}
+		}
+		
+		/* if they did enter the title and titles try to figure them out */
 		if (!$this->controller_title) {
 			ci()->load->helper('inflector');
 			
@@ -66,6 +76,11 @@ class MY_Controller extends CI_Controller {
 			
 			$this->controller_titles = plural(filter_human($this->controller));
 		}
+
+		/* start middleware */
+		require ORANGEPATH . '/libraries/Middleware_base.php';
+
+		require APPPATH . '/config/middleware.php';
 
 		$base_middleware = $middleware;
 		
@@ -86,27 +101,12 @@ class MY_Controller extends CI_Controller {
 				$this->controller_middleware_as_body_classes[] = substr($middleware_file, 0, -10);
 				$this->controller_middleware_ran[]             = $middleware_file;
 
-
 				(new $middleware_file($this))->run();
 			} else {
 				throw new Exception('middleware "'.$middleware_file.'" not found.');
 			}
 		}
 		/* end middleware */
-
-		/* is the site even open? */
-
-		/* it's always open on the command line */
-		if (php_sapi_name() !== 'cli') {
-			/* test the setting */
-			if (!config('application.site open')) {
-				/* but do they have the correct ISOPEN cookie? */
-				if ($_COOKIE['ISOPEN'] !== config('application.is open cookie', md5(uniqid(true)))) {
-					/* nope! */
-					errors::display(503, ['heading' => 'Please Stand By', 'message' => 'Site Down for Maintenance']);
-				}
-			}
-		}
 
 		/* load the other controller libraries, model, helpers */
 		if ($this->libraries) {
@@ -156,7 +156,7 @@ class MY_Controller extends CI_Controller {
 		}
 
 		/* while you could have done this in your onload file - this keeps it "clean" */
-		Event::trigger('ci.controller.startup', $this);
+		event::trigger('ci.controller.startup', $this);
 		
 	} /* end __construct */
 

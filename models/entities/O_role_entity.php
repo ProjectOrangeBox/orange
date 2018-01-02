@@ -20,13 +20,6 @@ class O_role_entity extends model_entity {
 	public $description;
 	public $name;
 
-	/**
-	 * [[Description]]
-	 * @private
-	 * @author Don Myers
-	 * @param  [[Type]] $name [[Description]]
-	 * @return [[Type]] [[Description]]
-	 */
 	public function __get($name) {
 		switch ($name) {
 			case 'users':

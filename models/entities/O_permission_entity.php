@@ -21,13 +21,6 @@ class O_permission_entity extends model_entity {
 	public $group;
 	public $description;
 
-	/**
-	 * [[Description]]
-	 * @private
-	 * @author Don Myers
-	 * @param  [[Type]] $name [[Description]]
-	 * @return [[Type]] [[Description]]
-	 */
 	public function __get($name) {
 		switch ($name) {
 			case 'roles':

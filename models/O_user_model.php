@@ -54,8 +54,6 @@ class o_user_model extends Database_model {
 	/**
 	 * Override parent insert to handle passwords
 	 * @author Don Myers
-	 * @param	 array $data array of required fields matching $rule_sets[insert]
-	 * @return integer Returns the ID of the last inserted row
 	 */
 	public function insert($data) {
 		if (!empty($data['password'])) {
@@ -74,8 +72,6 @@ class o_user_model extends Database_model {
 	/**
 	 * Override parent update to handle passwords
 	 * @author Don Myers
-	 * @param	 array $data array of fields
-	 * @return [[Type]] [[Description]]
 	 */
 	public function update($data) {
 		if (!empty($data['password'])) {
@@ -91,13 +87,6 @@ class o_user_model extends Database_model {
 		}
 	}
 
-	/**
-	 * [[Description]]
-	 * @author Don Myers
-	 * @param	 [[Type]] $user_id [[Description]]
-	 * @param	 [[Type]] $role		 [[Description]]
-	 * @return [[Type]] [[Description]]
-	 */
 	public function add_role($user_id, $role) {
 		if ((int) $user_id < 0) {
 			throw new Exception(__METHOD__ . ' please provide a integer for the user id');
@@ -114,13 +103,6 @@ class o_user_model extends Database_model {
 		return $this->_database->replace(config('auth.user role table'), ['role_id' => (int) $this->_find_role_id($role), 'user_id' => (int) $user_id]);
 	}
 
-	/**
-	 * [[Description]]
-	 * @author Don Myers
-	 * @param	 [[Type]] $user_id		 [[Description]]
-	 * @param	 [[Type]] [$role=null] [[Description]]
-	 * @return [[Type]] [[Description]]
-	 */
 	public function remove_role($user_id, $role = null) {
 		if ((int) $user_id < 0) {
 			throw new Exception(__METHOD__ . ' please provide a integer for the user id');
@@ -144,12 +126,6 @@ class o_user_model extends Database_model {
 		return $this->_database->delete(config('auth.user role table'), ['user_id' => (int) $user_id, 'role_id' => (int) $this->_find_role_id($role)]);
 	}
 
-	/**
-	 * [[Description]]
-	 * @author Don Myers
-	 * @param	 [[Type]] $user_id [[Description]]
-	 * @return [[Type]] [[Description]]
-	 */
 	public function roles($user_id) {
 		$dbc = $this->_database
 			->from(config('auth.user role table'))
@@ -160,87 +136,37 @@ class o_user_model extends Database_model {
 		return ($dbc->num_rows() > 0) ? $dbc->result() : [];
 	}
 
-	/**
-	 * [[Description]]
-	 * @author Don Myers
-	 * @param	 [[Type]] $password [[Description]]
-	 * @return [[Type]] [[Description]]
-	 */
 	public function hash_password($password) {
 		/* use new PHP password hasher */
 		return password_hash($password, PASSWORD_DEFAULT);
 	}
 
-	/**
-	 * [[Description]]
-	 * @author Don Myers
-	 * @param	 [[Type]] $login [[Description]]
-	 * @return [[Type]] [[Description]]
-	 */
 	public function get_user_by_login($login) {
 		return $this->where('LOWER(username)=', strtolower($login))->or_where('LOWER(email)=', strtolower($login))->set_temp_return_on_single(false)->_get(false);
 	}
 
-	/**
-	 * [[Description]]
-	 * @author Don Myers
-	 * @param	 [[Type]] $username [[Description]]
-	 * @return [[Type]] [[Description]]
-	 */
 	public function get_user_by_username($username) {
 		return $this->where('LOWER(username)=', strtolower($username))->set_temp_return_on_single(false)->_get(false);
 	}
 
-	/**
-	 * [[Description]]
-	 * @author Don Myers
-	 * @param	 [[Type]] $email [[Description]]
-	 * @return [[Type]] [[Description]]
-	 */
 	public function get_user_by_email($email) {
 		return $this->where('LOWER(email)=', strtolower($email))->set_temp_return_on_single(false)->_get(false);
 	}
 
-	/**
-	 * [[Description]]
-	 * @author Don Myers
-	 * @param	 [[Type]] $password [[Description]]
-	 * @return [[Type]] [[Description]]
-	 */
 	public function password($password) {
 		$this->validate->single($this->rules['password']['rules'], $password);
 
 		return errors::has();
 	}
 
-	/**
-	 * [[Description]]
-	 * @private
-	 * @author Don Myers
-	 * @param	 [[Type]] $role [[Description]]
-	 * @return [[Type]] [[Description]]
-	 */
 	public function _find_role_id($role) {
 		return (int) ((int) $role > 0) ? $role : $this->o_role_model->column('id')->get_by(['name' => $role]);
 	}
 
-	/**
-	 * [[Description]]
-	 * @private
-	 * @author Don Myers
-	 * @param	 [[Type]] $permission [[Description]]
-	 * @return [[Type]] [[Description]]
-	 */
 	public function _find_permission_id($permission) {
 		return (int) ((int) $permission > 0) ? $permission : $this->o_permission_model->column('id')->get_by(['key' => $permission]);
 	}
 
-	/**
-	 * [[Description]]
-	 * @private
-	 * @author Don Myers
-	 * @param [[Type]] &$data [[Description]]
-	 */
 	protected function _hash_password(&$data) {
 		if (isset($data['password'])) {
 			$password_info = password_get_info($data['password']);
