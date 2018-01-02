@@ -1,5 +1,5 @@
 <?php
-/**
+/*
  * Orange Framework Extension
  *
  * @package	CodeIgniter / Orange
@@ -12,6 +12,7 @@
  * libraries:
  * models:
  * helpers:
+ * functions:
  *
  */
 
@@ -33,4 +34,4 @@ class O_permission_entity extends model_entity {
 		return ci()->o_permission_model->roles($this->id);
 	}
 
-} /* end class */
+} /* end file */

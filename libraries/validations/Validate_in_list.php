@@ -1,21 +1,25 @@
 <?php
-/**
- * Orange Framework validation rule
- *
- * This content is released under the MIT License (MIT)
+/*
+ * Orange Framework Extension
  *
  * @package	CodeIgniter / Orange
- * @author	Don Myers
+ * @author Don Myers
  * @license http://opensource.org/licenses/MIT MIT License
- * @link	https://github.com/ProjectOrangeBox
+ * @link https://github.com/ProjectOrangeBox
+ *
+ * required
+ * core:
+ * libraries:
+ * models:
+ * helpers:
+ * functions:
  *
  */
+
 class Validate_in_list extends Validate_base {
 	public function validate(&$field, $options) {
 		$this->error_string = '%s must contain one of the available selections.';
-
-		// in_list[1,2,3,4]
-		$types = ($options) ? $options : '';
+				$types = ($options) ? $options : '';
 		return (in_array($field, explode(',', $types)));
 	}
-} /* end class */
+} /* end file */

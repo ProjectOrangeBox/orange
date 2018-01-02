@@ -1,8 +1,6 @@
 <?php
-/**
+/*
  * Orange Framework Extension
- *
- * This content is released under the MIT License (MIT)
  *
  * @package	CodeIgniter / Orange
  * @author Don Myers
@@ -10,21 +8,20 @@
  * @link https://github.com/ProjectOrangeBox
  *
  * required
- * core: session, load, input
- * libraries: event
+ * core:
+ * libraries:
  * models:
  * helpers:
- * functions: setting
+ * functions:
  *
  */
- 
+
 class o_permission_model extends Database_model {
-	protected $table; /* this is retrieved in the constructor from the config file */
+	protected $table;
 	protected $additional_cache_tags = '.acl';
 	protected $has_roles = true;
 	protected $has_stamps = true;
 	protected $entity = true;
-	
 	protected $rules = [
 		'id'          => ['field' => 'id', 'label' => 'Id', 'rules' => 'required|integer|max_length[10]|less_than[4294967295]|filter_int[10]'],
 		'description' => ['field' => 'description', 'label' => 'Description', 'rules' => 'required|max_length[255]|filter_input[255]|is_uniquem[o_permission_model.description.id]'],
@@ -34,17 +31,15 @@ class o_permission_model extends Database_model {
 
 	public function __construct() {
 		$this->table = config('auth.permission table');
-	
 		parent::__construct();
 	}
 
 	public function roles($role) {
 		$dbc = $this->_database
 			->from(config('auth.role permission table'))
-			->join(config('auth.role table'), config('auth.role table') . '.id = ' . config('auth.role permission table') . '.role_id')
+			->join(config('auth.role table'), config('auth.role table').'.id = '.config('auth.role permission table').'.role_id')
 			->where(['permission_id' => (int) $role_id])
 			->get();
-
 		return ($this->_database->num_rows() > 0) ? $dbc->result() : [];
 	}
 
@@ -55,26 +50,23 @@ class o_permission_model extends Database_model {
 	public function _find_permission_id($permission) {
 		return (int) ((int) $permission > 0) ? $permission : $this->o_permission_model->column('id')->get_by(['key' => $permission]);
 	}
-	
+
 	public function insert($data) {
 		if (!$this->exists(['key'=>$data['key']])) {
 			parent::insert($data);
-			
-			/* add this to the administrator role */
+
 			$this->administrator_refresh();
-			
-			/* refresh the ACL caches */
+
 			$this->delete_cache_by_tags();
 		}
 	}
 
 	public function administrator_refresh() {
-		/* get all permissions */
+
 		$records = $this->get_many();
-		
 		foreach ($records as $record) {
 			$this->o_role_model->add_permission(ADMIN_ROLE_ID,$record->id);
 		}
 	}
 
-} /* end class */
+} /* end file */

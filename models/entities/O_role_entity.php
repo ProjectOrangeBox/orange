@@ -1,5 +1,5 @@
 <?php
-/**
+/*
  * Orange Framework Extension
  *
  * @package	CodeIgniter / Orange
@@ -12,6 +12,7 @@
  * libraries:
  * models:
  * helpers:
+ * functions:
  *
  */
 
@@ -47,4 +48,4 @@ class O_role_entity extends model_entity {
 		return ci()->o_role_model->users((int)$this->id);
 	}
 
-} /* end class */
+} /* end file */

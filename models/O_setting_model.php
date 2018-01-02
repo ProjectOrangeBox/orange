@@ -1,21 +1,18 @@
 <?php
-/**
+/*
  * Orange Framework Extension
- *
- * This content is released under the MIT License (MIT)
  *
  * @package	CodeIgniter / Orange
  * @author Don Myers
  * @license http://opensource.org/licenses/MIT MIT License
  * @link https://github.com/ProjectOrangeBox
  *
- *
  * required
- * core: session, load, input
- * libraries: event
+ * core:
+ * libraries:
  * models:
  * helpers:
- * functions: setting
+ * functions:
  *
  */
 
@@ -23,7 +20,6 @@ class o_setting_model extends Database_model {
 	protected $table = 'orange_settings';
 	protected $has_roles = true;
 	protected $has_stamps = true;
-	
 	protected $rules = [
 		'id'             => ['field' => 'id', 'label' => 'Id', 'rules' => 'required|integer|max_length[10]|less_than[4294967295]|filter_int[10]'],
 		'group'          => ['field' => 'group', 'label' => 'Group', 'rules' => 'required|max_length[64]|filter_input[64]|trim'],
@@ -38,13 +34,10 @@ class o_setting_model extends Database_model {
 		return $this->get_many_by(['enabled' => 1]);
 	}
 
-	/* override parent */
 	protected function delete_cache_by_tags() {
-		/* anytime the model calls this to flush the cache also tell the core config which creates it's own cache */
 		$this->config->flush();
 
-		/* now tell the parent */
 		return parent::delete_cache_by_tags();
 	}
 
-} /* end class */
+} /* end file */

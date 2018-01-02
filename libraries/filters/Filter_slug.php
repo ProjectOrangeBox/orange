@@ -1,35 +1,28 @@
 <?php
-/**
- * Orange Framework validation rule
- *
- * This content is released under the MIT License (MIT)
+/*
+ * Orange Framework Extension
  *
  * @package	CodeIgniter / Orange
- * @author	Don Myers
+ * @author Don Myers
  * @license http://opensource.org/licenses/MIT MIT License
- * @link	https://github.com/ProjectOrangeBox
+ * @link https://github.com/ProjectOrangeBox
+ *
+ * required
+ * core:
+ * libraries:
+ * models:
+ * helpers:
+ * functions:
  *
  */
+
 class Filter_slug extends Filter_base {
-
 	public function filter(&$field, $options) {
-	  // replace non letter or digits by -
-	  $field = preg_replace('~[^\pL\d]+~u', '-', $field);
-	
-	  // transliterate
-	  $field = iconv('utf-8', 'us-ascii//TRANSLIT', $field);
-	
-	  // remove unwanted characters
-	  $field = preg_replace('~[^-\w]+~', '', $field);
-	
-	  // trim
-	  $field = trim($field, '-');
-	
-	  // remove duplicate -
-	  $field = preg_replace('~-+~', '-', $field);
-	
-	  // lowercase
-	  $field = strtolower($field);
+		$field = preg_replace('~[^\pL\d]+~u', '-', $field);
+		$field = iconv('utf-8', 'us-ascii//TRANSLIT', $field);
+		$field = preg_replace('~[^-\w]+~', '', $field);
+		$field = trim($field, '-');
+		$field = preg_replace('~-+~', '-', $field);
+		$field = strtolower($field);
 	}
-
-} /* end class */
+} /* end file */

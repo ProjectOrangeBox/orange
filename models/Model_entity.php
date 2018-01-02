@@ -1,5 +1,5 @@
 <?php
-/**
+/*
  * Orange Framework Extension
  *
  * @package	CodeIgniter / Orange
@@ -12,24 +12,23 @@
  * libraries:
  * models:
  * helpers:
+ * functions:
  *
  */
- 
+
 class Model_entity {
 	protected $_model_name = null;
-	protected $save_columns = null; /* when saving only use these columns */
+	protected $save_columns = null;
 
 	public function __construct() {
 		$this->_model_name = strtolower(substr(get_called_class(),0,-7).'_model');
-	
 		log_message('info', 'Model_entity Class Initialized');
 	}
 
 	public function save() {
 		$model = ci()->{$this->_model_name};
-
 		$primary_id = $model->get_primary_key();
-	
+
 		if ($this->save_columns) {
 			foreach ($this->save_columns as $col) {
 				$data[$col] = $this->$col;
@@ -39,25 +38,18 @@ class Model_entity {
 		}
 
 		if ($data[$primary_id] == null) {
-			/* let's make sure it's removed then */
+
 			unset($data[$primary_id]);
-			
 			$success = $model->insert($data);
-			
-			/* put it on this entity so they can update it on the next save call */
+
 			if ($success !== false) {
 				$this->$primary_id = $success;
-			}		
+			}
 		} else {
 			$success = $model->update($data);
 		}
-		
+
 		return (bool)$success;
 	}
 
-	/*
-	public function __get($name) {}
-	public function __set($name, $value) {}
-  */
-
-} /* end class */
+} /* end file */

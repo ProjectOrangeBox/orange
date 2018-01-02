@@ -1,5 +1,5 @@
 <?php
-/**
+/*
  * Orange Framework Extension
  *
  * @package	CodeIgniter / Orange
@@ -12,6 +12,7 @@
  * libraries:
  * models:
  * helpers:
+ * functions:
  *
  */
 
@@ -19,22 +20,18 @@ class O_user_entity extends model_entity {
 	public $id;
 	public $email;
 	public $username;
-
 	protected $roles       = [];
 	protected $permissions = [];
-
 	protected $lazy_loaded = false;
 
 	public function __get($name) {
 		switch ($name) {
 		case 'roles':
 			$this->_lazy_load();
-
 			return $this->roles;
 			break;
 		case 'permissions':
 			$this->_lazy_load();
-
 			return $this->permissions;
 			break;
 		}
@@ -50,7 +47,7 @@ class O_user_entity extends model_entity {
 
 	public function roles() {
 		$this->_lazy_load();
-	
+
 		return $this->roles;
 	}
 
@@ -101,7 +98,7 @@ class O_user_entity extends model_entity {
 
 		return true;
 	}
-	
+
 	public function has_one_permission_of($permission_ary = []) {
 		foreach ((array) $permission_ary as $p) {
 			if ($this->can($p)) {
@@ -121,28 +118,25 @@ class O_user_entity extends model_entity {
 	}
 
 	public function logged_in() {
-		/* is this person not nobody */
 		return ($this->id !== NOBODY_USER_ID);
 	}
 
 	protected function _lazy_load() {
 		$user_id = (int)$this->id;
 		$cache_key = 'database.user_entity.'.$user_id.'.acl.php';
-	
+
 		if (!$this->lazy_loaded) {
 			if (!$roles_permissions = ci()->cache->get($cache_key)) {
 				$roles_permissions = $this->_lazy_loader($user_id);
-				
 				ci()->cache->save($cache_key,$roles_permissions,cache_ttl());
 			}
 
 			$this->roles       = (array) $roles_permissions['roles'];
 			$this->permissions = (array) $roles_permissions['permissions'];
-
 			$this->lazy_loaded = true;
 		}
 	}
-	
+
 	protected function _lazy_loader($user_id) {
 		$roles_permissions = [];
 
@@ -155,22 +149,21 @@ class O_user_entity extends model_entity {
 			from ".config('auth.user role table')."
 			left join ".config('auth.role table')." on ".config('auth.role table').".id = ".config('auth.user role table').".role_id
 			left join ".config('auth.role permission table')." on ".config('auth.role permission table').".role_id = ".config('auth.role table').".id
-			left join ".config('auth.permission table')." on ".config('auth.permission table').".id = ".config('auth.role permission table').".permission_id 
+			left join ".config('auth.permission table')." on ".config('auth.permission table').".id = ".config('auth.role permission table').".permission_id
 			where ".config('auth.user role table').".user_id = ".$user_id;
-	
+
 		$dbc = ci()->db->query($sql);
-	
+
 		foreach ($dbc->result() as $dbr) {
 			if ($dbr->orange_roles_name) {
 				$roles_permissions['roles'][(int) $dbr->orange_roles_id] = $dbr->orange_roles_name;
 			}
-	
 			if ($dbr->key) {
 				$roles_permissions['permissions'][(int) $dbr->permission_id] = $dbr->key;
 			}
 		}
-		
+
 		return $roles_permissions;
 	}
 
-} /* end class */
+} /* end file */
