@@ -8,36 +8,34 @@
  * @link https://github.com/ProjectOrangeBox
  *
  * required
- * core:
- * libraries:
+ * core: load
+ * libraries: page
  * models:
- * helpers:
+ * helpers: html, form, date, inflector, language, number, text
  * functions:
  *
  */
 
 class Pear {
-	protected static $helper_loaded = false;
+	protected static $setup = false;
 	protected static $attached = [];
 	protected static $loaded_plugin = [];
 	protected static $extends  = null;
 	protected static $fragment = null;
 
 	public static function __callStatic($name,$arguments) {
-		if (!self::$helper_loaded) {
-			ci()->load->helper(['html','form','date','inflector','language','number','text']);
-			
-			self::$helper_loaded = true;
-		}
-
 		if (!self::$loaded_plugin[$name]) {
-			ci()->load->pear_plugin($name);
-			
-			self::$loaded_plugin[$name] = true;
+			self::_loader($name);
 		}
 
 		if (isset(self::$attached[$name])) {
 			return call_user_func_array(self::$attached[$name],$arguments);
+		}
+
+		if (!self::$setup) {
+			ci('load')->helper(['html','form','date','inflector','language','number','text']);
+			
+			self::$setup = true;
 		}
 
 		if (function_exists('form_'.$name)) {
@@ -57,7 +55,7 @@ class Pear {
 
 	public static function section($name,$value=null) {
 		if ($value) {
-			ci()->load->vars([$name => $value]);
+			ci('load')->vars([$name => $value]);
 		} else {
 			self::$fragment[$name] = $name;
 			ob_start();
@@ -67,7 +65,7 @@ class Pear {
 	public static function parent($name=null) {
 		$name = ($name) ? $name : end(self::$fragment);
 
-		echo ci()->load->get_var($name);
+		echo ci('load')->get_var($name);
 	}
 
 	public static function end() {
@@ -76,7 +74,7 @@ class Pear {
 
 		ob_end_clean();
 
-		ci()->load->vars([$name => $buffer]);
+		ci('load')->vars([$name => $buffer]);
 	}
 
 	public static function extends($name) {
@@ -85,9 +83,9 @@ class Pear {
 
 	public static function include($view = null, $data = [], $name = true) {
 		if ($name === true) {
-			echo ci()->page->view($view, $data, $name);
+			echo ci('page')->view($view, $data, $name);
 		} else {
-			ci()->page->view($view, $data, $name);
+			ci('page')->view($view, $data, $name);
 		}
 	}
 
@@ -96,9 +94,31 @@ class Pear {
 	}
 
 	public static function plugins($names='') {
-		ci()->page->prepend_asset();
-		ci()->load->pear_plugin($names);
-		ci()->page->prepend_asset(false);
+		ci('page')->prepend_asset(true);
+		self::_loader($names);
+		ci('page')->prepend_asset(false);
+	}
+	
+	public static function _loader($name='') {
+		if (strpos($name,',') !== false) {
+			$name = explode(',',$name);
+		}
+
+		if (is_array($name)) {
+			foreach ($name as $n) {
+				self::_loader($n);
+			}
+		} else {
+			$class = 'Pear_'.str_replace('pear_','',strtolower($name));
+
+			if (!class_exists($class,false)) {
+				if ($file = stream_resolve_include_path('libraries/pear_plugins/'.$class.'.php')) {
+					include $file;
+				
+					new $class;
+				}
+			}
+		}
 	}
 
 } /* end file */

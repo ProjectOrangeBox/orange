@@ -96,57 +96,62 @@ function codeigniter_autoload($class) {
 
 	if ($file = stream_resolve_include_path($class.'.php')) {
 		require_once $file;
+
 		return true;
 	} elseif (substr($class, -6) == '_model') {
 		if (stream_resolve_include_path('models/'.$uclass.'.php')) {
 			ci()->load->model($class);
+
 			return true;
 		}
 	} elseif (substr($class, -10) == 'Controller') {
 		if ($file = stream_resolve_include_path('controllers/'.$uclass.'.php')) {
 			include $file;
+
 			return true;
 		}
 	} elseif (substr($class, -6) == '_trait') {
 		if (substr($class, -17) == '_controller_trait') {
 			if ($file = stream_resolve_include_path('controllers/traits/'.$class.'.php')) {
 				include $file;
+
 				return true;
 			}
 		}
 		if (substr($class, -12) == '_model_trait') {
 			if ($file = stream_resolve_include_path('models/traits/'.$class.'.php')) {
 				include $file;
+
 				return true;
 			}
 		}
 		if (substr($class, -14) == '_library_trait') {
 			if ($file = stream_resolve_include_path('library/traits/'.$class.'.php')) {
 				include $file;
+
 				return true;
 			}
 		}
 	} elseif (stream_resolve_include_path('libraries/'.$uclass.'.php')) {
 		ci()->load->library($class);
+		
 		return true;
 	} elseif (substr($class, -10) == 'Middleware') {
 		if ($file = stream_resolve_include_path('middleware/'.$uclass.'.php')) {
 			include $file;
-			return true;
-		}
-	} elseif (substr($uclass,0,5) == 'Pear_') {
-		if ($file = stream_resolve_include_path('libraries/pear_plugins/'.$uclass.'.php')) {
-			include $file;
+		
 			return true;
 		}
 	} elseif (substr($uclass,0,9) == 'Validate_') {
 		if ($file = stream_resolve_include_path('libraries/validations/'.$uclass.'.php')) {
 			include $file;
+		
 			return true;
 		}
 	} elseif (substr($uclass,0,7) == 'Filter_') {
 		if ($file = stream_resolve_include_path('libraries/filters/'.$uclass.'.php')) {
 			include $file;
+
 			return true;
 		}
 	}
@@ -155,15 +160,16 @@ function codeigniter_autoload($class) {
 }
 
 function site_url($uri = '', $protocol = NULL) {
-
 	$uri = ci()->config->site_url($uri, $protocol);
 
 	$paths = cache_var_export::cache('get_path', function () {
 		$array = [];
 		$paths = config('paths');
+
 		foreach ($paths as $m => $t) {
 			$array['{'.$m.'}'] = $t;
 		}
+
 		return ['keys' => array_keys($array), 'values' => array_values($array)];
 	});
 

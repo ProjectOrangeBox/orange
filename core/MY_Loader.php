@@ -125,26 +125,4 @@ class MY_Loader extends CI_Loader {
 		return $this->_ci_init_library($library_name, $prefix, $params, $object_name);
 	}
 
-	public function pear_plugin($name='') {
-		if (strpos($name,',') !== false) {
-			$name = explode(',',$name);
-		}
-
-		if (is_array($name)) {
-			foreach ($name as $n) {
-				$this->pear_plugin($n);
-			}
-
-			return $this;
-		}
-
-		$class = 'Pear_'.str_replace('pear_','',strtolower($name));
-
-		if (class_exists($class,true)) {
-			new $class;
-		}
-		
-		return $this;
-	}
-
 } /* end file */
