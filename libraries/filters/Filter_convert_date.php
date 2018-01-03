@@ -19,7 +19,7 @@
 class Filter_convert_date extends Filter_base {
 	public function filter(&$field, $options) {
 		$options = ($options) ? $options : 'Y-m-d H:i:s';
-		
+
 		$field = date($options, strtotime($field));
 	}
 } /* end file */

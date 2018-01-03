@@ -134,18 +134,18 @@ function codeigniter_autoload($class) {
 		}
 	} elseif (stream_resolve_include_path('libraries/'.$uclass.'.php')) {
 		ci()->load->library($class);
-		
+
 		return true;
 	} elseif (substr($class, -10) == 'Middleware') {
 		if ($file = stream_resolve_include_path('middleware/'.$uclass.'.php')) {
 			include $file;
-		
+
 			return true;
 		}
 	} elseif (substr($uclass,0,9) == 'Validate_') {
 		if ($file = stream_resolve_include_path('libraries/validations/'.$uclass.'.php')) {
 			include $file;
-		
+
 			return true;
 		}
 	} elseif (substr($uclass,0,7) == 'Filter_') {

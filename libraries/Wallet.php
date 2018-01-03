@@ -73,7 +73,7 @@ class Wallet {
 
 	public function msg($msg = '', $type = 'yellow', $redirect = null) {
 		$sticky = ($type == 'red' || $type == 'danger' || $type == 'warning' || $type == 'yellow');
-		
+
 		event::trigger('wallet.msg', $msg, $type, $sticky, $redirect);
 
 		if (is_string($redirect) || $redirect === true) {

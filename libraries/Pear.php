@@ -31,7 +31,7 @@ class Pear {
 
 		if (!self::$setup) {
 			ci('load')->helper(['html','form','date','inflector','language','number','text']);
-			
+
 			self::$setup = true;
 		}
 
@@ -95,7 +95,7 @@ class Pear {
 		self::_loader($names);
 		ci('page')->prepend_asset(false);
 	}
-	
+
 	public static function _loader($name='') {
 		if (strpos($name,',') !== false) {
 			$name = explode(',',$name);
@@ -111,7 +111,7 @@ class Pear {
 			if (!class_exists($class,false)) {
 				if ($file = stream_resolve_include_path('libraries/pear_plugins/'.$class.'.php')) {
 					include $file;
-				
+
 					new $class;
 				}
 			}
