@@ -52,20 +52,41 @@ class o_permission_model extends Database_model {
 	}
 
 	public function insert($data) {
-		if (!$this->exists(['key'=>$data['key']])) {
-			parent::insert($data);
+		parent::insert($data);
 
-			$this->administrator_refresh();
+		$this->administrator_refresh();
 
-			$this->delete_cache_by_tags();
-		}
+		$this->delete_cache_by_tags();
+	}
+
+	public function update($data) {
+		parent::update($data);
+
+		$this->administrator_refresh();
+
+		$this->delete_cache_by_tags();
 	}
 
 	public function administrator_refresh() {
-
 		$records = $this->get_many();
+
 		foreach ($records as $record) {
 			$this->o_role_model->add_permission(ADMIN_ROLE_ID,$record->id);
+		}
+	}
+
+	public function add($key,$group,$description) {
+		$data = [
+			'key' => $key,
+			'group' => $group,
+			'description' => $description,
+			'read_role_id'=>ADMIN_ROLE_ID,
+			'edit_role_id'=>ADMIN_ROLE_ID,
+			'delete_role_id'=>ADMIN_ROLE_ID,
+		];
+
+		if (!$this->exists(['key'=>$key])) {
+			$this->insert($data);
 		}
 	}
 
