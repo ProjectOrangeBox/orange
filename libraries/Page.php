@@ -94,6 +94,8 @@ class Page {
 			$view_content = $this->view(pear::is_extending());
 		}
 
+		event::trigger('page.render.content',$view_content);
+
 		ci()->output->append_output($view_content);
 
 		return $this;
