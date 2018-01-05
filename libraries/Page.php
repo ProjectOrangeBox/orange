@@ -37,7 +37,9 @@ class Page {
 			$this->body_class(str_replace('/',' ',$this->route).' not-active uid'.$userid);
 		}
 
-		ci()->load->library('pear')->helper('url');
+		require 'Pear.php';
+
+		ci()->load->helper('url');
 
 		$base_url = trim(base_url(), '/');
 
@@ -61,24 +63,19 @@ class Page {
 	}
 
 	public function title($title = '') {
-		$this->data($this->page_prefix.'title', $title);
-
-		return $this;
+		return $this->data($this->page_prefix.'title', $title);
 	}
 
 	public function meta($attr, $name, $content = null) {
-		$content = ($content) ? ' content="'.$content.'"' : '';
-		$meta = '<meta '.$attr.'="'.$name.'"'.$content.'>';
-
-		return $this->_asset_add('meta',$meta);
+		return $this->_asset_add('meta','<meta '.$attr.'="'.$name.'"'.(($content) ? ' content="'.$content.'"' : '').'>');
 	}
 
 	public function body_class($class) {
 		$class = preg_replace('/[^\da-z ]/i', '', strtolower($class));
-		$this->assets['body_class'][$class] = $class;
-		$this->data($this->page_prefix.'body_class', implode(' ', $this->assets['body_class']));
 
-		return $this;
+		$this->assets['body_class'][$class] = $class;
+
+		return $this->data($this->page_prefix.'body_class', implode(' ', $this->assets['body_class']));
 	}
 
 	public function render($view = null, $data = []) {
@@ -111,7 +108,7 @@ class Page {
 		return ($_return === true) ? $_buffer : $this;
 	}
 
-	public function data($name = null, $value = null, $append = false) {
+	public function data($name = null, $value = null) {
 		if (is_array($name)) {
 			foreach ($name as $k => $v) {
 				$this->data($k, $v);
@@ -120,19 +117,13 @@ class Page {
 			return $this;
 		}
 
-		if ($append) {
-			$value .= ci()->load->get_var($name).$value;
-		}
-
 		ci()->load->vars([$name => $value]);
 
 		return $this;
 	}
 
 	public function icon($image_path = '') {
-		$this->data($this->page_prefix.'icon', '<link rel="icon" type="image/x-icon" href="'.$image_path.'"><link rel="apple-touch-icon" href="'.$image_path.'">');
-
-		return $this;
+		return $this->data($this->page_prefix.'icon', '<link rel="icon" type="image/x-icon" href="'.$image_path.'"><link rel="apple-touch-icon" href="'.$image_path.'">');
 	}
 
 	public function css($file = '') {
@@ -170,13 +161,7 @@ class Page {
 	}
 
 	public function js_variable($key,$value) {
-		if (is_scalar($value)) {
-			$var = 'var '.$key.'="'.str_replace('"', '\"', $value).'";';
-		} else {
-			$var = 'var '.$key.'='.json_encode($value, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE).';';
-		}
-
-		return $this->_asset_add('js_variables',$var);
+		return $this->_asset_add('js_variables',((is_scalar($value)) ? 'var '.$key.'="'.str_replace('"', '\"', $value).'";' : 'var '.$key.'='.json_encode($value, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE).';'));
 	}
 
 	public function js_variables($array) {
