@@ -69,6 +69,16 @@ class o_user_model extends Database_model {
 		}
 	}
 
+	public function delete($user_id) {
+		parent::delete($user_id);
+
+		if (!errors::has()) {
+			$this->update_by(['is_active'=>0],['id'=>$user_id]);
+
+			$this->remove_role($user_id);
+		}
+	}
+
 	public function add_role($user_id, $role) {
 		if ((int) $user_id < 0) {
 			throw new Exception(__METHOD__.' please provide a integer for the user id');
