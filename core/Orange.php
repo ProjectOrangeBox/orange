@@ -354,8 +354,9 @@ function cache($key, $closure, $ttl = null) {
 	return $cache;
 }
 
-function cache_ttl() {
-	return (ENVIRONMENT == 'development') ? 1 : mt_rand(10, 30) + (int) config('config.cache_ttl', 60);
+function cache_ttl($use_window=true) {
+	$adjust = ($use_window) ? mt_rand(-15,15) : 0;
+	return (ENVIRONMENT == 'development') ? 1 : $adjust + (int) config('config.cache_ttl', 60);
 }
 
 function delete_cache_by_tags($args) {
