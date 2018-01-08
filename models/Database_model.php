@@ -171,7 +171,11 @@ class Database_model extends MY_Model {
 	protected function _get($as_array = true, $table = null) {
 		$this->switch_database('read');
 		$table = ($table) ? $table : $this->table;
+
+		$this->add_where_on_select();
+
 		$dbc = $this->_database->get($table);
+
 		$this->log_last_query();
 		$results = ($as_array) ? $this->_as_array($dbc) : $this->_as_row($dbc);
 
@@ -619,7 +623,7 @@ class Database_model extends MY_Model {
 		return $this;
 	}
 
-	protected function add_where_on_select(&$data) {
+	protected function add_where_on_select() {
 		if ($this->has_soft_delete) {
 			if ($this->temporary_with_deleted !== true) {
 				$this->_database->where('is_deleted', (($this->temporary_only_deleted) ? 1 : 0));
