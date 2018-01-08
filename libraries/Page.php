@@ -43,21 +43,40 @@ class Page {
 
 		$base_url = trim(base_url(), '/');
 
+		$merge_configs = [
+			'title',
+			'body_class',
+			'data',
+			'css',
+			'js',
+			'script',
+			'style',
+			'domready',
+			'js_variables',
+			'icon',
+		];
+
+		foreach ($merge_configs as $mc) {
+			if ($config = config('page.'.$mc,null)) {
+				$this->$mc($config);
+			}
+		}
+
 		$this
-			->js_variables((array)config('page.js_variables') + [
+			->js_variables([
 				'base_url'            => $base_url,
 				'app_id'              => md5($base_url),
 				'controller_path'     => '/'.str_replace('/index', '', $this->route),
 				'user_id'             => $userid,
-			], true)
-			->data((array)config('page.data') + [
+			])
+			->data([
 				'controller'        => ci()->controller,
 				'controller_path'   => ci()->controller_path,
 				'controller_title'  => ci()->controller_title,
 				'controller_titles' => ci()->controller_titles,
 			]);
 
-		$this->title(((config('page.title')) ? config('page.title') : 'Web Application'));
+		//$this->title(((config('page.title')) ? config('page.title') : 'Web Application'));
 
 		log_message('info', 'Page Class Initialized');
 	}
