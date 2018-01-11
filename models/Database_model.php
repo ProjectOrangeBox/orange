@@ -209,8 +209,7 @@ class Database_model extends MY_Model {
 			unset($data[$this->primary_key]);
 		}
 
-		$this->only_columns_with_rules($data)->add_rule_set_columns($data,'insert');
-		$success = (!$this->skip_rules) ? $this->validate($data) : true;
+		$success = (!$this->skip_rules) ? $this->only_columns_with_rules($data)->add_rule_set_columns($data,'insert')->validate($data) : true;
 
 		if ($success) {
 			$this->remove_columns($data, $this->protected);
@@ -257,8 +256,7 @@ class Database_model extends MY_Model {
 		$this->switch_database('write');
 		$data = (array)$data;
 
-		$this->only_columns_with_rules($data)->add_rule_set_columns($data,'update');
-		$success = (!$this->skip_rules) ? $this->validate($data) : true;
+		$success = (!$this->skip_rules) ? $this->only_columns_with_rules($data)->add_rule_set_columns($data,'update')->validate($data) : true;
 
 		unset($data[$this->primary_key]);
 
@@ -286,7 +284,8 @@ class Database_model extends MY_Model {
 	public function delete_by($data) {
 		$this->switch_database('write');
 		$data = (array)$data;
-		$success = (!$this->skip_rules) ? $this->only_columns_with_rules($data)->validate($data) : true;
+
+		$success = (!$this->skip_rules) ? $this->only_columns_with_rules($data)->add_rule_set_columns($data,'delete')->validate($data) : true;
 
 		if ($success) {
 			if ($this->has_soft_delete) {
