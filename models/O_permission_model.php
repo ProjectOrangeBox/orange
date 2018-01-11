@@ -54,7 +54,7 @@ class o_permission_model extends Database_model {
 	public function insert($data) {
 		parent::insert($data);
 
-		$this->administrator_refresh();
+		$this->_refresh();
 
 		$this->delete_cache_by_tags();
 	}
@@ -62,17 +62,19 @@ class o_permission_model extends Database_model {
 	public function update($data) {
 		parent::update($data);
 
-		$this->administrator_refresh();
+		$this->_refresh();
 
 		$this->delete_cache_by_tags();
 	}
 
-	public function administrator_refresh() {
+	public function _refresh() {
 		$records = $this->get_many();
 
 		foreach ($records as $record) {
 			$this->o_role_model->add_permission(ADMIN_ROLE_ID,$record->id);
 		}
+
+		$this->o_role_model->remove_permission(NOBODY_USER_ID);
 	}
 
 	public function add($key,$group,$description) {
