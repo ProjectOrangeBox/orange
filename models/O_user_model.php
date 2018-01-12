@@ -26,7 +26,7 @@ class o_user_model extends Database_model {
 	protected $rules = [
 		'id'              => ['field' => 'id', 'label' => 'Id', 'rules' => 'required|integer|max_length[10]|less_than[4294967295]|filter_int[10]'],
 		'username'        => ['field' => 'username', 'label' => 'User Name', 'rules' => 'required|is_uniquem[o_user_model.username.id]'],
-		'password'        => ['field' => 'password', 'label' => 'Password', 'rules' => 'required|user_password|max_length[255]|filter_input[255]'],
+		'password'        => ['field' => 'password', 'label' => 'Password', 'rules' => 'required|max_length[255]|filter_input[255]'],
 		'email'           => ['field' => 'email', 'label' => 'Email', 'rules' => 'required|strtolower|valid_email|is_uniquem[o_user_model.email.id]|max_length[255]|filter_input[255]'],
 		'is_active'       => ['field' => 'is_active', 'label' => 'Active', 'rules' => 'if_empty[0]|in_list[0,1]|filter_int[1]|max_length[1]|less_than[2]'],
 		'user_read_role_id'    => ['field' => 'user_read_role_id', 'label' => 'User Read Role', 'rules' => 'required|integer|max_length[10]|less_than[4294967295]|filter_int[10]'],
@@ -47,46 +47,42 @@ class o_user_model extends Database_model {
 	}
 
 	public function insert($data) {
-		if (!empty($data['password'])) {
-			$password_info = password_get_info($data['password']);
+		$this->_password_check('insert',$data);
 
-			if ($password_info['algo'] == 0) {
-				$this->single($this->rules['password']['rules'],$data['password'],$this->rules['password']['label']);
-
-				if ($data['password'] != $data['confirm_password']) {
-					errors::add('Passwords do not match.');
-				}
-			}
-
-			if (!errors::has()) {
-				$this->_hash_password($data);
-
-				return parent::insert($data);
-			}
-		} else {
+		if (!errors::has()) {
 			return parent::insert($data);
 		}
 	}
 
 	public function update($data) {
 		if (!empty($data['password'])) {
-			$password_info = password_get_info($data['password']);
-
-			if ($password_info['algo'] == 0) {
-				$this->single($this->rules['password']['rules'],$data['password'],$this->rules['password']['label']);
-
-				if ($data['password'] != $data['confirm_password']) {
-					errors::add('Passwords do not match.');
-				}
-			}
-
-			if (!errors::has()) {
-				$this->_hash_password($data);
-
-				return parent::update($data);
-			}
+			$this->_password_check('update',$data);
 		} else {
+			unset($data['password']);
+		}
+
+		if (!errors::has()) {
 			return parent::update($data);
+		}
+	}
+
+	protected function _password_check($which,&$data) {
+		$password_info = password_get_info($data['password']);
+
+		if ($password_info['algo'] == 0) {
+			if ($data['password'] != $data['confirm_password']) {
+				errors::add('Passwords do not match.');
+			}
+
+			$this->rules['password']['rules'] .= '|user_password';
+
+			if ($which == 'insert') {
+				unset($data['id']);
+			}
+
+			$this->only_columns_with_rules($data)->add_rule_set_columns($data,$which)->validate($data);
+
+			$data['password'] = $this->hash_password($data['password']);
 		}
 	}
 
@@ -177,16 +173,6 @@ class o_user_model extends Database_model {
 
 	public function _find_permission_id($permission) {
 		return (int) ((int) $permission > 0) ? $permission : $this->o_permission_model->column('id')->get_by(['key' => $permission]);
-	}
-
-	protected function _hash_password(&$data) {
-		if (isset($data['password'])) {
-			$password_info = password_get_info($data['password']);
-
-			if ($password_info['algo'] == 0) {
-				$data['password'] = $this->hash_password($data['password']);
-			}
-		}
 	}
 
 } /* end file */
