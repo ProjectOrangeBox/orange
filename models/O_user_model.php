@@ -27,7 +27,6 @@ class o_user_model extends Database_model {
 		'id'              => ['field' => 'id', 'label' => 'Id', 'rules' => 'required|integer|max_length[10]|less_than[4294967295]|filter_int[10]'],
 		'username'        => ['field' => 'username', 'label' => 'User Name', 'rules' => 'required|is_uniquem[o_user_model.username.id]'],
 		'password'        => ['field' => 'password', 'label' => 'Password', 'rules' => 'required|user_password|max_length[255]|filter_input[255]'],
-		'confirm_password'=> ['field' => 'confirm_password', 'label' => 'Confirm Password', 'rules' => 'required|matches_password|max_length[255]|filter_input[255]'],
 		'email'           => ['field' => 'email', 'label' => 'Email', 'rules' => 'required|strtolower|valid_email|is_uniquem[o_user_model.email.id]|max_length[255]|filter_input[255]'],
 		'is_active'       => ['field' => 'is_active', 'label' => 'Active', 'rules' => 'if_empty[0]|in_list[0,1]|filter_int[1]|max_length[1]|less_than[2]'],
 		'user_read_role_id'    => ['field' => 'user_read_role_id', 'label' => 'User Read Role', 'rules' => 'required|integer|max_length[10]|less_than[4294967295]|filter_int[10]'],
@@ -40,13 +39,9 @@ class o_user_model extends Database_model {
 
 		parent::__construct();
 
-		$this->validate->attach('matches_password', function (&$field, &$param, &$error_string, &$field_data, &$validate) {
-			$error_string = 'Your passwords do not match.';
-			return (bool)($field == $field_data['password']);
-		});
-
 		$this->validate->attach('user_password', function (&$field, &$param, &$error_string, &$field_data, &$validate) {
 			$error_string = 'Your password is not in the correct format.';
+
 			return (bool) preg_match(config('auth.password regex'), $field);
 		});
 	}
@@ -57,6 +52,10 @@ class o_user_model extends Database_model {
 
 			if ($password_info['algo'] == 0) {
 				$this->single($this->rules['password']['rules'],$data['password'],$this->rules['password']['label']);
+
+				if ($data['password'] != $data['confirm_password']) {
+					errors::add('Passwords do not match.');
+				}
 			}
 
 			if (!errors::has()) {
@@ -71,9 +70,19 @@ class o_user_model extends Database_model {
 
 	public function update($data) {
 		if (!empty($data['password'])) {
-			$this->validate->request($this->rules['password']['rules'], 'password', $this->rules['password']['label']);
+			$password_info = password_get_info($data['password']);
+
+			if ($password_info['algo'] == 0) {
+				$this->single($this->rules['password']['rules'],$data['password'],$this->rules['password']['label']);
+
+				if ($data['password'] != $data['confirm_password']) {
+					errors::add('Passwords do not match.');
+				}
+			}
+
 			if (!errors::has()) {
 				$this->_hash_password($data);
+
 				return parent::update($data);
 			}
 		} else {
@@ -136,7 +145,13 @@ class o_user_model extends Database_model {
 	}
 
 	public function hash_password($password) {
-		return password_hash($password, PASSWORD_DEFAULT);
+		$password_info = password_get_info($password);
+
+		if ($password_info['algo'] == 0) {
+			$password = password_hash($password, PASSWORD_DEFAULT);
+		}
+
+		return $password;
 	}
 
 	public function get_user_by_login($login) {
