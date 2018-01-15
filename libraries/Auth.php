@@ -33,10 +33,10 @@ class Auth {
 	}
 
 	public function login($email, $password) {
-		$ajax = ci()->input->is_ajax_request();
 		$success = $this->_login($email, $password);
 
-		event::trigger('auth.login', $email, $success, $ajax);
+		event::trigger('auth.login', $email, $success);
+
 		log_message('info', 'Auth Class login');
 
 		return $success;
@@ -95,7 +95,6 @@ class Auth {
 		}
 
 		if (password_verify($password, $user->password) !== true) {
-
 			event::trigger('user.login.fail', $login);
 			log_message('debug', 'auth->user Incorrect Login and/or Password');
 			errors::add(config('auth.general failure error'));
