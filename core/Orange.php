@@ -391,3 +391,9 @@ function filter_filename($str,$ext=null) {
 function filter_human($str) {
 	return ucwords(str_replace('_',' ',strtolower(trim(preg_replace('#\W+#',' ', $str),' '))));
 }
+
+function middleware() {
+	global $_middleware;
+
+	return (func_num_args()) ? $_middleware = func_get_args() :  (array)$_middleware;
+}

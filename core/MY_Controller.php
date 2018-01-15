@@ -57,27 +57,9 @@ class MY_Controller extends CI_Controller {
 			$this->controller_titles = plural(filter_human($this->controller));
 		}
 
-		require ORANGEPATH.'/libraries/Middleware_base.php';
-		require APPPATH.'/config/middleware.php';
-
-		$base_middleware = $middleware;
-
-		if (file_exists(APPPATH.'/config/'.ENVIRONMENT.'/middleware.php')) {
-			include APPPATH.'/config/'.ENVIRONMENT.'/middleware.php';
-			$base_middleware = array_merge($base_middleware,$middleware);
-		}
-
-		foreach ($base_middleware as $re => $middleware_files) {
-			if (preg_match('@'.str_replace('*', '(.*)', $re).'@', '/'.ci()->uri->uri_string, $matches, PREG_OFFSET_CAPTURE, 0) == 1) {
-				break;
-			}
-		}
-
-		foreach ((array) $middleware_files as $middleware_file) {
+		foreach (middleware() as $middleware_file) {
 			if (class_exists($middleware_file)) {
-				$this->controller_middleware_as_body_classes[] = substr($middleware_file, 0, -10);
-				$this->controller_middleware_ran[]             = $middleware_file;
-				(new $middleware_file($this))->run();
+				new $middleware_file();
 			} else {
 				throw new Exception('middleware "'.$middleware_file.'" not found.');
 			}

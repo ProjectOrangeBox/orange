@@ -17,13 +17,6 @@
  */
 
 class Middleware_base {
-	protected $controller;
-
-	public function __construct(&$controller) {
-		$this->controller = &$controller;
-	}
-
-	public function run() {}
 
 	public function __get($key) {
 		return get_instance()->$key;

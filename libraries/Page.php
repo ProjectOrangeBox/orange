@@ -90,11 +90,9 @@ class Page {
 	}
 
 	public function body_class($class) {
-		$class = preg_replace('/[^\da-z ]/i', '', strtolower($class));
+		$this->assets['body_class'] .= ' '.preg_replace('/[^\da-z ]/i', '', strtolower($class));
 
-		$this->assets['body_class'][$class] = $class;
-
-		return $this->data($this->page_prefix.'body_class', implode(' ', $this->assets['body_class']));
+		return $this->data($this->page_prefix.'body_class',trim(implode(' ',array_unique(explode(' ',$this->assets['body_class'])))));
 	}
 
 	public function render($view = null, $data = []) {
@@ -118,7 +116,7 @@ class Page {
 	}
 
 	public function view($_view_file = null, $_data = [], $_return = true) {
-		$_buffer = view($_view_file,array_merge(ci()->load->get_vars(),$_data));
+		$_buffer = trim(view($_view_file,array_merge(ci()->load->get_vars(),$_data)));
 
 		if (is_string($_return)) {
 			ci()->load->vars([$_return => $_buffer]);
