@@ -17,11 +17,19 @@
  */
 
 class MY_Input extends CI_Input {
+	protected $_request;
+
+	public function __construct() {
+		parent::__construct();
+
+		$this->_request = ($_POST) ? $_POST : $this->input_stream();
+	}
+
 	/* return input_stream with default - this includes POST, PUT, DELETE, as long as Content-Type is application/x-www-form-urlencoded */
 	public function request($index = null, $default = null, $xss_clean = false) {
 		log_message('debug', 'MY_Input::request::'.$index);
 
-		$value = $this->input_stream($index, $xss_clean);
+		$value = $this->_fetch_from_array($this->_request, $index, $xss_clean);
 
 		return ($value === null) ? $default : $value;
 	}
@@ -30,20 +38,22 @@ class MY_Input extends CI_Input {
 	public function request_replace($index = null, $replace_value = null) {
 		log_message('debug', 'MY_Input::request_replace::'.$index);
 
-		$this->_input_stream[$index] = $replace_value;
+		$this->_request[$index] = $replace_value;
 	}
 
 	/* remap multiple input_stream values to different values with option to keep original values */
 	public function remap($map = [],$keep_current = false) {
 		log_message('debug', 'MY_Input::remap');
 
-		$new_form_data = [];
+		$current_request = $this->_request;
 
-		foreach ($map as $new_key => $old_key) {
-			$new_form_data[$new_key] = $this->input_stream($old_key);
+		if (!$keep_current) {
+			$this->_request = [];
 		}
 
-		$this->_input_stream = ($keep_current) ? array_merge((array)$this->_input_stream,$new_form_data) : $new_form_data;
+		foreach ($map as $new_key => $old_key) {
+			$this->_request[$new_key] = $current_request[$old_key];
+		}
 
 		return $this;
 	}
