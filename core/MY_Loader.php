@@ -19,7 +19,28 @@
 class MY_Loader extends CI_Loader {
 	protected $cache_drivers_loaded = false;
 
+	/**
+	 * Internal CI Library Instantiator
+	 *
+	 * @used-by	CI_Loader::_ci_load_stock_library()
+	 * @used-by	CI_Loader::_ci_load_library()
+	 *
+	 * @param	string		$class		Class name
+	 * @param	string		$prefix		Class name prefix
+	 * @param	array|null|bool	$config		Optional configuration to pass to the class constructor:
+	 *						FALSE to skip;
+	 *						NULL to search in config paths;
+	 *						array containing configuration data
+	 * @param	string		$object_name	Optional object name to assign to
+	 * @return	void
+	 *
+	 * add stream_resolve_include_path which is faster
+	 * and CodeIgniter cache loader since we use it for caching stuff before the controller is loaded
+	 *
+	 */
 	protected function _ci_init_library($class, $prefix, $config = FALSE, $object_name = NULL) {
+		log_message('debug', 'MY_Loader::_ci_init_library');
+
 		if (!$this->cache_drivers_loaded) {
 			$this->cache_drivers_loaded = true;
 
@@ -77,7 +98,24 @@ class MY_Loader extends CI_Loader {
 		$CI->$object_name = isset($config) ? new $class_name($config) : new $class_name();
 	}
 
+	/**
+	 * Internal CI Stock Library Loader
+	 *
+	 * @used-by	CI_Loader::_ci_load_library()
+	 * @uses	CI_Loader::_ci_init_library()
+	 *
+	 * @param	string	$library_name	Library name to load
+	 * @param	string	$file_path	Path to the library filename, relative to libraries/
+	 * @param	mixed	$params		Optional parameters to pass to the class constructor
+	 * @param	string	$object_name	Optional object name to assign to
+	 * @return	void
+	 *
+	 * add stream_resolve_include_path which is faster
+	 *
+	 */
 	protected function _ci_load_stock_library($library_name, $file_path, $params, $object_name) {
+		log_message('debug', 'MY_Loader::_ci_load_stock_library');
+
 		$prefix = 'CI_';
 
 		if (class_exists($prefix.$library_name, FALSE)) {

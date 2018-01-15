@@ -33,8 +33,6 @@ class MY_Controller extends CI_Controller {
 	public $data = [];
 
 	public $controller_model;
-	public $controller_middleware_ran = [];
-	public $controller_middleware_as_body_classes = [];
 
 	public function __construct() {
 		parent::__construct();
@@ -49,11 +47,13 @@ class MY_Controller extends CI_Controller {
 
 		if (!$this->controller_title) {
 			ci()->load->helper('inflector');
+
 			$this->controller_title = singular(filter_human($this->controller));
 		}
 
 		if (!$this->controller_titles) {
 			ci()->load->helper('inflector');
+
 			$this->controller_titles = plural(filter_human($this->controller));
 		}
 

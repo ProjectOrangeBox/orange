@@ -35,12 +35,16 @@ class MY_Model extends CI_Model {
 	}
 
 	public function clear() {
+		log_message('debug', 'MY_Model::clear');
+
 		errors::clear();
 
 		return $this;
 	}
 
 	public function validate(&$data, $rules = true) {
+		log_message('debug', 'MY_Model::validate');
+
 		if ($rules === true) {
 			$rules = $this->string2array(array_keys($data));
 		} elseif (is_string($rules)) {

@@ -8,11 +8,11 @@
  * @link https://github.com/ProjectOrangeBox
  *
  * required
- * core:
+ * core: load
  * libraries:
  * models:
  * helpers:
- * functions:
+ * functions: cache_var_export
  *
  */
 
@@ -20,16 +20,14 @@ class MY_Config extends CI_Config {
 	protected $setup = false;
 
 	public function item($item,$index=null) {
+		log_message('debug', 'MY_Config::item::'.$index);
+
 		$value = null;
 
 		if (!$this->setup) {
-
 			if (class_exists('CI_Controller',false)) {
-
 				if (class_exists('Cache_var_export',false)) {
-
 					$this->setup = true;
-
 					$this->_load_combined_config();
 				}
 			}
@@ -37,20 +35,23 @@ class MY_Config extends CI_Config {
 
 		if (strpos($item,'.') !== false) {
 			list($file,$key) = explode('.', strtolower($item), 2);
+
 			if (!$key) {
 				$value = isset($this->config[$file]) ? $this->config[$file] : $index;
 			} else {
 				$value = isset($this->config[$file], $this->config[$file][$key]) ? $this->config[$file][$key] : $index;
 			}
-		} else {
 
+		} else {
 			$value = parent::item($item,$index);
 		}
+
 		return $value;
 	}
 
 	public function flush() {
 		log_message('debug', 'MY_Config::settings_flush');
+
 		return cache_var_export::delete('config');
 	}
 
@@ -60,19 +61,20 @@ class MY_Config extends CI_Config {
 		$built_config = cache_var_export::get('config');
 
 		if (!is_array($built_config)) {
-
 			$built_config = [];
 
 			foreach ($_ENV as $key => $value) {
 				$built_config['env'][strtolower($key)] = $value;
 			}
-												$config_files = glob(APPPATH.'config/*.php');
+
+			$config_files = glob(APPPATH.'config/*.php');
+
 			foreach ($config_files as $file) {
 				$config = null;
+
 				include $file;
 
 				if (is_array($config)) {
-
 					$group_key = strtolower(basename($file, '.php'));
 
 					foreach ($config as $key => $value) {
@@ -80,13 +82,16 @@ class MY_Config extends CI_Config {
 					}
 				}
 			}
-												if (ENVIRONMENT) {
+
+			if (ENVIRONMENT) {
 				$config_files = glob(APPPATH.'config/'.ENVIRONMENT.'/*.php');
+
 				foreach ($config_files as $file) {
 					$config = null;
-					include $file;
-					if (is_array($config)) {
 
+					include $file;
+
+					if (is_array($config)) {
 						$group_key = strtolower(basename($file, '.php'));
 
 						foreach ($config as $key => $value) {
@@ -96,19 +101,15 @@ class MY_Config extends CI_Config {
 				}
 			}
 
-
 			if (parent::item('no_database_settings') !== true) {
+				$db_array = ci('o_setting_model')->pull();
 
-				ci()->load->model('o_setting_model');
-				$db_array = ci()->o_setting_model->pull();
 				if (is_array($db_array)) {
 					foreach ($db_array as $record) {
-
 						$built_config[strtolower($record->group)][strtolower($record->name)] = convert_to_real($record->value);
 					}
 				}
 			}
-
 
 			$built_config = $this->config + $built_config;
 
@@ -117,4 +118,5 @@ class MY_Config extends CI_Config {
 
 		$this->config = $built_config;
 	}
+
 } /* end file */
