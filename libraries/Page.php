@@ -28,14 +28,24 @@ class Page {
 	public function __construct() {
 		$this->route = strtolower(trim(ci()->router->fetch_directory().ci()->router->fetch_class(true).'/'.ci()->router->fetch_method(true), '/'));
 
+		foreach (explode('/',$this->route) as $r) {
+			$this->body_class('r-'.$r);
+		}
+
+		$userid = 'is-guest';
+		$is_active = 'is-not-active';
+
 		if (isset(ci()->user)) {
 			$userid = md5(ci()->user->id.config('config.encryption_key'));
-			$this->body_class(str_replace('/',' ',$this->route).(ci()->user->is_active ? ' active' : ' not-active').' uid'.$userid);
+
+			if (ci()->user->is_active) {
+				$is_active = 'is-active';
+			}
+
 			$this->data('user', ci()->user);
-		} else {
-			$userid = 'guest';
-			$this->body_class(str_replace('/',' ',$this->route).' not-active uid'.$userid);
 		}
+
+		$this->body_class(['uid-'.$userid,$is_active] + []);
 
 		require 'Pear.php';
 
@@ -90,9 +100,17 @@ class Page {
 	}
 
 	public function body_class($class) {
-		$this->assets['body_class'] .= ' '.preg_replace('/[^\da-z ]/i', '', strtolower($class));
+		if (is_array($class)) {
+			foreach ($class as $c) {
+				$this->body_class($c);
+			}
 
-		return $this->data($this->page_prefix.'body_class',trim(implode(' ',array_unique(explode(' ',$this->assets['body_class'])))));
+			return $this;
+		}
+
+		$this->assets['body_class'][] = preg_replace('/[^\da-z -]/i', '', strtolower($class));
+
+		return $this->data($this->page_prefix.'body_class',trim(implode(' ',array_unique($this->assets['body_class']))));
 	}
 
 	public function render($view = null, $data = []) {
