@@ -42,7 +42,7 @@ class MY_Input extends CI_Input {
 	}
 
 	/* remap multiple input_stream values to different values with option to keep original values */
-	public function remap($map = [],$keep_current = false) {
+	public function request_remap($map = [],$keep_current = false) {
 		log_message('debug', 'MY_Input::remap');
 
 		$current_request = $this->_request;
