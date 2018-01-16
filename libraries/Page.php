@@ -29,23 +29,23 @@ class Page {
 		$this->route = strtolower(trim(ci()->router->fetch_directory().ci()->router->fetch_class(true).'/'.ci()->router->fetch_method(true), '/'));
 
 		foreach (explode('/',$this->route) as $r) {
-			$this->body_class('r-'.$r);
+			$this->body_class('uri-'.$r);
 		}
 
-		$userid = 'is-guest';
-		$is_active = 'is-not-active';
+		$uid = 'guest';
+		$is = 'not-active';
 
 		if (isset(ci()->user)) {
-			$userid = md5(ci()->user->id.config('config.encryption_key'));
+			$uid = md5(ci()->user->id.config('config.encryption_key'));
 
 			if (ci()->user->is_active) {
-				$is_active = 'is-active';
+				$is = 'active';
 			}
 
 			$this->data('user', ci()->user);
 		}
 
-		$this->body_class(['uid-'.$userid,$is_active] + []);
+		$this->body_class(['uid-'.$uid,'is-'.$is]);
 
 		require 'Pear.php';
 
