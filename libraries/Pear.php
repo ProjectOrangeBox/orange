@@ -151,10 +151,10 @@ class Pear {
 
 		foreach ($a as $p) {
 			$fs = glob($p.'/libraries/pear_plugins/*.php',GLOB_NOSORT);
-			
+
 			foreach($fs as $file) {
 				$pathinfo = pathinfo($file);
-			
+
 				if (substr($pathinfo['filename'],0,5) == 'Pear_') {
 			  	$known_plugins[$pathinfo['filename']] = $file;
 				}
