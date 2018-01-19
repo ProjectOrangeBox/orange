@@ -37,6 +37,8 @@ class MY_Controller extends CI_Controller {
 	public function __construct() {
 		parent::__construct();
 
+		log_message('debug', 'MY_Controller::__construct');
+
 		if (php_sapi_name() !== 'cli') {
 			if (!config('application.site open')) {
 				if ($_COOKIE['ISOPEN'] !== config('application.is open cookie', md5(uniqid(true)))) {
@@ -44,6 +46,8 @@ class MY_Controller extends CI_Controller {
 				}
 			}
 		}
+
+		log_message('debug', 'MY_Config::inflector');
 
 		if (!$this->controller_title) {
 			ci()->load->helper('inflector');
@@ -57,6 +61,8 @@ class MY_Controller extends CI_Controller {
 			$this->controller_titles = plural(filter_human($this->controller));
 		}
 
+		log_message('debug', 'MY_Config::middleware');
+
 		foreach (middleware() as $middleware_file) {
 			if (class_exists($middleware_file)) {
 				new $middleware_file();
@@ -65,17 +71,25 @@ class MY_Controller extends CI_Controller {
 			}
 		}
 
+		log_message('debug', 'MY_Config::libraries');
+
 		if ($this->libraries) {
 			$this->load->library((array) $this->libraries);
 		}
+
+		log_message('debug', 'MY_Config::models');
 
 		if ($this->models) {
 			$this->load->model((array) $this->models);
 		}
 
+		log_message('debug', 'MY_Config::helpers');
+
 		if ($this->helpers) {
 			$this->load->helpers((array) $this->helpers);
 		}
+
+		log_message('debug', 'MY_Config::catalogs');
 
 		if ($this->catalogs) {
 			foreach ($this->catalogs as $variable_name => $args) {
