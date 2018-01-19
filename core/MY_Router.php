@@ -74,7 +74,7 @@ class MY_Router extends CI_Router {
 						}
 
 						log_message('debug', 'MY_Router::$this->directory['.$this->directory.'] $segments['.implode(',', $segments).']');
-						
+
 						return $segments;
 					}
 				}
