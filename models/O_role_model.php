@@ -30,7 +30,10 @@ class o_role_model extends Database_model {
 
 	public function __construct() {
 		$this->table = config('auth.role table');
+
 		parent::__construct();
+
+		log_message('info', 'o_role_model Class Initialized');
 	}
 
 	public function add_permission($role, $permission) {

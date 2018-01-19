@@ -23,6 +23,8 @@ class MY_Input extends CI_Input {
 		parent::__construct();
 
 		$this->_request = ($_POST) ? $_POST : $this->input_stream();
+
+		log_message('info', 'MY_Input Class Initialized');
 	}
 
 	/* return input_stream with default - this includes POST, PUT, DELETE, as long as Content-Type is application/x-www-form-urlencoded */

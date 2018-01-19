@@ -31,7 +31,10 @@ class o_permission_model extends Database_model {
 
 	public function __construct() {
 		$this->table = config('auth.permission table');
+
 		parent::__construct();
+
+		log_message('info', 'o_permission_model Class Initialized');
 	}
 
 	public function roles($role) {

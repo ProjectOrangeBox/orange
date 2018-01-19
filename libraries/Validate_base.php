@@ -26,6 +26,8 @@ class Validate_base {
 	public function __construct(&$field_data, &$error_string) {
 		$this->field_data   = &$field_data;
 		$this->error_string = &$error_string;
+
+		log_message('info', 'Validate_base Class Initialized');
 	}
 
 	public function field(&$field) {

@@ -21,6 +21,8 @@ class Cache_var_export {
 
 	public static function init($config) {
 		self::$config = $config;
+
+		log_message('info', 'Cache_var_export Class Initialized');
 	}
 
 	public static function get($id) {

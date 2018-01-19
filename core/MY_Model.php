@@ -61,6 +61,8 @@ class MY_Model extends CI_Model {
 	}
 
 	protected function remove_columns(&$data, $columns) {
+		log_message('debug', 'MY_Model::remove_columns');
+
 		$columns = (!is_array($columns)) ? explode(',', $columns) : $columns;
 
 		foreach ($columns as $attr) {
@@ -75,6 +77,8 @@ class MY_Model extends CI_Model {
 	}
 
 	protected function only_columns(&$data, $columns = []) {
+		log_message('debug', 'MY_Model::only_columns');
+
 		$columns = (!is_array($columns)) ? explode(',', $columns) : $columns;
 
 		foreach ($data as $key => $value) {
@@ -87,6 +91,8 @@ class MY_Model extends CI_Model {
 	}
 
 	protected function only_columns_with_rules(&$data, $rules = null) {
+		log_message('debug', 'MY_Model::only_columns_with_rules');
+
 		$rule_fields = [];
 		$rules = ($rules) ? $rules : $this->rules;
 
@@ -102,6 +108,8 @@ class MY_Model extends CI_Model {
 	}
 
 	protected function string2array($fields) {
+		log_message('debug', 'MY_Model::string2array');
+
 		$new_array = [];
 
 		foreach ($fields as $field) {

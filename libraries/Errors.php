@@ -20,6 +20,8 @@ class Errors {
 	protected static $errors_variable = 'ci_errors';
 
 	public static function add($msg) {
+		log_message('debug', 'Errors::add::'.$msg);
+
 		$current_errors = ci()->load->get_var(self::$errors_variable);
 		$current_errors[$msg] = $msg;
 
@@ -27,18 +29,26 @@ class Errors {
 	}
 
 	public static function clear() {
+		log_message('debug', 'Errors::clear');
+
 		ci()->load->vars(self::$errors_variable, []);
 	}
 
 	public static function has() {
+		log_message('debug', 'Errors::has');
+
 		return (count(ci()->load->get_var(self::$errors_variable)) != 0);
 	}
 
 	public static function as_array() {
+		log_message('debug', 'Errors::as_array');
+
 		return ci()->load->get_var(self::$errors_variable);
 	}
 
 	public static function as_html($prefix = null, $suffix = null) {
+		log_message('debug', 'Errors::as_html');
+
 		$str = '';
 
 		if (self::has()) {
@@ -61,24 +71,34 @@ class Errors {
 	}
 
 	public static function as_cli() {
+		log_message('debug', 'Errors::as_cli');
+
 		return errors::as_html(chr(9), chr(10));
 	}
 
 	public static function as_data() {
+		log_message('debug', 'Errors::as_data');
+
 		$errors = ci()->load->get_var(self::$errors_variable);
 
 		return ['records' => array_values($errors)] + ['count' => count($errors)];
 	}
 
 	public static function as_json() {
+		log_message('debug', 'Errors::as_json');
+
 		return json_encode(self::as_data(), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE | JSON_FORCE_OBJECT);
 	}
 
 	public static function show($message, $status_code, $heading = 'An Error Was Encountered') {
+		log_message('debug', 'Errors::show::'.$message);
+
 		self::display('general',['heading'=>$heading,'message'=>$message],$status_code);
 	}
 
 	public static function display($view, $data = [], $status_code = 500, $override = []) {
+		log_message('debug', 'Errors::display::'.$view);
+
 		if (is_numeric($view)) {
 			$status_code = (int) $view;
 		}

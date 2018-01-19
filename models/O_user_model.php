@@ -44,6 +44,8 @@ class o_user_model extends Database_model {
 
 			return (bool) preg_match(config('auth.password regex'), $field);
 		});
+
+		log_message('info', 'o_user_model Class Initialized');
 	}
 
 	public function insert($data) {

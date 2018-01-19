@@ -446,9 +446,7 @@ function cache($key, $closure, $ttl = null) {
 
 /* get the caching TTL with a window so they don't all expire at the exact same time on a high volume site */
 function cache_ttl($use_window=true) {
-	$adjust = ($use_window) ? mt_rand(-15,15) : 0;
-
-	return (ENVIRONMENT == 'development') ? 1 : $adjust + (int) config('config.cache_ttl', 60);
+	return ((($use_window) ? mt_rand(-15,15) : 0) + (int)config('config.cache_ttl', 60));
 }
 
 /* delete cache items using tags (dot notation filename) */

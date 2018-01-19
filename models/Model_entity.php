@@ -22,6 +22,7 @@ class Model_entity {
 
 	public function __construct() {
 		$this->_model_name = strtolower(substr(get_called_class(),0,-7).'_model');
+
 		log_message('info', 'Model_entity Class Initialized');
 	}
 

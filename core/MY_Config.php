@@ -20,7 +20,7 @@ class MY_Config extends CI_Config {
 	protected $setup = false;
 
 	public function item($item,$index=null) {
-		log_message('debug', 'MY_Config::item::'.$index);
+		log_message('debug', 'MY_Config::item::'.$item);
 
 		$value = null;
 

@@ -22,6 +22,8 @@ class MY_Router extends CI_Router {
 	protected $clean_method = null;
 
 	protected function _set_default_controller() {
+		log_message('debug', 'MY_Router::_set_default_controller');
+
 		if (empty($this->default_controller)) {
 			throw new Exception('Unable to determine what should be displayed. A default route has not been specified in the routing file.');
 		}
@@ -44,6 +46,8 @@ class MY_Router extends CI_Router {
 	}
 
 	public function _validate_request($segments) {
+		log_message('debug', 'MY_Router::_validate_request');
+
 		$search_path = explode(PATH_SEPARATOR, get_include_path());
 
 		foreach ($segments as $folder) {
@@ -69,7 +73,8 @@ class MY_Router extends CI_Router {
 							$this->directory = '../../'.$this->package.'controllers/'.$this->directory;
 						}
 
-						log_message('debug', 'MY_Router::_validate_request::$segments::'.$this->directory.'::'.implode('::', $segments));
+						log_message('debug', 'MY_Router::$this->directory['.$this->directory.'] $segments['.implode(',', $segments).']');
+						
 						return $segments;
 					}
 				}
@@ -86,22 +91,32 @@ class MY_Router extends CI_Router {
 	}
 
 	public function fetch_request_method() {
+		log_message('debug', 'MY_Router::fetch_request_method');
+
 		return isset($_SERVER['REQUEST_METHOD']) ? ucfirst(strtolower($_SERVER['REQUEST_METHOD'])) : 'Cli';
 	}
 
 	public function fetch_directory() {
+		log_message('debug', 'MY_Router::fetch_directory');
+
 		return ($this->package != '') ? substr($this->directory, strlen('../../'.$this->package.'controllers/')) : $this->directory;
 	}
 
 	public function fetch_class($clean=false) {
+		log_message('debug', 'MY_Router::fetch_class');
+
 		return ($clean) ? $this->clean_controller : $this->class;
 	}
 
 	public function fetch_method($clean=false) {
+		log_message('debug', 'MY_Router::fetch_method');
+
 		return ($clean) ? $this->clean_method : $this->method;
 	}
 
 	protected function controller_method($input) {
+		log_message('debug', 'MY_Router::controller_method');
+
 		$segments[0] = $input;
 		$segments[1] = 'index';
 
