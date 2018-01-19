@@ -110,6 +110,8 @@ class MY_Controller extends CI_Controller {
 			}
 		}
 
+		log_message('debug', 'MY_Config::controller_model');
+
 		if ($this->controller_model) {
 			$this->load->model($this->controller_model);
 		}
