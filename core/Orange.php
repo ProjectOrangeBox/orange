@@ -22,6 +22,12 @@ define('ORANGE_VERSION', '2.0.0');
 /* save the current system include paths */
 define('ROOTPATHS', get_include_path());
 
+if (file_exists('Orange_crush.php')) {
+	require 'Orange_crush.php';
+
+	new Orange_crush();
+}
+
 /* register our loader */
 spl_autoload_register('codeigniter_autoload');
 
@@ -143,65 +149,110 @@ Autoloader for:
 
 */
 function codeigniter_autoload($class) {
+	$_ORANGE_PATHS = get_orange_paths();
+
+	$lclass = strtolower($class);
 	$uclass = ucfirst($class);
+
+	if (isset($_ORANGE_PATHS['orange'][$lclass])) {
+		require $_ORANGE_PATHS['orange'][$lclass];
+
+		return true;
+	}
+
+	if (isset($_ORANGE_PATHS['models'][$lclass])) {
+		ci()->load->model($class);
+
+		return true;
+	}
+
+	if (isset($_ORANGE_PATHS['libraries'][$lclass])) {
+		ci()->load->library($class);
+
+		return true;
+	}
+
+	log_message('debug', 'CodeIgniter autoload falling back to search '.$lclass);
 
 	if ($file = stream_resolve_include_path($class.'.php')) {
 		require_once $file;
 
 		return true;
-	} elseif (substr($class, -6) == '_model') {
+	}
+
+	if (substr($class, -6) == '_model') {
 		if (stream_resolve_include_path('models/'.$uclass.'.php')) {
 			ci()->load->model($class);
 
 			return true;
 		}
-	} elseif (substr($class, -10) == 'Controller') {
+	}
+
+	if (substr($class, -10) == 'Controller') {
 		if ($file = stream_resolve_include_path('controllers/'.$uclass.'.php')) {
 			include $file;
 
 			return true;
 		}
-	} elseif (substr($class, -6) == '_trait') {
+	}
+
+	if (substr($class, -6) == '_trait') {
 		if (substr($class, -17) == '_controller_trait') {
 			if ($file = stream_resolve_include_path('controllers/traits/'.$class.'.php')) {
-				include $file;
+				require $file;
 
 				return true;
 			}
 		}
 		if (substr($class, -12) == '_model_trait') {
 			if ($file = stream_resolve_include_path('models/traits/'.$class.'.php')) {
-				include $file;
+				require $file;
 
 				return true;
 			}
 		}
 		if (substr($class, -14) == '_library_trait') {
 			if ($file = stream_resolve_include_path('library/traits/'.$class.'.php')) {
-				include $file;
+				require $file;
 
 				return true;
 			}
 		}
-	} elseif (stream_resolve_include_path('libraries/'.$uclass.'.php')) {
+	}
+
+	if (stream_resolve_include_path('libraries/'.$uclass.'.php')) {
 		ci()->load->library($class);
 
 		return true;
-	} elseif (substr($class, -10) == 'Middleware') {
+	}
+
+	if (substr($class, -10) == 'Middleware') {
 		if ($file = stream_resolve_include_path('middleware/'.$uclass.'.php')) {
-			include $file;
+			require $file;
 
 			return true;
 		}
-	} elseif (substr($uclass,0,9) == 'Validate_') {
+	}
+
+	if (substr($uclass,0,9) == 'Validate_') {
 		if ($file = stream_resolve_include_path('libraries/validations/'.$uclass.'.php')) {
-			include $file;
+			require $file;
 
 			return true;
 		}
-	} elseif (substr($uclass,0,7) == 'Filter_') {
+	}
+
+	if (substr($uclass,0,7) == 'Filter_') {
 		if ($file = stream_resolve_include_path('libraries/filters/'.$uclass.'.php')) {
-			include $file;
+			require $file;
+
+			return true;
+		}
+	}
+
+	if (substr($uclass,0,5) == 'Pear_') {
+		if ($file = stream_resolve_include_path('libraries/pear_plugins/'.$uclass.'.php')) {
+			require $file;
 
 			return true;
 		}
@@ -304,15 +355,35 @@ function console($var, $type = 'log') {
 	echo '<script type="text/javascript">console.'.$type.'('.json_encode($var).')</script>';
 }
 
+function set_orange_paths($paths) {
+	global $_ORANGE_PATHS;
+
+	$_ORANGE_PATHS = $paths;
+}
+
+function get_orange_paths() {
+	global $_ORANGE_PATHS;
+	
+	return (array)$_ORANGE_PATHS;
+}
+
 /* the most simple view building function */
 function view($_view,$_data=[]) {
-	$_view = 'views/'.ltrim(str_replace('.php','',$_view),'/').'.php';
+	$_ORANGE_PATHS = get_orange_paths();
 
-	/* use the include paths to search for the view */
-	$_view_file = stream_resolve_include_path($_view);
+	$_file = ltrim(str_replace('.php','',$_view),'/');
+
+	if (isset($_ORANGE_PATHS['views'][$_file])) {
+		$_view_file = $_ORANGE_PATHS['views'][$_file];
+	} else {
+		log_message('debug', 'view falling back to search '.$_file);
+
+		/* use the include paths to search for the view */
+		$_view_file = stream_resolve_include_path('views/'.$_file.'.php');
+	}
 
 	if ($_view_file === false) {
-		throw new Exception('Could not locate view "'.$_view.'"');
+		throw new Exception('Could not locate view "'.$_file.'"');
 	}
 
 	/* extract our data variables */

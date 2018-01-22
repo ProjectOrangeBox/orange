@@ -21,7 +21,6 @@ class Pear {
 	protected static $attached = [];
 	protected static $extends  = null;
 	protected static $fragment = null;
-	protected static $known_plugins = null;
 
 	public static function __callStatic($name,$arguments) {
 		log_message('debug', 'Pear::__callStatic::'.$name);
@@ -29,16 +28,10 @@ class Pear {
 		if (!self::$setup) {
 			ci('load')->helper(['html','form','date','inflector','language','number','text']);
 
-			self::$known_plugins = cache_var_export::get('pear');
-
-			if (!is_array(self::$known_plugins)) {
-				self::$known_plugins = self::_build_cache('pear');
-			}
-
 			self::$setup = true;
 		}
 
-		self::_loader($name);
+		self::instantiate_plugin($name);
 
 		if (isset(self::$attached[$name])) {
 			return call_user_func_array(self::$attached[$name],$arguments);
@@ -51,11 +44,6 @@ class Pear {
 		if (function_exists($name)) {
 			return call_user_func_array($name,$arguments);
 		}
-
-		/* let's rebuild the cache and try 1 more time */
-		self::$known_plugins = self::_build_cache('pear');
-
-		self::_loader($name);
 
 		throw new Exception('Plugin missing "'.$name.'"');
 	}
@@ -123,47 +111,28 @@ class Pear {
 
 		if (strpos($names,',') !== false) {
 			foreach (explode(',',$names) as $name) {
-				self::_loader($name);
+				self::instantiate_plugin($name);
 			}
 		} else {
-			self::_loader($names);
+			self::instantiate_plugin($names);
 		}
 
 		ci('page')->prepend_asset(false);
 	}
 
-	protected static function _loader($name='') {
+	protected static function instantiate_plugin($name='') {
 		$class = 'Pear_'.str_replace('pear_','',strtolower($name));
 
 		log_message('debug', 'Pear::load::'.$class);
 
+		/* if the class hasn't been loaded yet */
 		if (!class_exists($class,false)) {
-			if ($path = self::$known_plugins[$class]) {
-				include $path;
-
+			/* load it */
+			if (class_exists($class)) {
+				/* instantiate it */
 				new $class;
 			}
 		}
-	}
-
-	protected static function _build_cache($name) {
-		$a = explode(PATH_SEPARATOR,get_include_path());
-
-		foreach ($a as $p) {
-			$fs = glob($p.'/libraries/pear_plugins/*.php',GLOB_NOSORT);
-
-			foreach($fs as $file) {
-				$pathinfo = pathinfo($file);
-
-				if (substr($pathinfo['filename'],0,5) == 'Pear_') {
-			  	$known_plugins[$pathinfo['filename']] = $file;
-				}
-			}
-		}
-
-		cache_var_export::save($name,$known_plugins,3600);
-
-		return $known_plugins;
 	}
 
 } /* end file */
