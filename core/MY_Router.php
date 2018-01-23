@@ -31,7 +31,6 @@ class MY_Router extends CI_Router {
 		$segments = $this->controller_method($this->default_controller);
 
 		if (PHP_SAPI === 'cli' or defined('STDIN')) {
-
 			$segments[1] = substr($segments[1], 0, -6).'CliAction';
 		}
 
@@ -48,6 +47,59 @@ class MY_Router extends CI_Router {
 	public function _validate_request($segments) {
 		log_message('debug', 'MY_Router::_validate_request');
 
+		$segments = $this->method_b($segments,false);
+
+		if (is_array($segments)) {
+			#die(var_dump($this->class,$this->method,$this->package,$this->directory,$this->clean_controller,$this->clean_method,$s));
+
+			return $segments;
+		}
+		
+		/* nothing found */
+		
+		$this->directory = '';
+
+		log_message('debug', 'MY_Router::_validate_request::404');
+
+		return $this->controller_method($this->routes['404_override']);
+	}
+
+	public function method_b($segments) {
+		$uri = implode('/',str_replace('-','_',$segments));
+		$op = get_orange_paths();
+
+		foreach ($op['caches']['controllers'] as $key=>$controller_file) {
+			if (preg_match('#^'.$key.'$#', $uri, $matches)) {
+				$m = explode('/',trim($matches[1],'/'));
+
+				$cntr = str_replace(ROOTPATH.'/','',dirname(dirname($controller_file)));
+				$where_is_controller = strpos($cntr,'/controllers');
+				
+				$this->package = ($where_is_controller > 0) ? substr($cntr,0,$where_is_controller).'/' : $cntr.'/';
+				$this->directory = str_replace(ROOTPATH,'../..',dirname($controller_file)).'/';
+				
+				$this->clean_controller = basename($controller_file,'Controller.php');
+				$this->clean_method = (empty($m[0])) ? 'index' : strtolower($m[0]);
+
+				$segments = [];
+
+				$segments[0] = $this->clean_controller.'Controller';
+				$segments[1] = $this->clean_method.$this->fetch_request_method(true).'Action';
+
+				array_shift($m);
+
+				foreach ($m as $uu) {
+					$segments[] = $uu;
+				}
+
+				return $segments;
+			}
+		}
+
+		return false;
+	}
+
+	public function method_a($segments) {
 		$search_path = explode(PATH_SEPARATOR, get_include_path());
 
 		foreach ($segments as $folder) {
@@ -83,17 +135,15 @@ class MY_Router extends CI_Router {
 			$this->set_directory(array_shift($segments), true);
 		}
 
-		$this->directory = '';
-
-		log_message('debug', 'MY_Router::_validate_request::404');
-
-		return $this->controller_method($this->routes['404_override']);
+		return false;
 	}
 
-	public function fetch_request_method() {
+	public function fetch_request_method($filter_get=false) {
 		log_message('debug', 'MY_Router::fetch_request_method');
 
-		return isset($_SERVER['REQUEST_METHOD']) ? ucfirst(strtolower($_SERVER['REQUEST_METHOD'])) : 'Cli';
+		$method = isset($_SERVER['REQUEST_METHOD']) ? ucfirst(strtolower($_SERVER['REQUEST_METHOD'])) : 'Cli';
+
+		return ($filter_get && $method == 'Get') ? '' : $method;
 	}
 
 	public function fetch_directory() {
@@ -126,6 +176,7 @@ class MY_Router extends CI_Router {
 
 		$this->clean_controller = ucfirst(strtolower($segments[0]));
 		$this->clean_method = strtolower($segments[1]);
+
 		$segments[0] .= 'Controller';
 		$segments[1] .= 'Action';
 

@@ -26,6 +26,7 @@ class Orange_crush {
 			'paths'=>$this->paths,
 			'system'=>$this->cache_system(),
 			'controllers'=>$this->cache_controllers(),
+			'controllers2'=>$this->cache_controllers2(),
 			'models'=>$this->cache_models(),
 			'views'=>$this->cache_views(),
 			'libraries'=>$this->cache_libraries(),
@@ -112,6 +113,54 @@ class Orange_crush {
 		return str_replace(ROOTPATH,$this->root_path_tag,$path);
 	}
 
+	protected function cache_controllers2() {
+		$a = $this->paths;
+		$found = [];
+		$ends_with = 'Controller.php';
+		$path_section = '/controllers/';
+
+		/* cascade backwards */
+		$a = array_reverse($a,true);
+
+		foreach ($a as $p) {
+			if (file_exists($p)) {
+				$it = new RecursiveDirectoryIterator($p);
+
+				foreach(new RecursiveIteratorIterator($it) as $file) {
+					if (substr($file->getBasename(),-strlen($ends_with)) == $ends_with) {
+						$uri = $this->clean_path($file->getPathname());
+
+						$pos = strpos($uri,$path_section);
+
+						if ($pos) {
+							$uri = substr($uri,$pos+strlen($path_section),-14);
+				
+							$controller_file = $file->getPathname();
+							
+							$cntr = str_replace(ROOTPATH.'/','',dirname(dirname($controller_file)));
+							$where_is_controller = strpos($cntr,'/controllers');
+							
+							$rec['package'] = ($where_is_controller > 0) ? substr($cntr,0,$where_is_controller).'/' : $cntr.'/';
+							$rec['directory'] = str_replace(ROOTPATH,'../..',dirname($controller_file)).'/';
+							$rec['controller'] = $controller_file;
+
+							$found[strtolower($uri).'(.*)'] = $rec;
+						}
+					}
+				}
+			}
+		}
+
+		uksort($found,function($a,$b) {
+			return (strlen($a) < strlen($b));
+		});
+		
+		/* catch all */
+		//$found['(.*)'] = '#<!ROOTPATH!>#/application/controllers/MainController.php';
+
+		return $found;
+	}
+
 	protected function cache_controllers() {
 		$a = $this->paths;
 		$found = [];
@@ -144,7 +193,8 @@ class Orange_crush {
 		uksort($found,function($a,$b) {
 			return (strlen($a) < strlen($b));
 		});
-
+		
+		/* catch all */
 		$found['(.*)'] = '#<!ROOTPATH!>#/application/controllers/MainController.php';
 
 		return $found;
