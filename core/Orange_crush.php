@@ -134,12 +134,18 @@ class Orange_crush {
 						if ($pos) {
 							$uri = substr($uri,$pos+strlen($path_section),-14);
 
-							$found[strtolower($uri)] = $this->clean_cache_path($file->getPathname());
+							$found[strtolower($uri).'(.*)'] = $this->clean_cache_path($file->getPathname());
 						}
 					}
 				}
 			}
 		}
+
+		uksort($found,function($a,$b) {
+			return (strlen($a) < strlen($b));
+		});
+
+		$found['(.*)'] = '#<!ROOTPATH!>#/application/controllers/MainController.php';
 
 		return $found;
 	}

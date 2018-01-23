@@ -22,8 +22,8 @@ define('ORANGE_VERSION', '2.0.0');
 /* save the current system include paths */
 define('ROOTPATHS', get_include_path());
 
-if (file_exists('Orange_crush.php')) {
-	require 'Orange_crush.php';
+if (file_exists(__DIR__.'/Orange_crush.php')) {
+	require __DIR__.'/Orange_crush.php';
 
 	new Orange_crush();
 }
@@ -363,7 +363,7 @@ function set_orange_paths($paths) {
 
 function get_orange_paths() {
 	global $_ORANGE_PATHS;
-	
+
 	return (array)$_ORANGE_PATHS;
 }
 
