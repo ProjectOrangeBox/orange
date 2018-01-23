@@ -37,7 +37,7 @@ class MY_Router extends CI_Router {
 
 		$this->set_class($segments[0]);
 		$this->set_method($segments[1]);
-				$this->uri->rsegments = [
+		$this->uri->rsegments = [
 			1 => $segments[0],
 			2 => $segments[1],
 		];
