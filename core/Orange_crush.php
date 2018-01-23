@@ -134,15 +134,16 @@ class Orange_crush {
 
 						if ($pos) {
 							$uri = substr($uri,$pos+strlen($path_section),-14);
-				
+
 							$controller_file = $file->getPathname();
-							
+
 							$cntr = str_replace(ROOTPATH.'/','',dirname(dirname($controller_file)));
 							$where_is_controller = strpos($cntr,'/controllers');
-							
+
 							$rec['package'] = ($where_is_controller > 0) ? substr($cntr,0,$where_is_controller).'/' : $cntr.'/';
 							$rec['directory'] = str_replace(ROOTPATH,'../..',dirname($controller_file)).'/';
 							$rec['controller'] = $controller_file;
+							$rec['clean_controller'] = basename($controller_file,'Controller.php');
 
 							$found[strtolower($uri).'(.*)'] = $rec;
 						}
@@ -154,7 +155,7 @@ class Orange_crush {
 		uksort($found,function($a,$b) {
 			return (strlen($a) < strlen($b));
 		});
-		
+
 		/* catch all */
 		//$found['(.*)'] = '#<!ROOTPATH!>#/application/controllers/MainController.php';
 
@@ -193,7 +194,7 @@ class Orange_crush {
 		uksort($found,function($a,$b) {
 			return (strlen($a) < strlen($b));
 		});
-		
+
 		/* catch all */
 		$found['(.*)'] = '#<!ROOTPATH!>#/application/controllers/MainController.php';
 

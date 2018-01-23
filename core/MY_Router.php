@@ -54,9 +54,9 @@ class MY_Router extends CI_Router {
 
 			return $segments;
 		}
-		
+
 		/* nothing found */
-		
+
 		$this->directory = '';
 
 		log_message('debug', 'MY_Router::_validate_request::404');
@@ -68,17 +68,26 @@ class MY_Router extends CI_Router {
 		$uri = implode('/',str_replace('-','_',$segments));
 		$op = get_orange_paths();
 
-		foreach ($op['caches']['controllers'] as $key=>$controller_file) {
+		foreach ($op['caches']['controllers2'] as $key=>$rec) {
 			if (preg_match('#^'.$key.'$#', $uri, $matches)) {
 				$m = explode('/',trim($matches[1],'/'));
+				
+				/*
+				$controller_file = $rec['controller'];
 
 				$cntr = str_replace(ROOTPATH.'/','',dirname(dirname($controller_file)));
 				$where_is_controller = strpos($cntr,'/controllers');
-				
+
 				$this->package = ($where_is_controller > 0) ? substr($cntr,0,$where_is_controller).'/' : $cntr.'/';
 				$this->directory = str_replace(ROOTPATH,'../..',dirname($controller_file)).'/';
 				
-				$this->clean_controller = basename($controller_file,'Controller.php');
+				
+				basename($rec['controller'],'Controller.php');
+				*/
+
+				$this->package = $rec['package'];
+				$this->directory = $rec['directory'];
+				$this->clean_controller = $rec['clean_controller'];
 				$this->clean_method = (empty($m[0])) ? 'index' : strtolower($m[0]);
 
 				$segments = [];
@@ -86,6 +95,7 @@ class MY_Router extends CI_Router {
 				$segments[0] = $this->clean_controller.'Controller';
 				$segments[1] = $this->clean_method.$this->fetch_request_method(true).'Action';
 
+				/* shift off method */
 				array_shift($m);
 
 				foreach ($m as $uu) {
