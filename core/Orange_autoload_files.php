@@ -1,6 +1,6 @@
 <?php
 
-class Orange_crush {
+class Orange_autoload_files {
 	protected $paths = [];
 	protected $cache_path;
 	protected $root_path_tag = '#<!ROOTPATH!>#';
@@ -26,7 +26,6 @@ class Orange_crush {
 			'paths'=>$this->paths,
 			'system'=>$this->cache_system(),
 			'controllers'=>$this->cache_controllers(),
-			'controllers2'=>$this->cache_controllers2(),
 			'models'=>$this->cache_models(),
 			'views'=>$this->cache_views(),
 			'libraries'=>$this->cache_libraries(),
@@ -113,7 +112,7 @@ class Orange_crush {
 		return str_replace(ROOTPATH,$this->root_path_tag,$path);
 	}
 
-	protected function cache_controllers2() {
+	protected function cache_controllers() {
 		$a = $this->paths;
 		$found = [];
 		$ends_with = 'Controller.php';
@@ -158,45 +157,6 @@ class Orange_crush {
 
 		/* catch all */
 		//$found['(.*)'] = '#<!ROOTPATH!>#/application/controllers/MainController.php';
-
-		return $found;
-	}
-
-	protected function cache_controllers() {
-		$a = $this->paths;
-		$found = [];
-		$ends_with = 'Controller.php';
-		$path_section = '/controllers/';
-
-		/* cascade backwards */
-		$a = array_reverse($a,true);
-
-		foreach ($a as $p) {
-			if (file_exists($p)) {
-				$it = new RecursiveDirectoryIterator($p);
-
-				foreach(new RecursiveIteratorIterator($it) as $file) {
-					if (substr($file->getBasename(),-strlen($ends_with)) == $ends_with) {
-						$uri = $this->clean_path($file->getPathname());
-
-						$pos = strpos($uri,$path_section);
-
-						if ($pos) {
-							$uri = substr($uri,$pos+strlen($path_section),-14);
-
-							$found[strtolower($uri).'(.*)'] = $this->clean_cache_path($file->getPathname());
-						}
-					}
-				}
-			}
-		}
-
-		uksort($found,function($a,$b) {
-			return (strlen($a) < strlen($b));
-		});
-
-		/* catch all */
-		$found['(.*)'] = '#<!ROOTPATH!>#/application/controllers/MainController.php';
 
 		return $found;
 	}

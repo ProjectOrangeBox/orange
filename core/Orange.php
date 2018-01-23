@@ -22,11 +22,9 @@ define('ORANGE_VERSION', '2.0.0');
 /* save the current system include paths */
 define('ROOTPATHS', get_include_path());
 
-if (file_exists(__DIR__.'/Orange_crush.php')) {
-	require __DIR__.'/Orange_crush.php';
+require __DIR__.'/Orange_autoload_files.php';
 
-	new Orange_crush();
-}
+new Orange_autoload_files();
 
 /* register our loader */
 spl_autoload_register('codeigniter_autoload');
@@ -327,7 +325,7 @@ function l() {
 		}
 	}
 
-	$build  = date('H:i:s').chr(10);
+	$build = date('Y-m-d H:i:s').chr(10);
 
 	foreach ($args as $a) {
 		$build .= chr(9).$a.chr(10);
