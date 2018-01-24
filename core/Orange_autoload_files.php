@@ -10,9 +10,9 @@ class Orange_autoload_files {
 
 		$this->cache_path = ROOTPATH.'/autoload_files.php';
 
-		$this->paths = explode(PATH_SEPARATOR,rtrim(APPPATH,'/').PATH_SEPARATOR.implode(PATH_SEPARATOR,$autoload['packages']));
-
 		if (env('ORANGE_FILE_CACHE',false)) {
+			$this->paths = explode(PATH_SEPARATOR,rtrim(APPPATH,'/').PATH_SEPARATOR.implode(PATH_SEPARATOR,$autoload['packages']));
+
 			$this->create_cache();
 		}
 
