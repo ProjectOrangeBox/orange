@@ -280,7 +280,7 @@ function site_url($uri = '', $protocol = NULL) {
 	$uri = ci()->config->site_url($uri, $protocol);
 
 	/* build the paths cache for easy replacement */
-	$paths = cache_var_export::cache('get_path', function(){
+	$paths = ci('cache_var_export')->cache('get_path', function(){
 		$array = [];
 		$paths = config('paths');
 
@@ -536,7 +536,7 @@ function delete_cache_by_tags($args) {
 
 	log_message('debug', 'delete_cache_by_tags '.implode(', ', $tags));
 
-	event::trigger('delete cache by tags', $tags);
+	ci('event')->trigger('delete cache by tags', $tags);
 
 	$cached_keys = ci('cache')->cache_info();
 

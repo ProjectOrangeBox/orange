@@ -57,7 +57,7 @@ class Validate {
 	}
 
 	public function clear() {
-		errors::clear();
+		ci('errors')->clear();
 
 		return $this;
 	}
@@ -69,25 +69,25 @@ class Validate {
 	}
 
 	public function die_on_fail($view = '400') {
-		if (errors::has()) {
-			errors::display($view, ['heading' => 'Validation Failed', 'message' => errors::as_html()]);
+		if (ci('errors')->has()) {
+			ci('errors')->display($view, ['heading' => 'Validation Failed', 'message' => ci('errors')->as_html()]);
 		}
 
 		return $this;
 	}
 
 	public function redirect_on_fail($url = null) {
-		if (errors::has()) {
+		if (ci('errors')->has()) {
 			$url = (is_string($url)) ? $url : true;
-			ci()->wallet->msg(errors::as_html(), 'red', $url);
+			ci()->wallet->msg(ci('errors')->as_html(), 'red', $url);
 		}
 
 		return $this;
 	}
 
 	public function json_on_fail() {
-		if (errors::has()) {
-			ci()->output->json(['ci_errors'=>errors::as_data()])->_display();
+		if (ci('errors')->has()) {
+			ci()->output->json(['ci_errors'=>ci('errors')->as_data()])->_display();
 			exit(1);
 		}
 
@@ -95,7 +95,7 @@ class Validate {
 	}
 
 	public function success() {
-		return !errors::has();
+		return !ci('errors')->has();
 	}
 
 	public function variable($rules = '',&$field, $human = null) {
@@ -174,7 +174,7 @@ class Validate {
 							}
 						}
 
-						errors::add(sprintf($this->error_string, $human, $param));
+						ci('errors')->add(sprintf($this->error_string, $human, $param));
 
 						break;
 					}

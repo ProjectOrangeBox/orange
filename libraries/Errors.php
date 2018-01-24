@@ -17,34 +17,34 @@
  */
 
 class Errors {
-	protected static $errors_variable = 'ci_errors';
+	protected $errors_variable = 'ci_errors';
 
-	public static function add($msg) {
+	public function add($msg) {
 		log_message('debug', 'Errors::add::'.$msg);
 
-		$current_errors = ci()->load->get_var(self::$errors_variable);
+		$current_errors = ci()->load->get_var( $this->errors_variable);
 		$current_errors[$msg] = $msg;
 
-		ci()->load->vars(self::$errors_variable, $current_errors);
+		ci()->load->vars( $this->errors_variable, $current_errors);
 	}
 
-	public static function clear() {
-		ci()->load->vars(self::$errors_variable, []);
+	public function clear() {
+		ci()->load->vars( $this->errors_variable, []);
 	}
 
-	public static function has() {
-		return (count(ci()->load->get_var(self::$errors_variable)) != 0);
+	public function has() {
+		return (count(ci()->load->get_var( $this->errors_variable)) != 0);
 	}
 
-	public static function as_array() {
-		return ci()->load->get_var(self::$errors_variable);
+	public function as_array() {
+		return ci()->load->get_var( $this->errors_variable);
 	}
 
-	public static function as_html($prefix = null, $suffix = null) {
+	public function as_html($prefix = null, $suffix = null) {
 		$str = '';
 
-		if (self::has()) {
-			$errors = ci()->load->get_var(self::$errors_variable);
+		if ( $this->has()) {
+			$errors = ci()->load->get_var( $this->errors_variable);
 			if ($prefix === null) {
 				$prefix = '<p class="orange error">';
 			}
@@ -62,25 +62,25 @@ class Errors {
 		return $str;
 	}
 
-	public static function as_cli() {
-		return errors::as_html(chr(9), chr(10));
+	public function as_cli() {
+		return ci('errors')->as_html(chr(9), chr(10));
 	}
 
-	public static function as_data() {
-		$errors = ci()->load->get_var(self::$errors_variable);
+	public function as_data() {
+		$errors = ci()->load->get_var( $this->errors_variable);
 
 		return ['records' => array_values($errors)] + ['count' => count($errors)];
 	}
 
-	public static function as_json() {
-		return json_encode(self::as_data(), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE | JSON_FORCE_OBJECT);
+	public function as_json() {
+		return json_encode( $this->as_data(), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE | JSON_FORCE_OBJECT);
 	}
 
-	public static function show($message, $status_code, $heading = 'An Error Was Encountered') {
-		self::display('general',['heading'=>$heading,'message'=>$message],$status_code);
+	public function show($message, $status_code, $heading = 'An Error Was Encountered') {
+		 $this->display('general',['heading'=>$heading,'message'=>$message],$status_code);
 	}
 
-	public static function display($view, $data = [], $status_code = 500, $override = []) {
+	public function display($view, $data = [], $status_code = 500, $override = []) {
 		if (is_numeric($view)) {
 			$status_code = (int) $view;
 		}
@@ -128,7 +128,8 @@ class Errors {
 		}
 
 		log_message('error', 'Error: '.$view_path.' '.$status_code.' '.print_r($data,true));
-		event::trigger('death.show');
+
+		ci('event')->trigger('death.show');
 
 		ci()->output
 			->enable_profiler(false)

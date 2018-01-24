@@ -17,24 +17,24 @@
  */
 
 class Cache_var_export {
-	protected static $config;
+	protected $config;
 
-	public static function init($config) {
-		self::$config = $config;
+	public function init(&$config) {
+		$this->config = &$config;
 
 		log_message('info', 'Cache_var_export Class Initialized');
 	}
 
-	public static function get($id) {
+	public function get($id) {
 		$get = FALSE;
 
-		if (is_file(self::$config['cache_path'].$id.'.meta.php') && is_file(self::$config['cache_path'].$id.'.php')) {
-			$meta = self::get_metadata($id);
+		if (is_file( $this->config['cache_path'].$id.'.meta.php') && is_file( $this->config['cache_path'].$id.'.php')) {
+			$meta =  $this->get_metadata($id);
 
 			if ($meta['ttl'] > 0 && time() > $meta['expire']) {
-				self::delete($id);
+				 $this->delete($id);
 			} else {
-				$get = include self::$config['cache_path'].$id.'.php';
+				$get = include  $this->config['cache_path'].$id.'.php';
 			}
 
 		}
@@ -42,75 +42,75 @@ class Cache_var_export {
 		return $get;
 	}
 
-	public static function save($id, $data, $ttl = null, $include = FALSE) {
+	public function save($id, $data, $ttl = null, $include = FALSE) {
 		$ttl = ($ttl) ? $ttl : cache_ttl();
 
 		if (is_array($data) || is_object($data)) {
 			$data = '<?php return '.str_replace('stdClass::__set_state', '(object)', var_export($data, true)).';';
 		}
 
-		self::save_metadata($id, $ttl, strlen($data));
+		 $this->save_metadata($id, $ttl, strlen($data));
 
-		$save = atomic_file_put_contents(self::$config['cache_path'].$id.'.php', $data);
+		$save = atomic_file_put_contents( $this->config['cache_path'].$id.'.php', $data);
 
 		if ($include) {
-			$save = include self::$config['cache_path'].$id.'.php';
+			$save = include  $this->config['cache_path'].$id.'.php';
 		}
 
 		return $save;
 	}
 
-	public static function get_metadata($id) {
-		return (!is_file(self::$config['cache_path'].$id.'.meta.php') || !is_file(self::$config['cache_path'].$id.'.php')) ? FALSE : include self::$config['cache_path'].$id.'.meta.php';
+	public function get_metadata($id) {
+		return (!is_file( $this->config['cache_path'].$id.'.meta.php') || !is_file( $this->config['cache_path'].$id.'.php')) ? FALSE : include  $this->config['cache_path'].$id.'.meta.php';
 	}
 
-	public static function save_metadata($id, $ttl, $strlen) {
-		return atomic_file_put_contents(self::$config['cache_path'].$id.'.meta.php', '<?php return '.var_export(['strlen' => $strlen, 'time' => time(), 'ttl' => (int) $ttl, 'expire' => (time() + $ttl)], true).';');
+	public function save_metadata($id, $ttl, $strlen) {
+		return atomic_file_put_contents( $this->config['cache_path'].$id.'.meta.php', '<?php return '.var_export(['strlen' => $strlen, 'time' => time(), 'ttl' => (int) $ttl, 'expire' => (time() + $ttl)], true).';');
 	}
 
-	public static function delete($id) {
-		return (self::$config['cache_multiple_servers']) ? self::multi_delete($id) : self::single_delete($id);
+	public function delete($id) {
+		return ( $this->config['cache_multiple_servers']) ?  $this->multi_delete($id) :  $this->single_delete($id);
 	}
 
-	public static function endpoint_delete($request) {
-		if (!in_array(ci()->input->ip_address(), self::$config['cache_allowed'])) {
+	public function endpoint_delete($request) {
+		if (!in_array(ci()->input->ip_address(),  $this->config['cache_allowed'])) {
 			exit(13);
 		}
 
 		list($hmac, $id) = explode(chr(0), hex2bin($request));
 
-		if (md5(self::$config['encryption_key'].$id) !== $hmac) {
+		if (md5( $this->config['encryption_key'].$id) !== $hmac) {
 			exit(13);
 		}
 
-		self::single_delete($id);
+		 $this->single_delete($id);
 		echo $request;
 
 		exit(200);
 	}
 
-	public static function cache($key, $closure, $ttl = null) {
-		if (!$cache = self::get($key)) {
+	public function cache($key, $closure, $ttl = null) {
+		if (!$cache =  $this->get($key)) {
 			$ci = ci();
 			$cache = $closure($ci);
 
-			self::save($key, $cache, $ttl);
+			 $this->save($key, $cache, $ttl);
 		}
 
 		return $cache;
 	}
 
-	protected static function single_delete($id) {
-		return (remove_php_file_from_opcache(self::$config['cache_path'].$id.'.php') && remove_php_file_from_opcache(self::$config['cache_path'].$id.'.meta.php'));
+	protected function single_delete($id) {
+		return (remove_php_file_from_opcache( $this->config['cache_path'].$id.'.php') && remove_php_file_from_opcache( $this->config['cache_path'].$id.'.meta.php'));
 	}
 
-	protected static function multi_delete($id) {
-		$cache_servers = self::$config['cache_servers'];
-		$hmac = bin2hex(md5(self::$config['encryption_key'].$id).chr(0).$id);
+	protected function multi_delete($id) {
+		$cache_servers =  $this->config['cache_servers'];
+		$hmac = bin2hex(md5( $this->config['encryption_key'].$id).chr(0).$id);
 		$mh = curl_multi_init();
 
 		foreach ($cache_servers as $idx => $server) {
-			$url = 'http'.(self::$config['cache_server_secure'] ? 's://' : '://').$server.'/'.trim(self::$config['cache_url'], '/').'/'.$hmac;
+			$url = 'http'.( $this->config['cache_server_secure'] ? 's://' : '://').$server.'/'.trim( $this->config['cache_url'], '/').'/'.$hmac;
 			$ch[$idx] = curl_init();
 			curl_setopt($ch[$idx], CURLOPT_URL, $url);
 			curl_setopt($ch[$idx], CURLOPT_HEADER, 0);

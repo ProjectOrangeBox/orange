@@ -17,30 +17,30 @@
  */
 
 class Event {
-	protected static $listeners = [];
+	protected $listeners = [];
 
-	public static function register($name, $closure, $priority = 0) {
+	public function register($name, $closure, $priority = 0) {
 		if (is_array($name)) {
 			foreach ($name as $n) {
-				self::register($n, $closure, $priority = 0);
+				$this->register($n, $closure, $priority = 0);
 			}
 			return;
 		}
 
-		$name = self::_normalize_name($name);
+		$name = $this->_normalize_name($name);
 
 		log_message('debug', 'event::register::'.$name);
 
-		self::$listeners[$name][$priority][] = $closure;
+		$this->listeners[$name][$priority][] = $closure;
 	}
 
-	public static function trigger($name, &$a1 = null, &$a2 = null, &$a3 = null, &$a4 = null, &$a5 = null, &$a6 = null, &$a7 = null, &$a8 = null) {
-		$name = self::_normalize_name($name);
+	public function trigger($name, &$a1 = null, &$a2 = null, &$a3 = null, &$a4 = null, &$a5 = null, &$a6 = null, &$a7 = null, &$a8 = null) {
+		$name = $this->_normalize_name($name);
 
 		log_message('debug', 'event::trigger::'.$name);
 
-		if (self::has($name)) {
-			$events = self::$listeners[$name];
+		if ($this->has($name)) {
+			$events = $this->listeners[$name];
 
 			ksort($events);
 
@@ -55,23 +55,23 @@ class Event {
 		}
 	}
 
-	public static function has($name) {
-		$name = self::_normalize_name($name);
+	public function has($name) {
+		$name = $this->_normalize_name($name);
 
-		return (isset(self::$listeners[$name]) && count(self::$listeners[$name]) > 0);
+		return (isset($this->listeners[$name]) && count($this->listeners[$name]) > 0);
 	}
 
-	public static function events() {
-		return array_keys(self::$listeners);
+	public function events() {
+		return array_keys($this->listeners);
 	}
 
-	public static function count($name) {
-		$name = self::_normalize_name($name);
+	public function count($name) {
+		$name = $this->_normalize_name($name);
 
-		return count(self::$listeners[$name]);
+		return count($this->listeners[$name]);
 	}
 
-	protected static function _normalize_name($name) {
+	protected function _normalize_name($name) {
 		return str_replace('_','.',strtolower(trim(preg_replace('#\W+#', '_', $name), '_')));
 	}
 

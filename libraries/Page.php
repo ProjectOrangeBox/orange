@@ -116,9 +116,9 @@ class Page {
 
 		$view = ($view) ? $view : str_replace('-', '_', $this->route);
 
-		event::trigger('page.render', $this, $view);
+		ci('event')->trigger('page.render', $this, $view);
 
-		event::trigger('page.render.'.str_replace('/','.',$view),$this, $view);
+		ci('event')->trigger('page.render.'.str_replace('/','.',$view),$this, $view);
 
 		$view_content = $this->view($view, $data);
 
@@ -126,7 +126,7 @@ class Page {
 			$view_content = $this->view(pear::is_extending());
 		}
 
-		event::trigger('page.render.content',$view_content);
+		ci('event')->trigger('page.render.content',$view_content);
 
 		ci()->output->append_output($view_content);
 

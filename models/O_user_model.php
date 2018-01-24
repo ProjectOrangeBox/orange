@@ -51,7 +51,7 @@ class o_user_model extends Database_model {
 	public function insert($data) {
 		$this->_password_check('insert',$data);
 
-		if (!errors::has()) {
+		if (!ci('errors')->has()) {
 			return parent::insert($data);
 		}
 	}
@@ -63,7 +63,7 @@ class o_user_model extends Database_model {
 			unset($data['password']);
 		}
 
-		if (!errors::has()) {
+		if (!ci('errors')->has()) {
 			return parent::update($data);
 		}
 	}
@@ -73,7 +73,7 @@ class o_user_model extends Database_model {
 
 		if ($password_info['algo'] == 0) {
 			if ($data['password'] != $data['confirm_password']) {
-				errors::add('Passwords do not match.');
+				ci('errors')->add('Passwords do not match.');
 			}
 
 			$this->rules['password']['rules'] .= '|user_password';
@@ -91,7 +91,7 @@ class o_user_model extends Database_model {
 	public function delete($user_id) {
 		parent::delete($user_id);
 
-		if (!errors::has()) {
+		if (!ci('errors')->has()) {
 			$this->update_by(['is_active'=>0],['id'=>$user_id]);
 
 			$this->remove_role($user_id);
@@ -166,7 +166,8 @@ class o_user_model extends Database_model {
 
 	public function password($password) {
 		$this->validate->single($this->rules['password']['rules'], $password);
-		return errors::has();
+
+		return ci('errors')->has();
 	}
 
 	public function _find_role_id($role) {

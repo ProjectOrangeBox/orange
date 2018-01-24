@@ -35,7 +35,7 @@ class MY_Model extends CI_Model {
 	}
 
 	public function clear() {
-		errors::clear();
+		ci('errors')->clear();
 
 		return $this;
 	}
@@ -53,7 +53,7 @@ class MY_Model extends CI_Model {
 			ci('validate')->multiple($rules, $data);
 		}
 
-		return !errors::has();
+		return !ci('errors')->has();
 	}
 
 	protected function remove_columns(&$data, $columns) {

@@ -52,11 +52,11 @@ class MY_Config extends CI_Config {
 	public function flush() {
 		log_message('debug', 'MY_Config::settings_flush');
 
-		return cache_var_export::delete('config');
+		return ci('cache_var_export')->delete('config');
 	}
 
 	protected function _load_combined_config() {
-		$built_config = cache_var_export::get('config');
+		$built_config = ci('cache_var_export')->get('config');
 
 		if (!is_array($built_config)) {
 			$built_config = [];
@@ -111,7 +111,7 @@ class MY_Config extends CI_Config {
 
 			$built_config = $this->config + $built_config;
 
-			cache_var_export::save('config',$built_config);
+			ci('cache_var_export')->save('config',$built_config);
 		}
 
 		$this->config = $built_config;

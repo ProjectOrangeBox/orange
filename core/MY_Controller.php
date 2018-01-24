@@ -42,7 +42,7 @@ class MY_Controller extends CI_Controller {
 		if (php_sapi_name() !== 'cli') {
 			if (!config('application.site open')) {
 				if ($_COOKIE['ISOPEN'] !== config('application.is open cookie', md5(uniqid(true)))) {
-					errors::display(503, ['heading' => 'Please Stand By', 'message' => 'Site Down for Maintenance']);
+					ci('errors')->display(503, ['heading' => 'Please Stand By', 'message' => 'Site Down for Maintenance']);
 				}
 			}
 		}
@@ -102,7 +102,7 @@ class MY_Controller extends CI_Controller {
 			$this->load->model($this->controller_model);
 		}
 
-		event::trigger('ci.controller.startup', $this);
+		ci('event')->trigger('ci.controller.startup', $this);
 	}
 
 } /* end file */

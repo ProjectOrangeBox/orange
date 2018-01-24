@@ -35,7 +35,7 @@ class Auth {
 	public function login($email, $password) {
 		$success = $this->_login($email, $password);
 
-		event::trigger('auth.login', $email, $success);
+		ci('event')->trigger('auth.login', $email, $success);
 
 		log_message('info', 'Auth Class login');
 
@@ -43,7 +43,7 @@ class Auth {
 	}
 
 	public function logout() {
-		event::trigger('auth.logout');
+		ci('event')->trigger('auth.logout');
 
 		$this->refresh_userdata(NOBODY_USER_ID);
 
@@ -71,42 +71,42 @@ class Auth {
 
 	protected function _login($login, $password) {
 		if ((strlen(trim($login)) == 0) or (strlen(trim($password)) == 0)) {
-			errors::add(config('auth.empty fields error'));
+			ci('errors')->add(config('auth.empty fields error'));
 			log_message('debug', 'auth->user '.config('auth.empty fields error'));
 			return false;
 		}
 
-		event::trigger('user.login.init', $login);
+		ci('event')->trigger('user.login.init', $login);
 
 		if (!$user = ci()->o_user_model->get_user_by_email($login)) {
 			log_message('debug', 'Auth Get User by email returned NULL');
-			errors::add(config('auth.general failure error'));
+			ci('errors')->add(config('auth.general failure error'));
 			return false;
 		}
 
 		if (!($user instanceof O_user_entity)) {
 			log_message('debug', 'Auth $user not an object');
-			errors::add(config('auth.general failure error'));
+			ci('errors')->add(config('auth.general failure error'));
 			return false;
 		}
 
 		if ((int) $user->id === 0) {
 			log_message('debug', 'Auth $user->id is 0 (no users id is 0)');
-			errors::add(config('auth.general failure error'));
+			ci('errors')->add(config('auth.general failure error'));
 			return false;
 		}
 
 		if (password_verify($password, $user->password) !== true) {
-			event::trigger('user.login.fail', $login);
+			ci('event')->trigger('user.login.fail', $login);
 			log_message('debug', 'auth->user Incorrect Login and/or Password');
-			errors::add(config('auth.general failure error'));
+			ci('errors')->add(config('auth.general failure error'));
 			return false;
 		}
 
 		if ((int) $user->is_active == 0) {
-			event::trigger('user.login.in active', $login);
+			ci('event')->trigger('user.login.in active', $login);
 			log_message('debug', 'auth->user Incorrect Login and/or Password');
-			errors::add(config('auth.general failure error'));
+			ci('errors')->add(config('auth.general failure error'));
 			return false;
 		}
 

@@ -42,11 +42,11 @@ class MY_Loader extends CI_Loader {
 		if (!$this->cache_drivers_loaded) {
 			$this->cache_drivers_loaded = true;
 
-			ci()->load->driver('cache', ['adapter' => ci()->config->item('cache_default'), 'backup' => ci()->config->item('cache_backup')]);
+			$config = get_config();
 
-			include __DIR__.'/../libraries/Cache_var_export.php';
+			ci()->load->driver('cache', ['adapter' => $config['cache_default'], 'backup' => $config['cache_backup']]);
 
-			cache_var_export::init(ci()->config->config);
+			ci('cache_var_export')->init($config);
 		}
 
 		if ($config === NULL) {
