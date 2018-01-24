@@ -58,21 +58,15 @@ class Event {
 	public static function has($name) {
 		$name = self::_normalize_name($name);
 
-		log_message('debug', 'Errors::has::'.$name);
-
 		return (isset(self::$listeners[$name]) && count(self::$listeners[$name]) > 0);
 	}
 
 	public static function events() {
-		log_message('debug', 'Errors::events');
-
 		return array_keys(self::$listeners);
 	}
 
 	public static function count($name) {
 		$name = self::_normalize_name($name);
-
-		log_message('debug', 'Errors::count::'.$name);
 
 		return count(self::$listeners[$name]);
 	}

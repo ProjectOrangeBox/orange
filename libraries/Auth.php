@@ -20,8 +20,6 @@ class Auth {
 	protected $session_key = 'user::data';
 
 	public function __construct() {
-		log_message('debug', 'Auth::__construct');
-
 		ci()->load->model(['o_permission_model','o_role_model','o_user_model']);
 
 		define('ADMIN_ROLE_ID',config('auth.admin role id'));
@@ -35,8 +33,6 @@ class Auth {
 	}
 
 	public function login($email, $password) {
-		log_message('debug', 'Auth::login::'.$name);
-
 		$success = $this->_login($email, $password);
 
 		event::trigger('auth.login', $email, $success);
@@ -47,8 +43,6 @@ class Auth {
 	}
 
 	public function logout() {
-		log_message('debug', 'Auth::logout');
-
 		event::trigger('auth.logout');
 
 		$this->refresh_userdata(NOBODY_USER_ID);
@@ -76,8 +70,6 @@ class Auth {
 	}
 
 	protected function _login($login, $password) {
-		log_message('debug', 'Auth::_login::'.$login);
-
 		if ((strlen(trim($login)) == 0) or (strlen(trim($password)) == 0)) {
 			errors::add(config('auth.empty fields error'));
 			log_message('debug', 'auth->user '.config('auth.empty fields error'));

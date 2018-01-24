@@ -28,17 +28,15 @@ class Cache_var_export {
 	public static function get($id) {
 		$get = FALSE;
 
-		if (DEBUG != 'development') {
-			if (self::$config['cache_default'] !== 'dummy') {
-				if (is_file(self::$config['cache_path'].$id.'.meta.php') && is_file(self::$config['cache_path'].$id.'.php')) {
-					$meta = self::get_metadata($id);
-					if ($meta['ttl'] > 0 && time() > $meta['expire']) {
-						self::delete($id);
-					} else {
-						$get = include self::$config['cache_path'].$id.'.php';
-					}
-				}
+		if (is_file(self::$config['cache_path'].$id.'.meta.php') && is_file(self::$config['cache_path'].$id.'.php')) {
+			$meta = self::get_metadata($id);
+
+			if ($meta['ttl'] > 0 && time() > $meta['expire']) {
+				self::delete($id);
+			} else {
+				$get = include self::$config['cache_path'].$id.'.php';
 			}
+
 		}
 
 		return $get;

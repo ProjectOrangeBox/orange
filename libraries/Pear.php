@@ -55,8 +55,6 @@ class Pear {
 	}
 
 	public static function section($name,$value=null) {
-		log_message('debug', 'Pear::section::'.$name);
-
 		if ($value) {
 			ci('load')->vars([$name => $value]);
 		} else {
@@ -66,16 +64,12 @@ class Pear {
 	}
 
 	public static function parent($name=null) {
-		log_message('debug', 'Pear::parent::'.$name);
-
 		$name = ($name) ? $name : end(self::$fragment);
 
 		echo ci('load')->get_var($name);
 	}
 
 	public static function end() {
-		log_message('debug', 'Pear::end');
-
 		$name = array_pop(self::$fragment);
 		$buffer = ob_get_contents();
 
@@ -85,14 +79,10 @@ class Pear {
 	}
 
 	public static function extends($name) {
-		log_message('debug', 'Pear::extends::'.$name);
-
 		self::$extends = $name;
 	}
 
 	public static function include($view = null, $data = [], $name = true) {
-		log_message('debug', 'Pear::include::'.$view);
-
 		if ($name === true) {
 			echo ci('page')->view($view, $data, $name);
 		} else {
@@ -101,8 +91,6 @@ class Pear {
 	}
 
 	public static function is_extending() {
-		log_message('debug', 'Pear::is_extending');
-
 		return self::$extends;
 	}
 
@@ -122,8 +110,6 @@ class Pear {
 
 	protected static function instantiate_plugin($name='') {
 		$class = 'Pear_'.str_replace('pear_','',strtolower($name));
-
-		log_message('debug', 'Pear::load::'.$class);
 
 		/* if the class hasn't been loaded yet */
 		if (!class_exists($class,false)) {

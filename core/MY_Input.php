@@ -38,15 +38,11 @@ class MY_Input extends CI_Input {
 
 	/* replace a input stream value with another */
 	public function request_replace($index = null, $replace_value = null) {
-		log_message('debug', 'MY_Input::request_replace::'.$index);
-
 		$this->_request[$index] = $replace_value;
 	}
 
 	/* remap multiple input_stream values to different values with option to keep original values */
 	public function request_remap($map = [],$keep_current = false) {
-		log_message('debug', 'MY_Input::remap');
-
 		$current_request = $this->_request;
 
 		if (!$keep_current) {
@@ -62,8 +58,6 @@ class MY_Input extends CI_Input {
 
 	/* return cookie with default */
 	public function cookie($index = null, $default = null, $xss_clean = null) {
-		log_message('debug', 'MY_Input::cookie::'.$index);
-
 		$value = $this->_fetch_from_array($_COOKIE, $index, $xss_clean);
 
 		return ($value === null) ? $default : $value;

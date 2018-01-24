@@ -56,8 +56,6 @@ class MY_Config extends CI_Config {
 	}
 
 	protected function _load_combined_config() {
-		log_message('debug', 'MY_Config::_load_combined_config');
-
 		$built_config = cache_var_export::get('config');
 
 		if (!is_array($built_config)) {

@@ -26,8 +26,6 @@ class MY_Output extends CI_Output {
 
 	*/
 	public function json($data = null, $val = null) {
-		log_message('debug', 'MY_Output::json');
-
 		if ($data === null) {
 			$json = json_encode(ci()->load->get_vars(),JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE);
 		} else {
@@ -46,8 +44,6 @@ class MY_Output extends CI_Output {
 
 	/* send a no cache header */
 	public function nocache() {
-		log_message('debug', 'MY_Output::nocache');
-
 		$this
 			->set_header('Expires: Sat,26 Jul 1997 05:00:00 GMT')
 			->set_header('Cache-Control: no-cache,no-store,must-revalidate,max-age=0')
@@ -62,8 +58,6 @@ class MY_Output extends CI_Output {
 	https://www.codeigniter.com/user_guide/helpers/cookie_helper.html?highlight=set_cookie#set_cookie
 	*/
 	public function set_cookie($name = '', $value = '', $expire = '', $domain = '', $path = '/', $prefix = '', $secure = FALSE, $httponly = FALSE) {
-		log_message('debug', 'MY_Output::set_cookie::'.$name);
-
 		return ci()->input->set_cookie($name, $value, $expire, $domain, $path, $prefix, $secure, $httponly);
 	}
 

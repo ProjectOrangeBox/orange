@@ -39,8 +39,6 @@ class MY_Loader extends CI_Loader {
 	 *
 	 */
 	protected function _ci_init_library($class, $prefix, $config = FALSE, $object_name = NULL) {
-		log_message('debug', 'MY_Loader::_ci_init_library');
-
 		if (!$this->cache_drivers_loaded) {
 			$this->cache_drivers_loaded = true;
 
@@ -114,8 +112,6 @@ class MY_Loader extends CI_Loader {
 	 *
 	 */
 	protected function _ci_load_stock_library($library_name, $file_path, $params, $object_name) {
-		log_message('debug', 'MY_Loader::_ci_load_stock_library');
-
 		$prefix = 'CI_';
 
 		if (class_exists($prefix.$library_name, FALSE)) {

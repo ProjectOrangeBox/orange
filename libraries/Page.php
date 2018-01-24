@@ -90,14 +90,10 @@ class Page {
 	}
 
 	public function title($title = '') {
-		log_message('debug', 'page::title::'.$title);
-
 		return $this->data($this->page_prefix.'title', $title);
 	}
 
 	public function meta($attr, $name, $content = null) {
-		log_message('debug', 'page::meta');
-
 		return $this->_asset_add('meta','<meta '.$attr.'="'.$name.'"'.(($content) ? ' content="'.$content.'"' : '').'>');
 	}
 
@@ -109,8 +105,6 @@ class Page {
 
 			return $this;
 		}
-
-		log_message('debug', 'page::body_class::'.$class);
 
 		$this->assets['body_class'][] = preg_replace('/[^\da-z -]/i', '', strtolower($class));
 
@@ -140,8 +134,6 @@ class Page {
 	}
 
 	public function view($_view_file = null, $_data = [], $_return = true) {
-		log_message('debug', 'page::view::'.$_view_file);
-
 		$_buffer = trim(view($_view_file,array_merge(ci()->load->get_vars(),$_data)));
 
 		if (is_string($_return)) {
@@ -160,16 +152,12 @@ class Page {
 			return $this;
 		}
 
-		log_message('debug', 'page::data::'.$name);
-
 		ci()->load->vars([$name => $value]);
 
 		return $this;
 	}
 
 	public function icon($image_path = '') {
-		log_message('debug', 'page::icon::'.$image_path);
-
 		return $this->data($this->page_prefix.'icon', '<link rel="icon" type="image/x-icon" href="'.$image_path.'"><link rel="apple-touch-icon" href="'.$image_path.'">');
 	}
 
@@ -181,20 +169,14 @@ class Page {
 			return $this;
 		}
 
-		log_message('debug', 'page::css::'.$file);
-
 		return $this->_asset_add('css',$this->link_html($file));
 	}
 
 	public function link_html($file) {
-		log_message('debug', 'page::link_html::'.$file);
-
 		return $this->ary2element('link', array_merge($this->link_attributes, ['href' => $file]));
 	}
 
 	public function style($style) {
-		log_message('debug', 'page::style');
-
 		return $this->_asset_add('style',$style);
 	}
 
@@ -206,20 +188,14 @@ class Page {
 			return $this;
 		}
 
-		log_message('debug', 'page::js::'.$file);
-
 		return $this->_asset_add('js',$this->script_html($file));
 	}
 
 	public function script_html($file) {
-		log_message('debug', 'page::script_html::'.$file);
-
 		return $this->ary2element('script', array_merge($this->script_attributes, ['src' => $file]), '');
 	}
 
 	public function js_variable($key,$value) {
-		log_message('debug', 'page::js_variable');
-
 		return $this->_asset_add('js_variables',((is_scalar($value)) ? 'var '.$key.'="'.str_replace('"', '\"', $value).'";' : 'var '.$key.'='.json_encode($value, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE).';'));
 	}
 
@@ -232,14 +208,10 @@ class Page {
 	}
 
 	public function script($script) {
-		log_message('debug', 'page::script');
-
 		return $this->_asset_add('script',$script);
 	}
 
 	public function domready($script) {
-		log_message('debug', 'page::domready');
-
 		return $this->_asset_add('domready',$script);
 	}
 
@@ -260,8 +232,6 @@ class Page {
 	}
 
 	public function prepend_asset($bol = true) {
-		log_message('debug', 'page::prepend_asset::'.(string)$bol);
-
 		$this->prepend_asset = $bol;
 	}
 

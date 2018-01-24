@@ -56,24 +56,18 @@ class Validate {
 	}
 
 	public function clear() {
-		log_message('debug', 'Validate::clear');
-
 		errors::clear();
 
 		return $this;
 	}
 
 	public function attach($name, closure $closure) {
-		log_message('debug', 'Validate::attach::'.$name);
-
 		$this->attached['validate_'.$name] = $closure;
 
 		return $this;
 	}
 
 	public function die_on_fail($view = '400') {
-		log_message('debug', 'Validate::die_on_fail');
-
 		if (errors::has()) {
 			errors::display($view, ['heading' => 'Validation Failed', 'message' => errors::as_html()]);
 		}
@@ -82,8 +76,6 @@ class Validate {
 	}
 
 	public function redirect_on_fail($url = null) {
-		log_message('debug', 'Validate::redirect_on_fail');
-
 		if (errors::has()) {
 			$url = (is_string($url)) ? $url : true;
 			ci()->wallet->msg(errors::as_html(), 'red', $url);
@@ -93,8 +85,6 @@ class Validate {
 	}
 
 	public function json_on_fail() {
-		log_message('debug', 'Validate::json_on_fail');
-
 		if (errors::has()) {
 			ci()->output->json(['ci_errors'=>errors::as_data()])->_display();
 			exit(1);
@@ -104,20 +94,14 @@ class Validate {
 	}
 
 	public function success() {
-		log_message('debug', 'Validate::success');
-
 		return !errors::has();
 	}
 
 	public function variable($rules = '',&$field, $human = null) {
-		log_message('debug', 'Validate::variable');
-
 		return $this->single($rules, $field, $human);
 	}
 
 	public function request($rules = '', $key, $human = null) {
-		log_message('debug', 'Validate::request');
-
 		$field = ci()->input->request($key);
 
 		$this->single($rules, $field, $human);
@@ -128,14 +112,10 @@ class Validate {
 	}
 
 	public function run($rules = '', &$fields, $human = null) {
-		log_message('debug', 'Validate::run');
-
 		return (is_array($fields)) ? $this->multiple($rules, $fields) : $this->single($rules, $fields, $human);
 	}
 
 	public function single($rules, &$field, $human = null) {
-		log_message('debug', 'Validate::single');
-
 		$rules = (isset($this->config[$rules])) ? $this->config[$rules] : $rules;
 
 		if (!empty($rules)) {
@@ -205,8 +185,6 @@ class Validate {
 	}
 
 	public function multiple($rules, &$fields) {
-		log_message('debug', 'Validate::multiple');
-
 		$this->field_data = &$fields;
 
 		foreach ($rules as $fieldname => $rule) {
@@ -219,8 +197,6 @@ class Validate {
 	}
 
 	protected function load_plugin($class_name,$is_filter) {
-		log_message('debug', 'Validate::load_plugin::'.$class_name);
-
 		$plugin = false;
 
 		if (class_exists($class_name,true)) {
