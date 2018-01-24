@@ -42,17 +42,27 @@ class MY_Loader extends CI_Loader {
 		if (!$this->cache_drivers_loaded) {
 			$this->cache_drivers_loaded = true;
 
-			$config = get_config();
-
-			ci()->load->driver('cache',['adapter' => $config['cache_default'], 'backup' => $config['cache_backup']]);
+			ci()->load->driver('cache', ['adapter' => ci()->config->item('cache_default'), 'backup' => ci()->config->item('cache_backup')]);
 
 			include __DIR__.'/../libraries/Cache_var_export.php';
 
-			cache_var_export::init($config);
+			cache_var_export::init(ci()->config->config);
 		}
 
-		if ($config === FALSE) {
-			$config = include_config(strtolower($class));
+		if ($config === NULL) {
+			$found       = FALSE;
+			$config_file = stream_resolve_include_path('config/'.strtolower($class).'.php');
+
+			if ($config_file) {
+				$found = true;
+				include $config_file;
+			} else {
+				$config_file = stream_resolve_include_path('config/'.ENVIRONMENT.'/'.strtolower($class).'.php');
+				if ($config_file) {
+					$found = true;
+					include $config_file;
+				}
+			}
 		}
 
 		$class_name = $prefix.$class;
@@ -83,7 +93,7 @@ class MY_Loader extends CI_Loader {
 
 		$this->_ci_classes[$object_name] = $class;
 
-		$CI->$object_name = new $class_name($config);
+		$CI->$object_name = isset($config) ? new $class_name($config) : new $class_name();
 	}
 
 	/**
