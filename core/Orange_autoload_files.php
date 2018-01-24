@@ -12,7 +12,7 @@ class Orange_autoload_files {
 
 		$this->paths = explode(PATH_SEPARATOR,rtrim(APPPATH,'/').PATH_SEPARATOR.implode(PATH_SEPARATOR,$autoload['packages']));
 
-		if ($_ENV['ORANGE_FILE_CACHE'] == true) {
+		if (env('ORANGE_FILE_CACHE',false)) {
 			$this->create_cache();
 		}
 
@@ -37,6 +37,7 @@ class Orange_autoload_files {
 			'model_traits'=>$this->cache_model_traits(),
 			'library_traits'=>$this->cache_library_traits(),
 			'core'=>$this->cache_core(),
+			'config'=>$this->cache_config(),
 		];
 
 		$crush['caches'] = $caches;
@@ -500,6 +501,28 @@ class Orange_autoload_files {
 
 		foreach ($files as $f) {
 			$found['CI_'.basename($f,'.php')] = $this->clean_cache_path($f);
+		}
+
+		return $found;
+	}
+
+	protected function cache_config() {
+		$found = [];
+
+		$files = glob(APPPATH.'config/*.php');
+
+		foreach ($files as $file) {
+			$found[strtolower(basename($file,'.php'))] = $this->clean_cache_path($file);
+		}
+
+		$folders = glob(APPPATH.'config/*',GLOB_ONLYDIR);
+
+		foreach ($folders as $folder) {
+			$files = glob($folder.'/*.php');
+
+			foreach ($files as $file) {
+				$found['env_'.strtolower(basename($folder))][strtolower(basename($file,'.php'))] = $this->clean_cache_path($file);
+			}
 		}
 
 		return $found;

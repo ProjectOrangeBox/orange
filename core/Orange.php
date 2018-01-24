@@ -315,6 +315,11 @@ function get_public_object_vars($obj) {
   return get_object_vars($obj);
 }
 
+/* wrapper to get env with default */
+function env($key,$default=null) {
+	return (isset($_ENV[$key])) ? $_ENV[$key] : $default;
+}
+
 /* Simple logging function */
 function l() {
 	$args = func_get_args();
@@ -561,4 +566,36 @@ function middleware() {
 	global $_middleware;
 
 	return (func_num_args()) ? $_middleware = func_get_args() :  (array)$_middleware;
+}
+
+function include_config($filename,$env=null) {
+	$env = ($env) ? $env : ENVIRONMENT;
+
+	$_ORANGE_PATHS = get_orange_paths();
+
+	$lfilename = strtolower($filename);
+
+	$config = [];
+
+	if (isset($_ORANGE_PATHS['caches']['config'][$lfilename])) {
+		include $_ORANGE_PATHS['caches']['config'][$lfilename];
+	}
+
+	if ($env != false) {
+		if (isset($_ORANGE_PATHS['caches']['config']['env_'.strtolower($env)][$lfilename])) {
+			$original_config = $config;
+			$config = [];
+
+			include $_ORANGE_PATHS['caches']['config']['env_'.strtolower($env)][$lfilename];
+
+			foreach ($config as $key=>$env_config) {
+				$original_config[$key] = $env_config;
+			}
+
+			$config = $original_config;
+		}
+	}
+
+	/* always returns and array */
+	return $config;
 }

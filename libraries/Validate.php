@@ -48,6 +48,7 @@ class Validate {
 
 			foreach ($attach as $name=>$closure) {
 				log_message('debug', ENVIRONMENT.' "validate_'.$name.'" attached to Validate library.');
+
 				$this->attached['validate_'.$name] = $closure;
 			}
 		}
