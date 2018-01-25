@@ -51,7 +51,7 @@ class Cache_var_export {
 
 		 $this->save_metadata($id, $ttl, strlen($data));
 
-		$save = atomic_file_put_contents( $this->config['cache_path'].$id.'.php', $data);
+		$save = atomic_file_put_contents($this->config['cache_path'].$id.'.php', $data);
 
 		if ($include) {
 			$save = include  $this->config['cache_path'].$id.'.php';
@@ -65,7 +65,7 @@ class Cache_var_export {
 	}
 
 	public function save_metadata($id, $ttl, $strlen) {
-		return atomic_file_put_contents( $this->config['cache_path'].$id.'.meta.php', '<?php return '.var_export(['strlen' => $strlen, 'time' => time(), 'ttl' => (int) $ttl, 'expire' => (time() + $ttl)], true).';');
+		return atomic_file_put_contents($this->config['cache_path'].$id.'.meta.php', '<?php return '.var_export(['strlen' => $strlen, 'time' => time(), 'ttl' => (int) $ttl, 'expire' => (time() + $ttl)], true).';');
 	}
 
 	public function delete($id) {
