@@ -74,10 +74,7 @@ class MY_Config extends CI_Config {
 		if (!is_array($built_config)) {
 			$built_config = [];
 
-			foreach ($_ENV as $key => $value) {
-				$built_config['env'][strtolower($key)] = $value;
-			}
-
+			/* standard config files */
 			$config_files = glob(APPPATH.'config/*.php');
 
 			foreach ($config_files as $file) {
@@ -94,6 +91,7 @@ class MY_Config extends CI_Config {
 				}
 			}
 
+			/* environmental configs */
 			if (ENVIRONMENT) {
 				$config_files = glob(APPPATH.'config/'.ENVIRONMENT.'/*.php');
 
@@ -112,6 +110,7 @@ class MY_Config extends CI_Config {
 				}
 			}
 
+			/* database configs */
 			if (parent::item('no_database_settings') !== true) {
 				$db_array = ci('o_setting_model')->pull();
 
