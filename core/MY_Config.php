@@ -19,6 +19,16 @@
 class MY_Config extends CI_Config {
 	protected $setup = false;
 
+	/**
+	 * Fetch a config file item
+	 *
+	 * @param	string	$item	Config item name
+	 * @param	string	$index	Index name
+	 * @return	string|null	The configuration item or NULL if the item doesn't exist
+	 *
+	 * Overridden
+	 *
+	 */
 	public function item($item,$index=null) {
 		log_message('debug', 'MY_Config::item::'.$item);
 
@@ -28,12 +38,14 @@ class MY_Config extends CI_Config {
 			if (class_exists('CI_Controller',false)) {
 				if (class_exists('Cache_var_export',false)) {
 					$this->setup = true;
+
 					$this->_load_combined_config();
 				}
 			}
 		}
 
 		if (strpos($item,'.') !== false) {
+			/* dot notation style? */
 			list($file,$key) = explode('.', strtolower($item), 2);
 
 			if (!$key) {
@@ -43,6 +55,7 @@ class MY_Config extends CI_Config {
 			}
 
 		} else {
+			/* default style */
 			$value = parent::item($item,$index);
 		}
 
