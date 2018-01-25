@@ -21,8 +21,6 @@ class MY_Controller extends CI_Controller {
 
 	public $controller        = null;
 	public $controller_path   = null;
-	public $controller_title  = null;
-	public $controller_titles = null;
 
 	public $libraries = null;
 	public $helpers   = null;
@@ -45,18 +43,6 @@ class MY_Controller extends CI_Controller {
 					ci('errors')->display(503, ['heading' => 'Please Stand By', 'message' => 'Site Down for Maintenance']);
 				}
 			}
-		}
-
-		if (!$this->controller_title) {
-			ci()->load->helper('inflector');
-
-			$this->controller_title = singular(filter_human($this->controller));
-		}
-
-		if (!$this->controller_titles) {
-			ci()->load->helper('inflector');
-
-			$this->controller_titles = plural(filter_human($this->controller));
 		}
 
 		foreach (middleware() as $middleware_file) {
