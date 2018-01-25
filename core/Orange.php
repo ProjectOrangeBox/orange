@@ -295,7 +295,7 @@ function site_url($uri = '', $protocol = NULL) {
 	return str_replace($paths['keys'], $paths['values'], $uri);
 }
 
-/* wrapper function to grab configuration */
+/* wrapper function to grab configuration based on dot notation */
 function config($setting = null, $default = null) {
 	return ci()->config->item($setting,$default);
 }
@@ -401,7 +401,8 @@ function view($_view,$_data=[]) {
 
 /*
 Write a string to a file in a single "atomic" action
-using the atomic method doesn't cause problems with other processes trying to read/write to the file while you are writing it */
+using the atomic method doesn't cause problems with other processes trying to read/write to the file while you are writing it
+*/
 function atomic_file_put_contents($filepath, $content) {
 	$tmpfname = tempnam(dirname($filepath), 'afpc_');
 
@@ -413,6 +414,10 @@ function atomic_file_put_contents($filepath, $content) {
 
 	if ($bytes === false) {
 		throw new Exception('atomic file put contents could not file put contents');
+	}
+
+	if (chmod($tmpfname, 0644) === false) {
+		throw new Exception('atomic file put contents could not change file mode');
 	}
 
 	if (rename($tmpfname, $filepath) === false) {
@@ -520,7 +525,10 @@ function cache($key, $closure, $ttl = null) {
 
 /* get the caching TTL with a window so they don't all expire at the exact same time on a high volume site */
 function cache_ttl($use_window=true) {
-	return ((($use_window) ? mt_rand(-15,15) : 0) + (int)config('config.cache_ttl', 60));
+	$cache_ttl = (int)config('cache_ttl',0);
+	$window_adder = ($use_window) ? mt_rand(-15,15) : 0;
+
+	return ($cache_ttl == 0) ? 0 : ($cache_ttl + $window_adder);
 }
 
 /* delete cache items using tags (dot notation filename) */
