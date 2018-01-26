@@ -20,13 +20,18 @@ class Auth {
 	protected $session_key = 'user::data';
 
 	public function __construct() {
-		ci()->load->model(['o_permission_model','o_role_model','o_user_model']);
+		ci('load')->library('user')->model(['o_permission_model','o_role_model','o_user_model']);
 
 		define('ADMIN_ROLE_ID',config('auth.admin role id'));
 		define('NOBODY_USER_ID',config('auth.nobody user id'));
 
+
 		if (!is_cli()) {
-			$this->refresh_userdata((int)ci()->session->userdata($this->session_key));
+			$user_id = (int)ci()->session->userdata($this->session_key);
+
+			$user_id = ($user_id > 0) ? $user_id : NOBODY_USER_ID;
+
+			$this->refresh_userdata($user_id);
 		}
 
 		log_message('info', 'Auth Class Initialized');
@@ -56,7 +61,7 @@ class Auth {
 		log_message('debug', 'Auth::refresh_userdata::'.$user_id);
 
 		$user_id = ((int)$user_id > 0) ? (int)$user_id : NOBODY_USER_ID;
-		$profile = ci()->o_user_model->get($user_id);
+		$profile = ci('o_user_model')->get($user_id);
 
 		if ((int)$profile->is_active == 1 && $profile instanceof O_user_entity) {
 			unset($profile->password);
@@ -78,7 +83,7 @@ class Auth {
 
 		ci('event')->trigger('user.login.init', $login);
 
-		if (!$user = ci()->o_user_model->get_user_by_email($login)) {
+		if (!$user = ci('o_user_model')->get_user_by_email($login)) {
 			log_message('debug', 'Auth Get User by email returned NULL');
 			ci('errors')->add(config('auth.general failure error'));
 			return false;

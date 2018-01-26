@@ -5,22 +5,22 @@ class Orange_autoload_files {
 	protected $cache_path;
 	protected $root_path_tag = '#<!ROOTPATH!>#';
 
-	public function __construct() {
-		require APPPATH.'/config/autoload.php';
-
-		$this->cache_path = ROOTPATH.'/autoload_files.php';
+	public function __construct($path) {
+		$this->cache_path = $path;
 
 		if (env('ORANGE_FILE_CACHE',false)) {
+			require APPPATH.'/config/autoload.php';
+
 			$this->paths = explode(PATH_SEPARATOR,rtrim(APPPATH,'/').PATH_SEPARATOR.implode(PATH_SEPARATOR,$autoload['packages']));
 
-			$this->create_cache();
+			$this->write_cache($this->create_cache());
 		}
 
-		set_orange_paths($this->read_cache());
+		orange_paths($this->read_cache());
 	}
 
 	public function create_cache() {
-		$crush = [];
+		$autoload_files = [];
 
 		$caches = [
 			'paths'=>$this->paths,
@@ -40,21 +40,19 @@ class Orange_autoload_files {
 			'config'=>$this->cache_config(),
 		];
 
-		$crush['caches'] = $caches;
+		$autoload_files['caches'] = $caches;
 
 		foreach ($caches as $key=>$array) {
-			$crush['orange'] = array_merge($caches['system'],$caches['controllers'],$caches['validations'],$caches['pear_plugins'],$caches['filters'],$caches['middleware'],$caches['controller_traits'],$caches['model_traits'],$caches['library_traits'],$caches['core']);
+			$autoload_files['orange'] = array_merge($caches['system'],$caches['controllers'],$caches['validations'],$caches['pear_plugins'],$caches['filters'],$caches['middleware'],$caches['controller_traits'],$caches['model_traits'],$caches['library_traits'],$caches['core']);
 		}
 
-		$crush['models'] = $caches['models'];
+		$autoload_files['models'] = $caches['models'];
 
-		$crush['libraries'] = $caches['libraries'];
+		$autoload_files['libraries'] = $caches['libraries'];
 
-		$crush['views'] = $caches['views'];
+		$autoload_files['views'] = $caches['views'];
 
-		$this->write_cache($crush);
-
-		return $crush;
+		return $autoload_files;
 	}
 
 	protected function write_cache($array) {
@@ -66,7 +64,7 @@ class Orange_autoload_files {
 
 		$php .= 'return '.$vars.';';
 
-		return $this->atomic_file_put_contents($this->cache_path,$php);
+		return atomic_file_put_contents($this->cache_path,$php);
 	}
 
 	protected function read_cache() {
@@ -75,34 +73,6 @@ class Orange_autoload_files {
 		}
 
 		return include $this->cache_path;
-	}
-
-	protected function atomic_file_put_contents($filepath, $content) {
-		$tmpfname = tempnam(dirname($filepath), 'afpc_');
-
-		if ($tmpfname === false) {
-			throw new Exception('atomic file put contents could not create temp file');
-		}
-
-		$bytes = file_put_contents($tmpfname, $content);
-
-		if ($bytes === false) {
-			throw new Exception('atomic file put contents could not file put contents');
-		}
-
-		if (rename($tmpfname, $filepath) === false) {
-			throw new Exception('atomic file put contents could not make atomic switch');
-		}
-
-		if (function_exists('opcache_invalidate')) {
-			opcache_invalidate($filepath, true);
-		} elseif (function_exists('apc_delete_file')) {
-			apc_delete_file($filepath);
-		}
-
-		chmod($filepath, 0666);
-
-		return $bytes;
 	}
 
 	protected function clean_path($path) {
@@ -155,9 +125,6 @@ class Orange_autoload_files {
 		uksort($found,function($a,$b) {
 			return (strlen($a) < strlen($b));
 		});
-
-		/* catch all */
-		//$found['(.*)'] = '#<!ROOTPATH!>#/application/controllers/MainController.php';
 
 		return $found;
 	}

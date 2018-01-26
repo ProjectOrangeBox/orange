@@ -22,9 +22,9 @@ define('ORANGE_VERSION', '2.0.0');
 /* save the current system include paths */
 define('ROOTPATHS', get_include_path());
 
-require __DIR__.'/Orange_autoload_files.php';
+require __DIR__.'/../libraries/Orange_autoload_files.php';
 
-new Orange_autoload_files();
+init_orange_autoload_files();
 
 /* register our loader */
 spl_autoload_register('codeigniter_autoload');
@@ -147,10 +147,9 @@ Autoloader for:
 
 */
 function codeigniter_autoload($class) {
-	$_ORANGE_PATHS = get_orange_paths();
+	$_ORANGE_PATHS = orange_paths();
 
 	$lclass = strtolower($class);
-	$uclass = ucfirst($class);
 
 	if (isset($_ORANGE_PATHS['orange'][$lclass])) {
 		require $_ORANGE_PATHS['orange'][$lclass];
@@ -159,101 +158,15 @@ function codeigniter_autoload($class) {
 	}
 
 	if (isset($_ORANGE_PATHS['models'][$lclass])) {
-		ci()->load->model($class);
+		ci()->load->model($lclass);
 
 		return true;
 	}
 
 	if (isset($_ORANGE_PATHS['libraries'][$lclass])) {
-		ci()->load->library($class);
+		ci()->load->library($lclass);
 
 		return true;
-	}
-
-	log_message('debug', 'CodeIgniter autoload falling back to search '.$lclass);
-
-	if ($file = stream_resolve_include_path($class.'.php')) {
-		require_once $file;
-
-		return true;
-	}
-
-	if (substr($class, -6) == '_model') {
-		if (stream_resolve_include_path('models/'.$uclass.'.php')) {
-			ci()->load->model($class);
-
-			return true;
-		}
-	}
-
-	if (substr($class, -10) == 'Controller') {
-		if ($file = stream_resolve_include_path('controllers/'.$uclass.'.php')) {
-			include $file;
-
-			return true;
-		}
-	}
-
-	if (substr($class, -6) == '_trait') {
-		if (substr($class, -17) == '_controller_trait') {
-			if ($file = stream_resolve_include_path('controllers/traits/'.$class.'.php')) {
-				require $file;
-
-				return true;
-			}
-		}
-		if (substr($class, -12) == '_model_trait') {
-			if ($file = stream_resolve_include_path('models/traits/'.$class.'.php')) {
-				require $file;
-
-				return true;
-			}
-		}
-		if (substr($class, -14) == '_library_trait') {
-			if ($file = stream_resolve_include_path('library/traits/'.$class.'.php')) {
-				require $file;
-
-				return true;
-			}
-		}
-	}
-
-	if (stream_resolve_include_path('libraries/'.$uclass.'.php')) {
-		ci()->load->library($class);
-
-		return true;
-	}
-
-	if (substr($class, -10) == 'Middleware') {
-		if ($file = stream_resolve_include_path('middleware/'.$uclass.'.php')) {
-			require $file;
-
-			return true;
-		}
-	}
-
-	if (substr($uclass,0,9) == 'Validate_') {
-		if ($file = stream_resolve_include_path('libraries/validations/'.$uclass.'.php')) {
-			require $file;
-
-			return true;
-		}
-	}
-
-	if (substr($uclass,0,7) == 'Filter_') {
-		if ($file = stream_resolve_include_path('libraries/filters/'.$uclass.'.php')) {
-			require $file;
-
-			return true;
-		}
-	}
-
-	if (substr($uclass,0,5) == 'Pear_') {
-		if ($file = stream_resolve_include_path('libraries/pear_plugins/'.$uclass.'.php')) {
-			require $file;
-
-			return true;
-		}
 	}
 
 	return false;
@@ -344,45 +257,28 @@ function unlock_session() {
 	session_write_close();
 }
 
-/* Delete all cookies */
-function delete_all_cookies() {
-	$past = time() - 3600;
-
-	foreach ($_COOKIE as $key=>$value) {
-    setcookie($key,$value,$past,config('config.cookie_path','/'));
-	}
-}
-
 /* wrapper to provide a simple browser logging */
 function console($var, $type = 'log') {
 	echo '<script type="text/javascript">console.'.$type.'('.json_encode($var).')</script>';
 }
 
-function set_orange_paths($paths) {
+function orange_paths($paths=null) {
 	global $_ORANGE_PATHS;
 
-	$_ORANGE_PATHS = $paths;
-}
-
-function get_orange_paths() {
-	global $_ORANGE_PATHS;
-
-	return (array)$_ORANGE_PATHS;
+	return ($paths) ? $_ORANGE_PATHS = $paths : (array)$_ORANGE_PATHS;
 }
 
 /* the most simple view building function */
 function view($_view,$_data=[]) {
-	$_ORANGE_PATHS = get_orange_paths();
+	$_ORANGE_PATHS = orange_paths();
 
 	$_file = ltrim(str_replace('.php','',$_view),'/');
 
+	/* clean up */
 	if (isset($_ORANGE_PATHS['views'][$_file])) {
 		$_view_file = $_ORANGE_PATHS['views'][$_file];
 	} else {
-		log_message('debug', 'view falling back to search '.$_file);
-
-		/* use the include paths to search for the view */
-		$_view_file = stream_resolve_include_path('views/'.$_file.'.php');
+		die('view falling back to search '.$_file);
 	}
 
 	if ($_view_file === false) {
@@ -430,7 +326,9 @@ function atomic_file_put_contents($filepath, $content) {
 		apc_delete_file($filepath);
 	}
 
-	log_message('debug', 'atomic_file_put_contents wrote '.$filepath.' '.$bytes.' bytes');
+	if (function_exists('log_message')) {
+		log_message('debug', 'atomic_file_put_contents wrote '.$filepath.' '.$bytes.' bytes');
+	}
 
 	return $bytes;
 }
@@ -528,7 +426,7 @@ function cache_ttl($use_window=true) {
 	$cache_ttl = (int)config('cache_ttl',0);
 	$window_adder = ($use_window) ? mt_rand(-15,15) : 0;
 
-	return ($cache_ttl == 0) ? 0 : ($cache_ttl + $window_adder);
+	return ($cache_ttl == 0) ? 0 : (max(0,$cache_ttl + $window_adder));
 }
 
 /* delete cache items using tags (dot notation filename) */
@@ -574,4 +472,8 @@ function middleware() {
 	global $_middleware;
 
 	return (func_num_args()) ? $_middleware = func_get_args() :  (array)$_middleware;
+}
+
+function init_orange_autoload_files() {
+	new Orange_autoload_files(ROOTPATH.'/autoload_files.php');
 }

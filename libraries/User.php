@@ -85,4 +85,12 @@ class User {
 		return ci()->user->is_active;
 	}
 
+	public static function somebody() {
+		return (ci()->user->id != NOBODY_USER_ID);
+	}
+
+	public static function is_admin() {
+		return ci()->user->has_role(ADMIN_ROLE_ID);
+	}
+
 } /* end file */

@@ -78,6 +78,7 @@ class Wallet {
 
 		if (is_string($redirect) || $redirect === true) {
 			$redirect = (is_string($redirect)) ? $redirect : ci('input')->server('HTTP_REFERER');
+
 			$this->redirect_messages[md5(trim($msg))] = ['msg' => trim($msg), 'type' => $type, 'sticky' => $sticky];
 
 			ci('session')->set_flashdata($this->msg_key, $this->redirect_messages);

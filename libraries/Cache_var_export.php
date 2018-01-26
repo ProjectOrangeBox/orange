@@ -31,10 +31,10 @@ class Cache_var_export {
 		if (is_file( $this->config['cache_path'].$id.'.meta.php') && is_file( $this->config['cache_path'].$id.'.php')) {
 			$meta =  $this->get_metadata($id);
 
-			if ($meta['ttl'] > 0 && time() > $meta['expire']) {
+			if (time() > $meta['expire']) {
 				 $this->delete($id);
 			} else {
-				$get = include  $this->config['cache_path'].$id.'.php';
+				$get = include $this->config['cache_path'].$id.'.php';
 			}
 
 		}
@@ -90,11 +90,12 @@ class Cache_var_export {
 	}
 
 	public function cache($key, $closure, $ttl = null) {
-		if (!$cache =  $this->get($key)) {
+		if (!$cache = $this->get($key)) {
 			$ci = ci();
+
 			$cache = $closure($ci);
 
-			 $this->save($key, $cache, $ttl);
+			$this->save($key, $cache, $ttl);
 		}
 
 		return $cache;

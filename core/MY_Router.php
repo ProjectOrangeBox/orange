@@ -42,7 +42,7 @@ class MY_Router extends CI_Router {
 
 	public function _validate_request($segments) {
 		$uri = implode('/',str_replace('-','_',$segments));
-		$op = get_orange_paths();
+		$op = orange_paths();
 
 		foreach ($op['caches']['controllers'] as $key=>$rec) {
 			if (preg_match('#^'.$key.'$#', $uri, $matches)) {
