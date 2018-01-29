@@ -118,7 +118,11 @@ class O_user_entity extends model_entity {
 	}
 
 	public function logged_in() {
-		return ($this->id !== NOBODY_USER_ID);
+		return ($this->id != NOBODY_USER_ID);
+	}
+
+	public function is_admin() {
+		return $this->has_role(ADMIN_ROLE_ID);
 	}
 
 	protected function _lazy_load() {

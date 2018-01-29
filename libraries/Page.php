@@ -38,7 +38,7 @@ class Page {
 		if (isset(ci()->user)) {
 			$uid = md5(ci()->user->id.config('config.encryption_key'));
 
-			if (ci()->user->is_active) {
+			if (ci()->user->logged_in()) {
 				$is = 'active';
 			}
 

@@ -25,13 +25,16 @@ class Auth {
 		define('ADMIN_ROLE_ID',config('auth.admin role id'));
 		define('NOBODY_USER_ID',config('auth.nobody user id'));
 
-
 		if (!is_cli()) {
 			$user_id = (int)ci()->session->userdata($this->session_key);
 
 			$user_id = ($user_id > 0) ? $user_id : NOBODY_USER_ID;
 
-			$this->refresh_userdata($user_id);
+			/*
+			load the user but there is no reason to save it in a session
+			because we either got it from the session already or they are a "nobody"
+			*/
+			$this->refresh_userdata($user_id,false);
 		}
 
 		log_message('info', 'Auth Class Initialized');
@@ -57,7 +60,7 @@ class Auth {
 		return true;
 	}
 
-	public function refresh_userdata($user_id) {
+	public function refresh_userdata($user_id,$save_session=true) {
 		log_message('debug', 'Auth::refresh_userdata::'.$user_id);
 
 		$user_id = ((int)$user_id > 0) ? (int)$user_id : NOBODY_USER_ID;
@@ -66,7 +69,10 @@ class Auth {
 		if ((int)$profile->is_active == 1 && $profile instanceof O_user_entity) {
 			unset($profile->password);
 			ci()->user = &$profile;
-			ci()->session->set_userdata([$this->session_key => $profile->id]);
+
+			if ($save_session) {
+				ci()->session->set_userdata([$this->session_key => $profile->id]);
+			}
 		} else {
 			$this->refresh_userdata(NOBODY_USER_ID);
 		}
