@@ -8,7 +8,7 @@ class Orange_autoload_files {
 	public function __construct($path) {
 		$this->cache_path = $path;
 
-		if (env('ORANGE_FILE_CACHE',false)) {
+		if (env('ORANGE_FILE_CACHE',false) || !file_exists($this->cache_path)) {
 			require APPPATH.'/config/autoload.php';
 
 			$this->paths = explode(PATH_SEPARATOR,rtrim(APPPATH,'/').PATH_SEPARATOR.implode(PATH_SEPARATOR,$autoload['packages']));

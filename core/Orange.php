@@ -312,6 +312,12 @@ function atomic_file_put_contents($filepath, $content) {
 		throw new Exception('atomic file put contents could not file put contents');
 	}
 
+	if (!file_exists(dirname($filepath))) {
+		if (!mkdir(dirname($filepath),0755,true)) {
+			throw new Exception('atomic file put contents could not change create folder');
+		}
+	}
+
 	if (chmod($tmpfname, 0644) === false) {
 		throw new Exception('atomic file put contents could not change file mode');
 	}
