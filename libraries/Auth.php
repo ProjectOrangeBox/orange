@@ -35,6 +35,9 @@ class Auth {
 			because we either got it from the session already or they are a "nobody"
 			*/
 			$this->refresh_userdata($user_id,false);
+		} else {
+			/* cli as nobody */
+			$this->refresh_userdata(NOBODY_USER_ID,false);
 		}
 
 		log_message('info', 'Auth Class Initialized');
@@ -68,6 +71,7 @@ class Auth {
 
 		if ((int)$profile->is_active == 1 && $profile instanceof O_user_entity) {
 			unset($profile->password);
+
 			ci()->user = &$profile;
 
 			if ($save_session) {
