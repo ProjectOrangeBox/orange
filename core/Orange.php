@@ -300,7 +300,8 @@ Write a string to a file in a single "atomic" action
 using the atomic method doesn't cause problems with other processes trying to read/write to the file while you are writing it
 */
 function atomic_file_put_contents($filepath, $content) {
-	$tmpfname = tempnam(dirname($filepath), 'afpc_');
+	$dirname = dirname($filepath);
+	$tmpfname = tempnam($dirname, 'afpc_');
 
 	if ($tmpfname === false) {
 		throw new Exception('atomic file put contents could not create temp file');
@@ -310,12 +311,6 @@ function atomic_file_put_contents($filepath, $content) {
 
 	if ($bytes === false) {
 		throw new Exception('atomic file put contents could not file put contents');
-	}
-
-	if (!file_exists(dirname($filepath))) {
-		if (!mkdir(dirname($filepath),0755,true)) {
-			throw new Exception('atomic file put contents could not change create folder');
-		}
 	}
 
 	if (chmod($tmpfname, 0644) === false) {
