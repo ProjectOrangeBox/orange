@@ -8,7 +8,7 @@ class Orange_autoload_files {
 	public function __construct($path) {
 		$this->cache_path = $path;
 
-		if (env('ORANGE_FILE_CACHE',false) || !file_exists($this->cache_path)) {
+	if ($_ENV['SERVER_ENVIRONMENT'] == 'development' || !file_exists($this->cache_path)) {
 			require APPPATH.'/config/autoload.php';
 
 			$this->paths = explode(PATH_SEPARATOR,rtrim(APPPATH,'/').PATH_SEPARATOR.implode(PATH_SEPARATOR,$autoload['packages']));
@@ -57,12 +57,8 @@ class Orange_autoload_files {
 
 	protected function write_cache($array) {
 		$php = '<?php '.chr(10).chr(10);
-		$php .= '$baseDir = dirname(__FILE__);'.chr(10).chr(10);
-
-		$vars = var_export($array, true);
-		$vars = str_replace(chr(39).$this->root_path_tag,"\$baseDir.'",$vars);
-
-		$php .= 'return '.$vars.';';
+		$php .= '$baseDir = dirname(dirname(dirname(dirname(__FILE__))));'.chr(10).chr(10);
+		$php .= 'return '.str_replace(chr(39).$this->root_path_tag,"\$baseDir.'",var_export($array, true)).';';
 
 		return atomic_file_put_contents($this->cache_path,$php);
 	}
@@ -485,10 +481,12 @@ class Orange_autoload_files {
 		$folders = glob(APPPATH.'config/*',GLOB_ONLYDIR);
 
 		foreach ($folders as $folder) {
-			$files = glob($folder.'/*.php');
+			if ($folder != 'compiled') {
+				$files = glob($folder.'/*.php');
 
-			foreach ($files as $file) {
-				$found['env_'.strtolower(basename($folder))][strtolower(basename($file,'.php'))] = $this->clean_cache_path($file);
+				foreach ($files as $file) {
+					$found['env_'.strtolower(basename($folder))][strtolower(basename($file,'.php'))] = $this->clean_cache_path($file);
+				}
 			}
 		}
 

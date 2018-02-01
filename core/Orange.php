@@ -24,7 +24,7 @@ define('ROOTPATHS', get_include_path());
 
 require __DIR__.'/../libraries/Orange_autoload_files.php';
 
-init_orange_autoload_files();
+new Orange_autoload_files(APPPATH.'config/compiled/autoload_files.php');
 
 /* register our loader */
 spl_autoload_register('codeigniter_autoload');
@@ -192,17 +192,20 @@ function site_url($uri = '', $protocol = NULL) {
 	/* run the CodeIgniter version first */
 	$uri = ci()->config->site_url($uri, $protocol);
 
-	/* build the paths cache for easy replacement */
-	$paths = ci('cache_var_export')->cache('get_path', function(){
-		$array = [];
+	$file_path = APPPATH.'config/compiled/site_url.php';
+
+	if ($_ENV['SERVER_ENVIRONMENT'] == 'development' || !file_exists($file_path)) {
 		$paths = config('paths');
 
-		foreach ($paths as $m => $t) {
-			$array['{'.strtolower($m).'}'] = $t;
+		foreach ($paths as $find => $replace) {
+			$site_url['keys'][] = '{'.strtolower($find).'}';
+			$site_url['values'][] = $replace;
 		}
 
-		return ['keys' => array_keys($array), 'values' => array_values($array)];
-	});
+		atomic_file_put_contents($file_path,'<?php return '.var_export($site_url,true).';');
+	}
+
+	$array = include $file_path;
 
 	/* simple find and replace array to array */
 	return str_replace($paths['keys'], $paths['values'], $uri);
@@ -302,6 +305,10 @@ using the atomic method doesn't cause problems with other processes trying to re
 function atomic_file_put_contents($filepath, $content) {
 	$dirname = dirname($filepath);
 	$tmpfname = tempnam($dirname, 'afpc_');
+
+	if (!is_writable($dirname)) {
+		throw new Exception('atomic file put contents folder "'.$dirname.'" not writable');
+	}
 
 	if ($tmpfname === false) {
 		throw new Exception('atomic file put contents could not create temp file');
@@ -473,8 +480,4 @@ function middleware() {
 	global $_middleware;
 
 	return (func_num_args()) ? $_middleware = func_get_args() :  (array)$_middleware;
-}
-
-function init_orange_autoload_files() {
-	new Orange_autoload_files(ROOTPATH.'/autoload_files.php');
 }
