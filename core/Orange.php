@@ -147,23 +147,23 @@ Autoloader for:
 
 */
 function codeigniter_autoload($class) {
-	$_ORANGE_PATHS = orange_paths();
+	$op = orange_paths();
 
 	$lclass = strtolower($class);
 
-	if (isset($_ORANGE_PATHS['orange'][$lclass])) {
-		require $_ORANGE_PATHS['orange'][$lclass];
+	if (isset($op['orange'][$lclass])) {
+		require $op['orange'][$lclass];
 
 		return true;
 	}
 
-	if (isset($_ORANGE_PATHS['models'][$lclass])) {
+	if (isset($op['models'][$lclass])) {
 		ci()->load->model($lclass);
 
 		return true;
 	}
 
-	if (isset($_ORANGE_PATHS['libraries'][$lclass])) {
+	if (isset($op['libraries'][$lclass])) {
 		ci()->load->library($lclass);
 
 		return true;
@@ -205,7 +205,7 @@ function site_url($uri = '', $protocol = NULL) {
 		atomic_file_put_contents($file_path,'<?php return '.var_export($site_url,true).';');
 	}
 
-	$array = include $file_path;
+	$paths = include $file_path;
 
 	/* simple find and replace array to array */
 	return str_replace($paths['keys'], $paths['values'], $uri);
@@ -273,15 +273,15 @@ function orange_paths($paths=null) {
 
 /* the most simple view building function */
 function view($_view,$_data=[]) {
-	$_ORANGE_PATHS = orange_paths();
+	$_op = orange_paths();
 
 	$_file = ltrim(str_replace('.php','',$_view),'/');
 
+	$_view_file = false;
+
 	/* clean up */
-	if (isset($_ORANGE_PATHS['views'][$_file])) {
-		$_view_file = $_ORANGE_PATHS['views'][$_file];
-	} else {
-		die('view falling back to search '.$_file);
+	if (isset($_op['views'][$_file])) {
+		$_view_file = $_op['views'][$_file];
 	}
 
 	if ($_view_file === false) {

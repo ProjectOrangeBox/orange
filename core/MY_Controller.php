@@ -47,7 +47,7 @@ class MY_Controller extends CI_Controller {
 
 		foreach (middleware() as $middleware_file) {
 			if (class_exists($middleware_file)) {
-				new $middleware_file();
+				new $middleware_file;
 			} else {
 				throw new Exception('middleware "'.$middleware_file.'" not found.');
 			}

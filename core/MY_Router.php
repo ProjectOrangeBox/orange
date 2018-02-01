@@ -44,7 +44,7 @@ class MY_Router extends CI_Router {
 		$uri = implode('/',str_replace('-','_',$segments));
 		$op = orange_paths();
 
-		foreach ($op['caches']['controllers'] as $key=>$rec) {
+		foreach ($op['controllers'] as $key=>$rec) {
 			if (preg_match('#^'.$key.'$#', $uri, $matches)) {
 				$segs = explode('/',trim($matches[1],'/'));
 

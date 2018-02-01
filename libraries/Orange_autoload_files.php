@@ -20,37 +20,13 @@ class Orange_autoload_files {
 	}
 
 	public function create_cache() {
-		$autoload_files = [];
-
-		$caches = [
-			'paths'=>$this->paths,
-			'system'=>$this->cache_system(),
-			'controllers'=>$this->cache_controllers(),
-			'models'=>$this->cache_models(),
-			'views'=>$this->cache_views(),
-			'libraries'=>$this->cache_libraries(),
-			'validations'=>$this->cache_validations(),
-			'pear_plugins'=>$this->cache_pear_plugins(),
-			'filters'=>$this->cache_filters(),
-			'middleware'=>$this->cache_middleware(),
-			'controller_traits'=>$this->cache_controller_traits(),
-			'model_traits'=>$this->cache_model_traits(),
-			'library_traits'=>$this->cache_library_traits(),
-			'core'=>$this->cache_core(),
-			'config'=>$this->cache_config(),
+		$autoload_files = [
+			'orange' => array_merge($this->cache_system(),$this->cache_validations(),$this->cache_pear_plugins(),$this->cache_filters(),$this->cache_middleware(),$this->cache_controller_traits(),$this->cache_model_traits(),$this->cache_library_traits(),$this->cache_core()),
+			'models' => $this->cache_models(),
+			'libraries' => $this->cache_libraries(),
+			'views' => $this->cache_views(),
+			'controllers' => $this->cache_controllers(),
 		];
-
-		$autoload_files['caches'] = $caches;
-
-		foreach ($caches as $key=>$array) {
-			$autoload_files['orange'] = array_merge($caches['system'],$caches['controllers'],$caches['validations'],$caches['pear_plugins'],$caches['filters'],$caches['middleware'],$caches['controller_traits'],$caches['model_traits'],$caches['library_traits'],$caches['core']);
-		}
-
-		$autoload_files['models'] = $caches['models'];
-
-		$autoload_files['libraries'] = $caches['libraries'];
-
-		$autoload_files['views'] = $caches['views'];
 
 		return $autoload_files;
 	}
