@@ -194,7 +194,7 @@ function site_url($uri = '', $protocol = NULL) {
 
 	$file_path = APPPATH.'config/compiled/site_url.php';
 
-	if ($_ENV['SERVER_ENVIRONMENT'] == 'development' || !file_exists($file_path)) {
+	if (ENVIRONMENT == 'development' || !file_exists($file_path)) {
 		$paths = config('paths');
 
 		foreach ($paths as $find => $replace) {
