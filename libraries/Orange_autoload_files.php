@@ -33,7 +33,7 @@ class Orange_autoload_files {
 
 	protected function write_cache($array) {
 		$php = '<?php '.chr(10).chr(10);
-		$php .= '$baseDir = dirname(dirname(dirname(dirname(__FILE__))));'.chr(10).chr(10);
+		$php .= '$baseDir = dirname(__DIR__);'.chr(10).chr(10);
 		$php .= 'return '.str_replace(chr(39).$this->root_path_tag,"\$baseDir.'",var_export($array, true)).';';
 
 		return atomic_file_put_contents($this->cache_path,$php);
@@ -457,12 +457,10 @@ class Orange_autoload_files {
 		$folders = glob(APPPATH.'config/*',GLOB_ONLYDIR);
 
 		foreach ($folders as $folder) {
-			if ($folder != 'compiled') {
-				$files = glob($folder.'/*.php');
+			$files = glob($folder.'/*.php');
 
-				foreach ($files as $file) {
-					$found['env_'.strtolower(basename($folder))][strtolower(basename($file,'.php'))] = $this->clean_cache_path($file);
-				}
+			foreach ($files as $file) {
+				$found['env_'.strtolower(basename($folder))][strtolower(basename($file,'.php'))] = $this->clean_cache_path($file);
 			}
 		}
 

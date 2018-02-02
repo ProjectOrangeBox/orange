@@ -24,7 +24,7 @@ define('ROOTPATHS', get_include_path());
 
 require __DIR__.'/../libraries/Orange_autoload_files.php';
 
-new Orange_autoload_files(APPPATH.'config/compiled/autoload_files.php');
+new Orange_autoload_files(ROOTPATH.'/compiled/autoload_files.php');
 
 /* register our loader */
 spl_autoload_register('codeigniter_autoload');
@@ -192,7 +192,7 @@ function site_url($uri = '', $protocol = NULL) {
 	/* run the CodeIgniter version first */
 	$uri = ci()->config->site_url($uri, $protocol);
 
-	$file_path = APPPATH.'config/compiled/site_url.php';
+	$file_path = ROOTPATH.'/compiled/site_url.php';
 
 	if (ENVIRONMENT == 'development' || !file_exists($file_path)) {
 		$paths = config('paths');

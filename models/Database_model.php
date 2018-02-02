@@ -170,6 +170,7 @@ class Database_model extends MY_Model {
 
 	protected function _get($as_array = true, $table = null) {
 		$this->switch_database('read');
+
 		$table = ($table) ? $table : $this->table;
 
 		$this->add_where_on_select();
@@ -177,6 +178,7 @@ class Database_model extends MY_Model {
 		$dbc = $this->_database->get($table);
 
 		$this->log_last_query();
+
 		$results = ($as_array) ? $this->_as_array($dbc) : $this->_as_row($dbc);
 
 		if ($this->temporary_column_name) {
