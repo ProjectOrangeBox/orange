@@ -25,9 +25,9 @@ class o_user_model extends Database_model {
 	protected $entity = true;
 	protected $rules = [
 		'id'              => ['field' => 'id', 'label' => 'Id', 'rules' => 'required|integer|max_length[10]|less_than[4294967295]|filter_int[10]'],
-		'username'        => ['field' => 'username', 'label' => 'User Name', 'rules' => 'required|is_uniquem[o_user_model.username.id]'],
+		'username'        => ['field' => 'username', 'label' => 'User Name', 'rules' => 'required|trim|is_uniquem[o_user_model.username.id]'],
 		'password'        => ['field' => 'password', 'label' => 'Password', 'rules' => 'required|max_length[255]|filter_input[255]'],
-		'email'           => ['field' => 'email', 'label' => 'Email', 'rules' => 'required|strtolower|valid_email|is_uniquem[o_user_model.email.id]|max_length[255]|filter_input[255]'],
+		'email'           => ['field' => 'email', 'label' => 'Email', 'rules' => 'required|trim|strtolower|valid_email|is_uniquem[o_user_model.email.id]|max_length[255]|filter_input[255]'],
 		'is_active'       => ['field' => 'is_active', 'label' => 'Active', 'rules' => 'if_empty[0]|in_list[0,1]|filter_int[1]|max_length[1]|less_than[2]'],
 		'user_read_role_id'    => ['field' => 'user_read_role_id', 'label' => 'User Read Role', 'rules' => 'required|integer|max_length[10]|less_than[4294967295]|filter_int[10]'],
 		'user_edit_role_id'    => ['field' => 'user_edit_role_id', 'label' => 'User Edit Role', 'rules' => 'required|integer|max_length[10]|less_than[4294967295]|filter_int[10]'],

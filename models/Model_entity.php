@@ -39,8 +39,8 @@ class Model_entity {
 		}
 
 		if ($data[$primary_id] == null) {
-
 			unset($data[$primary_id]);
+
 			$success = $model->insert($data);
 
 			if ($success !== false) {
