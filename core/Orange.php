@@ -481,19 +481,3 @@ function middleware() {
 
 	return (func_num_args()) ? $_middleware = func_get_args() :  (array)$_middleware;
 }
-
-function vd() {
-	if (PHP_SAPI === 'cli' || defined('STDIN')) {
-		foreach (func_get_args() as $v) {
-			var_dump($v);
-		}
-	} else {
-		echo '<code>';
-		foreach (func_get_args() as $v) {
-			var_dump($v);
-		}
-		echo '</code>';
-	}
-
-	die();
-}
