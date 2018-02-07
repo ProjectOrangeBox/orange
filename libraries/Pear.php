@@ -31,7 +31,7 @@ class Pear {
 			self::$setup = true;
 		}
 
-		class_exists(ucfirst(strtolower($name)));
+		self::class_exists($name);
 
 		if (isset(self::$attached[$name])) {
 			return call_user_func_array(self::$attached[$name],$arguments);
@@ -101,13 +101,19 @@ class Pear {
 
 		if (is_array($name)) {
 			foreach ($name as $n) {
-				class_exists(ucfirst(strtolower($n)));
+				self::class_exists($n);
 			}
 		} else {
-			class_exists(ucfirst(strtolower($name)));
+			self::class_exists($name);
 		}
 
 		ci('page')->prepend_asset(false);
+	}
+
+	protected static function class_exists($name) {
+		$name = 'Pear_'.str_replace('pear_','',strtolower($name));
+
+		class_exists($name);
 	}
 
 } /* end file */
