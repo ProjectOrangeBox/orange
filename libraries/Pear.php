@@ -31,7 +31,7 @@ class Pear {
 			self::$setup = true;
 		}
 
-		self::instantiate_plugin($name);
+		class_exists(ucfirst(strtolower($name)));
 
 		if (isset(self::$attached[$name])) {
 			return call_user_func_array(self::$attached[$name],$arguments);
@@ -94,31 +94,20 @@ class Pear {
 		return self::$extends;
 	}
 
-	public static function plugins($names) {
+	public static function plugins($name) {
 		ci('page')->prepend_asset(true);
 
-		if (strpos($names,',') !== false) {
-			foreach (explode(',',$names) as $name) {
-				self::instantiate_plugin($name);
+		$name = (strpos($name,',') !== false) ? explode(',',$name) : $name;
+
+		if (is_array($name)) {
+			foreach ($name as $n) {
+				class_exists(ucfirst(strtolower($n)));
 			}
 		} else {
-			self::instantiate_plugin($names);
+			class_exists(ucfirst(strtolower($name)));
 		}
 
 		ci('page')->prepend_asset(false);
-	}
-
-	protected static function instantiate_plugin($name='') {
-		$class = 'Pear_'.str_replace('pear_','',strtolower($name));
-
-		/* if the class hasn't been loaded yet */
-		if (!class_exists($class,false)) {
-			/* load it */
-			if (class_exists($class)) {
-				/* instantiate it */
-				new $class;
-			}
-		}
 	}
 
 } /* end file */

@@ -38,8 +38,6 @@ class Database_model extends MY_Model {
 	protected $cache_prefix;
 	protected $temporary_with_deleted = false;
 	protected $temporary_only_deleted = false;
-	protected $temporary_return_on_single = null;
-	protected $temporary_return_on_many = null;
 	protected $temporary_column_name = null;
 	protected $temporary_return_as_array = null;
 	protected $auto_generated_primary = true;
@@ -79,17 +77,17 @@ class Database_model extends MY_Model {
 			];
 		}
 
+		require_once 'models/Model_entity.php';
+
+		$this->default_return_on_many = [];
+
 		if ($this->entity) {
 			$this->entity = ($this->entity === true) ? ucfirst(strtolower(substr(get_class($this),0,-5)).'entity') : $this->entity;
 
-			require_once 'models/Model_entity.php';
-
 			require_once 'models/entities/'.$this->entity.'.php';
 
-			$this->default_return_on_many = [];
 			$this->default_return_on_single = new $this->entity();
 		} else {
-			$this->default_return_on_many = [];
 			$this->default_return_on_single = new stdClass();
 		}
 
@@ -120,19 +118,7 @@ class Database_model extends MY_Model {
 		return $this->has_soft_delete;
 	}
 
-	public function set_temp_return_on_single($value) {
-		$this->temporary_return_on_single = $value;
-
-		return $this;
-	}
-
-	public function set_temp_return_on_many($value) {
-		$this->temporary_return_on_many = $value;
-
-		return $this;
-	}
-
-	public function set_temp_return_as_array() {
+	public function as_array() {
 		$this->temporary_return_as_array = true;
 
 		return $this;
@@ -140,6 +126,13 @@ class Database_model extends MY_Model {
 
 	public function column($name) {
 		$this->temporary_column_name = $name;
+
+		return $this;
+	}
+
+	public function on_empty_return($return) {
+		$this->default_return_on_single	= $return;
+		$this->default_return_on_many	= $return;
 
 		return $this;
 	}
@@ -196,9 +189,10 @@ class Database_model extends MY_Model {
 
 	public function _clear() {
 		$this->temporary_column_name = null;
-		$this->temporary_return_on_single = null;
-		$this->temporary_return_on_many = null;
 		$this->temporary_return_as_array = null;
+
+		$this->default_return_on_many = [];
+		$this->default_return_on_single = ($this->entity) ? new $this->entity() : new stdClass();
 
 		return $this;
 	}
@@ -309,7 +303,7 @@ class Database_model extends MY_Model {
 	}
 
 	protected function _as_array($dbc) {
-		$result = ($this->temporary_return_on_many) ? $this->temporary_return_on_many : $this->default_return_on_many;
+		$result = $this->default_return_on_many;
 
 		if (is_object($dbc)) {
 			if ($dbc->num_rows()) {
@@ -327,7 +321,7 @@ class Database_model extends MY_Model {
 	}
 
 	protected function _as_row($dbc) {
-		$result = ($this->temporary_return_on_single) ? $this->temporary_return_on_single : $this->default_return_on_single;
+		$result = $this->default_return_on_single;
 
 		if (is_object($dbc)) {
 			if ($dbc->num_rows()) {
@@ -659,7 +653,7 @@ class Database_model extends MY_Model {
 		$config = $db[$connection];
 
 		$mysqli = new mysqli($config['hostname'],$config['username'],$config['password'],$config['database']);
-		
+
 		$mysqli->query('ALTER TABLE `'.$tablename.'` ADD COLUMN read_role_id INT(11) UNSIGNED NULL DEFAULT '.ADMIN_ROLE_ID);
 		$mysqli->query('ALTER TABLE `'.$tablename.'` ADD COLUMN edit_role_id INT(11) UNSIGNED NULL DEFAULT '.ADMIN_ROLE_ID);
 		$mysqli->query('ALTER TABLE `'.$tablename.'` ADD COLUMN delete_role_id INT(11) UNSIGNED NULL DEFAULT '.ADMIN_ROLE_ID);
@@ -673,11 +667,11 @@ class Database_model extends MY_Model {
 		$config = $db[$connection];
 
 		$mysqli = new mysqli($config['hostname'],$config['username'],$config['password'],$config['database']);
-		
+
 		$mysqli->query('ALTER TABLE `'.$tablename.'` ADD COLUMN created_on DATETIME NULL DEFAULT NULL');
 		$mysqli->query('ALTER TABLE `'.$tablename.'` ADD COLUMN created_by INT(11) UNSIGNED NULL DEFAULT '.NOBODY_USER_ID);
 		$mysqli->query('ALTER TABLE `'.$tablename.'` ADD COLUMN created_ip VARCHAR(15) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT \'0.0.0.0\'');
-		
+
 		$mysqli->query('ALTER TABLE `'.$tablename.'` ADD COLUMN updated_on DATETIME NULL DEFAULT NULL');
 		$mysqli->query('ALTER TABLE `'.$tablename.'` ADD COLUMN updated_by INT(11) UNSIGNED NULL DEFAULT '.NOBODY_USER_ID);
 		$mysqli->query('ALTER TABLE `'.$tablename.'` ADD COLUMN updated_ip VARCHAR(15) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT \'0.0.0.0\'');

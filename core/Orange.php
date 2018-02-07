@@ -402,7 +402,7 @@ function convert_to_string($value) {
 }
 
 /* convert a complex associated array into a simple name/value associated pair */
-function simple_array($array, $key = 'id', $value = null) {
+function simplify_array($array, $key = 'id', $value = null) {
 	$value = ($value) ? $value : $key;
 
 	$new_array = [];
@@ -480,4 +480,20 @@ function middleware() {
 	global $_middleware;
 
 	return (func_num_args()) ? $_middleware = func_get_args() :  (array)$_middleware;
+}
+
+function vd() {
+	if (PHP_SAPI === 'cli' || defined('STDIN')) {
+		foreach (func_get_args() as $v) {
+			var_dump($v);
+		}
+	} else {
+		echo '<code>';
+		foreach (func_get_args() as $v) {
+			var_dump($v);
+		}
+		echo '</code>';
+	}
+
+	die();
 }

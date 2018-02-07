@@ -153,15 +153,15 @@ class o_user_model extends Database_model {
 	}
 
 	public function get_user_by_login($login) {
-		return $this->where('LOWER(username)=', strtolower($login))->or_where('LOWER(email)=', strtolower($login))->set_temp_return_on_single(false)->_get(false);
+		return $this->where('LOWER(username)=', strtolower($login))->or_where('LOWER(email)=', strtolower($login))->on_empty_return(false)->_get(false);
 	}
 
 	public function get_user_by_username($username) {
-		return $this->where('LOWER(username)=', strtolower($username))->set_temp_return_on_single(false)->_get(false);
+		return $this->where('LOWER(username)=', strtolower($username))->on_empty_return(false)->_get(false);
 	}
 
 	public function get_user_by_email($email) {
-		return $this->where('LOWER(email)=', strtolower($email))->set_temp_return_on_single(false)->_get(false);
+		return $this->where('LOWER(email)=', strtolower($email))->on_empty_return(false)->_get(false);
 	}
 
 	public function password($password) {
