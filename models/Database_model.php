@@ -77,7 +77,7 @@ class Database_model extends MY_Model {
 			];
 		}
 
-		require_once 'models/Model_entity.php';
+		require_once __DIR__.'/Model_entity.php';
 
 		$this->default_return_on_many = [];
 

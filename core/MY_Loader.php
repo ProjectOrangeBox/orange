@@ -51,12 +51,10 @@ class MY_Loader extends CI_Loader {
 
 			$CI->cache->page = new Cache_page();
 			$CI->cache->export = new Cache_export();
-			$CI->cache->app = new Cache_app();
 
 			/* save memory because these are libraries CI attached them to the super object */
 			unset($CI->cache_page);
 			unset($CI->cache_export);
-			unset($CI->cache_app);
 		}
 
 		if ($config === NULL) {

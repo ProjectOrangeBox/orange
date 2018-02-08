@@ -85,7 +85,7 @@ class User {
 		return ci('user')->username;
 	}
 
-	public static function set_username($username) {
+	public static function sudo($username) {
 		ci('user')->username = $username;
 	}
 

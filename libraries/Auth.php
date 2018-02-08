@@ -40,7 +40,7 @@ class Auth {
 			$this->refresh_userdata(NOBODY_USER_ID,false);
 
 			/* set username to cli */
-			user::set_username('cli');
+			user::sudo('cli');
 		}
 
 		log_message('info', 'Auth Class Initialized');
