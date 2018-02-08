@@ -12,7 +12,7 @@
  * libraries:
  * models:
  * helpers:
- * functions: cache_var_export
+ * functions:
  *
  */
 
@@ -36,7 +36,7 @@ class MY_Config extends CI_Config {
 
 		if (!$this->setup) {
 			if (class_exists('CI_Controller',false)) {
-				if (class_exists('Cache_var_export',false)) {
+				if (class_exists('Cache_export',false)) {
 					$this->setup = true;
 
 					$this->_load_combined_config();
@@ -65,11 +65,11 @@ class MY_Config extends CI_Config {
 	public function flush() {
 		log_message('debug', 'MY_Config::settings_flush');
 
-		return ci('cache_var_export')->delete('config');
+		return ci('cache')->export->delete('config');
 	}
 
 	protected function _load_combined_config() {
-		$built_config = ci('cache_var_export')->get('config');
+		$built_config = ci('cache')->export->get('config');
 
 		if (!is_array($built_config)) {
 			$built_config = [];
@@ -123,7 +123,7 @@ class MY_Config extends CI_Config {
 
 			$built_config = $this->config + $built_config;
 
-			ci('cache_var_export')->save('config',$built_config);
+			ci('cache')->export->save('config',$built_config);
 		}
 
 		$this->config = $built_config;

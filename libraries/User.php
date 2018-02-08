@@ -85,4 +85,8 @@ class User {
 		return ci('user')->username;
 	}
 
+	public static function set_username($username) {
+		ci('user')->username = $username;
+	}
+
 } /* end file */

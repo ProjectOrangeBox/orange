@@ -36,8 +36,11 @@ class Auth {
 			*/
 			$this->refresh_userdata($user_id,false);
 		} else {
-			/* cli as nobody */
+			/* load a nobody */
 			$this->refresh_userdata(NOBODY_USER_ID,false);
+
+			/* set username to cli */
+			user::set_username('cli');
 		}
 
 		log_message('info', 'Auth Class Initialized');
