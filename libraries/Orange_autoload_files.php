@@ -3,12 +3,12 @@
 class Orange_autoload_files {
 	protected $paths = [];
 	protected $cache_path;
-	protected $root_path_tag = '#<!ROOTPATH!>#';
+	protected $folder_levels = 2;
 
 	public function __construct($path) {
 		$this->cache_path = $path;
 
-	if (ENVIRONMENT == 'development' || !file_exists($this->cache_path)) {
+		if (ENVIRONMENT == 'development' || !file_exists($this->cache_path)) {
 			require APPPATH.'/config/autoload.php';
 
 			$this->paths = explode(PATH_SEPARATOR,rtrim(APPPATH,'/').PATH_SEPARATOR.implode(PATH_SEPARATOR,$autoload['packages']));
@@ -20,23 +20,57 @@ class Orange_autoload_files {
 	}
 
 	public function create_cache() {
-		$autoload_files = [
-			'orange' => array_merge($this->cache_system(),$this->cache_validations(),$this->cache_pear_plugins(),$this->cache_filters(),$this->cache_middleware(),$this->cache_controller_traits(),$this->cache_model_traits(),$this->cache_library_traits(),$this->cache_core()),
-			'models' => $this->cache_models(),
-			'libraries' => $this->cache_libraries(),
-			'views' => $this->cache_views(),
-			'controllers' => $this->cache_controllers(),
+		/* treat as classes */
+		$classes = [
+			'model_entity'=>ROOTPATH.'/packages/projectorangebox/orange/models/Model_entity.php',
+			'cache_export'=>ROOTPATH.'/packages/projectorangebox/orange/libraries/Cache_export.php',
+			'cache_page'=>ROOTPATH.'/packages/projectorangebox/orange/libraries/Cache_page.php',
 		];
+
+		$autoload_files = [
+			'classes' => array_merge(
+				$classes,
+				$this->globr(BASEPATH,'(.*).php'),
+				$this->search('/libraries/validations/','(.*)Validate_(.*).php'),
+				$this->search('/libraries/pear_plugins/','(.*).php','filename'),
+				$this->search('/libraries/filters/','(.*)filters/Filter_(.*).php'),
+				$this->search('/middleware/','(.*)Middleware.php'),
+				$this->search('/controllers/traits/','(.*)_controller_trait.php','filename'),
+				$this->search('/models/traits/','(.*)_model_trait.php','filename'),
+				$this->search('/library/traits/','(.*)trait.php','filename'),
+				$this->search('/models/entities/','(.*)_entity.php','filename'),
+				$this->search('/core/','(.*).php')
+			),
+			'models' => $this->search('/models/','(.*)_model.php'),
+			'libraries' => $this->search('/libraries/','(.*).php',function($filepath) {
+				$count = 0;
+				str_replace(['/validations/','/pear_plugins/','/filters/','/traits/'],'',$filepath,$count);
+
+				return (!$count) ? strtolower(basename($filepath,'.php')) : null;
+			}),
+			'views' => $this->search('/views/','(.*).php',function($filepath) { return strtolower(substr($filepath,strpos($filepath,'/views/') + 7,-4)); 	}),
+			'controllers' => $this->cache_controllers(),
+			'configs' => $this->cache_config(),
+		];
+
+		if (1 == 0) {
+			echo '<pre>';
+			foreach ($autoload_files['classes'] as $c=>$f) {
+				echo $c.' => '.$f.chr(10);
+			}
+			die();
+		}
 
 		return $autoload_files;
 	}
 
 	protected function write_cache($array) {
-		$php = '<?php '.chr(10).chr(10);
-		$php .= '$baseDir = dirname(__DIR__);'.chr(10).chr(10);
-		$php .= 'return '.str_replace(chr(39).$this->root_path_tag,"\$baseDir.'",var_export($array, true)).';';
+		for ($i = 0; $i < $this->folder_levels; $i++) {
+			$php1 .= 'dirname(';
+			$php2 .= ')';
+		}
 
-		return atomic_file_put_contents($this->cache_path,$php);
+		return atomic_file_put_contents($this->cache_path,'<?php '.chr(10).chr(10).'$baseDir = '.$php1.'__DIR__'.$php2.';'.chr(10).chr(10).'return '.str_replace(chr(39).ROOTPATH,"\$baseDir.'",var_export($array, true).';'));
 	}
 
 	protected function read_cache() {
@@ -45,14 +79,6 @@ class Orange_autoload_files {
 		}
 
 		return include $this->cache_path;
-	}
-
-	protected function clean_path($path) {
-		return str_replace(ROOTPATH,'',$path);
-	}
-
-	protected function clean_cache_path($path) {
-		return str_replace(ROOTPATH,$this->root_path_tag,$path);
 	}
 
 	protected function cache_controllers() {
@@ -70,7 +96,7 @@ class Orange_autoload_files {
 
 				foreach(new RecursiveIteratorIterator($it) as $file) {
 					if (substr($file->getBasename(),-strlen($ends_with)) == $ends_with) {
-						$uri = $this->clean_path($file->getPathname());
+						$uri = str_replace(ROOTPATH,'',$file->getPathname());
 
 						$pos = strpos($uri,$path_section);
 
@@ -101,370 +127,85 @@ class Orange_autoload_files {
 		return $found;
 	}
 
-	protected function cache_models() {
-		$a = $this->paths;
-		$found = [];
-		$ends_with = '_model.php';
-		$path_section = '/models/';
-
-		foreach ($a as $p) {
-			if (file_exists($p)) {
-				$it = new RecursiveDirectoryIterator($p);
-
-				foreach(new RecursiveIteratorIterator($it) as $file) {
-					if (substr($file->getBasename(),-strlen($ends_with)) == $ends_with) {
-						$uri = $this->clean_path($file->getPathname());
-
-						$pos = strpos($uri,$path_section);
-
-						if ($pos) {
-							$uri = substr($uri,$pos+strlen($path_section),-4);
-
-							$found[strtolower($uri)] = $this->clean_cache_path($file->getPathname());
-						}
-					}
-				}
-			}
-		}
-
-		return $found;
-	}
-
-	protected function cache_views() {
-		$a = $this->paths;
-		$found = [];
-		$ends_with = '.php';
-		$path_section = '/views/';
-
-		/* cascade backwards */
-		$a = array_reverse($a,true);
-
-		foreach ($a as $p) {
-			if (file_exists($p)) {
-				$it = new RecursiveDirectoryIterator($p);
-
-				foreach(new RecursiveIteratorIterator($it) as $file) {
-					if (substr($file->getBasename(),-strlen($ends_with)) == $ends_with) {
-						$uri = $this->clean_path($file->getPathname());
-
-						$pos = strpos($uri,$path_section);
-
-						if ($pos) {
-							$uri = substr($uri,$pos+strlen($path_section),-4);
-
-							$found[strtolower($uri)] = $this->clean_cache_path($file->getPathname());
-						}
-					}
-				}
-			}
-		}
-
-		return $found;
-	}
-
-	protected function cache_libraries() {
-		$a = $this->paths;
-		$found = [];
-		$ends_with = '.php';
-		$path_section = '/libraries/';
-
-		foreach ($a as $p) {
-			if (file_exists($p)) {
-				$it = new RecursiveDirectoryIterator($p);
-
-				foreach(new RecursiveIteratorIterator($it) as $file) {
-					if (substr($file->getBasename(),-strlen($ends_with)) == $ends_with) {
-						$uri = $this->clean_path($file->getPathname());
-
-						$pos = strpos($uri,$path_section);
-
-						if ($pos) {
-							$uri = strtolower(substr($uri,$pos+strlen($path_section),-4));
-
-							if (substr($uri,0,12) != 'validations/' && substr($uri,0,13) != 'pear_plugins/' && substr($uri,0,8) != 'filters/') {
-								$found[$uri] = $this->clean_cache_path($file->getPathname());
-							}
-						}
-					}
-				}
-			}
-		}
-
-		return $found;
-	}
-
-	protected function cache_validations() {
-		$a = $this->paths;
-		$found = [];
-		$ends_with = '.php';
-		$path_section = '/libraries/';
-
-		foreach ($a as $p) {
-			if (file_exists($p)) {
-				$it = new RecursiveDirectoryIterator($p);
-
-				foreach(new RecursiveIteratorIterator($it) as $file) {
-					if (substr($file->getBasename(),-strlen($ends_with)) == $ends_with) {
-						$uri = $this->clean_path($file->getPathname());
-
-						$pos = strpos($uri,$path_section);
-
-						if ($pos) {
-							$uri = strtolower(substr($uri,$pos+strlen($path_section),-4));
-
-							if (substr($uri,0,12) == 'validations/') {
-								$uri = substr($uri,12);
-
-								$found[$uri] = $this->clean_cache_path($file->getPathname());
-							}
-						}
-					}
-				}
-			}
-		}
-
-		return $found;
-	}
-
-	protected function cache_pear_plugins() {
-		$a = $this->paths;
-		$found = [];
-		$ends_with = '.php';
-		$path_section = '/libraries/pear_plugins/';
-
-		foreach ($a as $p) {
-			if (file_exists($p)) {
-				$it = new RecursiveDirectoryIterator($p);
-
-				foreach(new RecursiveIteratorIterator($it) as $file) {
-					if (substr($file->getBasename(),-strlen($ends_with)) == $ends_with) {
-						$uri = $this->clean_path($file->getPathname());
-
-						$pos = strpos($uri,$path_section);
-
-						if ($pos) {
-							$uri = strtolower(substr($uri,$pos+strlen($path_section),-4));
-
-							if (substr($uri,0,13) != 'pear_plugins/') {
-								$found[$uri] = $this->clean_cache_path($file->getPathname());
-							}
-						}
-					}
-				}
-			}
-		}
-
-		return $found;
-	}
-
-	protected function cache_filters() {
-		$a = $this->paths;
-		$found = [];
-		$ends_with = '.php';
-		$path_section = '/libraries/filters/';
-
-		foreach ($a as $p) {
-			if (file_exists($p)) {
-				$it = new RecursiveDirectoryIterator($p);
-
-				foreach(new RecursiveIteratorIterator($it) as $file) {
-					if (substr($file->getBasename(),-strlen($ends_with)) == $ends_with) {
-						$uri = $this->clean_path($file->getPathname());
-
-						$pos = strpos($uri,$path_section);
-
-						if ($pos) {
-							$uri = strtolower(substr($uri,$pos+strlen($path_section),-4));
-
-							if (substr($uri,0,8) != 'filters/') {
-								$found[$uri] = $this->clean_cache_path($file->getPathname());
-							}
-						}
-					}
-				}
-			}
-		}
-
-		return $found;
-	}
-
-	protected function cache_middleware() {
-		$a = $this->paths;
-		$found = [];
-		$ends_with = '.php';
-		$path_section = '/middleware/';
-
-		foreach ($a as $p) {
-			if (file_exists($p)) {
-				$it = new RecursiveDirectoryIterator($p);
-
-				foreach(new RecursiveIteratorIterator($it) as $file) {
-					if (substr($file->getBasename(),-strlen($ends_with)) == $ends_with) {
-						$uri = $this->clean_path($file->getPathname());
-
-						$pos = strpos($uri,$path_section);
-
-						if ($pos) {
-							$found[strtolower(substr($uri,$pos+strlen($path_section),-4))] = $this->clean_cache_path($file->getPathname());
-						}
-					}
-				}
-			}
-		}
-
-		return $found;
-	}
-
-	protected function cache_controller_traits() {
-		$a = $this->paths;
-		$found = [];
-		$ends_with = '.php';
-		$path_section = '/controllers/traits/';
-
-		foreach ($a as $p) {
-			if (file_exists($p)) {
-				$it = new RecursiveDirectoryIterator($p);
-
-				foreach(new RecursiveIteratorIterator($it) as $file) {
-					if (substr($file->getBasename(),-strlen($ends_with)) == $ends_with) {
-						$uri = $this->clean_path($file->getPathname());
-
-						$pos = strpos($uri,$path_section);
-
-						if ($pos) {
-							$found[strtolower(substr($uri,$pos+strlen($path_section),-4))] = $this->clean_cache_path($file->getPathname());
-						}
-					}
-				}
-			}
-		}
-
-		return $found;
-	}
-
-	protected function cache_model_traits() {
-		$a = $this->paths;
-		$found = [];
-		$ends_with = '.php';
-		$path_section = '/models/traits/';
-
-		foreach ($a as $p) {
-			if (file_exists($p)) {
-				$it = new RecursiveDirectoryIterator($p);
-
-				foreach(new RecursiveIteratorIterator($it) as $file) {
-					if (substr($file->getBasename(),-strlen($ends_with)) == $ends_with) {
-						$uri = $this->clean_path($file->getPathname());
-
-						$pos = strpos($uri,$path_section);
-
-						if ($pos) {
-							$found[strtolower(substr($uri,$pos+strlen($path_section),-4))] = $this->clean_cache_path($file->getPathname());
-						}
-					}
-				}
-			}
-		}
-
-		return $found;
-	}
-
-	protected function cache_library_traits() {
-		$a = $this->paths;
-		$found = [];
-		$ends_with = '.php';
-		$path_section = '/library/traits/';
-
-		foreach ($a as $p) {
-			if (file_exists($p)) {
-				$it = new RecursiveDirectoryIterator($p);
-
-				foreach(new RecursiveIteratorIterator($it) as $file) {
-					if (substr($file->getBasename(),-strlen($ends_with)) == $ends_with) {
-						$uri = $this->clean_path($file->getPathname());
-
-						$pos = strpos($uri,$path_section);
-
-						if ($pos) {
-							$uri = strtolower(substr($uri,$pos+strlen($path_section),-4));
-
-							$found[$uri] = $this->clean_cache_path($file->getPathname());
-						}
-					}
-				}
-			}
-		}
-
-		return $found;
-	}
-
-	protected function cache_core() {
-		$a = $this->paths;
-		$found = [];
-		$ends_with = '.php';
-		$path_section = '/core/';
-
-		foreach ($a as $p) {
-			if (file_exists($p)) {
-				$it = new RecursiveDirectoryIterator($p);
-
-				foreach(new RecursiveIteratorIterator($it) as $file) {
-					if (substr($file->getBasename(),-strlen($ends_with)) == $ends_with) {
-						$uri = $this->clean_path($file->getPathname());
-
-						$pos = strpos($uri,$path_section);
-
-						if ($pos) {
-							$uri = strtolower(substr($uri,$pos+strlen($path_section),-4));
-
-							$found[$uri] = $this->clean_cache_path($file->getPathname());
-						}
-					}
-				}
-			}
-		}
-
-		return $found;
-	}
-
-	protected function cache_system() {
-		$found = [];
-
-		$files = glob(BASEPATH.'core/*.php');
-
-		foreach ($files as $f) {
-			$found['CI_'.basename($f,'.php')] = $this->clean_cache_path($f);
-		}
-
-		$files = glob(BASEPATH.'libraries/*.php');
-
-		foreach ($files as $f) {
-			$found['CI_'.basename($f,'.php')] = $this->clean_cache_path($f);
-		}
-
-		return $found;
-	}
-
 	protected function cache_config() {
 		$found = [];
 
-		$files = glob(APPPATH.'config/*.php');
-
-		foreach ($files as $file) {
-			$found[strtolower(basename($file,'.php'))] = $this->clean_cache_path($file);
-		}
-
-		$folders = glob(APPPATH.'config/*',GLOB_ONLYDIR);
-
-		foreach ($folders as $folder) {
-			$files = glob($folder.'/*.php');
+		foreach ($this->paths as $p) {
+			$files = glob($p.'/config/*.php');
 
 			foreach ($files as $file) {
-				$found['env_'.strtolower(basename($folder))][strtolower(basename($file,'.php'))] = $this->clean_cache_path($file);
+				$found['root'][strtolower(basename($file,'.php'))] = $file;
+			}
+
+			$files = glob($p.'/config/'.ENVIRONMENT.'/*.php');
+
+			foreach ($files as $file) {
+				$found[ENVIRONMENT][strtolower(basename($file,'.php'))] = $file;
 			}
 		}
 
 		return $found;
+	}
+
+	protected function search($folder,$match,$options=true) {
+		$found = [];
+
+		foreach ($this->paths as $p) {
+			$found = array_merge($this->globr($p.$folder,$match,$options),$found);
+		}
+
+		return $found;
+	}
+
+	protected function globr($path,$match='(.*)',$option=true) {
+		$found = [];
+
+		if (file_exists($path)) {
+			$files = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($path),RecursiveIteratorIterator::SELF_FIRST);
+
+			foreach ($files as $f) {
+				if ($f->isFile()) {
+					$matches = [];
+					$filepath = $f->getRealPath();
+
+					if (preg_match('#'.$match.'#', $filepath, $matches)) {
+						if ($option === 'filename') {
+							$found[strtolower(basename($filepath,'.php'))] = $filepath;
+						} elseif ($option === true) {
+							if ($class_name = $this->find_class_name($filepath)) {
+								$found[$class_name] = $filepath;
+							}
+						} elseif (is_callable($option)) {
+							if ($class_name = $option($filepath)) {
+								$found[$class_name] = $filepath;
+							}
+						} else {
+							$found[] = $filepath;
+						}
+					}
+				}
+			}
+		}
+
+		return $found;
+	}
+
+	protected function find_class_name($filepath,$lowercase=true) {
+		$class = '';
+
+		$tokens = token_get_all(file_get_contents($filepath));
+
+		for ($i = 0;$i<count($tokens);$i++) {
+			if ($tokens[$i][0] === T_CLASS) {
+				for ($j=$i+1;$j<count($tokens);$j++) {
+					if ($tokens[$j] === '{') {
+						$class = $tokens[$i+2][1];
+					}
+				}
+			}
+		}
+
+		return ($lowercase) ? strtolower($class) : $class;
 	}
 
 } /* end class */

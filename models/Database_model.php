@@ -77,14 +77,16 @@ class Database_model extends MY_Model {
 			];
 		}
 
-		require_once __DIR__.'/Model_entity.php';
-
 		$this->default_return_on_many = [];
 
 		if ($this->entity) {
 			$this->entity = ($this->entity === true) ? ucfirst(strtolower(substr(get_class($this),0,-5)).'entity') : $this->entity;
 
-			require_once 'models/entities/'.$this->entity.'.php';
+			if (!class_exists($this->entity,true)) {
+				log_message('error', 'Non-existent class: '.$this->entity);
+
+				throw new Exception('Non-existent class: '.$this->entity);
+			}
 
 			$this->default_return_on_single = new $this->entity();
 		} else {
@@ -637,7 +639,7 @@ class Database_model extends MY_Model {
 	}
 
 	public function add_soft_delete_default_columns($tablename,$connection='default') {
-		require ROOTPATH.'/application/config/database.php';
+		require APPPATH.'/config/database.php';
 
 		$config = $db[$connection];
 
@@ -648,7 +650,7 @@ class Database_model extends MY_Model {
 	}
 
 	public function add_role_default_columns($tablename,$connection='default') {
-		require ROOTPATH.'/application/config/database.php';
+		require APPPATH.'/config/database.php';
 
 		$config = $db[$connection];
 
@@ -662,7 +664,7 @@ class Database_model extends MY_Model {
 	}
 
 	public function add_stamp_default_columns($tablename,$connection='default') {
-		require ROOTPATH.'/application/config/database.php';
+		require APPPATH.'/config/database.php';
 
 		$config = $db[$connection];
 

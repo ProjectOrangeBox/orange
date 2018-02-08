@@ -9,6 +9,11 @@
 */
 class Cache_page extends CI_Driver {
 	protected $cache = [];
+	protected $config;
+
+	public function __construct(&$cache_config) {
+		$this->config = &$cache_config;
+	}
 
 	/**
 	* Get

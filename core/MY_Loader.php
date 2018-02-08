@@ -42,35 +42,19 @@ class MY_Loader extends CI_Loader {
 		if (!$this->cache_drivers_loaded) {
 			$this->cache_drivers_loaded = true;
 
-			$config = get_config();
+			$cache_config = get_config();
 
-			ci()->load->driver('cache', ['adapter' => $config['cache_default'], 'backup' => $config['cache_backup']]);
+			ci()->load->driver('cache', ['adapter' => $cache_config['cache_default'], 'backup' => $cache_config['cache_backup']]);
 
 			/* manually attach our cache drivers */
 			$CI = &get_instance();
 
-			$CI->cache->page = new Cache_page();
-			$CI->cache->export = new Cache_export();
-
-			/* save memory because these are libraries CI attached them to the super object */
-			unset($CI->cache_page);
-			unset($CI->cache_export);
+			$CI->cache->page = new Cache_page($cache_config);
+			$CI->cache->export = new Cache_export($cache_config);
 		}
 
-		if ($config === NULL) {
-			$found       = FALSE;
-			$config_file = stream_resolve_include_path('config/'.strtolower($class).'.php');
-
-			if ($config_file) {
-				$found = true;
-				include $config_file;
-			} else {
-				$config_file = stream_resolve_include_path('config/'.ENVIRONMENT.'/'.strtolower($class).'.php');
-				if ($config_file) {
-					$found = true;
-					include $config_file;
-				}
-			}
+		if ($config == FALSE) {
+			$config = load_config($class);
 		}
 
 		$class_name = $prefix.$class;
@@ -83,6 +67,7 @@ class MY_Loader extends CI_Loader {
 
 		if (empty($object_name)) {
 			$object_name = strtolower($class);
+
 			if (isset($this->_ci_varmap[$object_name])) {
 				$object_name = $this->_ci_varmap[$object_name];
 			}

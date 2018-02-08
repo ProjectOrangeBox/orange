@@ -19,12 +19,9 @@
 /* orange version */
 define('ORANGE_VERSION', '2.0.0');
 
-/* save the current system include paths */
-define('ROOTPATHS', get_include_path());
-
 require __DIR__.'/../libraries/Orange_autoload_files.php';
 
-new Orange_autoload_files(ROOTPATH.'/compiled/autoload_files.php');
+new Orange_autoload_files(ROOTPATH.'/var/cache/autoload_files.php');
 
 /* register our loader */
 spl_autoload_register('codeigniter_autoload');
@@ -51,6 +48,8 @@ $model = ci('example_model');
 function &ci($class=null) {
 	/* Added Functionality */
 	if ($class) {
+		$class = strtolower($class);
+
 		if ($class == 'load') {
 			return ci()->load;
 		} elseif (ci()->load->is_loaded($class)) {
@@ -80,41 +79,23 @@ function &ci($class=null) {
  * @param	mixed	an optional argument to pass to the class constructor
  * @return	object
  *
- * Added so load_class would search the ORANGEPATH for core classes
  */
 function &load_class($class, $directory = 'libraries', $param = NULL) {
 	static $_classes = array();
-
-	if (count($_classes) == 0) {
-		include APPPATH.'config/autoload.php';
-
-		if (file_exists(APPPATH.'config/'.ENVIRONMENT.'/autoload.php')) {
-			include APPPATH.'config/'.ENVIRONMENT.'/autoload.php';
-		}
-
-		set_include_path(ROOTPATHS.PATH_SEPARATOR.rtrim(APPPATH,'/').PATH_SEPARATOR.implode(PATH_SEPARATOR, $autoload['packages']).PATH_SEPARATOR.rtrim(BASEPATH,'/'));
-	}
 
 	if (isset($_classes[$class])) {
 		return $_classes[$class];
 	}
 
 	$name = false;
+	$subclass_prefix = config_item('subclass_prefix');
 
-	if (file_exists(BASEPATH.$directory.'/'.$class.'.php')) {
+	if (class_exists('ci_'.$class)) {
 		$name = 'CI_'.$class;
-
-		if (class_exists($name, false) === false) {
-			require BASEPATH.$directory.'/'.$class.'.php';
-		}
 	}
 
-	if (file_exists(ORANGEPATH.'/'.$directory.'/'.config_item('subclass_prefix').$class.'.php')) {
-		$name = config_item('subclass_prefix').$class;
-
-		if (class_exists($name, false) === false) {
-			require_once ORANGEPATH.'/'.$directory.'/'.$name.'.php';
-		}
+	if (class_exists($subclass_prefix.$class)) {
+		$name = $subclass_prefix.$class;
 	}
 
 	if ($name === false) {
@@ -151,8 +132,8 @@ function codeigniter_autoload($class) {
 
 	$lclass = strtolower($class);
 
-	if (isset($op['orange'][$lclass])) {
-		require $op['orange'][$lclass];
+	if (isset($op['classes'][$lclass])) {
+		require $op['classes'][$lclass];
 
 		return true;
 	}
@@ -192,7 +173,7 @@ function site_url($uri = '', $protocol = NULL) {
 	/* run the CodeIgniter version first */
 	$uri = ci()->config->site_url($uri, $protocol);
 
-	$file_path = ROOTPATH.'/compiled/site_url.php';
+	$file_path = ROOTPATH.'/var/cache/site_url.php';
 
 	if (ENVIRONMENT == 'development' || !file_exists($file_path)) {
 		$paths = config('paths');
@@ -266,7 +247,7 @@ function console($var, $type = 'log') {
 }
 
 function orange_paths($paths=null) {
-	global $_ORANGE_PATHS;
+	static $_ORANGE_PATHS;
 
 	return ($paths) ? $_ORANGE_PATHS = $paths : (array)$_ORANGE_PATHS;
 }
@@ -477,7 +458,22 @@ function filter_human($str) {
 
 /* setter & getter for middleware to be/has been called */
 function middleware() {
-	global $_middleware;
+	static $_middleware;
 
 	return (func_num_args()) ? $_middleware = func_get_args() :  (array)$_middleware;
+}
+
+function load_config($class) {
+	$class = strtolower($class);
+	$config = [];
+
+	if ($config_file = stream_resolve_include_path('config/'.$class.'.php')) {
+		include $config_file;
+	}
+
+	if ($config_file = stream_resolve_include_path('config/'.ENVIRONMENT.'/'.$class.'.php')) {
+		include $config_file;
+	}
+
+	return $config;
 }

@@ -9,8 +9,8 @@
 class Cache_export extends CI_Driver {
 	protected $config;
 
-	public function __construct() {
-		$this->config = get_config();
+	public function __construct(&$cache_config) {
+		$this->config = &$cache_config;
 	}
 
 	/**
