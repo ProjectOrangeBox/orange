@@ -25,9 +25,6 @@ class Validate {
 	public function __construct() {
 		$this->config = config('validate');
 
-		require_once __DIR__.'/Validate_base.php';
-		require_once __DIR__.'/Filter_base.php';
-
 		$this->clear();
 
 		if (file_exists(APPPATH.'/config/validate.php')) {

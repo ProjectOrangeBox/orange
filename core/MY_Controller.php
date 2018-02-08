@@ -38,7 +38,7 @@ class MY_Controller extends CI_Controller {
 		log_message('debug', 'MY_Controller::__construct');
 
 		if (php_sapi_name() !== 'cli') {
-			if (!config('application.site open') || file_exists(ROOTPATH.'/site_down')) {
+			if (!config('application.site open')) {
 				if ($_COOKIE['ISOPEN'] !== config('application.is open cookie', md5(uniqid(true)))) {
 					ci('errors')->display(503, ['heading' => 'Please Stand By', 'message' => 'Site Down for Maintenance']);
 				}

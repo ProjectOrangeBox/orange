@@ -23,7 +23,7 @@ class Validate_base {
 	protected $field_data;
 	protected $field;
 
-	public function __construct(&$field_data, &$error_string) {
+	public function __construct(&$field_data=null, &$error_string=null) {
 		$this->field_data   = &$field_data;
 		$this->error_string = &$error_string;
 

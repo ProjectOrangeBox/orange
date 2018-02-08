@@ -464,15 +464,16 @@ function middleware() {
 }
 
 function load_config($class) {
+	$paths = orange_paths();
 	$class = strtolower($class);
 	$config = [];
 
-	if ($config_file = stream_resolve_include_path('config/'.$class.'.php')) {
-		include $config_file;
+	if (isset($paths['configs']['root'][$class])) {
+		include $paths['configs']['root'][$class];
 	}
 
-	if ($config_file = stream_resolve_include_path('config/'.ENVIRONMENT.'/'.$class.'.php')) {
-		include $config_file;
+	if (isset($paths['configs'][ENVIRONMENT][$class])) {
+		include $paths['configs'][ENVIRONMENT][$class];
 	}
 
 	return $config;
