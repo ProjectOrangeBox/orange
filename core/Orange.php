@@ -21,7 +21,7 @@ define('ORANGE_VERSION', '2.0.0');
 
 require __DIR__.'/../libraries/Orange_autoload_files.php';
 
-new Orange_autoload_files(ROOTPATH.'/var/cache/autoload_files.php');
+orange_autoload_files::load(ROOTPATH.'/var/cache/autoload_files.php');
 
 /* register our loader */
 spl_autoload_register('codeigniter_autoload');
@@ -246,10 +246,17 @@ function console($var, $type = 'log') {
 	echo '<script type="text/javascript">console.'.$type.'('.json_encode($var).')</script>';
 }
 
-function orange_paths($paths=null) {
+function orange_paths() {
 	static $_ORANGE_PATHS;
 
-	return ($paths) ? $_ORANGE_PATHS = $paths : (array)$_ORANGE_PATHS;
+	return (func_num_args()) ? $_ORANGE_PATHS = func_get_arg(0) : (array)$_ORANGE_PATHS;
+}
+
+/* setter & getter for middleware to be/has been called */
+function middleware() {
+	static $_ORANGE_MIDDLEWARE;
+
+	return (func_num_args()) ? $_ORANGE_MIDDLEWARE = func_get_args() :  (array)$_ORANGE_MIDDLEWARE;
 }
 
 /* the most simple view building function */
@@ -450,11 +457,4 @@ function filter_filename($str,$ext=null) {
 /* global filter function for human name */
 function filter_human($str) {
 	return ucwords(str_replace('_',' ',strtolower(trim(preg_replace('#\W+#',' ', $str),' '))));
-}
-
-/* setter & getter for middleware to be/has been called */
-function middleware() {
-	static $_middleware;
-
-	return (func_num_args()) ? $_middleware = func_get_args() :  (array)$_middleware;
 }

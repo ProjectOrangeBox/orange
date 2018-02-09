@@ -1,25 +1,25 @@
 <?php
 
 class Orange_autoload_files {
-	protected $paths = [];
-	protected $cache_path;
-	protected $folder_levels = 2;
+	static protected $paths = [];
+	static protected $cache_path;
+	static protected $folder_levels = 2;
 
-	public function __construct($path) {
-		$this->cache_path = $path;
+	static public function load($path) {
+		self::$cache_path = $path;
 
-		if (ENVIRONMENT == 'development' || !file_exists($this->cache_path)) {
+		if (ENVIRONMENT == 'development' || !file_exists(self::$cache_path)) {
 			require APPPATH.'/config/autoload.php';
 
-			$this->paths = explode(PATH_SEPARATOR,rtrim(APPPATH,'/').PATH_SEPARATOR.implode(PATH_SEPARATOR,$autoload['packages']));
+			self::$paths = explode(PATH_SEPARATOR,rtrim(APPPATH,'/').PATH_SEPARATOR.implode(PATH_SEPARATOR,$autoload['packages']));
 
-			$this->write_cache($this->create_cache());
+			self::write_cache(self::create_cache());
 		}
 
-		orange_paths($this->read_cache());
+		orange_paths(self::read_cache());
 	}
 
-	public function create_cache() {
+	static public function create_cache() {
 		/* treat as classes */
 		$classes = [
 			'model_entity'=>ROOTPATH.'/packages/projectorangebox/orange/models/Model_entity.php',
@@ -30,27 +30,27 @@ class Orange_autoload_files {
 		$autoload_files = [
 			'classes' => array_merge(
 				$classes,
-				$this->globr(BASEPATH,'(.*).php'),
-				$this->search('/libraries/validations/','(.*)Validate_(.*).php'),
-				$this->search('/libraries/pear_plugins/','(.*).php','filename'),
-				$this->search('/libraries/filters/','(.*)filters/Filter_(.*).php'),
-				$this->search('/middleware/','(.*)Middleware.php'),
-				$this->search('/controllers/traits/','(.*)_controller_trait.php','filename'),
-				$this->search('/models/traits/','(.*)_model_trait.php','filename'),
-				$this->search('/library/traits/','(.*)trait.php','filename'),
-				$this->search('/models/entities/','(.*)_entity.php','filename'),
-				$this->search('/core/','(.*).php')
+				self::globr(BASEPATH,'(.*).php'),
+				self::search('/libraries/validations/','(.*)Validate_(.*).php'),
+				self::search('/libraries/pear_plugins/','(.*).php','filename'),
+				self::search('/libraries/filters/','(.*)filters/Filter_(.*).php'),
+				self::search('/middleware/','(.*)Middleware.php'),
+				self::search('/controllers/traits/','(.*)_controller_trait.php','filename'),
+				self::search('/models/traits/','(.*)_model_trait.php','filename'),
+				self::search('/library/traits/','(.*)trait.php','filename'),
+				self::search('/models/entities/','(.*)_entity.php','filename'),
+				self::search('/core/','(.*).php')
 			),
-			'models' => $this->search('/models/','(.*)_model.php'),
-			'libraries' => $this->search('/libraries/','(.*).php',function($filepath) {
+			'models' => self::search('/models/','(.*)_model.php'),
+			'libraries' => self::search('/libraries/','(.*).php',function($filepath) {
 				$count = 0;
 				str_replace(['/validations/','/pear_plugins/','/filters/','/traits/'],'',$filepath,$count);
 
 				return (!$count) ? strtolower(basename($filepath,'.php')) : null;
 			}),
-			'views' => $this->search('/views/','(.*).php',function($filepath) { return strtolower(substr($filepath,strpos($filepath,'/views/') + 7,-4)); 	}),
-			'controllers' => $this->cache_controllers(),
-			'configs' => $this->cache_config(),
+			'views' => self::search('/views/','(.*).php',function($filepath) { return strtolower(substr($filepath,strpos($filepath,'/views/') + 7,-4)); 	}),
+			'controllers' => self::cache_controllers(),
+			'configs' => self::cache_config(),
 		];
 
 		if (1 == 0) {
@@ -64,33 +64,33 @@ class Orange_autoload_files {
 		return $autoload_files;
 	}
 
-	protected function write_cache($array) {
-		for ($i = 0; $i < $this->folder_levels; $i++) {
+	static protected function write_cache($array) {
+		for ($i = 0; $i < self::$folder_levels; $i++) {
 			$php1 .= 'dirname(';
 			$php2 .= ')';
 		}
 
-		return atomic_file_put_contents($this->cache_path,'<?php '.chr(10).chr(10).'$baseDir = '.$php1.'__DIR__'.$php2.';'.chr(10).chr(10).'return '.str_replace(chr(39).ROOTPATH,"\$baseDir.'",var_export($array, true).';'));
+		return atomic_file_put_contents(self::$cache_path,'<?php '.chr(10).chr(10).'$baseDir = '.$php1.'__DIR__'.$php2.';'.chr(10).chr(10).'return '.str_replace(chr(39).ROOTPATH,"\$baseDir.'",var_export($array, true).';'));
 	}
 
-	protected function read_cache() {
-		if (!is_file($this->cache_path)) {
+	static protected function read_cache() {
+		if (!is_file(self::$cache_path)) {
 			throw new Exception('Orange Crush Cache File Missing?');
 		}
 
-		return include $this->cache_path;
+		return include self::$cache_path;
 	}
 
-	protected function cache_controllers() {
-		$a = $this->paths;
+	static protected function cache_controllers() {
+		$paths = self::$paths;
 		$found = [];
 		$ends_with = 'Controller.php';
 		$path_section = '/controllers/';
 
 		/* cascade backwards */
-		$a = array_reverse($a,true);
+		$paths = array_reverse($paths,true);
 
-		foreach ($a as $p) {
+		foreach ($paths as $p) {
 			if (file_exists($p)) {
 				$it = new RecursiveDirectoryIterator($p);
 
@@ -127,10 +127,10 @@ class Orange_autoload_files {
 		return $found;
 	}
 
-	protected function cache_config() {
+	static protected function cache_config() {
 		$found = [];
 
-		foreach ($this->paths as $p) {
+		foreach (self::$paths as $p) {
 			$files = glob($p.'/config/*.php');
 
 			foreach ($files as $file) {
@@ -147,17 +147,17 @@ class Orange_autoload_files {
 		return $found;
 	}
 
-	protected function search($folder,$match,$options=true) {
+	static protected function search($folder,$match,$options=true) {
 		$found = [];
 
-		foreach ($this->paths as $p) {
-			$found = array_merge($this->globr($p.$folder,$match,$options),$found);
+		foreach (self::$paths as $p) {
+			$found = array_merge(self::globr($p.$folder,$match,$options),$found);
 		}
 
 		return $found;
 	}
 
-	protected function globr($path,$match='(.*)',$option=true) {
+	static protected function globr($path,$match='(.*)',$option=true) {
 		$found = [];
 
 		if (file_exists($path)) {
@@ -171,7 +171,7 @@ class Orange_autoload_files {
 						if ($option === 'filename') {
 							$found[strtolower(basename($filepath,'.php'))] = $filepath;
 						} elseif ($option === true) {
-							if ($class_name = $this->find_class_name($filepath)) {
+							if ($class_name = self::find_class_name($filepath)) {
 								$found[$class_name] = $filepath;
 							}
 						} elseif (is_callable($option)) {
@@ -189,7 +189,7 @@ class Orange_autoload_files {
 		return $found;
 	}
 
-	protected function find_class_name($filepath,$lowercase=true) {
+	static protected function find_class_name($filepath,$lowercase=true) {
 		$class = '';
 
 		$tokens = token_get_all(file_get_contents($filepath));
