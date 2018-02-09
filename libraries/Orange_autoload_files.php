@@ -164,8 +164,8 @@ class Orange_autoload_files {
 			$files = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($path),RecursiveIteratorIterator::SELF_FIRST);
 
 			foreach ($files as $f) {
-				$filepath = $f->getRealPath();
-				if (substr($filepath,-4) == '.php') {
+				if ($f->getExtension() == 'php') {
+					$filepath = $f->getRealPath();
 					$matches = [];
 					if (preg_match('#'.$match.'#', $filepath, $matches)) {
 						if ($option === 'filename') {

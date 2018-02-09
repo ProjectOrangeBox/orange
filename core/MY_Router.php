@@ -42,6 +42,7 @@ class MY_Router extends CI_Router {
 
 	public function _validate_request($segments) {
 		$uri = implode('/',str_replace('-','_',$segments));
+
 		$op = orange_paths();
 
 		foreach ($op['controllers'] as $key=>$rec) {
