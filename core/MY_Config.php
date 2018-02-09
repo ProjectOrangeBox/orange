@@ -74,35 +74,27 @@ class MY_Config extends CI_Config {
 		if (!is_array($built_config)) {
 			$built_config = [];
 
-			/* standard config files */
-			$config_files = glob(APPPATH.'config/*.php');
+			$paths = orange_paths();
 
-			foreach ($config_files as $file) {
+			foreach ($paths['configs']['root'] as $group_key=>$filepath) {
 				$config = null;
 
-				include $file;
+				include $filepath;
 
 				if (is_array($config)) {
-					$group_key = strtolower(basename($file, '.php'));
-
 					foreach ($config as $key => $value) {
 						$built_config[$group_key][strtolower($key)] = $value;
 					}
 				}
 			}
 
-			/* environmental configs */
-			if (ENVIRONMENT) {
-				$config_files = glob(APPPATH.'config/'.ENVIRONMENT.'/*.php');
-
-				foreach ($config_files as $file) {
+			if (is_array($paths['configs'][ENVIRONMENT])) {
+				foreach ($paths['configs'][ENVIRONMENT] as $group_key=>$filepath) {
 					$config = null;
 
-					include $file;
+					include $filepath;
 
 					if (is_array($config)) {
-						$group_key = strtolower(basename($file, '.php'));
-
 						foreach ($config as $key => $value) {
 							$built_config[$group_key][strtolower($key)] = $value;
 						}

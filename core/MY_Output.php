@@ -63,10 +63,8 @@ class MY_Output extends CI_Output {
 
 	/* Delete all cookies */
 	public function delete_all_cookies() {
-		$past = time() - 3600;
-
 		foreach ($_COOKIE as $key=>$value) {
-	    setcookie($key,$value,$past,config('config.cookie_path','/'));
+	    setcookie($key,$value,(time() - 3600),config('config.cookie_path','/'));
 		}
 	}
 

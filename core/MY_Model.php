@@ -42,9 +42,9 @@ class MY_Model extends CI_Model {
 
 	public function validate(&$data, $rules = true) {
 		if ($rules === true) {
-			$rules = $this->string2array(array_keys($data));
+			$rules = $this->_string2array(array_keys($data));
 		} elseif (is_string($rules)) {
-			$rules = $this->string2array(explode(',', $this->rule_sets[$rules]));
+			$rules = $this->_string2array(explode(',', $this->rule_sets[$rules]));
 		}
 
 		$this->only_columns_with_rules($data, $rules);
@@ -97,11 +97,10 @@ class MY_Model extends CI_Model {
 		return $this;
 	}
 
-	protected function string2array($fields) {
+	protected function _string2array($fields) {
 		$new_array = [];
 
 		foreach ($fields as $field) {
-
 			if (isset($this->rules[$field])) {
 				$new_array[$field] = $this->rules[$field];
 			}

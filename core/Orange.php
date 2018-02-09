@@ -130,22 +130,22 @@ Autoloader for:
 function codeigniter_autoload($class) {
 	$op = orange_paths();
 
-	$lclass = strtolower($class);
+	$class = strtolower($class);
 
-	if (isset($op['classes'][$lclass])) {
-		require $op['classes'][$lclass];
-
-		return true;
-	}
-
-	if (isset($op['models'][$lclass])) {
-		ci()->load->model($lclass);
+	if (isset($op['classes'][$class])) {
+		require $op['classes'][$class];
 
 		return true;
 	}
 
-	if (isset($op['libraries'][$lclass])) {
-		ci()->load->library($lclass);
+	if (isset($op['models'][$class])) {
+		ci()->load->model($class);
+
+		return true;
+	}
+
+	if (isset($op['libraries'][$class])) {
+		ci()->load->library($class);
 
 		return true;
 	}
@@ -258,16 +258,12 @@ function view($_view,$_data=[]) {
 
 	$_file = ltrim(str_replace('.php','',$_view),'/');
 
-	$_view_file = false;
-
 	/* clean up */
-	if (isset($_op['views'][$_file])) {
-		$_view_file = $_op['views'][$_file];
-	}
-
-	if ($_view_file === false) {
+	if (!isset($_op['views'][$_file])) {
 		throw new Exception('Could not locate view "'.$_file.'"');
 	}
+
+	$_view_file = $_op['views'][$_file];
 
 	/* extract our data variables */
 	extract($_data, EXTR_PREFIX_INVALID, '_');
@@ -461,20 +457,4 @@ function middleware() {
 	static $_middleware;
 
 	return (func_num_args()) ? $_middleware = func_get_args() :  (array)$_middleware;
-}
-
-function load_config($class) {
-	$paths = orange_paths();
-	$class = strtolower($class);
-	$config = [];
-
-	if (isset($paths['configs']['root'][$class])) {
-		include $paths['configs']['root'][$class];
-	}
-
-	if (isset($paths['configs'][ENVIRONMENT][$class])) {
-		include $paths['configs'][ENVIRONMENT][$class];
-	}
-
-	return $config;
 }

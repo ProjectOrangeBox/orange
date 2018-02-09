@@ -30,7 +30,7 @@ class MY_Controller extends CI_Controller {
 
 	public $data = [];
 
-	public $controller_model;
+	public $controller_model = null;
 
 	public function __construct() {
 		parent::__construct();

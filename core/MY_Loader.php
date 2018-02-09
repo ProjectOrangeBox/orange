@@ -54,7 +54,17 @@ class MY_Loader extends CI_Loader {
 		}
 
 		if ($config == FALSE) {
-			$config = load_config($class);
+			$paths = orange_paths();
+			$lc_class = strtolower($class);
+			$config = [];
+
+			if (isset($paths['configs']['root'][$lc_class])) {
+				include $paths['configs']['root'][$lc_class];
+			}
+
+			if (isset($paths['configs'][ENVIRONMENT][$lc_class])) {
+				include $paths['configs'][ENVIRONMENT][$lc_class];
+			}
 		}
 
 		$class_name = $prefix.$class;
@@ -125,10 +135,14 @@ class MY_Loader extends CI_Loader {
 			return;
 		}
 
-		if ($path = stream_resolve_include_path('libraries/'.$file_path.$library_name.'.php')) {
-			include_once $path;
+		$paths = orange_paths();
 
-			if (class_exists($prefix.$library_name, FALSE)) {
+		$lc_library_name = strtolower($library_name);
+
+		if (isset($paths['classes'][$prefix.$lc_library_name])) {
+			include_once $paths['classes'][$prefix.$lc_library_name];
+
+			if (class_exists($prefix.$lc_library_name, FALSE)) {
 				return $this->_ci_init_library($library_name, $prefix, $params, $object_name);
 			} else {
 				log_message('debug', $path.' exists, but does not declare '.$prefix.$library_name);
@@ -137,13 +151,13 @@ class MY_Loader extends CI_Loader {
 
 		include_once BASEPATH.'libraries/'.$file_path.$library_name.'.php';
 
-		$subclass = config_item('subclass_prefix').$library_name;
+		$subclass = config_item('subclass_prefix');
 
-		if ($path = stream_resolve_include_path('libraries/'.$file_path.$subclass.'.php')) {
-			include_once $path;
+		if (isset($paths['classes'][$subclass.$lc_library_name])) {
+			include_once $paths['classes'][$subclass.$lc_library_name];
 
-			if (class_exists($subclass, FALSE)) {
-				$prefix = config_item('subclass_prefix');
+			if (class_exists($subclass.$lc_library_name, FALSE)) {
+				$prefix = $subclass;
 			} else {
 				log_message('debug', $path.' exists, but does not declare '.$subclass);
 			}
