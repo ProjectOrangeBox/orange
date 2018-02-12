@@ -20,11 +20,14 @@ class Orange_autoload_files {
 	}
 
 	static public function create_cache() {
-		/* treat as classes */
+		/* treat as classes NOT libraries */
 		$classes = [
 			'model_entity'=>ROOTPATH.'/packages/projectorangebox/orange/models/Model_entity.php',
 			'cache_export'=>ROOTPATH.'/packages/projectorangebox/orange/libraries/Cache_export.php',
 			'cache_page'=>ROOTPATH.'/packages/projectorangebox/orange/libraries/Cache_page.php',
+			'middleware_base'=>ROOTPATH.'/packages/projectorangebox/orange/libraries/Middleware_base.php',
+			'validate_base'=>ROOTPATH.'/packages/projectorangebox/orange/libraries/Validate_base.php',
+			'filter_base'=>ROOTPATH.'/packages/projectorangebox/orange/libraries/Filter_base.php',
 		];
 
 		$autoload_files = [
@@ -42,12 +45,12 @@ class Orange_autoload_files {
 				self::search('/core/','(.*).php')
 			),
 			'models' => self::search('/models/','(.*)_model.php'),
-			'libraries' => self::search('/libraries/','(.*).php',function($filepath) {
+			'libraries' => array_diff_key(self::search('/libraries/','(.*).php',function($filepath) {
 				$count = 0;
 				str_replace(['/validations/','/pear_plugins/','/filters/','/traits/'],'',$filepath,$count);
 
 				return (!$count) ? strtolower(basename($filepath,'.php')) : null;
-			}),
+			})	,$classes),
 			'views' => self::search('/views/','(.*).php',function($filepath) { return strtolower(substr($filepath,strpos($filepath,'/views/') + 7,-4)); 	}),
 			'controllers' => self::cache_controllers(),
 			'configs' => self::cache_config(),

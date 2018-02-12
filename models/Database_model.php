@@ -41,6 +41,9 @@ class Database_model extends MY_Model {
 	protected $temporary_column_name = null;
 	protected $temporary_return_as_array = null;
 	protected $auto_generated_primary = true;
+	protected $read_role_id = null;
+	protected $edit_role_id = null;
+	protected $delete_role_id = null;
 
 	public function __construct() {
 		parent::__construct();
@@ -71,8 +74,8 @@ class Database_model extends MY_Model {
 
 		if ($this->has_roles) {
 			$this->rules = $this->rules + [
-				'read_role_id'   => ['field' => 'read_role_id', 	'label' => 'Read Role', 	'rules' => 'required|integer|max_length[10]|less_than[4294967295]|filter_int[10]'],
-				'edit_role_id'   => ['field' => 'edit_role_id', 	'label' => 'Edit Role', 	'rules' => 'required|integer|max_length[10]|less_than[4294967295]|filter_int[10]'],
+				'read_role_id' => ['field' => 'read_role_id', 'label' => 'Read Role', 	'rules' => 'required|integer|max_length[10]|less_than[4294967295]|filter_int[10]'],
+				'edit_role_id' => ['field' => 'edit_role_id', 'label' => 'Edit Role', 	'rules' => 'required|integer|max_length[10]|less_than[4294967295]|filter_int[10]'],
 				'delete_role_id' => ['field' => 'delete_role_id', 'label' => 'Delete Role', 'rules' => 'required|integer|max_length[10]|less_than[4294967295]|filter_int[10]'],
 			];
 		}
@@ -102,6 +105,20 @@ class Database_model extends MY_Model {
 		}
 
 		return $this;
+	}
+
+	public function set_role_ids($read_id=null,$edit_id=null,$delete_id=null) {
+		if ($read_id) {
+			$this->read_role_id = $read_id;
+		}
+
+		if ($edit_id) {
+			$this->edit_role_id = $edit_id;
+		}
+
+		if ($delete_id) {
+			$this->delete_role_id = $delete_id;
+		}
 	}
 
 	public function get_cache_prefix() {
@@ -585,15 +602,15 @@ class Database_model extends MY_Model {
 
 		if ($this->has_roles) {
 			if (!isset($data['read_role_id'])) {
-				$data['read_role_id'] = ci()->user->user_read_role_id;
+				$data['read_role_id'] = ((int)$this->read_role_id > 0) ? (int)$this->read_role_id : (int)ci()->user->user_read_role_id;
 			}
 
 			if (!isset($data['edit_role_id'])) {
-				$data['edit_role_id'] = ci()->user->user_edit_role_id;
+				$data['edit_role_id'] = ((int)$this->edit_role_id > 0) ? (int)$this->edit_role_id : (int)ci()->user->user_edit_role_id;
 			}
 
 			if (!isset($data['delete_role_id'])) {
-				$data['delete_role_id'] = ci()->user->user_delete_role_id;
+				$data['delete_role_id'] = ((int)$this->delete_role_id > 0) ? (int)$this->delete_role_id : (int)ci()->user->user_delete_role_id;
 			}
 		}
 
@@ -649,7 +666,9 @@ class Database_model extends MY_Model {
 		echo 'finished';
 	}
 
-	public function add_role_default_columns($tablename,$connection='default') {
+	public function add_role_default_columns($tablename=null,$connection='default') {
+		$tablename = ($tablename) ? $tablename : $this->table;
+
 		require APPPATH.'/config/database.php';
 
 		$config = $db[$connection];
@@ -660,10 +679,12 @@ class Database_model extends MY_Model {
 		$mysqli->query('ALTER TABLE `'.$tablename.'` ADD COLUMN edit_role_id INT(11) UNSIGNED NULL DEFAULT '.ADMIN_ROLE_ID);
 		$mysqli->query('ALTER TABLE `'.$tablename.'` ADD COLUMN delete_role_id INT(11) UNSIGNED NULL DEFAULT '.ADMIN_ROLE_ID);
 
-		echo 'finished';
+		echo '<p>finished</p>';
 	}
 
-	public function add_stamp_default_columns($tablename,$connection='default') {
+	public function add_stamp_default_columns($tablename=null,$connection='default') {
+		$tablename = ($tablename) ? $tablename : $this->table;
+
 		require APPPATH.'/config/database.php';
 
 		$config = $db[$connection];
@@ -685,7 +706,7 @@ class Database_model extends MY_Model {
 			$mysqli->query('ALTER TABLE `'.$tablename.'` ADD COLUMN is_deleted TINYINT(1) UNSIGNED NULL DEFAULT 0');
 		}
 
-		echo 'finished';
+		echo '<p>finished</p>';
 	}
 
 } /* end file */
