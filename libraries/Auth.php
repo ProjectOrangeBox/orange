@@ -70,21 +70,27 @@ class Auth {
 		log_message('debug', 'Auth::refresh_userdata::'.$user_id);
 
 		$user_id = ((int)$user_id > 0) ? (int)$user_id : NOBODY_USER_ID;
+
 		$profile = ci('o_user_model')->get($user_id);
 
-		if ((int)$profile->is_active == 1 && $profile instanceof O_user_entity) {
-			unset($profile->password);
+		if ((int)$profile->is_active != 1 && !$profile instanceof O_user_entity) {
+			/* fall back to nobody */
+			$user_id = NOBODY_USER_ID;
 
-			ci()->user = &$profile;
+			$profile = ci('o_user_model')->get($user_id);
+		}
 
-			if ($save_session) {
-				ci()->session->set_userdata([$this->session_key => $profile->id]);
-			}
-		} else {
-			$this->refresh_userdata(NOBODY_USER_ID);
+		unset($profile->password);
+
+		ci()->user = &$profile;
+
+		if ($save_session) {
+			ci()->session->set_userdata([$this->session_key => $profile->id]);
 		}
 
 		log_message('info', 'Auth Class Refreshed');
+
+		return $user_id;
 	}
 
 	protected function _login($login, $password) {

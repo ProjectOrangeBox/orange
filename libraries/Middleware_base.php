@@ -16,7 +16,7 @@
  *
  */
 
-class Middleware_base {
+abstract class Middleware_base {
 
 	public function __get($key) {
 		return get_instance()->$key;

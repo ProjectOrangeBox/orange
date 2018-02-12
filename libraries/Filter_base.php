@@ -16,7 +16,7 @@
  *
  */
 
-class Filter_base extends Validate_base {
+abstract class Filter_base extends Validate_base {
 	public function __construct(&$field_data=null) {
 		$this->field_data   = &$field_data;
 

@@ -16,7 +16,7 @@
  *
  */
 
-class Validate_base {
+abstract class Validate_base {
 	protected $true_array  = [1, '1', 'y', 'on', 'yes', 't', 'true', true];
 	protected $false_array = [0, '0', 'n', 'off', 'no', 'f', 'false', false];
 	protected $error_string;

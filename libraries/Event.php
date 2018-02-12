@@ -32,6 +32,8 @@ class Event {
 		log_message('debug', 'event::register::'.$name);
 
 		$this->listeners[$name][$priority][] = $closure;
+
+		return $this;
 	}
 
 	public function trigger($name, &$a1 = null, &$a2 = null, &$a3 = null, &$a4 = null, &$a5 = null, &$a6 = null, &$a7 = null, &$a8 = null) {
@@ -53,6 +55,8 @@ class Event {
 				}
 			}
 		}
+
+		return $this;
 	}
 
 	public function has($name) {

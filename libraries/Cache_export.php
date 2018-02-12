@@ -105,11 +105,6 @@ class Cache_export extends CI_Driver {
 		return FALSE;
 	}
 
-	/**
-	* Cache Info
-	*
-	* @return  configs
-	*/
 	public function cache_info($type = NULL) {
 		return [
 			'cache_path'=>$this->config['cache_path'],
@@ -122,22 +117,10 @@ class Cache_export extends CI_Driver {
 		];
 	}
 
-	/**
-	* Get Cache Metadata
-	*
-	* @param   mixed  key to get cache metadata on
-	* @return  bool   FALSE
-	*/
 	public function get_metadata($id) {
 		return (!is_file( $this->config['cache_path'].$id.'.meta.php') || !is_file( $this->config['cache_path'].$id.'.php')) ? FALSE : include  $this->config['cache_path'].$id.'.meta.php';
 	}
 
-	/**
-	* Is this caching driver supported on the system?
-	* Of course this one is.
-	*
-	* @return bool TRUE
-	*/
 	public function is_supported() {
 		return TRUE;
 	}

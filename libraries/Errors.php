@@ -26,10 +26,14 @@ class Errors {
 		$current_errors[$msg] = $msg;
 
 		ci()->load->vars( $this->errors_variable, $current_errors);
+
+		return $this;
 	}
 
 	public function clear() {
 		ci()->load->vars( $this->errors_variable, []);
+
+		return $this;
 	}
 
 	public function has() {
@@ -77,7 +81,7 @@ class Errors {
 	}
 
 	public function show($message, $status_code, $heading = 'An Error Was Encountered') {
-		 $this->display('general',['heading'=>$heading,'message'=>$message],$status_code);
+		$this->display('general',['heading'=>$heading,'message'=>$message],$status_code);
 	}
 
 	public function display($view, $data = [], $status_code = 500, $override = []) {
