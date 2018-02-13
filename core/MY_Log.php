@@ -21,9 +21,11 @@
 class MY_Log extends CI_Log {
 	public function __construct() {
 		parent::__construct();
+
 		$config = get_config();
+
 		if ($config['log_threshold'] == 0) {
 			$this->_enabled = FALSE;
 		}
 	}
-}
+} /* end class */

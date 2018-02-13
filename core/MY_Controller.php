@@ -1,7 +1,7 @@
 <?php
 /**
  * MY_Controller
- * Insert description here
+ * base controller
  *
  * @package CodeIgniter / Orange
  * @author Don Myers
@@ -88,7 +88,9 @@ class MY_Controller extends CI_Controller {
 
 	public function __construct() {
 		parent::__construct();
+
 		log_message('debug', 'MY_Controller::__construct');
+
 		if (php_sapi_name() !== 'cli') {
 			if (!config('application.site open')) {
 				if ($_COOKIE['ISOPEN'] !== config('application.is open cookie', md5(uniqid(true)))) {
@@ -96,6 +98,7 @@ class MY_Controller extends CI_Controller {
 				}
 			}
 		}
+
 		foreach (middleware() as $middleware_file) {
 			if (class_exists($middleware_file)) {
 				new $middleware_file;
@@ -103,15 +106,19 @@ class MY_Controller extends CI_Controller {
 				throw new Exception('middleware "'.$middleware_file.'" not found.');
 			}
 		}
+
 		if ($this->libraries) {
 			$this->load->library((array) $this->libraries);
 		}
+
 		if ($this->models) {
 			$this->load->model((array) $this->models);
 		}
+
 		if ($this->helpers) {
 			$this->load->helpers((array) $this->helpers);
 		}
+
 		if ($this->catalogs) {
 			foreach ($this->catalogs as $variable_name => $args) {
 				if (!is_array($args)) {
@@ -128,9 +135,11 @@ class MY_Controller extends CI_Controller {
 				}
 			}
 		}
+
 		if ($this->controller_model) {
 			$this->load->model($this->controller_model);
 		}
+
 		ci('event')->trigger('ci.controller.startup', $this);
 	}
-}
+} /* end class */

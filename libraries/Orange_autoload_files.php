@@ -19,8 +19,25 @@
  *
  */
 class Orange_autoload_files {
+	/**
+	 * track if the combined cached configuration has been loaded
+	 *
+	 * @var boolean
+	 */
 	static protected $paths = [];
+
+	/**
+	 * track if the combined cached configuration has been loaded
+	 *
+	 * @var boolean
+	 */
 	static protected $cache_path;
+
+	/**
+	 * track if the combined cached configuration has been loaded
+	 *
+	 * @var boolean
+	 */
 	static protected $folder_levels = 2;
 
 /**

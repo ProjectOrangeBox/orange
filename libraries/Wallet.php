@@ -19,10 +19,39 @@
  *
  */
 class Wallet {
+	/**
+	 * track if the combined cached configuration has been loaded
+	 *
+	 * @var boolean
+	 */
 	protected $redirect_messages = [];
+
+		/**
+	 * track if the combined cached configuration has been loaded
+	 *
+	 * @var boolean
+	 */
 	protected $request           = [];
+
+	/**
+	 * track if the combined cached configuration has been loaded
+	 *
+	 * @var boolean
+	 */
 	protected $msg_key         = 'internal::wallet::msg';
+
+	/**
+	 * track if the combined cached configuration has been loaded
+	 *
+	 * @var boolean
+	 */
 	protected $stash_key       = 'internal::wallet::stash';
+
+	/**
+	 * track if the combined cached configuration has been loaded
+	 *
+	 * @var boolean
+	 */
 	protected $default_msgs = [
 		'success' => 'Request Completed',
 		'failed'  => 'Request Failed',

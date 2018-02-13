@@ -19,9 +19,32 @@
  *
  */
 class Validate {
+	/**
+	 * track if the combined cached configuration has been loaded
+	 *
+	 * @var boolean
+	 */
 	protected $config;
+
+	/**
+	 * track if the combined cached configuration has been loaded
+	 *
+	 * @var boolean
+	 */
 	protected $attached = [];
+
+	/**
+	 * track if the combined cached configuration has been loaded
+	 *
+	 * @var boolean
+	 */
 	protected $error_string;
+
+	/**
+	 * track if the combined cached configuration has been loaded
+	 *
+	 * @var boolean
+	 */
 	protected $field_data = [];
 
 /**

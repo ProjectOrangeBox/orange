@@ -1,25 +1,33 @@
 <?php
+
 define('ORANGE_VERSION', '2.0.0');
+
 require __DIR__.'/../libraries/Orange_autoload_files.php';
+
 orange_autoload_files::load(ROOTPATH.'/var/cache/autoload_files.php');
+
 spl_autoload_register('codeigniter_autoload');
+
 require_once BASEPATH.'core/CodeIgniter.php';
+
 /**
  * ci
- * Insert description here
+ * auto loader for CodeIgniter libraries
  *
- * @param $class
+ * @param string $class name of the library you are looking for
  *
- * @return
+ * @return $this instance of controller
  *
- * @access
- * @static
- * @throws
- * @example
+ * @throws Exception
+ * @examples ci()->load->library('email')
+ * @examples ci('email')->send()
+ * @examples ci('page')->render()
  */
 function &ci($class=null) {
+	/* this function uses the "bail on first match" */
 	if ($class) {
 		$class = strtolower($class);
+
 		if ($class == 'load') {
 			return CI_Controller::get_instance()->load;
 		} elseif (CI_Controller::get_instance()->load->is_loaded($class)) {
@@ -36,8 +44,10 @@ function &ci($class=null) {
 			}
 		}
 	}
+
 	return CI_Controller::get_instance();
 }
+
 /**
  * load_class
  * Insert description here
@@ -55,26 +65,34 @@ function &ci($class=null) {
  */
 function &load_class($class, $directory = 'libraries', $param = NULL) {
 	static $_classes = array();
+
 	if (isset($_classes[$class])) {
 		return $_classes[$class];
 	}
+
 	$name = false;
 	$subclass_prefix = config_item('subclass_prefix');
+
 	if (class_exists('ci_'.$class)) {
 		$name = 'CI_'.$class;
 	}
+
 	if (class_exists($subclass_prefix.$class)) {
 		$name = $subclass_prefix.$class;
 	}
+
 	if ($name === false) {
 		set_status_header(503);
 		echo 'Unable to locate the specified class: '.$class.'.php';
 		exit(1);
 	}
+
 	is_loaded($class);
 	$_classes[$class] = isset($param) ? new $name($param) : new $name();
+
 	return $_classes[$class];
 }
+
 /**
  * codeigniter_autoload
  * Insert description here
@@ -91,20 +109,25 @@ function &load_class($class, $directory = 'libraries', $param = NULL) {
 function codeigniter_autoload($class) {
 	$op = orange_paths();
 	$class = strtolower($class);
+
 	if (isset($op['classes'][$class])) {
 		require $op['classes'][$class];
 		return true;
 	}
+
 	if (isset($op['models'][$class])) {
 		ci()->load->model($class);
 		return true;
 	}
+
 	if (isset($op['libraries'][$class])) {
 		ci()->load->library($class);
 		return true;
 	}
+
 	return false;
 }
+
 /**
  * site_url
  * Insert description here
@@ -122,17 +145,23 @@ function codeigniter_autoload($class) {
 function site_url($uri = '', $protocol = NULL) {
 	$uri = ci()->config->site_url($uri, $protocol);
 	$file_path = ROOTPATH.'/var/cache/site_url.php';
+
 	if (ENVIRONMENT == 'development' || !file_exists($file_path)) {
 		$paths = config('paths');
+
 		foreach ($paths as $find => $replace) {
 			$site_url['keys'][] = '{'.strtolower($find).'}';
 			$site_url['values'][] = $replace;
 		}
+
 		atomic_file_put_contents($file_path,'<?php return '.var_export($site_url,true).';');
 	}
+
 	$paths = include $file_path;
+
 	return str_replace($paths['keys'], $paths['values'], $uri);
 }
+
 /**
  * config
  * Insert description here
@@ -150,6 +179,7 @@ function site_url($uri = '', $protocol = NULL) {
 function config($setting = null, $default = null) {
 	return ci()->config->item($setting,$default);
 }
+
 /**
  * esc
  * Insert description here
@@ -166,6 +196,7 @@ function config($setting = null, $default = null) {
 function esc($string) {
 	return str_replace('"', '\"', $string);
 }
+
 /**
  * e
  * Insert description here
@@ -182,6 +213,7 @@ function esc($string) {
 function e($string) {
 	return htmlspecialchars($string, ENT_QUOTES, 'UTF-8');
 }
+
 /**
  * get_public_object_vars
  * Insert description here
@@ -198,6 +230,7 @@ function e($string) {
 function get_public_object_vars($obj) {
   return get_object_vars($obj);
 }
+
 /**
  * env
  * Insert description here
@@ -215,6 +248,7 @@ function get_public_object_vars($obj) {
 function env($key,$default=null) {
 	return (isset($_ENV[$key])) ? $_ENV[$key] : $default;
 }
+
 /**
  * l
  * Insert description here
@@ -240,6 +274,7 @@ function l() {
 	}
 	file_put_contents(ROOTPATH.'/var/logs/'.__METHOD__.'.log',$build,FILE_APPEND | LOCK_EX);
 }
+
 /**
  * unlock_session
  * Insert description here
@@ -255,6 +290,7 @@ function l() {
 function unlock_session() {
 	session_write_close();
 }
+
 /**
  * console
  * Insert description here
@@ -272,6 +308,7 @@ function unlock_session() {
 function console($var, $type = 'log') {
 	echo '<script type="text/javascript">console.'.$type.'('.json_encode($var).')</script>';
 }
+
 /**
  * orange_paths
  * Insert description here
@@ -288,6 +325,7 @@ function orange_paths() {
 	static $_ORANGE_PATHS;
 	return (func_num_args()) ? $_ORANGE_PATHS = func_get_arg(0) : (array)$_ORANGE_PATHS;
 }
+
 /**
  * middleware
  * Insert description here
@@ -304,6 +342,7 @@ function middleware() {
 	static $_ORANGE_MIDDLEWARE;
 	return (func_num_args()) ? $_ORANGE_MIDDLEWARE = func_get_args() :  (array)$_ORANGE_MIDDLEWARE;
 }
+
 /**
  * view
  * Insert description here
@@ -330,6 +369,7 @@ function view($_view,$_data=[]) {
 	include $_view_file;
 	return ob_get_clean();
 }
+
 /**
  * atomic_file_put_contents
  * Insert description here
@@ -373,6 +413,7 @@ function atomic_file_put_contents($filepath, $content) {
 	}
 	return $bytes;
 }
+
 /**
  * remove_php_file_from_opcache
  * Insert description here
@@ -395,6 +436,7 @@ function remove_php_file_from_opcache($fullpath) {
 	}
 	return $success;
 }
+
 /**
  * convert_to_real
  * Insert description here
@@ -430,6 +472,7 @@ function convert_to_real($value) {
 	$json = @json_decode($value, true);
 	return ($json !== null) ? $json : $value;
 }
+
 /**
  * convert_to_string
  * Insert description here
@@ -458,6 +501,7 @@ function convert_to_string($value) {
 	}
 	return (string) $value;
 }
+
 /**
  * simplify_array
  * Insert description here
@@ -485,6 +529,7 @@ function simplify_array($array, $key = 'id', $value = null) {
 	}
 	return $new_array;
 }
+
 /**
  * cache
  * Insert description here
@@ -508,6 +553,7 @@ function cache($key, $closure, $ttl = null) {
 	}
 	return $cache;
 }
+
 /**
  * cache_ttl
  * Insert description here
@@ -526,6 +572,7 @@ function cache_ttl($use_window=true) {
 	$window_adder = ($use_window) ? mt_rand(-15,15) : 0;
 	return ($cache_ttl == 0) ? 0 : (max(0,$cache_ttl + $window_adder));
 }
+
 /**
  * delete_cache_by_tags
  * Insert description here
@@ -558,6 +605,7 @@ function delete_cache_by_tags($args) {
 		}
 	}
 }
+
 /**
  * filter_filename
  * Insert description here
@@ -576,6 +624,7 @@ function filter_filename($str,$ext=null) {
 	$str = strtolower(trim(preg_replace('#\W+#', '_', $str), '_'));
 	return ($ext) ? $str.'.'.$ext : $str;
 }
+
 /**
  * filter_human
  * Insert description here

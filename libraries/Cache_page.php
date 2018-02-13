@@ -19,7 +19,18 @@
  *
  */
 class Cache_page extends CI_Driver {
+	/**
+	 * track if the combined cached configuration has been loaded
+	 *
+	 * @var boolean
+	 */
 	protected $cache = [];
+
+	/**
+	 * track if the combined cached configuration has been loaded
+	 *
+	 * @var boolean
+	 */
 	protected $config;
 
 /**

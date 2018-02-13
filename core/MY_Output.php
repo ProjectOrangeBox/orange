@@ -26,11 +26,13 @@ class MY_Output extends CI_Output {
 			$data = ($val !== NULL) ? [$data => $val] : $data;
 			$json = (is_array($data) || is_object($data)) ? json_encode($data,JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE) : $data;
 		}
+
 		$this
 			->enable_profiler(false)
 			->nocache()
 			->set_content_type('application/json', 'utf-8')
 			->set_output($json);
+
 		return $this;
 	}
 
@@ -52,6 +54,7 @@ class MY_Output extends CI_Output {
 			->set_header('Cache-Control: no-cache,no-store,must-revalidate,max-age=0')
 			->set_header('Cache-Control: post-check=0,pre-check=0', false)
 			->set_header('Pragma: no-cache');
+
 		return $this;
 	}
 
@@ -95,5 +98,7 @@ class MY_Output extends CI_Output {
 		foreach ($_COOKIE as $key=>$value) {
 	    setcookie($key,$value,(time() - 3600),config('config.cookie_path','/'));
 		}
+
+		return $this;
 	}
-}
+} /* end class */

@@ -19,6 +19,11 @@
  *
  */
 class Event {
+	/**
+	 * track if the combined cached configuration has been loaded
+	 *
+	 * @var boolean
+	 */
 	protected $listeners = [];
 
 /**

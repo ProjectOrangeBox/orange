@@ -19,24 +19,29 @@
  *
  */
 class MY_Loader extends CI_Loader {
+	/**
+	 * track if the combined cached configuration has been loaded
+	 *
+	 * @var boolean
+	 */
 	protected $cache_drivers_loaded = false;
 
-/**
- * _ci_init_library
- * Insert description here
- *
- * @param $class
- * @param $prefix
- * @param $config
- * @param $object_name
- *
- * @return
- *
- * @access
- * @static
- * @throws
- * @example
- */
+	/**
+	 * _ci_init_library
+	 * Insert description here
+	 *
+	 * @param $class
+	 * @param $prefix
+	 * @param $config
+	 * @param $object_name
+	 *
+	 * @return
+	 *
+	 * @access
+	 * @static
+	 * @throws
+	 * @example
+	 */
 	protected function _ci_init_library($class, $prefix, $config = FALSE, $object_name = NULL) {
 		if (!$this->cache_drivers_loaded) {
 			$this->cache_drivers_loaded = true;
@@ -46,6 +51,7 @@ class MY_Loader extends CI_Loader {
 			$CI->cache->page = new Cache_page($cache_config);
 			$CI->cache->export = new Cache_export($cache_config);
 		}
+
 		if ($config == FALSE) {
 			$paths = orange_paths();
 			$lc_class = strtolower($class);
@@ -57,18 +63,23 @@ class MY_Loader extends CI_Loader {
 				include $paths['configs'][ENVIRONMENT][$lc_class];
 			}
 		}
+
 		$class_name = $prefix.$class;
+
 		if (!class_exists($class_name, FALSE)) {
 			log_message('error', 'Non-existent class: '.$class_name);
 			throw new Exception('Non-existent class: '.$class_name);
 		}
+
 		if (empty($object_name)) {
 			$object_name = strtolower($class);
 			if (isset($this->_ci_varmap[$object_name])) {
 				$object_name = $this->_ci_varmap[$object_name];
 			}
 		}
+
 		$CI = &get_instance();
+
 		if (isset($CI->$object_name)) {
 			if ($CI->$object_name instanceof $class_name || PHPUNIT) {
 				log_message('debug', $class_name." has already been instantiated as '".$object_name."'. Second attempt aborted.");
@@ -76,28 +87,31 @@ class MY_Loader extends CI_Loader {
 			}
 			throw new Exception("Resource '".$object_name."' already exists and is not a ".$class_name." instance.");
 		}
+
 		$this->_ci_classes[$object_name] = $class;
+
 		$CI->$object_name = isset($config) ? new $class_name($config) : new $class_name();
 	}
 
-/**
- * _ci_load_stock_library
- * Insert description here
- *
- * @param $library_name
- * @param $file_path
- * @param $params
- * @param $object_name
- *
- * @return
- *
- * @access
- * @static
- * @throws
- * @example
- */
+	/**
+	 * _ci_load_stock_library
+	 * Insert description here
+	 *
+	 * @param $library_name
+	 * @param $file_path
+	 * @param $params
+	 * @param $object_name
+	 *
+	 * @return
+	 *
+	 * @access
+	 * @static
+	 * @throws
+	 * @example
+	 */
 	protected function _ci_load_stock_library($library_name, $file_path, $params, $object_name) {
 		$prefix = 'CI_';
+
 		if (class_exists($prefix.$library_name, FALSE)) {
 			if (class_exists(config_item('subclass_prefix').$library_name, FALSE)) {
 				$prefix = config_item('subclass_prefix');
@@ -111,8 +125,11 @@ class MY_Loader extends CI_Loader {
 			log_message('debug', $library_name.' class already loaded. Second attempt ignored.');
 			return;
 		}
+
 		$paths = orange_paths();
+
 		$lc_library_name = strtolower($library_name);
+
 		if (isset($paths['classes'][$prefix.$lc_library_name])) {
 			include_once $paths['classes'][$prefix.$lc_library_name];
 			if (class_exists($prefix.$lc_library_name, FALSE)) {
@@ -121,8 +138,11 @@ class MY_Loader extends CI_Loader {
 				log_message('debug', $path.' exists, but does not declare '.$prefix.$library_name);
 			}
 		}
+
 		include_once BASEPATH.'libraries/'.$file_path.$library_name.'.php';
+
 		$subclass = config_item('subclass_prefix');
+
 		if (isset($paths['classes'][$subclass.$lc_library_name])) {
 			include_once $paths['classes'][$subclass.$lc_library_name];
 			if (class_exists($subclass.$lc_library_name, FALSE)) {
@@ -133,4 +153,5 @@ class MY_Loader extends CI_Loader {
 		}
 		return $this->_ci_init_library($library_name, $prefix, $params, $object_name);
 	}
-}
+
+} /* end class */

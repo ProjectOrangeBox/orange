@@ -19,6 +19,11 @@
  *
  */
 class Errors {
+	/**
+	 * track if the combined cached configuration has been loaded
+	 *
+	 * @var boolean
+	 */
 	protected $errors_variable = 'ci_errors';
 
 /**

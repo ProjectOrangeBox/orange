@@ -1,7 +1,7 @@
 <?php
 /**
  * MY_Config
- * Insert description here
+ * The Config class provides a means to retrieve configuration preferences. These preferences can come from the default config file (application/config/config.php) or from your own custom config files.
  *
  * @package CodeIgniter / Orange
  * @author Don Myers
@@ -26,20 +26,20 @@ class MY_Config extends CI_Config {
 	 */
 	protected $setup = false;
 
-/**
- *
- * extends the default with dot notation selection
- *
- * @param string $item Config item name or dot notation format
- * @param mixed $index Index name or default if dot notation used
- *
- * @return string|null The configuration item or NULL if the item doesn't exist
- *
- * @access public
- * @uses none
- * @examples item('email','mailtype')
- * @examples item('email.mailtype','html')
- */
+	/**
+	 *
+	 * extends the default with dot notation selection
+	 *
+	 * @param string $item Config item name or dot notation format
+	 * @param mixed $index Index name or default if dot notation used
+	 *
+	 * @return string|null The configuration item or NULL if the item doesn't exist
+	 *
+	 * @access public
+	 * @uses none
+	 * @examples item('email','mailtype')
+	 * @examples item('email.mailtype','html')
+	 */
 	public function item($item,$index=null) {
 		log_message('debug', 'MY_Config::item::'.$item);
 
@@ -69,29 +69,29 @@ class MY_Config extends CI_Config {
 		return $value;
 	}
 
-/**
- * flush the cached data
- *
- *
- * @return boolean success or failure
- *
- * @access public
- * @examples flush()
- */
+	/**
+	 * flush the cached data
+	 *
+	 *
+	 * @return boolean success or failure
+	 *
+	 * @access public
+	 * @examples flush()
+	 */
 	public function flush() {
 		log_message('debug', 'MY_Config::settings_flush');
 
 		return ci('cache')->export->delete('config');
 	}
 
-/**
- * configuration cache builder
- * combined file config files, environment files, database values
- *
- *
- * @return null
- *
- */
+	/**
+	 * configuration cache builder
+	 * combined file config files, environment files, database values
+	 *
+	 *
+	 * @return null
+	 *
+	 */
 	protected function _load_combined_config() {
 		/* load from the cache */
 		$built_config = ci('cache')->export->get('config');
@@ -150,4 +150,4 @@ class MY_Config extends CI_Config {
 
 		$this->config = $built_config;
 	}
-}
+} /* end class */
