@@ -1,11 +1,14 @@
 <?php
-/*
- * Orange Framework Extension
+/**
+ * O_setting_model
+ * Insert description here
  *
- * @package	CodeIgniter / Orange
+ * @package CodeIgniter / Orange
  * @author Don Myers
+ * @copyright 2018
  * @license http://opensource.org/licenses/MIT MIT License
  * @link https://github.com/ProjectOrangeBox
+ * @version 2.0
  *
  * required
  * core:
@@ -15,8 +18,7 @@
  * functions:
  *
  */
-
-class o_setting_model extends Database_model {
+class O_setting_model extends Database_model {
 	protected $table = 'orange_settings';
 	protected $has_roles = true;
 	protected $has_stamps = true;
@@ -30,14 +32,37 @@ class o_setting_model extends Database_model {
 		'options'        => ['field' => 'options', 'label' => 'Options', 'rules' => 'max_length[16384]|filter_textarea[16384]'],
 	];
 
-	public function pull() {
+/**
+ * pull
+ * Insert description here
+ *
+ *
+ * @return
+ *
+ * @access
+ * @static
+ * @throws
+ * @example
+ */
+	public function for_config() {
 		return $this->get_many_by(['enabled' => 1]);
 	}
 
+/**
+ * delete_cache_by_tags
+ * Insert description here
+ *
+ *
+ * @return
+ *
+ * @access
+ * @static
+ * @throws
+ * @example
+ */
 	protected function delete_cache_by_tags() {
-		$this->config->flush();
+		ci('config')->flush();
 
 		return parent::delete_cache_by_tags();
 	}
-
-} /* end file */
+}

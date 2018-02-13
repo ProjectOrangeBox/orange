@@ -1,11 +1,14 @@
 <?php
-/*
- * Orange Framework Extension
+/**
+ * MY_Loader
+ * Insert description here
  *
- * @package	CodeIgniter / Orange
+ * @package CodeIgniter / Orange
  * @author Don Myers
+ * @copyright 2018
  * @license http://opensource.org/licenses/MIT MIT License
  * @link https://github.com/ProjectOrangeBox
+ * @version 2.0
  *
  * required
  * core:
@@ -15,155 +18,119 @@
  * functions:
  *
  */
-
 class MY_Loader extends CI_Loader {
 	protected $cache_drivers_loaded = false;
 
-	/**
-	 * Internal CI Library Instantiator
-	 *
-	 * @used-by	CI_Loader::_ci_load_stock_library()
-	 * @used-by	CI_Loader::_ci_load_library()
-	 *
-	 * @param	string		$class		Class name
-	 * @param	string		$prefix		Class name prefix
-	 * @param	array|null|bool	$config		Optional configuration to pass to the class constructor:
-	 *						FALSE to skip;
-	 *						NULL to search in config paths;
-	 *						array containing configuration data
-	 * @param	string		$object_name	Optional object name to assign to
-	 * @return	void
-	 *
-	 * add stream_resolve_include_path which is faster
-	 * and CodeIgniter cache loader since we use it for caching stuff before the controller is loaded
-	 *
-	 */
+/**
+ * _ci_init_library
+ * Insert description here
+ *
+ * @param $class
+ * @param $prefix
+ * @param $config
+ * @param $object_name
+ *
+ * @return
+ *
+ * @access
+ * @static
+ * @throws
+ * @example
+ */
 	protected function _ci_init_library($class, $prefix, $config = FALSE, $object_name = NULL) {
 		if (!$this->cache_drivers_loaded) {
 			$this->cache_drivers_loaded = true;
-
 			$cache_config = get_config();
-
 			ci()->load->driver('cache', ['adapter' => $cache_config['cache_default'], 'backup' => $cache_config['cache_backup']]);
-
-			/* manually attach our cache drivers */
 			$CI = &get_instance();
-
 			$CI->cache->page = new Cache_page($cache_config);
 			$CI->cache->export = new Cache_export($cache_config);
 		}
-
 		if ($config == FALSE) {
 			$paths = orange_paths();
 			$lc_class = strtolower($class);
 			$config = [];
-
 			if (isset($paths['configs']['root'][$lc_class])) {
 				include $paths['configs']['root'][$lc_class];
 			}
-
 			if (isset($paths['configs'][ENVIRONMENT][$lc_class])) {
 				include $paths['configs'][ENVIRONMENT][$lc_class];
 			}
 		}
-
 		$class_name = $prefix.$class;
-
 		if (!class_exists($class_name, FALSE)) {
 			log_message('error', 'Non-existent class: '.$class_name);
-
 			throw new Exception('Non-existent class: '.$class_name);
 		}
-
 		if (empty($object_name)) {
 			$object_name = strtolower($class);
-
 			if (isset($this->_ci_varmap[$object_name])) {
 				$object_name = $this->_ci_varmap[$object_name];
 			}
 		}
-
 		$CI = &get_instance();
-
 		if (isset($CI->$object_name)) {
 			if ($CI->$object_name instanceof $class_name || PHPUNIT) {
 				log_message('debug', $class_name." has already been instantiated as '".$object_name."'. Second attempt aborted.");
 				return;
 			}
-
 			throw new Exception("Resource '".$object_name."' already exists and is not a ".$class_name." instance.");
 		}
-
 		$this->_ci_classes[$object_name] = $class;
-
 		$CI->$object_name = isset($config) ? new $class_name($config) : new $class_name();
 	}
 
-	/**
-	 * Internal CI Stock Library Loader
-	 *
-	 * @used-by	CI_Loader::_ci_load_library()
-	 * @uses	CI_Loader::_ci_init_library()
-	 *
-	 * @param	string	$library_name	Library name to load
-	 * @param	string	$file_path	Path to the library filename, relative to libraries/
-	 * @param	mixed	$params		Optional parameters to pass to the class constructor
-	 * @param	string	$object_name	Optional object name to assign to
-	 * @return	void
-	 *
-	 * add stream_resolve_include_path which is faster
-	 *
-	 */
+/**
+ * _ci_load_stock_library
+ * Insert description here
+ *
+ * @param $library_name
+ * @param $file_path
+ * @param $params
+ * @param $object_name
+ *
+ * @return
+ *
+ * @access
+ * @static
+ * @throws
+ * @example
+ */
 	protected function _ci_load_stock_library($library_name, $file_path, $params, $object_name) {
 		$prefix = 'CI_';
-
 		if (class_exists($prefix.$library_name, FALSE)) {
 			if (class_exists(config_item('subclass_prefix').$library_name, FALSE)) {
 				$prefix = config_item('subclass_prefix');
 			}
-
 			if ($object_name !== NULL) {
 				$CI = &get_instance();
-
 				if (!isset($CI->$object_name)) {
 					return $this->_ci_init_library($library_name, $prefix, $params, $object_name);
 				}
 			}
-
 			log_message('debug', $library_name.' class already loaded. Second attempt ignored.');
-
 			return;
 		}
-
 		$paths = orange_paths();
-
 		$lc_library_name = strtolower($library_name);
-
 		if (isset($paths['classes'][$prefix.$lc_library_name])) {
 			include_once $paths['classes'][$prefix.$lc_library_name];
-
 			if (class_exists($prefix.$lc_library_name, FALSE)) {
 				return $this->_ci_init_library($library_name, $prefix, $params, $object_name);
 			} else {
 				log_message('debug', $path.' exists, but does not declare '.$prefix.$library_name);
 			}
 		}
-
 		include_once BASEPATH.'libraries/'.$file_path.$library_name.'.php';
-
 		$subclass = config_item('subclass_prefix');
-
 		if (isset($paths['classes'][$subclass.$lc_library_name])) {
 			include_once $paths['classes'][$subclass.$lc_library_name];
-
 			if (class_exists($subclass.$lc_library_name, FALSE)) {
 				$prefix = $subclass;
 			} else {
 				log_message('debug', $path.' exists, but does not declare '.$subclass);
 			}
 		}
-
 		return $this->_ci_init_library($library_name, $prefix, $params, $object_name);
 	}
-
-} /* end file */
+}

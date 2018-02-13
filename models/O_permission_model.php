@@ -1,11 +1,14 @@
 <?php
-/*
- * Orange Framework Extension
+/**
+ * O_permission_model
+ * Insert description here
  *
- * @package	CodeIgniter / Orange
+ * @package CodeIgniter / Orange
  * @author Don Myers
+ * @copyright 2018
  * @license http://opensource.org/licenses/MIT MIT License
  * @link https://github.com/ProjectOrangeBox
+ * @version 2.0
  *
  * required
  * core:
@@ -15,8 +18,7 @@
  * functions:
  *
  */
-
-class o_permission_model extends Database_model {
+class O_permission_model extends Database_model {
 	protected $table;
 	protected $additional_cache_tags = '.acl';
 	protected $has_roles = true;
@@ -29,14 +31,37 @@ class o_permission_model extends Database_model {
 		'key'         => ['field' => 'key', 'label' => 'Key', 'rules' => 'required|strtolower|max_length[255]|filter_input[255]|is_uniquem[o_permission_model.key.id]'],
 	];
 
+/**
+ * __construct
+ * Insert description here
+ *
+ *
+ * @return
+ *
+ * @access
+ * @static
+ * @throws
+ * @example
+ */
 	public function __construct() {
 		$this->table = config('auth.permission table');
-
 		parent::__construct();
-
 		log_message('info', 'o_permission_model Class Initialized');
 	}
 
+/**
+ * roles
+ * Insert description here
+ *
+ * @param $role
+ *
+ * @return
+ *
+ * @access
+ * @static
+ * @throws
+ * @example
+ */
 	public function roles($role) {
 		$dbc = $this->_database
 			->from(config('auth.role permission table'))
@@ -46,40 +71,113 @@ class o_permission_model extends Database_model {
 		return ($this->_database->num_rows() > 0) ? $dbc->result() : [];
 	}
 
+/**
+ * _find_role_id
+ * Insert description here
+ *
+ * @param $role
+ *
+ * @return
+ *
+ * @access
+ * @static
+ * @throws
+ * @example
+ */
 	public function _find_role_id($role) {
 		return (int) ((int) $role > 0) ? $role : $this->o_role_model->column('id')->get_by(['name' => $role]);
 	}
 
+/**
+ * _find_permission_id
+ * Insert description here
+ *
+ * @param $permission
+ *
+ * @return
+ *
+ * @access
+ * @static
+ * @throws
+ * @example
+ */
 	public function _find_permission_id($permission) {
 		return (int) ((int) $permission > 0) ? $permission : $this->o_permission_model->column('id')->get_by(['key' => $permission]);
 	}
 
+/**
+ * insert
+ * Insert description here
+ *
+ * @param $data
+ *
+ * @return
+ *
+ * @access
+ * @static
+ * @throws
+ * @example
+ */
 	public function insert($data) {
 		parent::insert($data);
-
 		$this->_refresh();
-
 		$this->delete_cache_by_tags();
 	}
 
+/**
+ * update
+ * Insert description here
+ *
+ * @param $data
+ *
+ * @return
+ *
+ * @access
+ * @static
+ * @throws
+ * @example
+ */
 	public function update($data) {
 		parent::update($data);
-
 		$this->_refresh();
-
 		$this->delete_cache_by_tags();
 	}
 
+/**
+ * _refresh
+ * Insert description here
+ *
+ *
+ * @return
+ *
+ * @access
+ * @static
+ * @throws
+ * @example
+ */
 	public function _refresh() {
 		$records = $this->get_many();
-
 		foreach ($records as $record) {
 			$this->o_role_model->add_permission(ADMIN_ROLE_ID,$record->id);
 		}
-
 		$this->o_role_model->remove_permission(NOBODY_USER_ID);
 	}
 
+/**
+ * add
+ * Insert description here
+ *
+ * @param $key
+ * @param $group
+ * @param $description
+ *
+ * @return
+ *
+ * @access
+ * @static
+ * @throws
+ * @example
+ */
 	public function add($key,$group,$description) {
 		$data = [
 			'key' => $key,
@@ -89,10 +187,8 @@ class o_permission_model extends Database_model {
 			'edit_role_id'=>ADMIN_ROLE_ID,
 			'delete_role_id'=>ADMIN_ROLE_ID,
 		];
-
 		if (!$this->exists(['key'=>$key])) {
 			$this->insert($data);
 		}
 	}
-
-} /* end file */
+}

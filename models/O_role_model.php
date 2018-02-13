@@ -1,11 +1,14 @@
 <?php
-/*
- * Orange Framework Extension
+/**
+ * O_role_model
+ * Insert description here
  *
- * @package	CodeIgniter / Orange
+ * @package CodeIgniter / Orange
  * @author Don Myers
+ * @copyright 2018
  * @license http://opensource.org/licenses/MIT MIT License
  * @link https://github.com/ProjectOrangeBox
+ * @version 2.0
  *
  * required
  * core:
@@ -15,8 +18,7 @@
  * functions:
  *
  */
-
-class o_role_model extends Database_model {
+class O_role_model extends Database_model {
 	protected $table;
 	protected $additional_cache_tags = '.acl';
 	protected $has_roles = true;
@@ -28,14 +30,38 @@ class o_role_model extends Database_model {
 		'description' => ['field' => 'description', 'label' => 'Description', 'rules' => 'max_length[255]|filter_input[255]|is_uniquem[o_role_model.description.id]'],
 	];
 
+/**
+ * __construct
+ * Insert description here
+ *
+ *
+ * @return
+ *
+ * @access
+ * @static
+ * @throws
+ * @example
+ */
 	public function __construct() {
 		$this->table = config('auth.role table');
-
 		parent::__construct();
-
 		log_message('info', 'o_role_model Class Initialized');
 	}
 
+/**
+ * add_permission
+ * Insert description here
+ *
+ * @param $role
+ * @param $permission
+ *
+ * @return
+ *
+ * @access
+ * @static
+ * @throws
+ * @example
+ */
 	public function add_permission($role, $permission) {
 		if (is_array($permission)) {
 			foreach ($permission as $p) {
@@ -46,6 +72,20 @@ class o_role_model extends Database_model {
 		return $this->_database->replace(config('auth.role permission table'), ['role_id' => (int) $this->_find_role_id($role), 'permission_id' => (int) $this->_find_permission_id($permission)]);
 	}
 
+/**
+ * remove_permission
+ * Insert description here
+ *
+ * @param $role
+ * @param $permission
+ *
+ * @return
+ *
+ * @access
+ * @static
+ * @throws
+ * @example
+ */
 	public function remove_permission($role, $permission = null) {
 		if (is_array($permission)) {
 			foreach ($permission as $p) {
@@ -60,6 +100,19 @@ class o_role_model extends Database_model {
 		return $this->_database->delete(config('auth.role permission table'), ['role_id' => (int) $this->_find_role_id($role), 'permission_id' => (int) $this->_find_permission_id($permission)]);
 	}
 
+/**
+ * permissions
+ * Insert description here
+ *
+ * @param $role
+ *
+ * @return
+ *
+ * @access
+ * @static
+ * @throws
+ * @example
+ */
 	public function permissions($role) {
 		$role_id = $this->_find_role_id($role);
 		$dbc = $this->_database
@@ -70,6 +123,19 @@ class o_role_model extends Database_model {
 		return ($dbc->num_rows() > 0) ? $dbc->result() : [];
 	}
 
+/**
+ * users
+ * Insert description here
+ *
+ * @param $role
+ *
+ * @return
+ *
+ * @access
+ * @static
+ * @throws
+ * @example
+ */
 	public function users($role) {
 		$role_id = $this->_find_role_id($role);
 		$dbc = $this->_database
@@ -80,6 +146,19 @@ class o_role_model extends Database_model {
 		return ($dbc->num_rows() > 0) ? $dbc->result() : [];
 	}
 
+/**
+ * truncate
+ * Insert description here
+ *
+ * @param $ensure
+ *
+ * @return
+ *
+ * @access
+ * @static
+ * @throws
+ * @example
+ */
 	public function truncate($ensure = false) {
 		if ($ensure !== true) {
 			throw new Exception(__METHOD__.' please provide "true" to truncate a database model');
@@ -89,12 +168,37 @@ class o_role_model extends Database_model {
 		return parent::truncate($ensure);
 	}
 
+/**
+ * _find_role_id
+ * Insert description here
+ *
+ * @param $role
+ *
+ * @return
+ *
+ * @access
+ * @static
+ * @throws
+ * @example
+ */
 	public function _find_role_id($role) {
 		return (int) ((int) $role > 0) ? $role : $this->o_role_model->column('id')->get_by(['name' => $role]);
 	}
 
+/**
+ * _find_permission_id
+ * Insert description here
+ *
+ * @param $permission
+ *
+ * @return
+ *
+ * @access
+ * @static
+ * @throws
+ * @example
+ */
 	public function _find_permission_id($permission) {
 		return (int) ((int) $permission > 0) ? $permission : $this->o_permission_model->column('id')->get_by(['key' => $permission]);
 	}
-
-} /* end file */
+}
