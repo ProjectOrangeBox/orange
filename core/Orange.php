@@ -51,11 +51,19 @@ function &ci($class=null) {
 		$class = strtolower($class);
 
 		if ($class == 'load') {
-			return ci()->load;
-		} elseif (ci()->load->is_loaded($class)) {
+			return CI_Controller::get_instance()->load;
+		} elseif (CI_Controller::get_instance()->load->is_loaded($class)) {
 			return CI_Controller::get_instance()->$class;
 		} else {
-			if (codeigniter_autoload($class)) {
+			/* is this a CodeIgniter class? */
+			$op = orange_paths();
+
+			if (isset($op['classes'][config_item('subclass_prefix').$class]) || isset($op['classes']['ci_'.$class])) {
+				/* yes */
+				CI_Controller::get_instance()->load->library($class);
+
+				return CI_Controller::get_instance()->$class;
+			} elseif (codeigniter_autoload($class)) {
 				return CI_Controller::get_instance()->$class;
 			} else {
 				throw new Exception('ci('.$class.') not found');
