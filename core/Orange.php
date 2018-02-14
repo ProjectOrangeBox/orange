@@ -263,15 +263,19 @@ function env($key,$default=null) {
  */
 function l() {
 	$args = func_get_args();
+
 	foreach ($args as $idx=>$arg) {
 		if (!is_scalar($arg)) {
 			$args[$idx] = json_encode($arg);
 		}
 	}
+
 	$build = date('Y-m-d H:i:s').chr(10);
+
 	foreach ($args as $a) {
 		$build .= chr(9).$a.chr(10);
 	}
+
 	file_put_contents(ROOTPATH.'/var/logs/'.__METHOD__.'.log',$build,FILE_APPEND | LOCK_EX);
 }
 
@@ -323,6 +327,7 @@ function console($var, $type = 'log') {
  */
 function orange_paths() {
 	static $_ORANGE_PATHS;
+
 	return (func_num_args()) ? $_ORANGE_PATHS = func_get_arg(0) : (array)$_ORANGE_PATHS;
 }
 
@@ -340,6 +345,7 @@ function orange_paths() {
  */
 function middleware() {
 	static $_ORANGE_MIDDLEWARE;
+
 	return (func_num_args()) ? $_ORANGE_MIDDLEWARE = func_get_args() :  (array)$_ORANGE_MIDDLEWARE;
 }
 
@@ -360,13 +366,17 @@ function middleware() {
 function view($_view,$_data=[]) {
 	$_op = orange_paths();
 	$_file = ltrim(str_replace('.php','',$_view),'/');
+
 	if (!isset($_op['views'][$_file])) {
 		throw new Exception('Could not locate view "'.$_file.'"');
 	}
+
 	$_view_file = $_op['views'][$_file];
 	extract($_data, EXTR_PREFIX_INVALID, '_');
 	ob_start();
+
 	include $_view_file;
+
 	return ob_get_clean();
 }
 
@@ -387,30 +397,39 @@ function view($_view,$_data=[]) {
 function atomic_file_put_contents($filepath, $content) {
 	$dirname = dirname($filepath);
 	$tmpfname = tempnam($dirname, 'afpc_');
+
 	if (!is_writable($dirname)) {
 		throw new Exception('atomic file put contents folder "'.$dirname.'" not writable');
 	}
+
 	if ($tmpfname === false) {
 		throw new Exception('atomic file put contents could not create temp file');
 	}
+
 	$bytes = file_put_contents($tmpfname, $content);
+
 	if ($bytes === false) {
 		throw new Exception('atomic file put contents could not file put contents');
 	}
+
 	if (chmod($tmpfname, 0644) === false) {
 		throw new Exception('atomic file put contents could not change file mode');
 	}
+
 	if (rename($tmpfname, $filepath) === false) {
 		throw new Exception('atomic file put contents could not make atomic switch');
 	}
+
 	if (function_exists('opcache_invalidate')) {
 		opcache_invalidate($filepath, true);
 	} elseif (function_exists('apc_delete_file')) {
 		apc_delete_file($filepath);
 	}
+
 	if (function_exists('log_message')) {
 		log_message('debug', 'atomic_file_put_contents wrote '.$filepath.' '.$bytes.' bytes');
 	}
+
 	return $bytes;
 }
 
@@ -429,11 +448,13 @@ function atomic_file_put_contents($filepath, $content) {
  */
 function remove_php_file_from_opcache($fullpath) {
 	$success = (is_file($fullpath)) ? unlink($fullpath) : true;
+
 	if (function_exists('opcache_invalidate')) {
 		opcache_invalidate($filepath, true);
 	} elseif (function_exists('apc_delete_file')) {
 		apc_delete_file($filepath);
 	}
+
 	return $success;
 }
 
@@ -451,6 +472,8 @@ function remove_php_file_from_opcache($fullpath) {
  * @example
  */
 function convert_to_real($value) {
+	/* return on first match multiple exists */
+
 	switch (trim(strtolower($value))) {
 	case 'true':
 		return true;
@@ -469,7 +492,9 @@ function convert_to_real($value) {
 			return (is_float($value)) ? (float) $value : (int) $value;
 		}
 	}
+
 	$json = @json_decode($value, true);
+
 	return ($json !== null) ? $json : $value;
 }
 
@@ -487,18 +512,24 @@ function convert_to_real($value) {
  * @example
  */
 function convert_to_string($value) {
+	/* return on first match multiple exists */
+
 	if (is_array($value)) {
 		return var_export($value, true);
 	}
+
 	if ($value === true) {
 		return 'true';
 	}
+
 	if ($value === false) {
 		return 'false';
 	}
+
 	if ($value === null) {
 		return 'null';
 	}
+
 	return (string) $value;
 }
 
@@ -520,6 +551,7 @@ function convert_to_string($value) {
 function simplify_array($array, $key = 'id', $value = null) {
 	$value = ($value) ? $value : $key;
 	$new_array = [];
+
 	foreach ($array as $row) {
 		if (is_object($row)) {
 			$new_array[$row->$key] = $row->$value;
@@ -527,6 +559,7 @@ function simplify_array($array, $key = 'id', $value = null) {
 			$new_array[$row[$key]] = $row[$value];
 		}
 	}
+
 	return $new_array;
 }
 
@@ -551,6 +584,7 @@ function cache($key, $closure, $ttl = null) {
 		$ttl = ($ttl) ? (int) $ttl : cache_ttl();
 		ci('cache')->save($key, $cache, $ttl);
 	}
+
 	return $cache;
 }
 
@@ -570,6 +604,7 @@ function cache($key, $closure, $ttl = null) {
 function cache_ttl($use_window=true) {
 	$cache_ttl = (int)config('cache_ttl',0);
 	$window_adder = ($use_window) ? mt_rand(-15,15) : 0;
+
 	return ($cache_ttl == 0) ? 0 : (max(0,$cache_ttl + $window_adder));
 }
 
@@ -594,9 +629,13 @@ function delete_cache_by_tags($args) {
 	} else {
 		$tags = func_get_args();
 	}
+
 	log_message('debug', 'delete_cache_by_tags '.implode(', ', $tags));
+
 	ci('event')->trigger('delete cache by tags', $tags);
+
 	$cached_keys = ci('cache')->cache_info();
+
 	if (is_array($cached_keys)) {
 		foreach ($cached_keys as $key) {
 			if (count(array_intersect(explode('.', $key['name']), $tags))) {
@@ -622,6 +661,7 @@ function delete_cache_by_tags($args) {
  */
 function filter_filename($str,$ext=null) {
 	$str = strtolower(trim(preg_replace('#\W+#', '_', $str), '_'));
+
 	return ($ext) ? $str.'.'.$ext : $str;
 }
 
