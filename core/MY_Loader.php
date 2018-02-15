@@ -27,20 +27,7 @@ class MY_Loader extends CI_Loader {
 	protected $cache_drivers_loaded = false;
 
 	/**
-	 * _ci_init_library
-	 * Insert description here
-	 *
-	 * @param $class
-	 * @param $prefix
-	 * @param $config
-	 * @param $object_name
-	 *
-	 * @return
-	 *
-	 * @access
-	 * @static
-	 * @throws
-	 * @example
+	 * Internal Load extended function
 	 */
 	protected function _ci_init_library($class, $prefix, $config = FALSE, $object_name = NULL) {
 		if (!$this->cache_drivers_loaded) {
@@ -94,20 +81,7 @@ class MY_Loader extends CI_Loader {
 	}
 
 	/**
-	 * _ci_load_stock_library
-	 * Insert description here
-	 *
-	 * @param $library_name
-	 * @param $file_path
-	 * @param $params
-	 * @param $object_name
-	 *
-	 * @return
-	 *
-	 * @access
-	 * @static
-	 * @throws
-	 * @example
+	 * Internal Load extended function
 	 */
 	protected function _ci_load_stock_library($library_name, $file_path, $params, $object_name) {
 		$prefix = 'CI_';
