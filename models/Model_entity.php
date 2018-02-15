@@ -18,39 +18,26 @@
  * functions:
  *
  */
-class Model_entity {
+abstract class Model_entity {
 	protected $_model_name = null;
 	protected $save_columns = null;
 
-/**
- * __construct
- * Insert description here
- *
- *
- * @return
- *
- * @access
- * @static
- * @throws
- * @example
- */
+	/**
+	 * __construct
+	 *
+	 */
 	public function __construct() {
 		$this->_model_name = strtolower(substr(get_called_class(),0,-7).'_model');
 		log_message('info', 'Model_entity Class Initialized');
 	}
 
-/**
- * save
- * Insert description here
- *
- *
- * @return
- *
- * @access
- * @static
- * @throws
- * @example
- */
+	/**
+	 * provide a save method to auto save (update) a entity back to the database
+	 *
+	 *
+	 * @return boolean success
+	 *
+	 */
 	public function save() {
 		$model = ci()->{$this->_model_name};
 		$primary_id = $model->get_primary_key();
@@ -72,4 +59,4 @@ class Model_entity {
 		}
 		return (bool)$success;
 	}
-}
+} /* end class */

@@ -24,19 +24,19 @@ abstract class Filter_base extends Validate_base {
 		log_message('info', 'Filter_base Class Initialized');
 	}
 
-/**
- * filter
- * Insert description here
- *
- * @param $field
- * @param $options
- *
- * @return
- *
- * @access
- * @static
- * @throws
- * @example
- */
+	/**
+	 * filter
+	 * Insert description here
+	 *
+	 * @param $field
+	 * @param $options
+	 *
+	 * @return
+	 *
+	 * @access
+	 * @static
+	 * @throws
+	 * @example
+	 */
 	public function filter(&$field, $options) {}
-}
+} /* end class */

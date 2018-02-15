@@ -466,7 +466,7 @@ class Database_model extends MY_Model {
 	public function update($data) {
 		$data = (array)$data;
 		if (!isset($data[$this->primary_key])) {
-			show_error('Database Model update primary key missing');
+			throw new Exception('Database Model update primary key missing');
 		}
 		return $this->update_by($data, [$this->primary_key => $data[$this->primary_key]]);
 	}
@@ -1085,6 +1085,35 @@ class Database_model extends MY_Model {
 			}
 		}
 		return $this;
+	}
+
+/**
+ * Insert description here
+ *
+ * @param array $data list of data to test
+ * @param array $only_columns list of only the columns you want to check. if left empty all columns in $data tested
+ *
+ * @return boolean|array false if no changes or associated list of columns changed. list key contains the column name and list value contain the old value
+ *
+ */
+	protected function find_changed_columns($data,$only_columns=false) {
+		$changed = false;
+		$data = (array)$data;
+
+		if (!isset($data[$this->primary_key])) {
+			throw new Exception('Database Model update primary key missing');
+		}
+
+		$old_data = (array)$this->get($data[$this->primary_key]);
+		$columns = (is_array($only_columns)) ? $only_columns : array_keys($data);
+
+		foreach ($columns as $column) {
+			if ($data[$column] != $old_data[$column]) {
+				$changed[$column] = $old_data[$column];
+			}
+		}
+
+		return $changed;
 	}
 
 /**

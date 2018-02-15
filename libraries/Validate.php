@@ -47,18 +47,18 @@ class Validate {
 	 */
 	protected $field_data = [];
 
-/**
- * __construct
- * Insert description here
- *
- *
- * @return
- *
- * @access
- * @static
- * @throws
- * @example
- */
+	/**
+	 * __construct
+	 * Insert description here
+	 *
+	 *
+	 * @return
+	 *
+	 * @access
+	 * @static
+	 * @throws
+	 * @example
+	 */
 	public function __construct() {
 		$this->config = config('validate');
 		$this->clear();
@@ -81,56 +81,56 @@ class Validate {
 		log_message('info', 'Validate Class Initialized');
 	}
 
-/**
- * clear
- * Insert description here
- *
- *
- * @return
- *
- * @access
- * @static
- * @throws
- * @example
- */
+	/**
+	 * clear
+	 * Insert description here
+	 *
+	 *
+	 * @return
+	 *
+	 * @access
+	 * @static
+	 * @throws
+	 * @example
+	 */
 	public function clear() {
 		ci('errors')->clear();
 		return $this;
 	}
 
-/**
- * attach
- * Insert description here
- *
- * @param $name
- * @param closure
- * @param $closure
- *
- * @return
- *
- * @access
- * @static
- * @throws
- * @example
- */
+	/**
+	 * attach
+	 * Insert description here
+	 *
+	 * @param $name
+	 * @param closure
+	 * @param $closure
+	 *
+	 * @return
+	 *
+	 * @access
+	 * @static
+	 * @throws
+	 * @example
+	 */
 	public function attach($name, closure $closure) {
 		$this->attached['validate_'.$name] = $closure;
 		return $this;
 	}
 
-/**
- * die_on_fail
- * Insert description here
- *
- * @param $view
- *
- * @return
- *
- * @access
- * @static
- * @throws
- * @example
- */
+	/**
+	 * die_on_fail
+	 * Insert description here
+	 *
+	 * @param $view
+	 *
+	 * @return $this
+	 *
+	 * @access
+	 * @static
+	 * @throws
+	 * @example
+	 */
 	public function die_on_fail($view = '400') {
 		if (ci('errors')->has()) {
 			ci('errors')->display($view, ['heading' => 'Validation Failed', 'message' => ci('errors')->as_html()]);
@@ -138,19 +138,19 @@ class Validate {
 		return $this;
 	}
 
-/**
- * redirect_on_fail
- * Insert description here
- *
- * @param $url
- *
- * @return
- *
- * @access
- * @static
- * @throws
- * @example
- */
+	/**
+	 * redirect_on_fail
+	 * Insert description here
+	 *
+	 * @param $url
+	 *
+	 * @return $this
+	 *
+	 * @access
+	 * @static
+	 * @throws
+	 * @example
+	 */
 	public function redirect_on_fail($url = null) {
 		if (ci('errors')->has()) {
 			$url = (is_string($url)) ? $url : true;
@@ -159,18 +159,18 @@ class Validate {
 		return $this;
 	}
 
-/**
- * json_on_fail
- * Insert description here
- *
- *
- * @return
- *
- * @access
- * @static
- * @throws
- * @example
- */
+	/**
+	 * json_on_fail
+	 * Insert description here
+	 *
+	 *
+	 * @return
+	 *
+	 * @access
+	 * @static
+	 * @throws
+	 * @example
+	 */
 	public function json_on_fail() {
 		if (ci('errors')->has()) {
 			ci()->output->json(['ci_errors'=>ci('errors')->as_data()])->_display();
@@ -179,56 +179,56 @@ class Validate {
 		return $this;
 	}
 
-/**
- * success
- * Insert description here
- *
- *
- * @return
- *
- * @access
- * @static
- * @throws
- * @example
- */
+	/**
+	 * success
+	 * Insert description here
+	 *
+	 *
+	 * @return
+	 *
+	 * @access
+	 * @static
+	 * @throws
+	 * @example
+	 */
 	public function success() {
 		return !ci('errors')->has();
 	}
 
-/**
- * variable
- * Insert description here
- *
- * @param $rules
- * @param $field
- * @param $human
- *
- * @return
- *
- * @access
- * @static
- * @throws
- * @example
- */
+	/**
+	 * variable
+	 * Insert description here
+	 *
+	 * @param $rules
+	 * @param $field
+	 * @param $human
+	 *
+	 * @return
+	 *
+	 * @access
+	 * @static
+	 * @throws
+	 * @example
+	 */
 	public function variable($rules = '',&$field, $human = null) {
 		return $this->single($rules, $field, $human);
 	}
 
-/**
- * request
- * Insert description here
- *
- * @param $rules
- * @param $key
- * @param $human
- *
- * @return
- *
- * @access
- * @static
- * @throws
- * @example
- */
+	/**
+	 * request
+	 * Insert description here
+	 *
+	 * @param $rules
+	 * @param $key
+	 * @param $human
+	 *
+	 * @return
+	 *
+	 * @access
+	 * @static
+	 * @throws
+	 * @example
+	 */
 	public function request($rules = '', $key, $human = null) {
 		$field = ci()->input->request($key);
 		$this->single($rules, $field, $human);
@@ -236,40 +236,40 @@ class Validate {
 		return ($human === true) ? $field : $this;
 	}
 
-/**
- * run
- * Insert description here
- *
- * @param $rules
- * @param $fields
- * @param $human
- *
- * @return
- *
- * @access
- * @static
- * @throws
- * @example
- */
+	/**
+	 * run
+	 * Insert description here
+	 *
+	 * @param $rules
+	 * @param $fields
+	 * @param $human
+	 *
+	 * @return
+	 *
+	 * @access
+	 * @static
+	 * @throws
+	 * @example
+	 */
 	public function run($rules = '', &$fields, $human = null) {
 		return (is_array($fields)) ? $this->multiple($rules, $fields) : $this->single($rules, $fields, $human);
 	}
 
-/**
- * single
- * Insert description here
- *
- * @param $rules
- * @param $field
- * @param $human
- *
- * @return
- *
- * @access
- * @static
- * @throws
- * @example
- */
+	/**
+	 * single
+	 * Insert description here
+	 *
+	 * @param $rules
+	 * @param $field
+	 * @param $human
+	 *
+	 * @return
+	 *
+	 * @access
+	 * @static
+	 * @throws
+	 * @example
+	 */
 	public function single($rules, &$field, $human = null) {
 		$rules = (isset($this->config[$rules])) ? $this->config[$rules] : $rules;
 		if (!empty($rules)) {
@@ -325,20 +325,20 @@ class Validate {
 		return $this;
 	}
 
-/**
- * multiple
- * Insert description here
- *
- * @param $rules
- * @param $fields
- *
- * @return
- *
- * @access
- * @static
- * @throws
- * @example
- */
+	/**
+	 * multiple
+	 * Insert description here
+	 *
+	 * @param $rules
+	 * @param $fields
+	 *
+	 * @return
+	 *
+	 * @access
+	 * @static
+	 * @throws
+	 * @example
+	 */
 	public function multiple($rules, &$fields) {
 		$this->field_data = &$fields;
 		foreach ($rules as $fieldname => $rule) {
@@ -348,20 +348,20 @@ class Validate {
 		return $this;
 	}
 
-/**
- * load_plugin
- * Insert description here
- *
- * @param $class_name
- * @param $is_filter
- *
- * @return
- *
- * @access
- * @static
- * @throws
- * @example
- */
+	/**
+	 * load_plugin
+	 * Insert description here
+	 *
+	 * @param $class_name
+	 * @param $is_filter
+	 *
+	 * @return
+	 *
+	 * @access
+	 * @static
+	 * @throws
+	 * @example
+	 */
 	protected function load_plugin($class_name,$is_filter) {
 		$plugin = false;
 		if (class_exists($class_name,true)) {
@@ -369,4 +369,4 @@ class Validate {
 		}
 		return $plugin;
 	}
-}
+} /* end class */
