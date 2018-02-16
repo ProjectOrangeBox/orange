@@ -8,6 +8,25 @@ orange_autoload_files::load(ROOTPATH.'/var/cache/autoload_files.php');
 
 spl_autoload_register('codeigniter_autoload');
 
+assert_options(ASSERT_CALLBACK,function($file, $line, $code, $desc = ''){
+	die('<!doctype html>
+	<title>Assertion Failed</title>
+	<style>
+		body, html { text-align: center; padding: 150px; background-color: #492727; font: 20px Helvetica, sans-serif; color: #fff; font-size: 18px;}
+		h1 { font-size: 150%; }
+		article { display: block; text-align: left; width: 650px; margin: 0 auto; }
+	</style>
+	<article>
+		<h1>Assertion Failed</h1>
+		<div>
+			<p>File: '.$file.'</p>
+			<p>Line: '.$line.'</p>
+			<p>Code: '.$code.'</p>
+			<p>Description: '.$desc.'</p>
+		</div>
+	</article>');
+});
+
 require_once BASEPATH.'core/CodeIgniter.php';
 
 /**
