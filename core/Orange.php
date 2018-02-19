@@ -714,6 +714,6 @@ function filter_human($str) {
  * @throws
  * @example
  */
-function filter_visable($str) {
+function filter_visible($str) {
 	return preg_replace("/[^\\x20-\\x7E]/mi", '', $str);
 }
