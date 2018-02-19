@@ -700,3 +700,20 @@ function filter_filename($str,$ext=null) {
 function filter_human($str) {
 	return ucwords(str_replace('_',' ',strtolower(trim(preg_replace('#\W+#',' ', $str),' '))));
 }
+
+/**
+ * filter_human
+ * Insert description here
+ *
+ * @param $str
+ *
+ * @return
+ *
+ * @access
+ * @static
+ * @throws
+ * @example
+ */
+function filter_visable($str) {
+	return preg_replace("/[^\\x20-\\x7E]/mi", '', $str);
+}

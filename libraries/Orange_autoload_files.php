@@ -67,12 +67,12 @@ class Orange_autoload_files {
 	 */
 	static public function get_cache() {
 		$classes = [
-			'model_entity'=>ROOTPATH.'/packages/projectorangebox/orange/models/Model_entity.php',
-			'cache_export'=>ROOTPATH.'/packages/projectorangebox/orange/libraries/Cache_export.php',
-			'cache_page'=>ROOTPATH.'/packages/projectorangebox/orange/libraries/Cache_page.php',
-			'middleware_base'=>ROOTPATH.'/packages/projectorangebox/orange/libraries/Middleware_base.php',
-			'validate_base'=>ROOTPATH.'/packages/projectorangebox/orange/libraries/Validate_base.php',
-			'filter_base'=>ROOTPATH.'/packages/projectorangebox/orange/libraries/Filter_base.php',
+			'model_entity'=>ORANGEPATH.'/models/Model_entity.php',
+			'cache_export'=>ORANGEPATH.'/libraries/Cache_export.php',
+			'cache_page'=>ORANGEPATH.'/libraries/Cache_page.php',
+			'middleware_base'=>ORANGEPATH.'/libraries/Middleware_base.php',
+			'validate_base'=>ORANGEPATH.'/libraries/Validate_base.php',
+			'filter_base'=>ORANGEPATH.'/libraries/Filter_base.php',
 		];
 
 		return [

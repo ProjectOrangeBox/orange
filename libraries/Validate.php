@@ -11,8 +11,8 @@
  * @version 2.0
  *
  * required
- * core:
- * libraries:
+ * core: input, output
+ * libraries: errors, wallet
  * models:
  * helpers:
  * functions:
@@ -22,28 +22,28 @@ class Validate {
 	/**
 	 * track if the combined cached configuration has been loaded
 	 *
-	 * @var boolean
+	 * @var array
 	 */
-	protected $config;
+	protected $config = [];
 
 	/**
 	 * track if the combined cached configuration has been loaded
 	 *
-	 * @var boolean
+	 * @var array
 	 */
 	protected $attached = [];
 
 	/**
 	 * track if the combined cached configuration has been loaded
 	 *
-	 * @var boolean
+	 * @var string
 	 */
-	protected $error_string;
+	protected $error_string = '';
 
 	/**
 	 * track if the combined cached configuration has been loaded
 	 *
-	 * @var boolean
+	 * @var array
 	 */
 	protected $field_data = [];
 
@@ -62,6 +62,7 @@ class Validate {
 	public function __construct() {
 		$this->config = config('validate');
 		$this->clear();
+
 		if (file_exists(APPPATH.'/config/validate.php')) {
 			$attach = [];
 			include APPPATH.'/config/validate.php';
@@ -70,6 +71,7 @@ class Validate {
 				$this->attached['validate_'.$name] = $closure;
 			}
 		}
+
 		if (file_exists(APPPATH.'/config/'.ENVIRONMENT.'/validate.php')) {
 			$attach = [];
 			include APPPATH.'/config/'.ENVIRONMENT.'/validate.php';
@@ -78,6 +80,7 @@ class Validate {
 				$this->attached['validate_'.$name] = $closure;
 			}
 		}
+
 		log_message('info', 'Validate Class Initialized');
 	}
 
@@ -95,6 +98,7 @@ class Validate {
 	 */
 	public function clear() {
 		ci('errors')->clear();
+		
 		return $this;
 	}
 
@@ -115,6 +119,7 @@ class Validate {
 	 */
 	public function attach($name, closure $closure) {
 		$this->attached['validate_'.$name] = $closure;
+
 		return $this;
 	}
 
@@ -135,6 +140,7 @@ class Validate {
 		if (ci('errors')->has()) {
 			ci('errors')->display($view, ['heading' => 'Validation Failed', 'message' => ci('errors')->as_html()]);
 		}
+		
 		return $this;
 	}
 
@@ -154,8 +160,9 @@ class Validate {
 	public function redirect_on_fail($url = null) {
 		if (ci('errors')->has()) {
 			$url = (is_string($url)) ? $url : true;
-			ci()->wallet->msg(ci('errors')->as_html(), 'red', $url);
+			ci('wallet')->msg(ci('errors')->as_html(), 'red', $url);
 		}
+		
 		return $this;
 	}
 
@@ -173,9 +180,10 @@ class Validate {
 	 */
 	public function json_on_fail() {
 		if (ci('errors')->has()) {
-			ci()->output->json(['ci_errors'=>ci('errors')->as_data()])->_display();
+			ci('output')->json(['ci_errors'=>ci('errors')->as_data()])->_display();
 			exit(1);
 		}
+		
 		return $this;
 	}
 
@@ -230,9 +238,10 @@ class Validate {
 	 * @example
 	 */
 	public function request($rules = '', $key, $human = null) {
-		$field = ci()->input->request($key);
+		$field = ci('input')->request($key);
 		$this->single($rules, $field, $human);
-		ci()->input->request_replace($key,$field);
+		ci('input')->request_replace($key,$field);
+		
 		return ($human === true) ? $field : $this;
 	}
 
@@ -272,6 +281,7 @@ class Validate {
 	 */
 	public function single($rules, &$field, $human = null) {
 		$rules = (isset($this->config[$rules])) ? $this->config[$rules] : $rules;
+		
 		if (!empty($rules)) {
 			$rules = explode('|', $rules);
 			foreach ($rules as $rule) {
@@ -322,6 +332,7 @@ class Validate {
 				}
 			}
 		}
+		
 		return $this;
 	}
 
@@ -341,10 +352,13 @@ class Validate {
 	 */
 	public function multiple($rules, &$fields) {
 		$this->field_data = &$fields;
+
 		foreach ($rules as $fieldname => $rule) {
 			$this->single($rule['rules'], $this->field_data[$fieldname], $rule['label']);
 		}
+
 		$fields = &$this->field_data;
+
 		return $this;
 	}
 
@@ -364,9 +378,12 @@ class Validate {
 	 */
 	protected function load_plugin($class_name,$is_filter) {
 		$plugin = false;
+
 		if (class_exists($class_name,true)) {
 			$plugin = ($is_filter) ? new $class_name($this->field_data) : new $class_name($this->field_data, $this->error_string);
 		}
+
 		return $plugin;
 	}
+
 } /* end class */

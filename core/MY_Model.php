@@ -12,7 +12,7 @@
  *
  * required
  * core:
- * libraries:
+ * libraries: errors, validate
  * models:
  * helpers:
  * functions:

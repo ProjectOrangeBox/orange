@@ -24,7 +24,7 @@ abstract class Validate_base {
 	 *
 	 * @var boolean
 	 */
-	protected $true_array  = [1, '1', 'y', 'on', 'yes', 't', 'true', true];
+	protected $true_array = [1, '1', 'y', 'on', 'yes', 't', 'true', true];
 
 	/**
 	 * track if the combined cached configuration has been loaded
@@ -38,7 +38,7 @@ abstract class Validate_base {
 	 *
 	 * @var boolean
 	 */
-	protected $error_string;
+	protected $error_string = '';
 
 	/**
 	 * track if the combined cached configuration has been loaded
@@ -71,6 +71,7 @@ abstract class Validate_base {
 	public function __construct(&$field_data=null, &$error_string=null) {
 		$this->field_data   = &$field_data;
 		$this->error_string = &$error_string;
+
 		log_message('info', 'Validate_base Class Initialized');
 	}
 
@@ -89,6 +90,7 @@ abstract class Validate_base {
 	 */
 	public function field(&$field) {
 		$this->field = &$field;
+
 		return $this;
 	}
 
@@ -127,6 +129,7 @@ abstract class Validate_base {
 				$this->field = substr($this->field, 0, $length);
 			}
 		}
+
 		return $this;
 	}
 
@@ -144,6 +147,7 @@ abstract class Validate_base {
 	 */
 	public function trim() {
 		$this->field = trim($this->field);
+
 		return $this;
 	}
 
@@ -161,6 +165,7 @@ abstract class Validate_base {
 	 */
 	public function human() {
 		$this->field = preg_replace("/[^\\x20-\\x7E]/mi", '', $this->field);
+
 		return $this;
 	}
 
@@ -178,6 +183,7 @@ abstract class Validate_base {
 	 */
 	public function human_plus() {
 		$this->field = preg_replace("/[^\\x20-\\x7E\\n\\t\\r]/mi", '', $this->field);
+
 		return $this;
 	}
 
@@ -196,6 +202,7 @@ abstract class Validate_base {
 	 */
 	public function strip($strip) {
 		$this->field = str_replace(str_split($strip), '', $this->field);
+
 		return $this;
 	}
 
