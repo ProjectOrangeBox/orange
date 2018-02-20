@@ -38,7 +38,7 @@ class Orange_autoload_files {
 	 *
 	 * @var int
 	 */
-	static protected $folder_levels = 2;
+	static protected $folder_levels;
 
 	/**
 	 * build array of classes and cache
@@ -46,8 +46,9 @@ class Orange_autoload_files {
 	 * @param string $path location of the cache file
 	 *
 	 */
-	static public function load($path) {
+	static public function load($path,$level=2) {
 		self::$cache_path = $path;
+		self::$folder_levels = $level;
 
 		if (ENVIRONMENT == 'development' || !file_exists(self::$cache_path)) {
 			require APPPATH.'/config/autoload.php';
