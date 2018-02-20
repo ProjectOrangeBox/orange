@@ -163,7 +163,7 @@ class Errors {
 	 */
 	public function as_data() {
 		$errors = ci('load')->get_var( $this->errors_variable);
-		
+
 		return ['records' => array_values($errors)] + ['count' => count($errors)];
 	}
 

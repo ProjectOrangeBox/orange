@@ -98,7 +98,7 @@ class Validate {
 	 */
 	public function clear() {
 		ci('errors')->clear();
-		
+
 		return $this;
 	}
 
@@ -140,7 +140,7 @@ class Validate {
 		if (ci('errors')->has()) {
 			ci('errors')->display($view, ['heading' => 'Validation Failed', 'message' => ci('errors')->as_html()]);
 		}
-		
+
 		return $this;
 	}
 
@@ -162,7 +162,7 @@ class Validate {
 			$url = (is_string($url)) ? $url : true;
 			ci('wallet')->msg(ci('errors')->as_html(), 'red', $url);
 		}
-		
+
 		return $this;
 	}
 
@@ -183,7 +183,7 @@ class Validate {
 			ci('output')->json(['ci_errors'=>ci('errors')->as_data()])->_display();
 			exit(1);
 		}
-		
+
 		return $this;
 	}
 
@@ -241,7 +241,7 @@ class Validate {
 		$field = ci('input')->request($key);
 		$this->single($rules, $field, $human);
 		ci('input')->request_replace($key,$field);
-		
+
 		return ($human === true) ? $field : $this;
 	}
 
@@ -281,7 +281,7 @@ class Validate {
 	 */
 	public function single($rules, &$field, $human = null) {
 		$rules = (isset($this->config[$rules])) ? $this->config[$rules] : $rules;
-		
+
 		if (!empty($rules)) {
 			$rules = explode('|', $rules);
 			foreach ($rules as $rule) {
@@ -332,7 +332,7 @@ class Validate {
 				}
 			}
 		}
-		
+
 		return $this;
 	}
 

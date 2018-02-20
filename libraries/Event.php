@@ -80,7 +80,7 @@ class Event {
 	public function trigger($name, &$a1 = null, &$a2 = null, &$a3 = null, &$a4 = null, &$a5 = null, &$a6 = null, &$a7 = null, &$a8 = null) {
 		$name = $this->_normalize_name($name);
 		log_message('debug', 'event::trigger::'.$name);
-		
+
 		if ($this->has($name)) {
 			$events = $this->listeners[$name];
 			ksort($events);
@@ -92,7 +92,7 @@ class Event {
 				}
 			}
 		}
-		
+
 		return $this;
 	}
 
@@ -111,7 +111,7 @@ class Event {
 	 */
 	public function has($name) {
 		$name = $this->_normalize_name($name);
-		
+
 		return (isset($this->listeners[$name]) && count($this->listeners[$name]) > 0);
 	}
 
@@ -146,7 +146,7 @@ class Event {
 	 */
 	public function count($name) {
 		$name = $this->_normalize_name($name);
-		
+
 		return count($this->listeners[$name]);
 	}
 

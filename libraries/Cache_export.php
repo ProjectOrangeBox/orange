@@ -248,13 +248,13 @@ class Cache_export extends CI_Driver {
 		if (!in_array(ci()->input->ip_address(), $this->config['cache_allowed'])) {
 			exit(13);
 		}
-		
+
 		list($hmac, $id) = explode(chr(0), hex2bin($request));
-		
+
 		if (md5( $this->config['encryption_key'].$id) !== $hmac) {
 			exit(13);
 		}
-		
+
 		$this->single_delete($id);
 		echo $request;
 		exit(200);

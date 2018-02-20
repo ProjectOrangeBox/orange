@@ -104,7 +104,7 @@ class Wallet {
 		} else {
 			$return = (isset($this->request[$name])) ? $this->request[$name] : null;
 		}
-	
+
 		return $return;
 	}
 
@@ -125,7 +125,7 @@ class Wallet {
 	public function snapdata($newdata = null, $newval = null) {
 		$newdata = (is_array($newdata)) ? $newdata : [$newdata => $newval];
 		ci('session')->set_tempdata($newdata, null, 3600);
-	
+
 		return $this;
 	}
 
@@ -200,7 +200,7 @@ class Wallet {
 				'pause_for_each' => config('wallet.pause_for_each', 1000),
 			]]);
 		}
-	
+
 		return $this;
 	}
 
