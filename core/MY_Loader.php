@@ -34,6 +34,7 @@ class MY_Loader extends CI_Loader {
 			$this->cache_drivers_loaded = true;
 			$cache_config = get_config();
 			ci()->load->driver('cache', ['adapter' => $cache_config['cache_default'], 'backup' => $cache_config['cache_backup']]);
+			/* attach page and export to CodeIgniter cache singleton loaded above */
 			$CI = &get_instance();
 			$CI->cache->page = new Cache_page($cache_config);
 			$CI->cache->export = new Cache_export($cache_config);
