@@ -265,11 +265,9 @@ function get_public_object_vars($obj) {
  * @throws
  * @example
  */
-function env($key,$default=null,$required=false) {
-	if ($required) {
-		if (!isset($_ENV[$key])) {
-			die('The environmental variable "'.$key.'" is required.');
-		}
+function env($key,$default=null) {
+	if (!isset($_ENV[$key]) && $default === null) {
+		die('The environmental variable "'.$key.'" is required.');
 	}
 
 	return (isset($_ENV[$key])) ? $_ENV[$key] : $default;
