@@ -86,7 +86,7 @@ class MY_Router extends CI_Router {
 		$op = orange_paths();
 
 		foreach ($op['controllers'] as $key=>$rec) {
-			if (preg_match('#^'.$key.'$#', $uri, $matches)) {
+			if (preg_match('#^'.$key.'$#', strtolower($uri), $matches)) {
 				$segs = explode('/',trim($matches[1],'/'));
 				$this->package = $rec['package'];
 				$this->directory = $rec['directory'];
