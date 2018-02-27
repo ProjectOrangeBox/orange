@@ -196,7 +196,13 @@ function site_url($uri = '', $protocol = NULL) {
  * @example
  */
 function config($setting = null, $default = null) {
-	return ci()->config->item($setting,$default);
+	$value = ci()->config->item($setting,$default);
+	
+	if ($value === null) {
+		die('The config variable "'.$setting.'" not set.'.PHP_EOL);
+	}
+	
+	return $value;
 }
 
 /**
@@ -267,7 +273,7 @@ function get_public_object_vars($obj) {
  */
 function env($key,$default=null) {
 	if (!isset($_ENV[$key]) && $default === null) {
-		die('The environmental variable "'.$key.'" is required.');
+		die('The environmental variable "'.$key.'" not set.'.PHP_EOL);
 	}
 
 	return (isset($_ENV[$key])) ? $_ENV[$key] : $default;
