@@ -195,11 +195,12 @@ function site_url($uri = '', $protocol = NULL) {
  * @throws
  * @example
  */
-function config($setting = null, $default = null) {
-	$value = ci()->config->item($setting,$default);
+function config($setting,$default='%%no_value%%') {
+	$value = ci('config')->item_dot($setting,$default);
 
-	if ($value === null) {
-		die('The config variable "'.$setting.'" not set.'.PHP_EOL);
+	/* if no default was given and nothing was returned die with error */
+	if ($value === '%%no_value%%') {
+		throw new Exception('The config variable "'.$setting.'" not set.');
 	}
 
 	return $value;

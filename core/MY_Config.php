@@ -37,13 +37,10 @@ class MY_Config extends CI_Config {
 	 *
 	 * @access public
 	 * @uses none
-	 * @examples item('email','mailtype')
 	 * @examples item('email.mailtype','html')
 	 */
-	public function item($item,$index=null) {
-		log_message('debug', 'MY_Config::item::'.$item);
-
-		$value = null;
+	public function item_dot($setting,$default) {
+		log_message('debug', 'MY_Config::item_dot::'.$setting);
 
 		if (!$this->setup) {
 			if (class_exists('CI_Controller',false)) {
@@ -54,16 +51,12 @@ class MY_Config extends CI_Config {
 			}
 		}
 
-		if (strpos($item,'.') !== false) {
-			list($file,$key) = explode('.', strtolower($item), 2);
+		list($file,$key) = explode('.', strtolower($setting), 2);
 
-			if (!$key) {
-				$value = isset($this->config[$file]) ? $this->config[$file] : $index;
-			} else {
-				$value = isset($this->config[$file], $this->config[$file][$key]) ? $this->config[$file][$key] : $index;
-			}
+		if ($key) {
+			$value = isset($this->config[$file], $this->config[$file][$key]) ? $this->config[$file][$key] : $default;
 		} else {
-			$value = (is_string($index)) ? parent::item($item,$index) : parent::item($item,null);
+			$value = isset($this->config[$file]) ? $this->config[$file] : $default;
 		}
 
 		return $value;
