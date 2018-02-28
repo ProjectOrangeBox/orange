@@ -63,7 +63,7 @@ class MY_Config extends CI_Config {
 				$value = isset($this->config[$file], $this->config[$file][$key]) ? $this->config[$file][$key] : $index;
 			}
 		} else {
-			$value = parent::item($item,$index);
+			$value = (is_string($index)) ? parent::item($item,$index) : parent::item($item,null);
 		}
 
 		return $value;
