@@ -166,7 +166,7 @@ function site_url($uri = '', $protocol = NULL) {
 	$file_path = ROOTPATH.'/var/cache/site_url.php';
 
 	if (ENVIRONMENT == 'development' || !file_exists($file_path)) {
-		$paths = config('paths');
+		$paths = config('paths',[]);
 
 		foreach ($paths as $find => $replace) {
 			$site_url['keys'][] = '{'.strtolower($find).'}';
@@ -197,11 +197,11 @@ function site_url($uri = '', $protocol = NULL) {
  */
 function config($setting = null, $default = null) {
 	$value = ci()->config->item($setting,$default);
-	
+
 	if ($value === null) {
 		die('The config variable "'.$setting.'" not set.'.PHP_EOL);
 	}
-	
+
 	return $value;
 }
 

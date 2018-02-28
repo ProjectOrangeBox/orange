@@ -111,7 +111,7 @@ class Page {
 			'icon',
 		];
 		foreach ($merge_configs as $mc) {
-			if ($config = config('page.'.$mc,null)) {
+			if ($config = config('page.'.$mc,false)) {
 				$this->$mc($config);
 			}
 		}

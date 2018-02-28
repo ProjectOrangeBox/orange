@@ -60,7 +60,7 @@ class Validate {
 	 * @example
 	 */
 	public function __construct() {
-		$this->config = config('validate');
+		$this->config = config('validate',[]);
 		$this->clear();
 
 		if (file_exists(APPPATH.'/config/validate.php')) {

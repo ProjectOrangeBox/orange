@@ -223,7 +223,7 @@ class Errors {
 			$status_code = (int) $view;
 		}
 
-		$config = config('errors');
+		$config = config('errors',[]);
 		$view = ($config['named'][$view]) ? $config['named'][$view] : $view;
 		$charset     = 'utf-8';
 		$mime_type   = 'text/html';
