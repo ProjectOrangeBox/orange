@@ -196,11 +196,11 @@ function site_url($uri = '', $protocol = NULL) {
  * @example
  */
 function config($setting,$default='%%no_value%%') {
-	$value = ci('config')->item_dot($setting,$default);
+	$value = ci('config')->dot_item($setting,$default);
 
-	/* if no default was given and nothing was returned die with error */
+	/* only throw an error if nothing found and no default given */
 	if ($value === '%%no_value%%') {
-		throw new Exception('The config variable "'.$setting.'" not set.');
+		throw new Exception('The config variable "'.$setting.'" not set and no default given.');
 	}
 
 	return $value;
