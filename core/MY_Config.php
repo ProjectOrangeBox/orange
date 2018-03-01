@@ -39,7 +39,7 @@ class MY_Config extends CI_Config {
 	 * @uses none
 	 * @examples item('email.mailtype','html')
 	 */
-	public function dot_item($setting,$default) {
+	public function item_dot($setting,$default) {
 		log_message('debug', 'MY_Config::item_dot::'.$setting);
 
 		if (!$this->setup) {
