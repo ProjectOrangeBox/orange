@@ -90,7 +90,7 @@ class MY_Log extends CI_Log {
 			This is a local variable so the bootstrapper can attach stuff to it
 			*/
 
-			$monolog = new Monolog\Logger('CodeIgniter');
+			$monolog = new \Monolog\Logger('CodeIgniter');
 
 			/* find the monolog_bootstrap file */
 			if (file_exists(APPPATH.'config/'.ENVIRONMENT.'/monolog.php')) {
