@@ -100,6 +100,24 @@ class Pear {
 	}
 
 /**
+ * set
+ * Insert description here
+ *
+ * @param $name
+ * @param $value
+ *
+ * @return
+ *
+ * @access
+ * @static
+ * @throws
+ * @example
+ */
+	public static function set($name,$value=null) {
+		ci('load')->vars([$name => $value]);
+	}
+
+/**
  * section
  * Insert description here
  *
