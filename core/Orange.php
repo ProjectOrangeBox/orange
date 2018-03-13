@@ -25,7 +25,7 @@ assert_options(ASSERT_CALLBACK,function($file, $line, $code, $desc = ''){
 	<p>Description: '.$desc.'</p>
 	</div>
 	</article>';
-	
+
 	echo (defined('STDIN')) ? strip_tags(substr($error,strpos($error,'<article>'),strpos($error,'</article>') - strpos($error,'<article>'))).chr(10) : $error;
 	exit(1);
 });
