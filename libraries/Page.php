@@ -95,7 +95,6 @@ class Page {
 			$this->data('user', ci()->user);
 		}
 		$this->body_class(['uid-'.$uid,'is-'.$is]);
-		require 'Pear.php';
 		ci()->load->helper('url');
 		$base_url = trim(base_url(), '/');
 		$merge_configs = [
@@ -208,13 +207,10 @@ class Page {
 	public function render($view = null, $data = []) {
 		log_message('debug', 'page::render::'.$view);
 		$view = ($view) ? $view : str_replace('-', '_', $this->route);
-		ci('event')->trigger('page.render', $this, $view);
-		ci('event')->trigger('page.render.'.str_replace('/','.',$view),$this, $view);
+		ci('event')->trigger('page.render',$this,$view);
+		ci('event')->trigger('page.render.'.str_replace('/','.',$view),$this,$view);
 		$view_content = $this->view($view, $data);
-		if (pear::is_extending()) {
-			$view_content = $this->view(pear::is_extending());
-		}
-		ci('event')->trigger('page.render.content',$view_content);
+		ci('event')->trigger('page.render.content',$view_content,$view,$data);
 		ci()->output->append_output($view_content);
 		return $this;
 	}
