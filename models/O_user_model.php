@@ -50,27 +50,14 @@ class O_user_model extends Database_model {
  */
 	public function __construct() {
 		$this->table = config('auth.user table');
+
 		parent::__construct();
-/**
- * $field
- * Insert description here
- *
- * @param $param
- * @param $error_string
- * @param $field_data
- * @param $validate
- *
- * @return
- *
- * @access
- * @static
- * @throws
- * @example
- */
+
 		$this->validate->attach('user_password', function (&$field, &$param, &$error_string, &$field_data, &$validate) {
 			$error_string = 'Your password is not in the correct format.';
 			return (bool) preg_match(config('auth.password regex'), $field);
 		});
+
 		log_message('info', 'o_user_model Class Initialized');
 	}
 

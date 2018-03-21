@@ -184,7 +184,7 @@ class MY_Log extends CI_Log {
 	/*
 	overridden to allow all PSR3 log levels
 
-	pretty much a copy of CodeIgniter's Method with the "top" removed.
+	pretty much a copy of CodeIgniter's Method.
 	*/
 	protected function ci_write_log($level, $msg) {
 		$filepath = $this->_log_path.'log-'.date('Y-m-d').'.'.$this->_file_ext;
@@ -198,12 +198,6 @@ class MY_Log extends CI_Log {
 			}
 		}
 
-		if (!$fp = @fopen($filepath, 'ab')) {
-			return false;
-		}
-
-		flock($fp, LOCK_EX);
-
 		/* Instantiating DateTime with microseconds appended to initial date is needed for proper support of this format */
 		if (strpos($this->_date_fmt, 'u') !== FALSE) {
 			$microtime_full = microtime(true);
@@ -215,6 +209,12 @@ class MY_Log extends CI_Log {
 		}
 
 		$message .= $this->_format_line($level, $date, $msg);
+
+		if (!$fp = @fopen($filepath, 'ab')) {
+			return false;
+		}
+
+		flock($fp, LOCK_EX);
 
 		for ($written = 0, $length = self::strlen($message); $written < $length; $written += $result) 	{
 			if (($result = fwrite($fp, self::substr($message, $written))) === false) {

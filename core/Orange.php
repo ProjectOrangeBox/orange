@@ -245,23 +245,6 @@ function e($string) {
 }
 
 /**
- * get_public_object_vars
- * Insert description here
- *
- * @param $obj
- *
- * @return
- *
- * @access
- * @static
- * @throws
- * @example
- */
-function get_public_object_vars($obj) {
-  return get_object_vars($obj);
-}
-
-/**
  * env
  * Insert description here
  *
@@ -311,7 +294,7 @@ function l() {
 		$build .= chr(9).$a.chr(10);
 	}
 
-	file_put_contents(ROOTPATH.'/var/logs/'.__METHOD__.'.log',$build,FILE_APPEND | LOCK_EX);
+	file_put_contents(ROOTPATH.'/var/logs/l.log',$build,FILE_APPEND | LOCK_EX);
 }
 
 /**
