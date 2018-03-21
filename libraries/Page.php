@@ -11,12 +11,13 @@
  * @version 2.0
  *
  * required
- * core:
- * libraries:
+ * core: router, load, output
+ * libraries: event, user@
  * models:
- * helpers:
+ * helpers: url
  * functions:
  *
+ * @ used but not required
  */
 class Page {
 	/**
@@ -52,6 +53,13 @@ class Page {
 	 *
 	 * @var boolean
 	 */
+	protected $assets_added			 = [];
+
+	/**
+	 * track if the combined cached configuration has been loaded
+	 *
+	 * @var boolean
+	 */
 	protected $script_attributes = ['src' => '', 'type' => 'text/javascript', 'charset' => 'utf-8'];
 
 	/**
@@ -81,10 +89,9 @@ class Page {
  * @example
  */
 	public function __construct() {
-		$this->route = strtolower(trim(ci()->router->fetch_directory().ci()->router->fetch_class(true).'/'.ci()->router->fetch_method(true), '/'));
-		foreach (explode('/',$this->route) as $r) {
-			$this->body_class('uri-'.$r);
-		}
+		$this->route = strtolower(trim(ci()->router->fetch_directory().ci()->router->fetch_class(true).'/'.ci()->router->fetch_method(true), '/'));		
+		$controller_path = '/'.str_replace('/index', '', $this->route);
+		$this->body_class(str_replace('/',' uri-',$controller_path));
 		$uid = 'guest';
 		$is = 'not-active';
 		if (isset(ci()->user)) {
@@ -118,14 +125,8 @@ class Page {
 			->js_variables([
 				'base_url'            => $base_url,
 				'app_id'              => md5($base_url),
-				'controller_path'     => '/'.str_replace('/index', '', $this->route),
-				'user_id'             => $userid,
-			])
-			->data([
-				'controller'        => ci()->controller,
-				'controller_path'   => ci()->controller_path,
-				'controller_title'  => ci()->controller_title,
-				'controller_titles' => ci()->controller_titles,
+				'controller_path'     => $controller_path,
+				'user_id'             => $uid,
 			]);
 		log_message('info', 'Page Class Initialized');
 	}
@@ -186,8 +187,9 @@ class Page {
 			}
 			return $this;
 		}
-		$this->assets['body_class'][] = preg_replace('/[^\da-z -]/i', '', strtolower($class));
-		return $this->data($this->page_prefix.'body_class',trim(implode(' ',array_unique($this->assets['body_class']))));
+		$normalized = trim(preg_replace('/[^\da-z -]/i', '', strtolower($class)));
+		$this->assets['body_class'][$normalized] = $normalized;
+		return $this->data($this->page_prefix.'body_class',implode(' ',$this->assets['body_class']));
 	}
 
 /**

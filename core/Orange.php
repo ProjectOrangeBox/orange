@@ -186,7 +186,8 @@ function site_url($uri = '', $protocol = NULL) {
 
 /**
  * config
- * Insert description here
+ * Wrapper for configure with dot notation
+ * ci('config')->dot_item(...)
  *
  * @param $setting
  * @param $default

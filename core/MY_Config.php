@@ -1,7 +1,9 @@
 <?php
 /**
  * MY_Config
- * The Config class provides a means to retrieve configuration preferences. These preferences can come from the default config file (application/config/config.php) or from your own custom config files.
+ * The Config class provides a means to retrieve configuration preferences.
+ * These preferences can come from the default config file (application/config/config.php)
+ * or from your own custom config files.
  *
  * @package CodeIgniter / Orange
  * @author Don Myers
@@ -27,8 +29,7 @@ class MY_Config extends CI_Config {
 	protected $setup = false;
 
 	/**
-	 *
-	 * extends the default with dot notation selection
+	 * provide dot notation selection
 	 *
 	 * @param string $item Config item name or dot notation format
 	 * @param mixed $index Index name or default if dot notation used
@@ -65,7 +66,6 @@ class MY_Config extends CI_Config {
 	/**
 	 * flush the cached data
 	 *
-	 *
 	 * @return boolean success or failure
 	 *
 	 * @access public
@@ -80,7 +80,6 @@ class MY_Config extends CI_Config {
 	/**
 	 * configuration cache builder
 	 * combined file config files, environment files, database values
-	 *
 	 *
 	 * @return null
 	 *

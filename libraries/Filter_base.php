@@ -20,7 +20,7 @@
  */
 abstract class Filter_base extends Validate_base {
 	public function __construct(&$field_data=null) {
-		$this->field_data   = &$field_data;
+		$this->field_data = &$field_data;
 
 		log_message('info', 'Filter_base Class Initialized');
 	}
