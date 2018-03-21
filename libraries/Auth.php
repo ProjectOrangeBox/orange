@@ -11,9 +11,9 @@
  * @version 2.0
  *
  * required
- * core:
- * libraries:
- * models:
+ * core: load, session
+ * libraries: user, event, errors
+ * models: o_permission_model, o_role_model, o_user_model
  * helpers:
  * functions:
  *
@@ -43,12 +43,12 @@ class Auth {
 		define('ADMIN_ROLE_ID',config('auth.admin role id'));
 		define('NOBODY_USER_ID',config('auth.nobody user id'));
 		if (!is_cli()) {
-			$user_id = (int)ci()->session->userdata($this->session_key);
+			$user_id = (int)ci('session')->userdata($this->session_key);
 			$user_id = ($user_id > 0) ? $user_id : NOBODY_USER_ID;
 			$this->refresh_userdata($user_id,false);
 		} else {
 			$this->refresh_userdata(NOBODY_USER_ID,false);
-			user::sudo('cli');
+			ci()->user->username = 'cli';
 		}
 		log_message('info', 'Auth Class Initialized');
 	}
@@ -111,14 +111,14 @@ class Auth {
 		log_message('debug', 'Auth::refresh_userdata::'.$user_id);
 		$user_id = ((int)$user_id > 0) ? (int)$user_id : NOBODY_USER_ID;
 		$profile = ci('o_user_model')->get($user_id);
-		if ((int)$profile->is_active != 1 && !$profile instanceof O_user_entity) {
+		if ((int)$profile->is_active != 1 || !$profile instanceof O_user_entity) {
 			$user_id = NOBODY_USER_ID;
 			$profile = ci('o_user_model')->get($user_id);
 		}
 		unset($profile->password);
 		ci()->user = &$profile;
 		if ($save_session) {
-			ci()->session->set_userdata([$this->session_key => $profile->id]);
+			ci('session')->set_userdata([$this->session_key => $profile->id]);
 		}
 		log_message('info', 'Auth Class Refreshed');
 		return $user_id;
