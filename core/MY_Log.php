@@ -71,18 +71,18 @@ class MY_Log extends CI_Log {
 			if ($config['log_threshold'] == 0) {
 				/* Nope! */
 				$this->_enabled = false;
-	
+
 				/* no need to stay around bail now */
 				return;
 			}
 		}
-		
+
 		/* it's on therefore let the CodeIgniter parent setup */
 		parent::__construct();
 
 		/* Use CodeIgniter or PSR Threshold */
 		$this->_bitwise = (bool)$config['log_use_bitwise_psr'];
-		
+
 		if ($config['log_handler'] == 'monolog' && class_exists('\Monolog\Logger',false)) {
 			/*
 			Create a instance of monolog for the bootstrapper
@@ -180,10 +180,10 @@ class MY_Log extends CI_Log {
 
 		return true;
 	}
-	
+
 	/*
 	overridden to allow all PSR3 log levels
-	
+
 	pretty much a copy of CodeIgniter's Method with the "top" removed.
 	*/
 	protected function ci_write_log($level, $msg) {
