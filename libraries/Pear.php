@@ -65,11 +65,6 @@ class Pear {
 		log_message('debug', 'Pear::__callStatic::'.$name);
 		if (!self::$setup) {
 			ci('load')->helper(['html','form','date','inflector','language','number','text']);
-			ci('event')->register('page.render.content',function(&$view_content,&$view,&$data) {
-				if (pear::is_extending()) {
-					$view_content = ci('page')->view(pear::is_extending());
-				}
-			});
 			self::$setup = true;
 		}
 		self::class_exists($name);

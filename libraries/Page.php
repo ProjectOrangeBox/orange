@@ -212,6 +212,9 @@ class Page {
 		ci('event')->trigger('page.render',$this,$view);
 		ci('event')->trigger('page.render.'.str_replace('/','.',$view),$this,$view);
 		$view_content = $this->view($view, $data);
+		if (pear::is_extending()) {
+			$view_content = $this->view(pear::is_extending());
+		}
 		ci('event')->trigger('page.render.content',$view_content,$view,$data);
 		ci()->output->append_output($view_content);
 		return $this;
