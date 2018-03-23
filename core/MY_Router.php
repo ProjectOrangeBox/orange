@@ -19,12 +19,6 @@
  *
  */
 class MY_Router extends CI_Router {
-	/**
-	 * track if the combined cached configuration has been loaded
-	 *
-	 * @var boolean
-	 */
-	protected $package = '';
 
 	/**
 	 * track if the combined cached configuration has been loaded
@@ -88,7 +82,6 @@ class MY_Router extends CI_Router {
 		foreach ($op['controllers'] as $key=>$rec) {
 			if (preg_match('#^'.$key.'$#', strtolower($uri), $matches)) {
 				$segs = explode('/',trim($matches[1],'/'));
-				$this->package = $rec['package'];
 				$this->directory = $rec['directory'];
 				$this->clean_controller = $rec['clean_controller'];
 				$this->clean_method = (empty($segs[0])) ? 'index' : strtolower($segs[0]);
@@ -143,7 +136,7 @@ class MY_Router extends CI_Router {
 	 * @example
 	 */
 	public function fetch_directory() {
-		return substr($this->directory, strlen('../../'.$this->package.'controllers/'));
+		return substr($this->directory, strpos($this->directory,'/controllers/') + 13);
 	}
 
 	/**
