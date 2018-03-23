@@ -75,12 +75,18 @@ class Pear {
 		self::class_exists($name);
 		if (isset(self::$attached[$name])) {
 			return call_user_func_array(self::$attached[$name],$arguments);
-		}
+		}		
 		if (function_exists('form_'.$name)) {
 			return call_user_func_array('form_'.$name,$arguments);
 		}
 		if (function_exists($name)) {
 			return call_user_func_array($name,$arguments);
+		}
+		if (strpos($name,'_')) {
+			self::class_exists(current(explode('_',$name)));
+			if (isset(self::$attached[$name])) {
+				return call_user_func_array(self::$attached[$name],$arguments);
+			}		
 		}
 		throw new Exception('Plugin missing "'.$name.'"');
 	}
