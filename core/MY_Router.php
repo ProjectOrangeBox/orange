@@ -143,7 +143,7 @@ class MY_Router extends CI_Router {
 	 * @example
 	 */
 	public function fetch_directory() {
-		return ($this->package != '') ? substr($this->directory, strlen('../../'.$this->package.'controllers/')) : $this->directory;
+		return substr($this->directory, strlen('../../'.$this->package.'controllers/'));
 	}
 
 	/**
