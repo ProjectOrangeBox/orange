@@ -410,7 +410,7 @@ class Database_model extends MY_Model {
 		if ($this->auto_generated_primary) {
 			unset($data[$this->primary_key]);
 		}
-		$success = (!$this->skip_rules) ? $this->only_columns($data,$this->rules)->add_rule_set_columns($data,'insert')->validate($data) : true;
+		$success = (!$this->skip_rules && count($this->rules)) ? $this->only_columns($data,$this->rules)->add_rule_set_columns($data,'insert')->validate($data) : true;
 		if ($success) {
 			$this->remap_columns($data, $this->rules)->remove_columns($data, $this->protected);
 			$this->add_fields_on_insert($data)->add_where_on_insert($data);
@@ -488,7 +488,7 @@ class Database_model extends MY_Model {
 	public function update_by($data, $where = []) {
 		$this->switch_database('write');
 		$data = (array)$data;
-		$success = (!$this->skip_rules) ? $this->only_columns($data,$this->rules)->add_rule_set_columns($data,'update')->validate($data) : true;
+		$success = (!$this->skip_rules && count($this->rules)) ? $this->only_columns($data,$this->rules)->add_rule_set_columns($data,'update')->validate($data) : true;
 		unset($data[$this->primary_key]);
 		if ($success) {
 			$this->remap_columns($data, $this->rules)->remove_columns($data, $this->protected);
@@ -536,8 +536,9 @@ class Database_model extends MY_Model {
 	public function delete_by($data) {
 		$this->switch_database('write');
 		$data = (array)$data;
-		$success = (!$this->skip_rules) ? $this->only_columns($data,$this->rules)->add_rule_set_columns($data,'delete')->validate($data) : true;
+		$success = (!$this->skip_rules && count($this->rules)) ? $this->only_columns($data,$this->rules)->add_rule_set_columns($data,'delete')->validate($data) : true;
 		if ($success) {
+			$this->remap_columns($data, $this->rules);
 			if ($this->has_soft_delete) {
 				$where = $data;
 				$data = $data + ['is_deleted'=>1];
