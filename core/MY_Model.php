@@ -140,12 +140,12 @@ class MY_Model extends CI_Model {
 			/* copy all the rules */ 
 			$rules = $this->rules;
 			
-			/* now filter out the ones we don't need */
+			/* now filter out the rules we don't need */
 			$this->only_columns($rules, $rules_names);
 		}
 
 		/* let's make sure the data "keys" have rules */
-		$this->only_columns_with_rules($data, $rules);
+		$this->only_columns($data, $rules);
 		
 		/* did we actually get any rules? */
 		if (count($rules)) {
@@ -167,7 +167,7 @@ class MY_Model extends CI_Model {
 	 * @return object
 	 *
 	 */
-	protected function remove_columns(&$data, $columns = []) {
+	public function remove_columns(&$data, $columns = []) {
 		/* convert string with commas to array */
 		$columns = (!is_array($columns)) ? explode(',', $columns) : $columns;
 		
@@ -186,38 +186,36 @@ class MY_Model extends CI_Model {
 	 *
 	 * @return object
 	 */
-	protected function only_columns(&$data, $columns = []) {
+	public function only_columns(&$data, $columns = []) {
 		/* convert string with commas to array */
 		$columns = (!is_array($columns)) ? explode(',', $columns) : $columns;
+		
+		/* let' make sure the values are singular not an array if they are singular then create the key/value pair */
+		if (!is_array(current($columns))) {
+			$columns = array_combine($columns,$columns);
+		}
 
 		/* remove any data "key" not in columns array */
-		$data = array_intersect_key($data,array_combine($columns,$columns));
+		$data = array_intersect_key($data,$columns);
 
 		return $this;
 	}
-
-	/**
-	 * only_columns_with_rules
-	 * Insert description here
-	 *
-	 * @param $data
-	 * @param $rules
-	 *
-	 * @return object
-	 *
-	 */
-	protected function only_columns_with_rules(&$data, $rules = null) {
-		$rule_fields = [];
-		$rules = ($rules) ? $rules : $this->rules;
-
-		foreach ($rules as $key => $rule) {
-			if (isset($rule['field'])) {
-				$rule_fields[] = $rule['field'];
+	
+	/*
+	remap the "fake" column name to real column names
+	this is when a rule key is password_not_empty but the field is password for example
+	*/
+	public function remap_columns(&$data, $rules = []) {
+		$new_data = [];
+		
+		foreach ($rules as $key=>$rule) {
+			if (isset($data[$key])) {
+				$new_data[$rule['field']] = $data[$key];
 			}
 		}
-
-		$this->only_columns($data, $rule_fields);
-
+	
+		$data = $new_data;
+	
 		return $this;
 	}
 

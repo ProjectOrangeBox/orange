@@ -410,9 +410,9 @@ class Database_model extends MY_Model {
 		if ($this->auto_generated_primary) {
 			unset($data[$this->primary_key]);
 		}
-		$success = (!$this->skip_rules) ? $this->only_columns_with_rules($data)->add_rule_set_columns($data,'insert')->validate($data) : true;
+		$success = (!$this->skip_rules) ? $this->only_columns($data,$this->rules)->add_rule_set_columns($data,'insert')->validate($data) : true;
 		if ($success) {
-			$this->remove_columns($data, $this->protected);
+			$this->remap_columns($data, $this->rules)->remove_columns($data, $this->protected);
 			$this->add_fields_on_insert($data)->add_where_on_insert($data);
 			if (count($data)) {
 				$this->_database->insert($this->table, $data);
@@ -426,7 +426,7 @@ class Database_model extends MY_Model {
 
 /**
  * add_rule_set_columns
- * Insert description here
+ * Make sure we add the correct rule set and add the missing data entries
  *
  * @param $data
  * @param $which_set
@@ -488,10 +488,10 @@ class Database_model extends MY_Model {
 	public function update_by($data, $where = []) {
 		$this->switch_database('write');
 		$data = (array)$data;
-		$success = (!$this->skip_rules) ? $this->only_columns_with_rules($data)->add_rule_set_columns($data,'update')->validate($data) : true;
+		$success = (!$this->skip_rules) ? $this->only_columns($data,$this->rules)->add_rule_set_columns($data,'update')->validate($data) : true;
 		unset($data[$this->primary_key]);
 		if ($success) {
-			$this->remove_columns($data, $this->protected);
+			$this->remap_columns($data, $this->rules)->remove_columns($data, $this->protected);
 			$this->add_fields_on_update($data)->add_where_on_update($data);
 			if (count($data)) {
 				$this->_database->where($where)->update($this->table, $data);
@@ -536,7 +536,7 @@ class Database_model extends MY_Model {
 	public function delete_by($data) {
 		$this->switch_database('write');
 		$data = (array)$data;
-		$success = (!$this->skip_rules) ? $this->only_columns_with_rules($data)->add_rule_set_columns($data,'delete')->validate($data) : true;
+		$success = (!$this->skip_rules) ? $this->only_columns($data,$this->rules)->add_rule_set_columns($data,'delete')->validate($data) : true;
 		if ($success) {
 			if ($this->has_soft_delete) {
 				$where = $data;
