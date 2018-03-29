@@ -129,7 +129,7 @@ class O_user_model extends Database_model {
 			if ($which == 'insert') {
 				unset($data['id']);
 			}
-			$this->only_columns_with_rules($data)->add_rule_set_columns($data,$which)->validate($data);
+			$this->only_columns($data,$this->rules)->add_rule_set_columns($data,$which)->validate($data);
 			$data['password'] = $this->hash_password($data['password']);
 		}
 	}

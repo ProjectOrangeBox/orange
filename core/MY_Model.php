@@ -20,23 +20,30 @@
  */
 class MY_Model extends CI_Model {
 	/**
-	 * track if the combined cached configuration has been loaded
+	 * array of ALL of the rules for this model
 	 *
-	 * @var boolean
+	 * example:
+	 *  'id' => ['field' => 'id', 'label' => 'Id', 'rules' => 'required|integer|max_length[10]|less_than[4294967295]|filter_int[10]'],
+	 *
+	 * @var array
 	 */
-	protected $rules     = [];
+	protected $rules = [];
 
 	/**
-	 * track if the combined cached configuration has been loaded
+	 * set of rules to use
 	 *
-	 * @var boolean
+	 * example:
+	 *  'basic_form'=>'id,first_name,last_name'
+	 *  'adv_form'=>'id,first_name,last_name,age,weight'
+	 *
+	 * @var array
 	 */
 	protected $rule_sets = [];
 
 	/**
-	 * track if the combined cached configuration has been loaded
+	 * name of the object
 	 *
-	 * @var boolean
+	 * @var string
 	 */
 	protected $object = null;
 
@@ -111,30 +118,42 @@ class MY_Model extends CI_Model {
 	/**
 	 * validate
 	 * Insert description here
+	 * 'id' => ['field' => 'id', 'label' => 'Id', 'rules' => 'required|integer|max_length[10]|less_than[4294967295]|filter_int[10]'],
 	 *
-	 * @param $data
-	 * @param $rules
+	 * @param $data - array of key value pairs to test
+	 * @param $rules - 
 	 *
-	 * @return
+	 * @return boolean - has error
 	 *
-	 * @access
-	 * @static
-	 * @throws
-	 * @example
 	 */
 	public function validate(&$data, $rules = true) {
-		if ($rules === true) {
-			$rules = $this->_string2array(array_keys($data));
-		} elseif (is_string($rules)) {
-			$rules = $this->_string2array(explode(',', $this->rule_sets[$rules]));
+		/* if it's already a array then it's already in the format we need */
+		if (!is_array($rules)) {
+			/* if rules is true then just use the data array keys as the fields to validate to */
+			if ($rules === true) {
+				$rules_names = array_keys($data);
+			} elseif (is_string($rules)) {
+				/* if it's a string then see if it's a rule set if not treat as a comma sep list of field to validate */
+				$rules_names = explode(',',(isset($this->rule_sets[$rules]) ? $this->rule_sets[$rules] : $rules));
+			}
+			
+			/* copy all the rules */ 
+			$rules = $this->rules;
+			
+			/* now filter out the rules we don't need */
+			$this->only_columns($rules, $rules_names);
 		}
 
-		$this->only_columns_with_rules($data, $rules);
-
+		/* let's make sure the data "keys" have rules */
+		$this->only_columns($data, $rules);
+		
+		/* did we actually get any rules? */
 		if (count($rules)) {
+			/* run the rules on the data array */
 			ci('validate')->multiple($rules, $data);
 		}
-
+		
+		/* return if we got any errors */
 		return !ci('errors')->has();
 	}
 
@@ -142,26 +161,18 @@ class MY_Model extends CI_Model {
 	 * remove_columns
 	 * Insert description here
 	 *
-	 * @param $data
-	 * @param $columns
+	 * @param $data array
+	 * @param $columns string or array
 	 *
-	 * @return
+	 * @return object
 	 *
-	 * @access
-	 * @static
-	 * @throws
-	 * @example
 	 */
-	protected function remove_columns(&$data, $columns) {
+	public function remove_columns(&$data, $columns = []) {
+		/* convert string with commas to array */
 		$columns = (!is_array($columns)) ? explode(',', $columns) : $columns;
-
-		foreach ($columns as $attr) {
-			if (is_object($row)) {
-				unset($row->$attr);
-			} else {
-				unset($row[$attr]);
-			}
-		}
+		
+		/* remove any data "key" in columns array */
+		$data = array_diff_key($data,array_combine($columns,$columns));
 
 		return $this;
 	}
@@ -170,79 +181,42 @@ class MY_Model extends CI_Model {
 	 * only_columns
 	 * Insert description here
 	 *
-	 * @param $data
-	 * @param $columns
+	 * @param $data array
+	 * @param $columns string or array
 	 *
-	 * @return
-	 *
-	 * @access
-	 * @static
-	 * @throws
-	 * @example
+	 * @return object
 	 */
-	protected function only_columns(&$data, $columns = []) {
+	public function only_columns(&$data, $columns = []) {
+		/* convert string with commas to array */
 		$columns = (!is_array($columns)) ? explode(',', $columns) : $columns;
-
-		foreach ($data as $key => $value) {
-			if (!in_array($key, $columns)) {
-				unset($data[$key]);
-			}
+		
+		/* let' make sure the values are singular not an array if they are singular then create the key/value pair */
+		if (!is_array(current($columns))) {
+			$columns = array_combine($columns,$columns);
 		}
+
+		/* remove any data "key" not in columns array */
+		$data = array_intersect_key($data,$columns);
 
 		return $this;
 	}
-
-	/**
-	 * only_columns_with_rules
-	 * Insert description here
-	 *
-	 * @param $data
-	 * @param $rules
-	 *
-	 * @return
-	 *
-	 * @access
-	 * @static
-	 * @throws
-	 * @example
-	 */
-	protected function only_columns_with_rules(&$data, $rules = null) {
-		$rule_fields = [];
-		$rules = ($rules) ? $rules : $this->rules;
-
-		foreach ($rules as $key => $rule) {
-			if (isset($rule['field'])) {
-				$rule_fields[] = $rule['field'];
+	
+	/*
+	remap the "fake" column name to real column names
+	this is when a rule key is password_not_empty but the field is password for example
+	*/
+	public function remap_columns(&$data, $rules = []) {
+		$new_data = [];
+		
+		foreach ($rules as $key=>$rule) {
+			if (isset($data[$key])) {
+				$new_data[$rule['field']] = $data[$key];
 			}
 		}
-
-		$this->only_columns($data, $rule_fields);
-
+	
+		$data = $new_data;
+	
 		return $this;
 	}
 
-	/**
-	 * _string2array
-	 * Insert description here
-	 *
-	 * @param $fields
-	 *
-	 * @return
-	 *
-	 * @access
-	 * @static
-	 * @throws
-	 * @example
-	 */
-	protected function _string2array($fields) {
-		$new_array = [];
-
-		foreach ($fields as $field) {
-			if (isset($this->rules[$field])) {
-				$new_array[$field] = $this->rules[$field];
-			}
-		}
-
-		return $new_array;
-	}
 } /* end class */
