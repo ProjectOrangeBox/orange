@@ -121,7 +121,7 @@ class MY_Model extends CI_Model {
 	 * 'id' => ['field' => 'id', 'label' => 'Id', 'rules' => 'required|integer|max_length[10]|less_than[4294967295]|filter_int[10]'],
 	 *
 	 * @param $data - array of key value pairs to test
-	 * @param $rules - 
+	 * @param $rules -
 	 *
 	 * @return boolean - has error
 	 *
@@ -136,23 +136,23 @@ class MY_Model extends CI_Model {
 				/* if it's a string then see if it's a rule set if not treat as a comma sep list of field to validate */
 				$rules_names = explode(',',(isset($this->rule_sets[$rules]) ? $this->rule_sets[$rules] : $rules));
 			}
-			
-			/* copy all the rules */ 
+
+			/* copy all the rules */
 			$rules = $this->rules;
-			
+
 			/* now filter out the rules we don't need */
 			$this->only_columns($rules, $rules_names);
 		}
 
 		/* let's make sure the data "keys" have rules */
 		$this->only_columns($data, $rules);
-		
+
 		/* did we actually get any rules? */
 		if (count($rules)) {
 			/* run the rules on the data array */
 			ci('validate')->multiple($rules, $data);
 		}
-		
+
 		/* return if we got any errors */
 		return !ci('errors')->has();
 	}
@@ -170,7 +170,7 @@ class MY_Model extends CI_Model {
 	public function remove_columns(&$data, $columns = []) {
 		/* convert string with commas to array */
 		$columns = (!is_array($columns)) ? explode(',', $columns) : $columns;
-		
+
 		/* remove any data "key" in columns array */
 		$data = array_diff_key($data,array_combine($columns,$columns));
 
@@ -189,7 +189,7 @@ class MY_Model extends CI_Model {
 	public function only_columns(&$data, $columns = []) {
 		/* convert string with commas to array */
 		$columns = (!is_array($columns)) ? explode(',', $columns) : $columns;
-		
+
 		/* let' make sure the values are singular not an array if they are singular then create the key/value pair */
 		if (!is_array(current($columns))) {
 			$columns = array_combine($columns,$columns);
@@ -200,22 +200,22 @@ class MY_Model extends CI_Model {
 
 		return $this;
 	}
-	
+
 	/*
 	remap the "fake" column name to real column names
 	this is when a rule key is password_not_empty but the field is password for example
 	*/
 	public function remap_columns(&$data, $rules = []) {
 		$new_data = [];
-		
+
 		foreach ($rules as $key=>$rule) {
 			if (isset($data[$key])) {
 				$new_data[$rule['field']] = $data[$key];
 			}
 		}
-	
+
 		$data = $new_data;
-	
+
 		return $this;
 	}
 
