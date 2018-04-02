@@ -206,15 +206,15 @@ class MY_Model extends CI_Model {
 	this is when a rule key is password_not_empty but the field is password for example
 	*/
 	public function remap_columns(&$data, $rules = []) {
-		$new_data = [];
-
-		foreach ($rules as $key=>$rule) {
-			if (isset($data[$key])) {
-				$new_data[$rule['field']] = $data[$key];
+		if (!$this->skip_rules && count($rules)) {
+			$new_data = [];
+			foreach ($rules as $key=>$rule) {
+				if (isset($data[$key])) {
+					$new_data[$rule['field']] = $data[$key];
+				}
 			}
+			$data = $new_data;
 		}
-
-		$data = $new_data;
 
 		return $this;
 	}
