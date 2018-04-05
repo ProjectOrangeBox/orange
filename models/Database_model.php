@@ -29,7 +29,6 @@ class Database_model extends MY_Model {
 	protected $debug = false; /* boolean stored in ROOTPATH.'/var/logs/model.{class name}.log' */
 	protected $primary_key = 'id'; /* primary id used as default for many SQL commands */
 	protected $additional_cache_tags = ''; /* additional cache tags to add to cache prefix remember each tag is separated by . */
-	protected $skip_rules = false; /* force skip all rule validate on insert, update, delete */
 	protected $entity = null; /* true or string name of the entity to use for records - if true it uses the class name and replaces _model with _entity */
 	protected $has_roles = false; /* does this table use the standard role columns? these are automatically added to index, insert query's */
 	protected $has_stamps = false; /* does this table use the standard timestamps columns? these are automatically added to insert, update, delete query's */
@@ -710,45 +709,45 @@ class Database_model extends MY_Model {
  *
 	ci('status_model')->catalog()
 		array (
-		  1 =>
-		  Status_entity::__set_state(array(
-		     'id' => '1',
-		     'human' => 'Error',
-		     'color' => 'ff0000',
-		     'icon' => 'asterisk',
+			1 =>
+			Status_entity::__set_state(array(
+				'id' => '1',
+				'human' => 'Error',
+				'color' => 'ff0000',
+				'icon' => 'asterisk',
 
-  ci('status_model')->catalog('human','*')
+	ci('status_model')->catalog('human','*')
 		array (
-		  'Error' => 'ff0000',
-		  'Ok' => '38cfbd',
+			'Error' => 'ff0000',
+			'Ok' => '38cfbd',
 
 	ci('status_model')->catalog('human','color')
 		array (
-		  'Error' =>
-		  Status_entity::__set_state(array(
-		     'id' => '1',
-		     'human' => 'Error',
-		     'color' => 'ff0000',
-		     'icon' => 'asterisk',
+			'Error' =>
+			Status_entity::__set_state(array(
+				'id' => '1',
+				'human' => 'Error',
+				'color' => 'ff0000',
+				'icon' => 'asterisk',
 
 	ci('status_model')->catalog('human','*',['is_deleted'=>0])
 		array (
-		  'Error' => 
-		  Status_entity::__set_state(array(
-		     'id' => '1',
-		     'human' => 'Error',
-		     'color' => 'ff0000',
-		     'icon' => 'asterisk',
+			'Error' =>
+			Status_entity::__set_state(array(
+				'id' => '1',
+				'human' => 'Error',
+				'color' => 'ff0000',
+				'icon' => 'asterisk',
 
 	ci('status_model')->catalog('human','*',['is_deleted'=>0],'name') defaults to asc
 	ci('status_model')->catalog('human','*',['is_deleted'=>0],'name desc')
 		array (
-		  'SkyBlue' => 
-		  Status_entity::__set_state(array(
-		     'id' => '3',
-		     'human' => 'SkyBlue',
-		     'color' => '215eb8',
-		     'icon' => 'dribbble',
+			'SkyBlue' =>
+			Status_entity::__set_state(array(
+				'id' => '3',
+				'human' => 'SkyBlue',
+				'color' => '215eb8',
+				'icon' => 'dribbble',
 
  *
  */
@@ -826,20 +825,20 @@ class Database_model extends MY_Model {
 	public function is_uniquem($field, $column, $form_key) {
 		/* run the query return a maximum of 3 */
 		$dbc = $this->_database->select($column.','.$this->primary_key)->where([$column=>$field])->get($this->table, 3);
-		
+
 		/* how many records where found? */
 		$rows_found = $dbc->num_rows();
-		
+
 		/* none? then we are good! */
 		if ($rows_found == 0) {
 			return true; /* test for really true === */
 		}
-		
+
 		/* more than 1? that's really bad return false */
 		if ($rows_found > 1) {
 			return false; /* test for really false === */
 		}
-		
+
 		/* 1 record so do the keys match? */
 		return ($dbc->row()->{$this->primary_key} == get_instance()->input->request($form_key));
 	}

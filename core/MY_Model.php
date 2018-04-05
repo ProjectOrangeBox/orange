@@ -29,6 +29,9 @@ class MY_Model extends CI_Model {
 	 */
 	protected $rules = [];
 
+	/* force skip all rule validate on insert, update, delete */
+	protected $skip_rules = false;
+
 	/**
 	 * set of rules to use
 	 *
