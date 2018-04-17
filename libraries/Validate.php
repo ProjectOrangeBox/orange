@@ -289,16 +289,28 @@ class Validate {
 					$success = true;
 					break;
 				}
+
+				if ($rule == 'allow_empty') {
+					if (empty($field)) {
+						break;
+					} else {
+						continue;
+					}
+				}
+
 				$param = null;
+
 				if (preg_match("/(.*?)\[(.*?)\]/", $rule, $match)) {
 					$rule  = $match[1];
 					$param = $match[2];
 				}
+
 				$success            = false;
 				$this->error_string = '%s is not valid.';
 				$lowercase = strtolower($rule);
 				$is_filter = (substr($lowercase,0,6) == 'filter');
 				$class_name = ($is_filter) ? ucfirst($lowercase) : 'Validate_'.$lowercase;
+
 				if ($plugin = $this->load_plugin($class_name,$is_filter)) {
 					if ($is_filter) {
 						$success = true;
@@ -313,6 +325,7 @@ class Validate {
 				} else {
 					$this->error_string = 'Could not validate %s against '.$rule;
 				}
+
 				if (!$is_filter) {
 					if ($success !== false) {
 						if (!is_bool($success)) {
