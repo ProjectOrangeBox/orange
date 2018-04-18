@@ -53,7 +53,7 @@ class Orange_autoload_files {
 		if (ENVIRONMENT == 'development' || !file_exists(self::$cache_path)) {
 			require APPPATH.'/config/autoload.php';
 			self::$paths = explode(PATH_SEPARATOR,rtrim(APPPATH,'/').PATH_SEPARATOR.implode(PATH_SEPARATOR,$autoload['packages']));
-			self::write_cache(self::get_cache());
+			self::write_cache(self::get_cache($autoload));
 		}
 
 		orange_paths(self::read_cache());
@@ -66,7 +66,7 @@ class Orange_autoload_files {
 	 * @return array array of classes
 	 *
 	 */
-	static public function get_cache() {
+	static public function get_cache($autoload = []) {
 		$classes = [
 			'model_entity'=>ORANGEPATH.'/models/Model_entity.php',
 			'cache_export'=>ORANGEPATH.'/libraries/Cache_export.php',
@@ -76,7 +76,7 @@ class Orange_autoload_files {
 			'filter_base'=>ORANGEPATH.'/libraries/Filter_base.php',
 		];
 
-		return [
+		$base = [
 			'classes' => array_merge(
 				$classes,
 				self::globr(BASEPATH,'(.*).php'),
@@ -100,6 +100,9 @@ class Orange_autoload_files {
 			'controllers' => self::cache_controllers(),
 			'configs' => self::cache_config(),
 		];
+		
+		/* override what was found */
+		return array_replace_recursive($base,$autoload['autoloader']);
 	}
 
 	/**

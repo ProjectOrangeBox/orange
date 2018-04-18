@@ -38,8 +38,7 @@ assert_options(ASSERT_CALLBACK,function($file, $line, $code, $desc = ''){
 require_once BASEPATH.'core/CodeIgniter.php';
 
 /**
- * ci
- * auto loader for CodeIgniter libraries
+ * newer / smarter version of get_instance
  *
  * @param string $class name of the library you are looking for
  *
@@ -76,19 +75,16 @@ function &ci($class=null) {
 }
 
 /**
- * load_class
- * Insert description here
+ * Class registry - Overrides the CodeIgniter Default
  *
- * @param $class
- * @param $directory
- * @param $param
+ * This function acts as a singleton. If the requested class does not
+ * exist it is instantiated and set to a static variable. If it has
+ * previously been instantiated the variable is returned.
  *
- * @return
- *
- * @access
- * @static
- * @throws
- * @example
+ * @param	string	the class name being requested
+ * @param	string	the directory where the class should be found
+ * @param	mixed	an optional argument to pass to the class constructor
+ * @return	object
  */
 function &load_class($class, $directory = 'libraries', $param = NULL) {
 	static $_classes = array();
@@ -121,37 +117,39 @@ function &load_class($class, $directory = 'libraries', $param = NULL) {
 }
 
 /**
- * codeigniter_autoload
- * Insert description here
+ * CodeIgniter / Orange registered autoload function 
  *
  * @param $class
  *
- * @return
+ * @return boolean
  *
- * @access
- * @static
- * @throws
- * @example
  */
 function codeigniter_autoload($class) {
+	/* load the autoload config array */
 	$op = orange_paths();
+	
+	/* normalize the class name */
 	$class = strtolower($class);
-
+	
+	/* is it in the class array? */
 	if (isset($op['classes'][$class])) {
 		require $op['classes'][$class];
 		return true;
 	}
 
+	/* is it in the models array? */
 	if (isset($op['models'][$class])) {
 		ci()->load->model($class);
 		return true;
 	}
 
+	/* is it in the libraries array? */
 	if (isset($op['libraries'][$class])) {
 		ci()->load->library($class);
 		return true;
 	}
 
+	/* can't find this class file notify the autoload (return false) to let somebody else have a shot */
 	return false;
 }
 
