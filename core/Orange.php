@@ -2,9 +2,14 @@
 
 define('ORANGE_VERSION', '2.0.0');
 
-require __DIR__.'/../libraries/Orange_autoload_files.php';
+require APPPATH.'config/paths.php';
 
-orange_autoload_files::load(ROOTPATH.'/var/cache/autoload_files.php');
+define('CACHEPATH',ROOTPATH.$config['cache']);
+define('LOGPATH',ROOTPATH.$config['logs']);
+
+require ORANGEPATH.'/libraries/Orange_autoload_files.php';
+
+orange_autoload_files::load(CACHEPATH.'/autoload_files.php');
 
 spl_autoload_register('codeigniter_autoload');
 
@@ -166,7 +171,8 @@ function codeigniter_autoload($class) {
  */
 function site_url($uri = '', $protocol = NULL) {
 	$uri = ci()->config->site_url($uri, $protocol);
-	$file_path = ROOTPATH.'/var/cache/site_url.php';
+	
+	$file_path = CACHEPATH.'/site_url.php';
 
 	if (ENVIRONMENT == 'development' || !file_exists($file_path)) {
 		$paths = config('paths',[]);
@@ -294,7 +300,7 @@ function l() {
 		$build .= chr(9).$a.chr(10);
 	}
 
-	file_put_contents(ROOTPATH.'/var/logs/l.log',$build,FILE_APPEND | LOCK_EX);
+	file_put_contents(LOGPATH.'/l.log',$build,FILE_APPEND | LOCK_EX);
 }
 
 /**
