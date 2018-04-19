@@ -74,6 +74,8 @@ class MY_Config extends CI_Config {
 	public function flush() {
 		log_message('debug', 'MY_Config::settings_flush');
 
+		$this->setup = false;
+
 		return ci('cache')->export->delete('config');
 	}
 
@@ -92,10 +94,10 @@ class MY_Config extends CI_Config {
 		if (!is_array($built_config)) {
 			/* no - so we need to build our dynamic configuration */
 			$built_config = [];
-			$paths = orange_paths('configs');
+			$orange_paths = orange_paths('configs');
 
 			/* load the application configs */
-			foreach ($paths['root'] as $group_key=>$filepath) {
+			foreach ($orange_paths['root'] as $group_key=>$filepath) {
 				$config = null;
 
 				include $filepath;
@@ -108,8 +110,8 @@ class MY_Config extends CI_Config {
 			}
 
 			/* load the environment configs */
-			if (is_array($paths[ENVIRONMENT])) {
-				foreach ($paths[ENVIRONMENT] as $group_key=>$filepath) {
+			if (is_array($orange_paths[ENVIRONMENT])) {
+				foreach ($orange_paths[ENVIRONMENT] as $group_key=>$filepath) {
 					$config = null;
 
 					include $filepath;

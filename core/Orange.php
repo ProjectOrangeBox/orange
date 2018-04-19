@@ -90,10 +90,10 @@ function &ci($class=null) {
 			/* ok let's see if it's a class we know about */
 
 			/* get the autoloader array */
-			$op = orange_paths('classes');
+			$orange_paths = orange_paths('classes');
 
 			/* is it a CI_ class or MY_ class? */
-			if (isset($op[config_item('subclass_prefix').$class]) || isset($op['ci_'.$class])) {
+			if (isset($orange_paths[config_item('subclass_prefix').$class]) || isset($orange_paths['ci_'.$class])) {
 				/* yes - then load it */
 				CI_Controller::get_instance()->load->library($class);
 
@@ -168,25 +168,25 @@ function &load_class($class, $directory = 'libraries', $param = NULL) {
  */
 function codeigniter_autoload($class) {
 	/* load the autoload config array */
-	$op = orange_paths();
+	$orange_paths = orange_paths();
 
 	/* normalize the class name */
 	$class = strtolower($class);
 
 	/* is it in the class array? */
-	if (isset($op['classes'][$class])) {
-		require $op['classes'][$class];
+	if (isset($orange_paths['classes'][$class])) {
+		require $orange_paths['classes'][$class];
 		return true;
 	}
 
 	/* is it in the models array? */
-	if (isset($op['models'][$class])) {
+	if (isset($orange_paths['models'][$class])) {
 		ci()->load->model($class);
 		return true;
 	}
 
 	/* is it in the libraries array? */
-	if (isset($op['libraries'][$class])) {
+	if (isset($orange_paths['libraries'][$class])) {
 		ci()->load->library($class);
 		return true;
 	}
@@ -325,7 +325,7 @@ function l() {
 	/* loop over the arguments */
 	foreach ($args as $idx=>$arg) {
 		/* is it's not scalar then convert it to json */
-		$build .= chr(9).((!is_scalar($arg) ? json_encode($arg) : $arg).chr(10);
+		$build .= chr(9).(!is_scalar($arg)) ? json_encode($arg) : $arg.chr(10);
 	}
 
 	/* write it to the log file */

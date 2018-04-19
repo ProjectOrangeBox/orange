@@ -41,14 +41,14 @@ class MY_Loader extends CI_Loader {
 		}
 
 		if ($config == FALSE) {
-			$paths = orange_paths('configs');
+			$orange_paths = orange_paths('configs');
 			$lc_class = strtolower($class);
 			$config = [];
-			if (isset($paths['root'][$lc_class])) {
-				include $paths['root'][$lc_class];
+			if (isset($orange_paths['root'][$lc_class])) {
+				include $orange_paths['root'][$lc_class];
 			}
-			if (isset($paths[ENVIRONMENT][$lc_class])) {
-				include $paths[ENVIRONMENT][$lc_class];
+			if (isset($orange_paths[ENVIRONMENT][$lc_class])) {
+				include $orange_paths[ENVIRONMENT][$lc_class];
 			}
 		}
 
@@ -101,12 +101,12 @@ class MY_Loader extends CI_Loader {
 			return;
 		}
 
-		$paths = orange_paths('classes');
+		$orange_paths = orange_paths('classes');
 
 		$lc_library_name = strtolower($library_name);
 
-		if (isset($paths[$prefix.$lc_library_name])) {
-			include_once $paths[$prefix.$lc_library_name];
+		if (isset($orange_paths[$prefix.$lc_library_name])) {
+			include_once $orange_paths[$prefix.$lc_library_name];
 			if (class_exists($prefix.$lc_library_name, FALSE)) {
 				return $this->_ci_init_library($library_name, $prefix, $params, $object_name);
 			} else {
@@ -118,8 +118,8 @@ class MY_Loader extends CI_Loader {
 
 		$subclass = config_item('subclass_prefix');
 
-		if (isset($paths[$subclass.$lc_library_name])) {
-			include_once $paths[$subclass.$lc_library_name];
+		if (isset($orange_paths[$subclass.$lc_library_name])) {
+			include_once $orange_paths[$subclass.$lc_library_name];
 			if (class_exists($subclass.$lc_library_name, FALSE)) {
 				$prefix = $subclass;
 			} else {
