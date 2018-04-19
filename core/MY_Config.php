@@ -92,10 +92,10 @@ class MY_Config extends CI_Config {
 		if (!is_array($built_config)) {
 			/* no - so we need to build our dynamic configuration */
 			$built_config = [];
-			$paths = orange_paths();
+			$paths = orange_paths('configs');
 
 			/* load the application configs */
-			foreach ($paths['configs']['root'] as $group_key=>$filepath) {
+			foreach ($paths['root'] as $group_key=>$filepath) {
 				$config = null;
 
 				include $filepath;
@@ -108,8 +108,8 @@ class MY_Config extends CI_Config {
 			}
 
 			/* load the environment configs */
-			if (is_array($paths['configs'][ENVIRONMENT])) {
-				foreach ($paths['configs'][ENVIRONMENT] as $group_key=>$filepath) {
+			if (is_array($paths[ENVIRONMENT])) {
+				foreach ($paths[ENVIRONMENT] as $group_key=>$filepath) {
 					$config = null;
 
 					include $filepath;

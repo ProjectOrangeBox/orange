@@ -299,10 +299,14 @@ class Cache_export extends CI_Driver {
 	 * @example
 	 */
 	protected function single_delete($id) {
-		$file = is_file($this->config['cache_path'].$id.'.php') ? unlink($this->config['cache_path'].$id.'.php') : FALSE;
-		$cache = (remove_php_file_from_opcache($this->config['cache_path'].$id.'.php') && remove_php_file_from_opcache($this->config['cache_path'].$id.'.meta.php'));
-
-		return $file || $cache;
+		$php_file = $this->config['cache_path'].$id.'.php';
+		$meta_file = $this->config['cache_path'].$id.'.meta.php';
+		
+		@unlink($php_file);
+		@unlink($meta_file);
+		
+		remove_php_file_from_opcache($php_file);
+		remove_php_file_from_opcache($meta_file);
 	}
 
 	/**

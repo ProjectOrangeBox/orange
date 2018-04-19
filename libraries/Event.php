@@ -1,7 +1,7 @@
 <?php
 /**
  * Event
- * Insert description here
+ * Manage Events in your Application
  *
  * @package CodeIgniter / Orange
  * @author Don Myers
@@ -20,148 +20,141 @@
  */
 class Event {
 	/**
-	 * track if the combined cached configuration has been loaded
+	 * storage for all listeners
 	 *
-	 * @var boolean
+	 * @var array
 	 */
 	protected $listeners = [];
 
 	/**
-	 * register
-	 * Insert description here
+	 * Register a listener
 	 *
-	 * @param $name
-	 * @param $closure
-	 * @param $priority
+	 * @param $name - string - name of the event we want to listen for
+	 * @param $closure - function to call if the event if triggered
+	 * @param $priority - integer - the priority this listener has against other listeners
+	 *										A priority of −100 is the highest priority and 100 is the lowest priority.
 	 *
-	 * @return
+	 * @return $this
 	 *
-	 * @access
-	 * @static
-	 * @throws
-	 * @example
+   * @access public
+	 * @example register('open.page',function(&$var1) { echo "hello $var1"; },-100);
 	 */
 	public function register($name, $closure, $priority = 0) {
+		/* if they pass in a array treat it as a name=>closure pair */
 		if (is_array($name)) {
 			foreach ($name as $n) {
-				$this->register($n, $closure, $priority = 0);
+				$this->register($n, $closure, $priority);
 			}
-			return;
+			return $this;
 		}
-
+		
+		/* clean up the name */
 		$name = $this->_normalize_name($name);
-		log_message('debug', 'event::register::'.$name);
+		
+		/* log a debug event */
+		log_message('debug','event::register::'.$name);
+		
+		/* save the listener */
 		$this->listeners[$name][$priority][] = $closure;
-
+		
+		/* allow chaining */
 		return $this;
 	}
 
 	/**
-	 * trigger
-	 * Insert description here
+	 * Trigger an event
 	 *
-	 * @param $name
-	 * @param $a1
-	 * @param $a2
-	 * @param $a3
-	 * @param $a4
-	 * @param $a5
-	 * @param $a6
-	 * @param $a7
-	 * @param $a8
+	 * @param $name - string - event to trigger
+	 * @param $a1,$a2,$a3,...,$a8 - mixed - variables to pass by reference
 	 *
-	 * @return
+	 * @return $this
 	 *
-	 * @access
-	 * @static
-	 * @throws
-	 * @example
+   * @access public
+	 * @example trigger('open.page',$var1);
 	 */
 	public function trigger($name, &$a1 = null, &$a2 = null, &$a3 = null, &$a4 = null, &$a5 = null, &$a6 = null, &$a7 = null, &$a8 = null) {
+		/* clean up the name */
 		$name = $this->_normalize_name($name);
+		
+		/* log a debug event */
 		log_message('debug', 'event::trigger::'.$name);
-
+		
+		/* do we even have any events with this name? */
 		if ($this->has($name)) {
+			/* let's get them all then */
 			$events = $this->listeners[$name];
+			
+			/* sort the keys (priority) */
 			ksort($events);
+			
+			/* call each event */
 			foreach ($events as $priority) {
 				foreach ($priority as $event) {
+					/* if false is returned from the event then do not process the rest of the events */
 					if ($event($a1, $a2, $a3, $a4, $a5, $a6, $a7, $a8) === false) {
+						/* jump out of both foreach loops */
 						break 2;
 					}
 				}
 			}
 		}
 
+		/* allow chaining */
 		return $this;
 	}
 
 	/**
-	 * has
-	 * Insert description here
+	 * Is there any listeners for a certain event?
 	 *
-	 * @param $name
+	 * @param $name - string - event to search for
 	 *
-	 * @return
+	 * @return boolean
 	 *
-	 * @access
-	 * @static
-	 * @throws
-	 * @example
+   * @access public
+	 * @example has('page.load');
 	 */
 	public function has($name) {
+		/* clean up the name */
 		$name = $this->_normalize_name($name);
 
 		return (isset($this->listeners[$name]) && count($this->listeners[$name]) > 0);
 	}
 
 	/**
-	 * events
-	 * Insert description here
+	 * Return an array of all of the event names
 	 *
+	 * @return array
 	 *
-	 * @return
-	 *
-	 * @access
-	 * @static
-	 * @throws
-	 * @example
+   * @access public
 	 */
 	public function events() {
 		return array_keys($this->listeners);
 	}
 
 	/**
-	 * count
-	 * Insert description here
+	 * Return the number of events for a certain name 
 	 *
-	 * @param $name
+	 * @param $name - string - event to search for
 	 *
-	 * @return
+	 * @return integer
 	 *
-	 * @access
-	 * @static
-	 * @throws
-	 * @example
+   * @access public
 	 */
 	public function count($name) {
+		/* clean up the name */
 		$name = $this->_normalize_name($name);
 
 		return count($this->listeners[$name]);
 	}
 
 	/**
-	 * _normalize_name
-	 * Insert description here
+	 * Normalize the event name
 	 *
-	 * @param $name
+	 * @param $name string
 	 *
-	 * @return
+	 * @return string
 	 *
-	 * @access
-	 * @static
-	 * @throws
-	 * @example
+   * @access protected
 	 */
 	protected function _normalize_name($name) {
 		return str_replace('_','.',strtolower(trim(preg_replace('#\W+#', '_', $name), '_')));

@@ -1,19 +1,35 @@
 <?php
 
-define('ORANGE_VERSION', '2.0.0');
+/* register the version */
+define('ORANGE_VERSION','2.0.0');
 
-require APPPATH.'config/paths.php';
+/* Where is the paths configuration file? */
+$paths_config_file = APPPATH.'config/paths.php';
 
+/* is the paths configuration file even there? */
+if (!file_exists($paths_config_file)) {
+	/* no show error */
+	die('Paths Config File Not found at "'.$paths_config_file.'"'.chr(10));
+}
+
+/* load the paths file */
+include $paths_config_file;
+
+/* get out the 2 paths we need now and set them as constants these are pretty "necessary" paths used thought the system */
 define('CACHEPATH',ROOTPATH.$config['cache']);
 define('LOGPATH',ROOTPATH.$config['logs']);
 
-require ORANGEPATH.'/libraries/Orange_autoload_files.php';
+/* load the orange autoloader library */
+include ORANGEPATH.'/libraries/Orange_autoload_files.php';
 
-orange_autoload_files::load(CACHEPATH.'/autoload_files.php');
+/* instancte the orange autoloader class and save the returned array */
+$_ORANGE_PATHS = (new Orange_autoload_files(CACHEPATH.'/autoload_files.php',2))->read_cache();
 
+/* register the Orange Autoloader */
 spl_autoload_register('codeigniter_autoload');
 
-assert_options(ASSERT_CALLBACK,function($file, $line, $code, $desc = ''){
+/* setup a assertion handler HTML & CLI output supported */
+assert_options(ASSERT_CALLBACK,function($file,$line,$code,$desc='') {
 	$error = '<!doctype html>
 	<title>Assertion Failed</title>
 	<style>
@@ -35,14 +51,19 @@ assert_options(ASSERT_CALLBACK,function($file, $line, $code, $desc = ''){
 	exit(1);
 });
 
+/* Ok now Orange is setup so bring in the CodeIgniter "Bootstrapper" */
 require_once BASEPATH.'core/CodeIgniter.php';
 
+/******************
+* Global Functions
+*******************/
+
 /**
- * newer / smarter version of get_instance
+ * newer / smarter version of CodeIgniter get_instance()
  *
- * @param string $class name of the library you are looking for
+ * @param string $class name of the library or model you are looking for
  *
- * @return $this instance of controller
+ * @return mixed
  *
  * @throws Exception
  * @examples ci()->load->library('email')
@@ -50,27 +71,48 @@ require_once BASEPATH.'core/CodeIgniter.php';
  * @examples ci('page')->render()
  */
 function &ci($class=null) {
-	/* this function uses the "bail on first match" */
+	/* this function uses the "return on first match" */
+
+	/* did they include a class name? */
 	if ($class) {
+		/* normalize it */
 		$class = strtolower($class);
 
+		/* is it load? that kind of special so handle that directly */
 		if ($class == 'load') {
 			return CI_Controller::get_instance()->load;
+
+		/* is the class loaded? */
 		} elseif (CI_Controller::get_instance()->load->is_loaded($class)) {
+			/* yes - then just return that */
 			return CI_Controller::get_instance()->$class;
 		} else {
-			$op = orange_paths();
-			if (isset($op['classes'][config_item('subclass_prefix').$class]) || isset($op['classes']['ci_'.$class])) {
+			/* ok let's see if it's a class we know about */
+
+			/* get the autoloader array */
+			$op = orange_paths('classes');
+
+			/* is it a CI_ class or MY_ class? */
+			if (isset($op[config_item('subclass_prefix').$class]) || isset($op['ci_'.$class])) {
+				/* yes - then load it */
 				CI_Controller::get_instance()->load->library($class);
+
+				/* and return it */
 				return CI_Controller::get_instance()->$class;
+
+			/* did the codeigniter autoloader load it? */
 			} elseif (codeigniter_autoload($class)) {
+
+				/* yes - then return it */
 				return CI_Controller::get_instance()->$class;
 			} else {
+				/* not sure what they are looking for */
 				throw new Exception('ci('.$class.') not found');
 			}
 		}
 	}
 
+	/* default CodeIgniter get_instance() */
 	return CI_Controller::get_instance();
 }
 
@@ -81,8 +123,8 @@ function &ci($class=null) {
  * exist it is instantiated and set to a static variable. If it has
  * previously been instantiated the variable is returned.
  *
- * @param	string	the class name being requested
- * @param	string	the directory where the class should be found
+ * @param	string the class name being requested
+ * @param	string the directory where the class should be found
  * @param	mixed	an optional argument to pass to the class constructor
  * @return	object
  */
@@ -117,7 +159,7 @@ function &load_class($class, $directory = 'libraries', $param = NULL) {
 }
 
 /**
- * CodeIgniter / Orange registered autoload function 
+ * CodeIgniter / Orange registered autoload function
  *
  * @param $class
  *
@@ -127,10 +169,10 @@ function &load_class($class, $directory = 'libraries', $param = NULL) {
 function codeigniter_autoload($class) {
 	/* load the autoload config array */
 	$op = orange_paths();
-	
+
 	/* normalize the class name */
 	$class = strtolower($class);
-	
+
 	/* is it in the class array? */
 	if (isset($op['classes'][$class])) {
 		require $op['classes'][$class];
@@ -155,41 +197,48 @@ function codeigniter_autoload($class) {
 
 /**
  * site_url
- * Insert description here
+ * Returns your site URL, as specified in your config file.
+ * also provides auto merging of "merge" fields in {} format
  *
  * @param $uri
  * @param $protocol
  *
  * @return
  *
- * @access
- * @static
- * @throws
- * @example
+ * @example site_url('/{www theme}/assets/css');
  */
 function site_url($uri = '', $protocol = NULL) {
+	/* Call CodeIgniter version first */
 	$uri = ci()->config->site_url($uri, $protocol);
-	
-	$file_path = CACHEPATH.'/site_url.php';
 
-	if (ENVIRONMENT == 'development' || !file_exists($file_path)) {
+	/* now let's merge if needed */
+
+	/* where is the cache file? */
+	$cache_file_path = CACHEPATH.'/site_url.php';
+
+	/* are we in development mode or is the cache file missing */
+	if (ENVIRONMENT == 'development' || !file_exists($cache_file_path)) {
+		/* yes - then we need to generate it */
 		$paths = config('paths',[]);
 
+		/* build the array for easier access later */
 		foreach ($paths as $find => $replace) {
 			$site_url['keys'][] = '{'.strtolower($find).'}';
 			$site_url['values'][] = $replace;
 		}
 
-		atomic_file_put_contents($file_path,'<?php return '.var_export($site_url,true).';');
+		/* save it */
+		atomic_file_put_contents($cache_file_path,'<?php return '.var_export($site_url,true).';');
 	}
 
-	$paths = include $file_path;
+	/* include the cache file */
+	$paths = include $cache_file_path;
 
+	/* return the merge str replace */
 	return str_replace($paths['keys'], $paths['values'], $uri);
 }
 
 /**
- * config
  * Wrapper for configure with dot notation
  * ci('config')->dot_item(...)
  *
@@ -198,10 +247,9 @@ function site_url($uri = '', $protocol = NULL) {
  *
  * @return
  *
- * @access
- * @static
- * @throws
- * @example
+ * @example $foo = config('file.key');
+ * @example $foo = config('file.key2','default value');
+ *
  */
 function config($setting,$default='%%no_value%%') {
 	$value = ci('config')->dot_item($setting,$default);
@@ -215,283 +263,248 @@ function config($setting,$default='%%no_value%%') {
 }
 
 /**
- * esc
- * Insert description here
+ * escape any single quotes with \"
  *
  * @param $string
  *
- * @return
+ * @return string
  *
- * @access
- * @static
- * @throws
- * @example
  */
 function esc($string) {
 	return str_replace('"', '\"', $string);
 }
 
 /**
- * e
- * Insert description here
+ * escape html special chracters
  *
  * @param $string
  *
- * @return
+ * @return string
  *
- * @access
- * @static
- * @throws
- * @example
  */
 function e($string) {
 	return htmlspecialchars($string, ENT_QUOTES, 'UTF-8');
 }
 
 /**
- * env
- * Insert description here
+ * get a environmental variable with support for default
  *
- * @param $key
- * @param $default
- * @param $required
+ * @param $key string environmental variable you want to load
+ * @param $default mixed the default value if environmental variable isn't set
  *
- * @return
+ * @return string
  *
- * @access
- * @static
- * @throws
- * @example
+ * @example $foo = env('key');
+ * @example $foo = env('key2','default value');
+ *
  */
 function env($key,$default=null) {
 	if (!isset($_ENV[$key]) && $default === null) {
-		die('The environmental variable "'.$key.'" not set.'.PHP_EOL);
+		throw new Exception('The environmental variable "'.$key.'" is not set and no default was provided.');
 	}
 
 	return (isset($_ENV[$key])) ? $_ENV[$key] : $default;
 }
 
 /**
- * l
- * Insert description here
+ * Simple Logging function for debugging purposes
+ * the file name is ALWAYS orange_debug.log
+ * and saved in the paths config file log path
  *
+ * @params 1 or more mixed parameters
  *
- * @return
+ * @return the number of bytes that were written to the file, or FALSE on failure.
  *
- * @access
- * @static
- * @throws
- * @example
  */
 function l() {
+	/* get the number of arguments passed */
 	$args = func_get_args();
-
-	foreach ($args as $idx=>$arg) {
-		if (!is_scalar($arg)) {
-			$args[$idx] = json_encode($arg);
-		}
-	}
 
 	$build = date('Y-m-d H:i:s').chr(10);
 
-	foreach ($args as $a) {
-		$build .= chr(9).$a.chr(10);
+	/* loop over the arguments */
+	foreach ($args as $idx=>$arg) {
+		/* is it's not scalar then convert it to json */
+		$build .= chr(9).((!is_scalar($arg) ? json_encode($arg) : $arg).chr(10);
 	}
 
-	file_put_contents(LOGPATH.'/l.log',$build,FILE_APPEND | LOCK_EX);
+	/* write it to the log file */
+	return file_put_contents(LOGPATH.'/orange_debug.log',$build,FILE_APPEND | LOCK_EX);
 }
 
 /**
- * unlock_session
- * Insert description here
+ * End the current session and store session data.
  *
+ * @return boolean TRUE on success or FALSE on failure.
  *
- * @return
- *
- * @access
- * @static
- * @throws
- * @example
  */
 function unlock_session() {
 	session_write_close();
 }
 
 /**
- * console
- * Insert description here
+ * Show output in Browser Console
  *
- * @param $var
- * @param $type
+ * @param $var mixed - converted to json
+ * @param $type - browser console log types defaults to log
  *
- * @return
- *
- * @access
- * @static
- * @throws
- * @example
  */
 function console($var, $type = 'log') {
 	echo '<script type="text/javascript">console.'.$type.'('.json_encode($var).')</script>';
 }
 
 /**
- * orange_paths
- * Insert description here
+ * Get the current Orange Paths Array
  *
+ * @param $var string specific section you are looking for (optional)
  *
- * @return
+ * @return array
  *
- * @access
- * @static
- * @throws
- * @example
  */
-function orange_paths() {
-	static $_ORANGE_PATHS;
+function orange_paths($section=null) {
+	global $_ORANGE_PATHS;
 
-	return (func_num_args()) ? $_ORANGE_PATHS = func_get_arg(0) : (array)$_ORANGE_PATHS;
+	return ($section) ? (array)$_ORANGE_PATHS[$section] : (array)$_ORANGE_PATHS;
 }
 
 /**
- * middleware
- * Insert description here
+ * Getter / Setter for the current Middleware
+ * Note: using it as a setter will overwrite what is currently stored
  *
+ * @return array
  *
- * @return
+ * @example middleware('AdminMiddleware','PublicMiddleware','GuiMiddleware','TooltipMiddleware');
  *
- * @access
- * @static
- * @throws
- * @example
  */
 function middleware() {
-	static $_ORANGE_MIDDLEWARE;
+	global $_ORANGE_MIDDLEWARE;
 
+	/* setting or getting? */
 	return (func_num_args()) ? $_ORANGE_MIDDLEWARE = func_get_args() :  (array)$_ORANGE_MIDDLEWARE;
 }
 
 /**
- * view
- * Insert description here
+ * The most Basic MVC View loader
  *
- * @param $_view
- * @param $_data
+ * @param $_view string view filename
+ * @param $_data array list of view variables
  *
- * @return
+ * @return string
  *
- * @access
- * @static
- * @throws
- * @example
+ * @example $html = view('admin/users/show',['name'=>'Johnny Appleseed']);
+ *
  */
 function view($_view,$_data=[]) {
-	$_op = orange_paths();
+	/* get a list of all the found views */
+	$_op = orange_paths('views');
+
+	/* clean up the view path */
 	$_file = ltrim(str_replace('.php','',$_view),'/');
 
-	if (!isset($_op['views'][$_file])) {
+	/* is the view file found? */
+	if (!isset($_op[$_file])) {
+		/* nope! */
 		throw new Exception('Could not locate view "'.$_file.'"');
 	}
 
-	$_view_file = $_op['views'][$_file];
+	/* get the view file */
+	$_view_file = $_op[$_file];
+
+	/* import variables into the current symbol table from an only prefix invalid/numeric variable names with _ 	*/
 	extract($_data, EXTR_PREFIX_INVALID, '_');
+
+	/* turn on output buffering */
 	ob_start();
 
+	/* bring in the view file */
 	include $_view_file;
 
+	/* return the current buffer contents and delete current output buffer */
 	return ob_get_clean();
 }
 
 /**
- * atomic_file_put_contents
- * Insert description here
+ * Write a string to a file with atomic uninterruptible
  *
- * @param $filepath
- * @param $content
+ * @param $filepath string path to the file where to write the data
+ * @param $content string the data to write
  *
- * @return
+ * @return the number of bytes that were written to the file, or FALSE on failure.
  *
- * @access
- * @static
- * @throws
- * @example
  */
 function atomic_file_put_contents($filepath, $content) {
+	/* get the path where you want to save this file so we can put our file in the same file */
 	$dirname = dirname($filepath);
-	$tmpfname = tempnam($dirname, 'afpc_');
 
+	/* is the directory writeable */
 	if (!is_writable($dirname)) {
 		throw new Exception('atomic file put contents folder "'.$dirname.'" not writable');
 	}
 
+	/* create file with unique file name with prefix */
+	$tmpfname = tempnam($dirname, 'afpc_');
+
+	/* did we get a temporary filename */
 	if ($tmpfname === false) {
 		throw new Exception('atomic file put contents could not create temp file');
 	}
 
+	/* write to the temporary file */
 	$bytes = file_put_contents($tmpfname, $content);
 
+	/* did we write anything? */
 	if ($bytes === false) {
 		throw new Exception('atomic file put contents could not file put contents');
 	}
 
+	/* changes file permissions so I can read/write and everyone else read */
 	if (chmod($tmpfname, 0644) === false) {
 		throw new Exception('atomic file put contents could not change file mode');
 	}
 
+	/* move it into place - this is the atomic function */
 	if (rename($tmpfname, $filepath) === false) {
 		throw new Exception('atomic file put contents could not make atomic switch');
 	}
 
-	if (function_exists('opcache_invalidate')) {
-		opcache_invalidate($filepath, true);
-	} elseif (function_exists('apc_delete_file')) {
-		apc_delete_file($filepath);
-	}
+	/* if it's cached we need to flush it out so the old one isn't loaded */
+	remove_php_file_from_opcache($filepath);
 
+	/* if log message function is loaded at this point log a debug entry */
 	if (function_exists('log_message')) {
 		log_message('debug', 'atomic_file_put_contents wrote '.$filepath.' '.$bytes.' bytes');
 	}
 
+	/* return the number of bytes written */
 	return $bytes;
 }
 
 /**
- * remove_php_file_from_opcache
- * Insert description here
+ * invalidate it if it's a cached script
  *
  * @param $fullpath
  *
  * @return
  *
- * @access
- * @static
- * @throws
- * @example
  */
 function remove_php_file_from_opcache($fullpath) {
-	$success = (is_file($fullpath)) ? unlink($fullpath) : true;
-
+	/* flush from the cache */
 	if (function_exists('opcache_invalidate')) {
 		opcache_invalidate($filepath, true);
 	} elseif (function_exists('apc_delete_file')) {
 		apc_delete_file($filepath);
 	}
-
-	return $success;
 }
 
 /**
- * convert_to_real
- * Insert description here
+ * Try to convert a value to it's real type
+ * this is nice for pulling string from a database
+ * such as configuration values stored in string format
  *
  * @param $value
  *
- * @return
+ * @return mixed
  *
- * @access
- * @static
- * @throws
- * @example
  */
 function convert_to_real($value) {
 	/* return on first match multiple exists */
@@ -511,7 +524,7 @@ function convert_to_real($value) {
 		break;
 	default:
 		if (is_numeric($value)) {
-			return (is_float($value)) ? (float) $value : (int) $value;
+			return (is_float($value)) ? (float)$value : (int)$value;
 		}
 	}
 
@@ -521,17 +534,14 @@ function convert_to_real($value) {
 }
 
 /**
- * convert_to_string
- * Insert description here
+ * Try to convert a value back into a string
+ * this is nice for storing string into a database
+ * such as configuration values stored in string format
  *
- * @param $value
+ * @param $value mixed
  *
- * @return
+ * @return string
  *
- * @access
- * @static
- * @throws
- * @example
  */
 function convert_to_string($value) {
 	/* return on first match multiple exists */
@@ -556,19 +566,14 @@ function convert_to_string($value) {
 }
 
 /**
- * simplify_array
- * Insert description here
+ * this will collapse a array with multiple values into a single key=>value pair
  *
  * @param $array
- * @param $key
- * @param $value
+ * @param $key string value to use for the key
+ * @param $value value to use for the value
  *
- * @return
+ * @return array
  *
- * @access
- * @static
- * @throws
- * @example
  */
 function simplify_array($array, $key = 'id', $value = null) {
 	$value = ($value) ? $value : $key;
@@ -586,19 +591,14 @@ function simplify_array($array, $key = 'id', $value = null) {
 }
 
 /**
- * cache
- * Insert description here
+ * Wrapper function to sue the currently loaded cache library in a closure fashion
  *
- * @param $key
- * @param $closure
- * @param $ttl
+ * @param $key string cache key
+ * @param $closure function to run IF the cached data is not found or has expired
+ * @param $ttl integer time to live if empty it will use the default
  *
- * @return
+ * @return mixed cached data
  *
- * @access
- * @static
- * @throws
- * @example
  */
 function cache($key, $closure, $ttl = null) {
 	if (!$cache = ci('cache')->get($key)) {
@@ -611,39 +611,41 @@ function cache($key, $closure, $ttl = null) {
 }
 
 /**
- * cache_ttl
- * Insert description here
+ * Get the current Cache Time to Live with optional "window" support to negate a cache stamped
  *
- * @param $use_window
+ * @param $use_window boolean
  *
- * @return
+ * @return integer
  *
- * @access
- * @static
- * @throws
- * @example
  */
 function cache_ttl($use_window=true) {
-	$cache_ttl = (int)config('cache_ttl',0);
-	$window_adder = ($use_window) ? mt_rand(-15,15) : 0;
+	/* get the cache ttl from the config file */
+	$cache_ttl = (int)config_item('cache_ttl');
 
-	return ($cache_ttl == 0) ? 0 : (max(0,$cache_ttl + $window_adder));
+	/* are they using the window option? */
+	if ($use_window) {
+		/* let determine the window size based on there cache time to live length no more than 5 minutes */
+		$window = min(300,ceil($cache_ttl * .02));
+		/* add it to the cache_ttl to get our "new" cache time to live */
+		$cache_ttl += mt_rand(-$window,$window);
+	}
+
+	return $cache_ttl;
 }
 
 /**
- * delete_cache_by_tags
- * Insert description here
+ * Delete cache records based on dot notation "tags"
  *
- * @param $args
+ * @param $args mixed rray, period separated list of tags or multiple arguments
  *
  * @return
  *
- * @access
- * @static
- * @throws
- * @example
+ * @example delete_cache_by_tags('acl','user','roles');
+ * @example delete_cache_by_tags('acl.user.roles');
+ * @example delete_cache_by_tags(['acl','user','roles']);
  */
 function delete_cache_by_tags($args) {
+	/* determine if it's a array, period separated list of tags or multiple arguments */
 	if (is_array($args)) {
 		$tags = $args;
 	} elseif(strpos($args,'.') !== false) {
@@ -652,12 +654,16 @@ function delete_cache_by_tags($args) {
 		$tags = func_get_args();
 	}
 
+	/* log a debug entry */
 	log_message('debug', 'delete_cache_by_tags '.implode(', ', $tags));
 
-	ci('event')->trigger('delete cache by tags', $tags);
-
+	/* trigger a event incase somebody else needs to know send in our array of tags by reference */
+	ci('event')->trigger('delete-cache-by-tags',$tags);
+	
+	/* get all of the currently loaded cache driver cache keys */
 	$cached_keys = ci('cache')->cache_info();
-
+	
+	/* if the cache key has 1 or more matching tag delete the entry */
 	if (is_array($cached_keys)) {
 		foreach ($cached_keys as $key) {
 			if (count(array_intersect(explode('.', $key['name']), $tags))) {
@@ -668,54 +674,50 @@ function delete_cache_by_tags($args) {
 }
 
 /**
- * filter_filename
- * Insert description here
+ * filter to clean filenames
  *
- * @param $str
- * @param $ext
+ * @param $str string to filter
+ * @param $ext extension to add to the end
  *
  * @return
  *
- * @access
- * @static
- * @throws
- * @example
  */
 function filter_filename($str,$ext=null) {
+	/*
+	only word characters - from a-z, A-Z, 0-9, including the _ (underscore) character
+	then trim any _ (underscore) characters from the beginning and end of the string
+	*/
 	$str = strtolower(trim(preg_replace('#\W+#', '_', $str), '_'));
 
 	return ($ext) ? $str.'.'.$ext : $str;
 }
 
 /**
- * filter_human
- * Insert description here
+ * filter to make input a little more "human"
  *
- * @param $str
+ * @param $str string to filter
  *
- * @return
+ * @return string
  *
- * @access
- * @static
- * @throws
- * @example
  */
 function filter_human($str) {
+	/*
+	only word characters - from a-z, A-Z, 0-9, including the _ (underscore) character
+	then trim any _ (underscore) characters from the beginning and end of the string
+	convert to lowercase
+	replace _ (underscore) characters with spaces
+	uppercase words
+	*/
 	return ucwords(str_replace('_',' ',strtolower(trim(preg_replace('#\W+#',' ', $str),' '))));
 }
 
 /**
- * filter_human
- * Insert description here
+ * filter out invisible characters
  *
- * @param $str
+ * @param $str string to filter
  *
- * @return
+ * @return string
  *
- * @access
- * @static
- * @throws
- * @example
  */
 function filter_visible($str) {
 	return preg_replace("/[^\\x20-\\x7E]/mi", '', $str);
