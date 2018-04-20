@@ -31,7 +31,7 @@ class MY_Input extends CI_Input {
 		parent::__construct();
 
 		/* load our array with the incoming data */
-		$this->_request = ($_POST) ? $_POST : $this->input_stream();
+		$this->_request = (count($_POST) > 0) ? $_POST : $this->input_stream();
 
 		log_message('info', 'MY_Input Class Initialized');
 	}
@@ -99,6 +99,72 @@ class MY_Input extends CI_Input {
 		}
 
 		return $this;
+	}
+
+	/**
+	 * process a request with advanced options
+	 * this makes it easier to pass this data into a model
+	 * or to provide additional processing
+	 *
+	 * @param array $move associated array new key=>old key (move)
+	 * @param array $copy associated array new key=>old key (copy)
+	 * @param string $default_model the name of the default model (where separator isn't present)
+	 * @param string $only_model_name only return this model
+	 * @param string $separator if this is present then treat this as a model + field pair
+	 * @param boolean $append_model should "_model" be append to the model names
+	 * @param array $_request form index=>value associated array
+	 *
+	 * @return array
+	 *
+	 * @examples
+	 */
+	public function request_process($move=[],$copy=[],$default_model='#',$only_model_name=null,$separator='.',$append_model=false,$_request=[]) {
+		$request = ($_request) ? $_request : $this->_request;
+
+		$groups = [];
+
+		/* first copy over any fields */
+		foreach ((array)$copy as $new_key=>$old_key) {
+			if (isset($request[$old_key])) {
+				$request[$new_key] = $request[$old_key];
+			}
+		}
+	
+		
+
+
+		/* now group them */
+		foreach ($request as $index=>$value) {
+			if (strpos($index,$separator) !== false) {
+				if (is_array($move)) {
+					if (isset($move[$index])) {
+						$index = $move[$index];
+					}
+				}
+
+				list($model,$field) = explode($separator,$index,2);
+
+				if ($append_model) {
+					$model = str_replace('_model','',$model).'_model';
+				}
+
+				if (is_array($value)) {
+					foreach ($value as $idx=>$v) {
+						$groups[$model][$idx][$field] = $v;
+					}
+				} else {
+					$groups[$model][$field] = $value;
+				}
+			} else {
+				$groups[$default_model][$index] = $value;
+			}
+		}
+
+		if ($append_model && $only_model_name) {
+			$only_model_name = str_replace('_model','',$only_model_name).'_model';
+		}
+
+		return ($only_model_name) ? $groups[$only_model_name] : $groups;
 	}
 
 	/**
