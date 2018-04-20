@@ -30,6 +30,7 @@ class MY_Config extends CI_Config {
 
 	/**
 	 * provide dot notation selection
+	 * this is the new "recommended" way to make sure you get database values as well
 	 *
 	 * @param string $item Config item name or dot notation format
 	 * @param mixed $index Index name or default if dot notation used
@@ -47,7 +48,7 @@ class MY_Config extends CI_Config {
 			if (class_exists('CI_Controller',false)) {
 				if (class_exists('Cache_export',false)) {
 					$this->setup = true;
-					$this->_load_combined_config();
+					$this->config = $this->_load_combined_config();
 				}
 			}
 		}
@@ -142,6 +143,6 @@ class MY_Config extends CI_Config {
 			ci('cache')->export->save('config',$built_config);
 		}
 
-		$this->config = $built_config;
+		return $built_config;
 	}
 } /* end class */

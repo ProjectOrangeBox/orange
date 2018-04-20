@@ -89,6 +89,7 @@ class Page {
  * @example
  */
 	public function __construct() {
+		define('PAGE_MIN',(env('SERVER_DEBUG') == 'development' ? '' : '.min'));
 		$this->route = strtolower(trim(ci()->router->fetch_directory().ci()->router->fetch_class(true).'/'.ci()->router->fetch_method(true), '/'));
 		$controller_path = '/'.str_replace('/index', '', $this->route);
 		$this->body_class(str_replace('/',' uri-',$controller_path));
@@ -128,6 +129,7 @@ class Page {
 				'controller_path'     => $controller_path,
 				'user_id'             => $uid,
 			]);
+
 		log_message('info', 'Page Class Initialized');
 	}
 

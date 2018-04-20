@@ -30,27 +30,27 @@ class MY_Loader extends CI_Loader {
 	 * Internal Load extended function
 	 */
 	protected function _ci_init_library($class, $prefix, $config = FALSE, $object_name = NULL) {
+		/* multiple exits */
+
+		/* Get a instance of CodeIgniter Super Object */
+		$CI = &get_instance();
+		
 		if (!$this->cache_drivers_loaded) {
+			/* all of our caches are loaded */
 			$this->cache_drivers_loaded = true;
+
+			/* load config.php configuration file contents */
 			$cache_config = get_config();
-			ci()->load->driver('cache', ['adapter' => $cache_config['cache_default'], 'backup' => $cache_config['cache_backup']]);
+			
+			/* attach cache driver now */
+			$CI->load->driver('cache', ['adapter' => $cache_config['cache_default'], 'backup' => $cache_config['cache_backup']]);
+			
 			/* attach page and export to CodeIgniter cache singleton loaded above */
-			$CI = &get_instance();
 			$CI->cache->page = new Cache_page($cache_config);
 			$CI->cache->export = new Cache_export($cache_config);
 		}
 
-		if ($config == FALSE) {
-			$orange_paths = orange_paths('configs');
-			$lc_class = strtolower($class);
-			$config = [];
-			if (isset($orange_paths['root'][$lc_class])) {
-				include $orange_paths['root'][$lc_class];
-			}
-			if (isset($orange_paths[ENVIRONMENT][$lc_class])) {
-				include $orange_paths[ENVIRONMENT][$lc_class];
-			}
-		}
+		$config = (!$config) ? config(strtolower($class),[]) : $config;
 
 		$class_name = $prefix.$class;
 
@@ -65,8 +65,6 @@ class MY_Loader extends CI_Loader {
 				$object_name = $this->_ci_varmap[$object_name];
 			}
 		}
-
-		$CI = &get_instance();
 
 		if (isset($CI->$object_name)) {
 			if ($CI->$object_name instanceof $class_name || PHPUNIT) {
@@ -85,18 +83,23 @@ class MY_Loader extends CI_Loader {
 	 * Internal Load extended function
 	 */
 	protected function _ci_load_stock_library($library_name, $file_path, $params, $object_name) {
+		/* multiple exits */
+	
 		$prefix = 'CI_';
 
 		if (class_exists($prefix.$library_name, FALSE)) {
 			if (class_exists(config_item('subclass_prefix').$library_name, FALSE)) {
 				$prefix = config_item('subclass_prefix');
 			}
+			
 			if ($object_name !== NULL) {
 				$CI = &get_instance();
+
 				if (!isset($CI->$object_name)) {
 					return $this->_ci_init_library($library_name, $prefix, $params, $object_name);
 				}
 			}
+			
 			log_message('debug', $library_name.' class already loaded. Second attempt ignored.');
 			return;
 		}
@@ -107,6 +110,7 @@ class MY_Loader extends CI_Loader {
 
 		if (isset($orange_paths[$prefix.$lc_library_name])) {
 			include_once $orange_paths[$prefix.$lc_library_name];
+			
 			if (class_exists($prefix.$lc_library_name, FALSE)) {
 				return $this->_ci_init_library($library_name, $prefix, $params, $object_name);
 			} else {
@@ -126,6 +130,7 @@ class MY_Loader extends CI_Loader {
 				log_message('debug', $path.' exists, but does not declare '.$subclass);
 			}
 		}
+		
 		return $this->_ci_init_library($library_name, $prefix, $params, $object_name);
 	}
 

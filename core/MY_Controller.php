@@ -87,10 +87,12 @@ class MY_Controller extends CI_Controller {
 	public $controller_model = null;
 
 	public function __construct() {
+		/* let the parent controller do it's work */
 		parent::__construct();
 
 		log_message('debug', 'MY_Controller::__construct');
-
+		
+		/* is the site up? */
 		if (php_sapi_name() !== 'cli') {
 			if (!config('application.site open',true)) {
 				if ($_COOKIE['ISOPEN'] !== config('application.is open cookie', md5(uniqid(true)))) {
@@ -98,15 +100,20 @@ class MY_Controller extends CI_Controller {
 				}
 			}
 		}
-
+		
+		/* fire off middleware if necessary */
 		foreach (middleware() as $middleware_file) {
+			/* this loads the class / middleware */
 			if (class_exists($middleware_file)) {
+				/* this fires it off */
 				new $middleware_file;
 			} else {
+				/* class_exists couldn't find it */
 				throw new Exception('middleware "'.$middleware_file.'" not found.');
 			}
 		}
-
+		
+		/* load the libraries, models, helpers, catalogs from the properties as needed */
 		if ($this->libraries) {
 			$this->load->library((array) $this->libraries);
 		}
@@ -135,11 +142,13 @@ class MY_Controller extends CI_Controller {
 				}
 			}
 		}
-
+		
+		/* does the controller have a "default" model? */
 		if ($this->controller_model) {
 			$this->load->model($this->controller_model);
 		}
-
+		
+		/* trigger our start up event */
 		ci('event')->trigger('ci.controller.startup', $this);
 	}
 } /* end class */
