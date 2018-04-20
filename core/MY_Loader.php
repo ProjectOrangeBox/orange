@@ -34,17 +34,17 @@ class MY_Loader extends CI_Loader {
 
 		/* Get a instance of CodeIgniter Super Object */
 		$CI = &get_instance();
-		
+
 		if (!$this->cache_drivers_loaded) {
 			/* all of our caches are loaded */
 			$this->cache_drivers_loaded = true;
 
 			/* load config.php configuration file contents */
 			$cache_config = get_config();
-			
+
 			/* attach cache driver now */
 			$CI->load->driver('cache', ['adapter' => $cache_config['cache_default'], 'backup' => $cache_config['cache_backup']]);
-			
+
 			/* attach page and export to CodeIgniter cache singleton loaded above */
 			$CI->cache->page = new Cache_page($cache_config);
 			$CI->cache->export = new Cache_export($cache_config);
@@ -84,14 +84,14 @@ class MY_Loader extends CI_Loader {
 	 */
 	protected function _ci_load_stock_library($library_name, $file_path, $params, $object_name) {
 		/* multiple exits */
-	
+
 		$prefix = 'CI_';
 
 		if (class_exists($prefix.$library_name, FALSE)) {
 			if (class_exists(config_item('subclass_prefix').$library_name, FALSE)) {
 				$prefix = config_item('subclass_prefix');
 			}
-			
+
 			if ($object_name !== NULL) {
 				$CI = &get_instance();
 
@@ -99,7 +99,7 @@ class MY_Loader extends CI_Loader {
 					return $this->_ci_init_library($library_name, $prefix, $params, $object_name);
 				}
 			}
-			
+
 			log_message('debug', $library_name.' class already loaded. Second attempt ignored.');
 			return;
 		}
@@ -110,7 +110,7 @@ class MY_Loader extends CI_Loader {
 
 		if (isset($orange_paths[$prefix.$lc_library_name])) {
 			include_once $orange_paths[$prefix.$lc_library_name];
-			
+
 			if (class_exists($prefix.$lc_library_name, FALSE)) {
 				return $this->_ci_init_library($library_name, $prefix, $params, $object_name);
 			} else {
@@ -130,7 +130,7 @@ class MY_Loader extends CI_Loader {
 				log_message('debug', $path.' exists, but does not declare '.$subclass);
 			}
 		}
-		
+
 		return $this->_ci_init_library($library_name, $prefix, $params, $object_name);
 	}
 

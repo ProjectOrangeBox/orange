@@ -47,16 +47,16 @@ class Event {
 			}
 			return $this;
 		}
-		
+
 		/* clean up the name */
 		$name = $this->_normalize_name($name);
-		
+
 		/* log a debug event */
 		log_message('debug','event::register::'.$name);
-		
+
 		/* save the listener */
 		$this->listeners[$name][$priority][] = $closure;
-		
+
 		/* allow chaining */
 		return $this;
 	}
@@ -75,18 +75,18 @@ class Event {
 	public function trigger($name, &$a1 = null, &$a2 = null, &$a3 = null, &$a4 = null, &$a5 = null, &$a6 = null, &$a7 = null, &$a8 = null) {
 		/* clean up the name */
 		$name = $this->_normalize_name($name);
-		
+
 		/* log a debug event */
 		log_message('debug', 'event::trigger::'.$name);
-		
+
 		/* do we even have any events with this name? */
 		if ($this->has($name)) {
 			/* let's get them all then */
 			$events = $this->listeners[$name];
-			
+
 			/* sort the keys (priority) */
 			ksort($events);
-			
+
 			/* call each event */
 			foreach ($events as $priority) {
 				foreach ($priority as $event) {
@@ -132,7 +132,7 @@ class Event {
 	}
 
 	/**
-	 * Return the number of events for a certain name 
+	 * Return the number of events for a certain name
 	 *
 	 * @param $name - string - event to search for
 	 *

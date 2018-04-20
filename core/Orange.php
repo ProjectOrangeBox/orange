@@ -659,10 +659,10 @@ function delete_cache_by_tags($args) {
 
 	/* trigger a event incase somebody else needs to know send in our array of tags by reference */
 	ci('event')->trigger('delete-cache-by-tags',$tags);
-	
+
 	/* get all of the currently loaded cache driver cache keys */
 	$cached_keys = ci('cache')->cache_info();
-	
+
 	/* if the cache key has 1 or more matching tag delete the entry */
 	if (is_array($cached_keys)) {
 		foreach ($cached_keys as $key) {

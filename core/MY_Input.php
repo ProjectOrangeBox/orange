@@ -204,7 +204,7 @@ class MY_Input extends CI_Input {
 				$only_index = str_replace('_model','',$only_index).'_model';
 			}
 		}
-		
+
 		/* do they want everything or just 1 */
 		return ($only_index) ? $groups[$only_index] : $groups;
 	}

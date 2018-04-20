@@ -301,10 +301,10 @@ class Cache_export extends CI_Driver {
 	protected function single_delete($id) {
 		$php_file = $this->config['cache_path'].$id.'.php';
 		$meta_file = $this->config['cache_path'].$id.'.meta.php';
-		
+
 		@unlink($php_file);
 		@unlink($meta_file);
-		
+
 		remove_php_file_from_opcache($php_file);
 		remove_php_file_from_opcache($meta_file);
 	}
