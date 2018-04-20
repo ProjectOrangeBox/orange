@@ -103,50 +103,53 @@ class MY_Input extends CI_Input {
 
 	/**
 	 * process a request with advanced options
-	 * this makes it easier to pass this data into a model
+	 * this makes it easier to pass returned array into a models
 	 * or to provide additional processing
 	 *
-	 * @param array $move associated array new key=>old key (move)
-	 * @param array $copy associated array new key=>old key (copy)
+	 * @param array $copy associated array new index=>old index (copy)
+	 * @param array $move associated array new index=>old index (move)
+	 * @param array $remove array index note: this is preformed after copy and move
 	 * @param string $default_model the name of the default model (where separator isn't present)
 	 * @param string $only_model_name only return this model
-	 * @param string $separator if this is present then treat this as a model + field pair
-	 * @param boolean $append_model should "_model" be append to the model names
-	 * @param array $_request form index=>value associated array
+	 * @param string $separator if this is present then treat each array index as a model + field pair
+	 * @param boolean $append_model should "_model" be append to the array indexs
+	 * @param array $_request form's index=>value associated array
 	 *
 	 * @return array
 	 *
 	 * @examples
 	 */
-	public function request_process($move=[],$copy=[],$default_model='#',$only_model_name=null,$separator='.',$append_model=false,$_request=[]) {
+	public function request_process($copy=[],$move=[],$remove=[],$default_model='#',$only_model_name=null,$separator='.',$append_model=false,$_request=[]) {
 		$request = ($_request) ? $_request : $this->_request;
 
 		$groups = [];
 
 		/* first copy over any fields */
-		foreach ((array)$copy as $new_key=>$old_key) {
-			if (isset($request[$old_key])) {
-				$request[$new_key] = $request[$old_key];
+		foreach ((array)$copy as $new_index=>$old_index) {
+			if (isset($request[$old_index])) {
+				$request[$new_index] = $request[$old_index];
 			}
 		}
-	
 		
+		/* then move any fields */
+		foreach ((array)$move as $new_index=>$old_index) {
+			if (isset($request[$old_index])) {
+				$request[$new_index] = $request[$old_index];
+				unset($request[$old_index]);
+			}
+		}
 
+		/* finally remove any fields */
+		foreach ((array)$remove as $index) {
+			if (isset($request[$index])) {
+				unset($request[$index]);
+			}
+		}
 
 		/* now group them */
 		foreach ($request as $index=>$value) {
 			if (strpos($index,$separator) !== false) {
-				if (is_array($move)) {
-					if (isset($move[$index])) {
-						$index = $move[$index];
-					}
-				}
-
 				list($model,$field) = explode($separator,$index,2);
-
-				if ($append_model) {
-					$model = str_replace('_model','',$model).'_model';
-				}
 
 				if (is_array($value)) {
 					foreach ($value as $idx=>$v) {
@@ -160,8 +163,40 @@ class MY_Input extends CI_Input {
 			}
 		}
 
-		if ($append_model && $only_model_name) {
-			$only_model_name = str_replace('_model','',$only_model_name).'_model';
+		/* do any indexs end with []? if so treat as a array */
+		foreach ($groups as $key=>$value) {
+			if (substr($key,-2) == '[]') {
+				$child_index = substr($key,0,-2);
+				$child_key = key($value);
+				$child_value = current($value);
+
+				if (is_array($groups[$child_index])) {
+					foreach ($groups[$child_index] as $ii=>$child_record) {
+						if (is_array($groups[$child_index][$ii])) {
+							$groups[$child_index][$ii] = $child_record + [$child_key=>$child_value];
+						} else {
+							$groups[$child_index][$child_key] = $child_value;
+						}
+					}
+				}
+
+				unset($groups[$key]);
+			}
+		}
+
+		/* add _model if necessary */
+		if ($append_model) {
+			foreach ($groups as $model_name=>$value) {
+				if (substr($model_name,-6) != '_model') {
+					$groups[$model_name.'_model'] = $value;
+
+					unset($groups[$model_name]);
+				}
+			}
+		
+			if (is_string($only_model_name)) {
+				$only_model_name = str_replace('_model','',$only_model_name).'_model';
+			}
 		}
 
 		return ($only_model_name) ? $groups[$only_model_name] : $groups;
