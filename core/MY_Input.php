@@ -24,14 +24,14 @@ class MY_Input extends CI_Input {
 	 *
 	 * @var array
 	 */
-	protected $_request;
+	protected $_request = [];
 
 	public function __construct() {
+		$this->_raw_input_stream = file_get_contents('php://input');
+		$this->_request = $this->http_parse_query($this->_raw_input_stream);
+
 		/* call the parent classes constructor */
 		parent::__construct();
-
-		/* load our array with the incoming data */
-		$this->_request = (count($_POST) > 0) ? $_POST : $this->input_stream();
 
 		log_message('info', 'MY_Input Class Initialized');
 	}
@@ -77,55 +77,42 @@ class MY_Input extends CI_Input {
 	}
 
 	/**
-	 * request_remap
-	 * remap the input keys
-	 *
-	 * @param array $map associated array new key=>old key
-	 * @param boolean $keep_current keep the current request data
-	 *
-	 * @return $this
-	 *
-	 * @examples
-	 */
-	public function request_remap($map = [],$keep_current = false) {
-		$current_request = $this->_request;
-
-		if (!$keep_current) {
-			$this->_request = [];
-		}
-
-		foreach ((array)$map as $new_key => $old_key) {
-			$this->_request[$new_key] = $current_request[$old_key];
-		}
-
-		return $this;
-	}
-
-	/**
 	 * process a request with advanced options
-	 * this makes it easier to pass returned array into a models
-	 * or to provide additional processing
+	 * this makes it easier to pass the returned array into a models
+	 * or something else for further processing
 	 *
 	 * @param array $copy associated array new index=>old index (copy) - preformed first
 	 * @param array $move associated array new index=>old index (move) - preformed second
-	 * @param array $remove indexes based on array index - preformed last
+	 * @param array $remove array indexes - preformed last
 	 * @param string $default_model the name of the default model (where separator isn't present)
 	 * @param string $only_index only return this model
 	 * @param string $separator if this is present then treat each array index as a model + field pair
-	 * @param boolean $append_model should "_model" be append to the array indexs
-	 * @param array $_request form's index=>value associated array
+	 * @param boolean $append_model should "_model" be append to the array indexes
+	 * @param mixed $_request associated array index=>value - or - TRUE to use client input
 	 *
 	 * @return array
 	 *
-	 * it is possible to append [] (brackets) after the index name in the
+	 * if $_request is true the input is processed and placed back into client input
+	 * if $_request is false the input is processed then a array is returned
+	 * if $_request is an array then a array is returned
+	 *
+	 * it is possible to append [] (brackets) after the field name in the
 	 * copy or move array in order to copy or move the value to the output of a array if needed
-	 * $copy = ['roles[].parent_id'=>'id'];
-	 * This would copy the id into the role index
+	 * $copy = ['roles.parent_id[]'=>'id'];
+	 * This would copy the id to each role index
 	 *
 	 */
-	public function request_process($copy=[],$move=[],$remove=[],$default_model='#',$only_index=null,$separator='.',$append_model=false,$_request=[]) {
+	public function request_remap($copy=[],$move=[],$remove=[],$default_model='#',$only_index=null,$separator='.',$append_model=false,$_request=[]) {
 		/* use form request or what was sent in? */
-		$request = ($_request) ? $_request : $this->_request;
+		if (is_bool($_request)) {
+			$request = $this->_request;
+		} elseif (is_array($_request)) {
+			$request = $_request;
+		} else {
+			throw new Exception('Request Process input not an array or boolean.');
+		}
+
+		$append_model = ($append_model === true) ? '_model' : $append_model;
 
 		/* storage for new form groups */
 		$groups = [];
@@ -171,21 +158,15 @@ class MY_Input extends CI_Input {
 
 		/* now process the array elements */
 		foreach ($groups as $key=>$value) {
-			if (substr($key,-2) == '[]') {
-				foreach ((array)$value as $i=>$v) {
-					$child_index = substr($key,0,-2);
-
-					if (is_array($groups[$child_index])) {
-						foreach ($groups[$child_index] as $ii=>$child_record) {
-							if (is_array($groups[$child_index][$ii])) {
-								$groups[$child_index][$ii] = $child_record + [$i=>$v];
-							} else {
-								$groups[$child_index][$i] = $v;
-							}
+			if (is_array($value)) {
+				foreach ($value as $k=>$v) {
+					if (substr($k,-2) == '[]') {
+						$kk = substr($k,0,-2);
+						unset($groups[$key][$k]);
+						foreach ($groups[$key] as $aa=>$bb) {
+							$groups[$key][$aa][$kk] = $v;
 						}
 					}
-
-					unset($groups[$key]);
 				}
 			}
 		}
@@ -193,20 +174,32 @@ class MY_Input extends CI_Input {
 		/* add _model if necessary */
 		if ($append_model) {
 			foreach ($groups as $model_name=>$value) {
-				if (substr($model_name,-6) != '_model') {
-					$groups[$model_name.'_model'] = $value;
+				if (substr($model_name,-strlen($append_model)) != $append_model) {
+					$groups[$model_name.$append_model] = $value;
 
 					unset($groups[$model_name]);
 				}
 			}
 
 			if (is_string($only_index)) {
-				$only_index = str_replace('_model','',$only_index).'_model';
+				$only_index = str_replace($append_model,'',$only_index).$append_model;
 			}
 		}
 
-		/* do they want everything or just 1 */
-		return ($only_index) ? $groups[$only_index] : $groups;
+		/* do they want the entire group array or just a single part of it? */
+		$output_array = ($only_index) ? $groups[$only_index] : $groups;
+
+		/* default method output */
+		$responds = $output_array;
+
+		/* if request argument was true then put back into internal request property */
+		if ($_request === true) {
+			$this->_request = $output_array;
+
+			$responds = $this;
+		}
+
+		return $responds;
 	}
 
 	/**
@@ -228,4 +221,61 @@ class MY_Input extends CI_Input {
 
 		return ($value === null) ? $default : $value;
 	}
+
+	/*
+	http://php.net/manual/en/function.parse-str.php#119484
+	*/
+	protected function http_parse_query($queryString) {
+		$result = [];
+
+		if (!empty($queryString)) {
+			$parts = explode('&',$queryString);
+
+			foreach ($parts as $part) {
+				list($paramName, $paramValue) = explode('=',$part,2);
+
+				$paramName = urldecode($paramName);
+				$paramValue = urldecode($paramValue);
+
+				if (preg_match_all('/\[([^\]]*)\]/m', $paramName, $matches)) {
+					$paramName = substr($paramName, 0, strpos($paramName, '['));
+					$keys = array_merge([$paramName], $matches[1]);
+				} else {
+					$keys = [$paramName];
+				}
+
+				$target = &$result;
+
+				foreach ($keys as $index) {
+					if ($index === '') {
+						if (isset($target)) {
+							if (is_array($target)) {
+								$intKeys = array_filter(array_keys($target), 'is_int');
+								$index = count($intKeys) ? max($intKeys)+1 : 0;
+							} else {
+								$target = [$target];
+								$index  = 1;
+							}
+						} else {
+							$target = [];
+							$index = 0;
+						}
+					} elseif (isset($target[$index]) && !is_array($target[$index])) {
+						$target[$index] = [$target[$index]];
+					}
+
+					$target = &$target[$index];
+				}
+
+				if (is_array($target)) {
+					$target[] = $paramValue;
+				} else {
+					$target = $paramValue;
+				}
+			}
+		}
+
+		return $result;
+	}
+
 } /* end class */
