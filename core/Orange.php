@@ -678,7 +678,7 @@ function filter($rule,$field) {
 	foreach (explode('|',$rule) as $r) {
 		$a[] = 'filter_'.str_replace('filter_','',strtolower($r));
 	}
-	
+
 	ci('validate')->single(implode('|',$a),$field);
 
 	return $field;

@@ -13,7 +13,7 @@
 class Filter_visible extends Filter_base {
 	public function filter(&$field, $options) {
 		$field = preg_replace('/[\x00-\x1F\x7F\xA0]/u','',$field);
-		
+
 		/* options is max length - filter is in orange core */
 		$this->field($field)->length($options);
 	}

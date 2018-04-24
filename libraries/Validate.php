@@ -396,7 +396,7 @@ class Validate {
 			$plugin = ($is_filter) ? new $class_name($this->field_data) : new $class_name($this->field_data, $this->error_string);
 		} else {
 			$type = ($is_filter) ? 'Filter' : 'Validation';
-		
+
 			throw new Exception('Load '.$type.' plugin "'.$class_name.'" not found.');
 		}
 
