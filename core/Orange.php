@@ -320,16 +320,16 @@ function l() {
 	/* get the number of arguments passed */
 	$args = func_get_args();
 
-	$build = date('Y-m-d H:i:s').chr(10);
+	$log[] = date('Y-m-d H:i:s');
 
 	/* loop over the arguments */
 	foreach ($args as $idx=>$arg) {
 		/* is it's not scalar then convert it to json */
-		$build .= chr(9).(!is_scalar($arg)) ? json_encode($arg) : $arg.chr(10);
+		$log[] = (!is_scalar($arg)) ? chr(9).json_encode($arg) : chr(9).$arg;
 	}
 
 	/* write it to the log file */
-	return file_put_contents(LOGPATH.'/orange_debug.log',$build,FILE_APPEND | LOCK_EX);
+	return file_put_contents(LOGPATH.'/orange_debug.log',implode(chr(10),$log).chr(10),FILE_APPEND | LOCK_EX);
 }
 
 /**
