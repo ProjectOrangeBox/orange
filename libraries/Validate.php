@@ -395,7 +395,7 @@ class Validate {
 		if (class_exists($class_name,true)) {
 			$plugin = ($is_filter) ? new $class_name($this->field_data) : new $class_name($this->field_data, $this->error_string);
 		}
-		
+
 		/* if it's not there then it might be a built in function */
 
 		return $plugin;
