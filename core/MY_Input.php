@@ -28,7 +28,8 @@ class MY_Input extends CI_Input {
 
 	public function __construct() {
 		$this->_raw_input_stream = file_get_contents('php://input');
-		$this->_request = $this->http_parse_query($this->_raw_input_stream);
+
+		$this->_request = (empty($this->_raw_input_stream)) ? $_POST : $this->http_parse_query($this->_raw_input_stream);
 
 		/* call the parent classes constructor */
 		parent::__construct();
