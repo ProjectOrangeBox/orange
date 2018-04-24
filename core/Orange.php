@@ -673,52 +673,19 @@ function delete_cache_by_tags($args) {
 	}
 }
 
-/**
- * filter to clean filenames
- *
- * @param $str string to filter
- * @param $ext extension to add to the end
- *
- * @return
- *
- */
-function filter_filename($str,$ext=null) {
-	/*
-	only word characters - from a-z, A-Z, 0-9, including the _ (underscore) character
-	then trim any _ (underscore) characters from the beginning and end of the string
-	*/
-	$str = strtolower(trim(preg_replace('#\W+#', '_', $str), '_'));
+function filter($rule,$field) {
+	/* add filter_ if it's not there */
+	foreach (explode('|',$rule) as $r) {
+		$a[] = 'filter_'.str_replace('filter_','',strtolower($r));
+	}
+	
+	ci('validate')->single(implode('|',$a),$field);
 
-	return ($ext) ? $str.'.'.$ext : $str;
+	return $field;
 }
 
-/**
- * filter to make input a little more "human"
- *
- * @param $str string to filter
- *
- * @return string
- *
- */
-function filter_human($str) {
-	/*
-	only word characters - from a-z, A-Z, 0-9, including the _ (underscore) character
-	then trim any _ (underscore) characters from the beginning and end of the string
-	convert to lowercase
-	replace _ (underscore) characters with spaces
-	uppercase words
-	*/
-	return ucwords(str_replace('_',' ',strtolower(trim(preg_replace('#\W+#',' ', $str),' '))));
-}
+function valid($rule,$field) {
+	ci('validate')->single($rule,$field);
 
-/**
- * filter out invisible characters
- *
- * @param $str string to filter
- *
- * @return string
- *
- */
-function filter_visible($str) {
-	return preg_replace("/[^\\x20-\\x7E]/mi", '', $str);
+	return !ci('errors')->has();
 }
