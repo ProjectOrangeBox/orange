@@ -442,7 +442,7 @@ class Database_model extends MY_Model {
 
 /**
  * Make sure each column is added to data even if empty
- * this makes sure each validation rule can work on something if nessesary
+ * this makes sure each validation rule can work on something if necessary
  * if data didn't include the column then the rules would be skipped
  *
  * @param $data
