@@ -914,7 +914,8 @@ class Database_model extends MY_Model {
 	public function exists($arg) {
 		$record = $this->get_by($this->create_where($arg));
 
-		return (isset($record->{$this->primary_key})) ? $record : false;
+		/* did we get one or more columns */
+		return (count((array)$record)) ? $record : false;
 	}
 
 /**

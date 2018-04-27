@@ -263,6 +263,31 @@ function config($setting,$default='%%no_value%%') {
 }
 
 /**
+ * Wrapper for validate
+ *
+*/
+function filter($rule,$field) {
+	/* add filter_ if it's not there */
+	foreach (explode('|',$rule) as $r) {
+		$a[] = 'filter_'.str_replace('filter_','',strtolower($r));
+	}
+
+	ci('validate')->single(implode('|',$a),$field);
+
+	return $field;
+}
+
+/**
+ * Wrapper for valid
+ *
+*/
+function valid($rule,$field) {
+	ci('validate')->single($rule,$field);
+
+	return (!ci('errors')->has());
+}
+
+/**
  * escape any single quotes with \"
  *
  * @param $string
@@ -671,21 +696,4 @@ function delete_cache_by_tags($args) {
 			}
 		}
 	}
-}
-
-function filter($rule,$field) {
-	/* add filter_ if it's not there */
-	foreach (explode('|',$rule) as $r) {
-		$a[] = 'filter_'.str_replace('filter_','',strtolower($r));
-	}
-
-	ci('validate')->single(implode('|',$a),$field);
-
-	return $field;
-}
-
-function valid($rule,$field) {
-	ci('validate')->single($rule,$field);
-
-	return !ci('errors')->has();
 }

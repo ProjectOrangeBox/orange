@@ -47,20 +47,20 @@ class Pear {
 	 */
 	protected static $fragment = null;
 
-/**
- * __callStatic
- * Insert description here
- *
- * @param $name
- * @param $arguments
- *
- * @return
- *
- * @access
- * @static
- * @throws
- * @example
- */
+	/**
+	 * __callStatic
+	 * Insert description here
+	 *
+	 * @param $name
+	 * @param $arguments
+	 *
+	 * @return
+	 *
+	 * @access
+	 * @static
+	 * @throws
+	 * @example
+	 */
 	public static function __callStatic($name,$arguments) {
 		log_message('debug', 'Pear::__callStatic::'.$name);
 
@@ -94,20 +94,20 @@ class Pear {
 		throw new Exception('Plugin missing "'.$name.'"');
 	}
 
-/**
- * section
- * Insert description here
- *
- * @param $name
- * @param $value
- *
- * @return
- *
- * @access
- * @static
- * @throws
- * @example
- */
+	/**
+	 * section
+	 * Insert description here
+	 *
+	 * @param $name
+	 * @param $value
+	 *
+	 * @return
+	 *
+	 * @access
+	 * @static
+	 * @throws
+	 * @example
+	 */
 	public static function section($name,$value=null) {
 		if ($value) {
 			ci('load')->vars([$name => $value]);
@@ -117,36 +117,36 @@ class Pear {
 		}
 	}
 
-/**
- * parent
- * Insert description here
- *
- * @param $name
- *
- * @return
- *
- * @access
- * @static
- * @throws
- * @example
- */
+	/**
+	 * parent
+	 * Insert description here
+	 *
+	 * @param $name
+	 *
+	 * @return
+	 *
+	 * @access
+	 * @static
+	 * @throws
+	 * @example
+	 */
 	public static function parent($name=null) {
 		$name = ($name) ? $name : end(self::$fragment);
 		echo ci('load')->get_var($name);
 	}
 
-/**
- * end
- * Insert description here
- *
- *
- * @return
- *
- * @access
- * @static
- * @throws
- * @example
- */
+	/**
+	 * end
+	 * Insert description here
+	 *
+	 *
+	 * @return
+	 *
+	 * @access
+	 * @static
+	 * @throws
+	 * @example
+	 */
 	public static function end() {
 		$name = array_pop(self::$fragment);
 		$buffer = ob_get_contents();
@@ -154,38 +154,42 @@ class Pear {
 		ci('load')->vars([$name => $buffer]);
 	}
 
-/**
- * extends
- * Insert description here
- *
- * @param $name
- *
- * @return
- *
- * @access
- * @static
- * @throws
- * @example
- */
+	/**
+	 * extends
+	 * Insert description here
+	 *
+	 * @param $name
+	 *
+	 * @return
+	 *
+	 * @access
+	 * @static
+	 * @throws
+	 * @example
+	 */
 	public static function extends($name) {
+		if (self::$extends !== null) {
+			throw new Exception('Pear Templating is already extending "'.self::$extends.'" therefore we cannot extend "'.$name.'"');
+		}
+
 		self::$extends = $name;
 	}
 
-/**
- * include
- * Insert description here
- *
- * @param $view
- * @param $data
- * @param $name
- *
- * @return
- *
- * @access
- * @static
- * @throws
- * @example
- */
+	/**
+	 * include
+	 * Insert description here
+	 *
+	 * @param $view
+	 * @param $data
+	 * @param $name
+	 *
+	 * @return
+	 *
+	 * @access
+	 * @static
+	 * @throws
+	 * @example
+	 */
 	public static function include($view = null, $data = [], $name = true) {
 		if ($name === true) {
 			echo ci('page')->view($view, $data, $name);
@@ -194,35 +198,35 @@ class Pear {
 		}
 	}
 
-/**
- * is_extending
- * Insert description here
- *
- *
- * @return
- *
- * @access
- * @static
- * @throws
- * @example
- */
+	/**
+	 * is_extending
+	 * Insert description here
+	 *
+	 *
+	 * @return
+	 *
+	 * @access
+	 * @static
+	 * @throws
+	 * @example
+	 */
 	public static function is_extending() {
 		return self::$extends;
 	}
 
-/**
- * plugins
- * Insert description here
- *
- * @param $name
- *
- * @return
- *
- * @access
- * @static
- * @throws
- * @example
- */
+	/**
+	 * plugins
+	 * Insert description here
+	 *
+	 * @param $name
+	 *
+	 * @return
+	 *
+	 * @access
+	 * @static
+	 * @throws
+	 * @example
+	 */
 	public static function plugins($name) {
 		ci('page')->prepend_asset(true);
 
@@ -239,19 +243,19 @@ class Pear {
 		ci('page')->prepend_asset(false);
 	}
 
-/**
- * load_class
- * Insert description here
- *
- * @param $name
- *
- * @return
- *
- * @access
- * @static
- * @throws
- * @example
- */
+	/**
+	 * load_class
+	 * Insert description here
+	 *
+	 * @param $name
+	 *
+	 * @return
+	 *
+	 * @access
+	 * @static
+	 * @throws
+	 * @example
+	 */
 	protected static function load_class($name,$throw_error=false) {
 		$class_name = 'Pear_'.str_replace('pear_','',strtolower($name));
 

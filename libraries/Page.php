@@ -530,17 +530,22 @@ class Page {
  * @throws
  * @example
  */
-	protected function _asset_add($name,$value) {
+	protected function _asset_add($name,$value,$priority=50) {
 		$key = md5($value);
+		
 		if (!isset($this->assets_added[$key])) {
 			$this->assets_added[$key] = true;
+		
 			$complete_name = $this->page_prefix.$name;
+		
 			if ($this->prepend_asset) {
 				ci()->load->vars([$complete_name => $value.chr(10).ci()->load->get_var($complete_name)]);
 			} else {
 				ci()->load->vars([$complete_name => ci()->load->get_var($complete_name).$value.chr(10)]);
 			}
+		
 		}
+		
 		return $this;
 	}
 }
