@@ -20,13 +20,7 @@
  * @ used but not required
  */
 class Page {
-	/**
-	 * track if the combined cached configuration has been loaded
-	 *
-	 * @var boolean
-	 */
-	protected $prepend_asset = false;
-
+	protected $priority = 50;
 	/**
 	 * track if the combined cached configuration has been loaded
 	 *
@@ -46,14 +40,14 @@ class Page {
 	 *
 	 * @var boolean
 	 */
-	protected $assets            = [];
+	protected $variables            = [];
 
 	/**
 	 * track if the combined cached configuration has been loaded
 	 *
 	 * @var boolean
 	 */
-	protected $assets_added			 = [];
+	protected $prevent_duplicate = [];
 
 	/**
 	 * track if the combined cached configuration has been loaded
@@ -90,21 +84,29 @@ class Page {
  */
 	public function __construct() {
 		define('PAGE_MIN',(env('SERVER_DEBUG') == 'development' ? '' : '.min'));
-		$this->route = strtolower(trim(ci()->router->fetch_directory().ci()->router->fetch_class(true).'/'.ci()->router->fetch_method(true), '/'));
+		
+		$this->route = strtolower(trim(ci('router')->fetch_directory().ci('router')->fetch_class(true).'/'.ci('router')->fetch_method(true), '/'));
 		$controller_path = '/'.str_replace('/index', '', $this->route);
-		$this->body_class(str_replace('/',' uri-',$controller_path));
+		$this->body_class(trim(str_replace('/',' uri-',$controller_path)));
+		
 		$uid = 'guest';
 		$is = 'not-active';
+		
+		/* this is a variable test */
 		if (isset(ci()->user)) {
-			$uid = md5(ci()->user->id.config('config.encryption_key'));
-			if (ci()->user->logged_in()) {
+			$uid = md5(ci('user')->id.config('config.encryption_key'));
+			if (ci('user')->logged_in()) {
 				$is = 'active';
 			}
-			$this->data('user', ci()->user);
+			$this->data('user', ci('user'));
 		}
+		
 		$this->body_class(['uid-'.$uid,'is-'.$is]);
-		ci()->load->helper('url');
+		
+		ci('load')->helper('url');
+		
 		$base_url = trim(base_url(), '/');
+		
 		$merge_configs = [
 			'title',
 			'body_class',
@@ -117,18 +119,19 @@ class Page {
 			'js_variables',
 			'icon',
 		];
+		
 		foreach ($merge_configs as $mc) {
 			if ($config = config('page.'.$mc,false)) {
 				$this->$mc($config);
 			}
 		}
-		$this
-			->js_variables([
-				'base_url'            => $base_url,
-				'app_id'              => md5($base_url),
-				'controller_path'     => $controller_path,
-				'user_id'             => $uid,
-			]);
+		
+		$this->js_variables([
+			'base_url'				=> $base_url,
+			'app_id'					=> md5($base_url),
+			'controller_path' => $controller_path,
+			'user_id'					=> $uid,
+		]);
 
 		log_message('info', 'Page Class Initialized');
 	}
@@ -139,15 +142,34 @@ class Page {
  *
  * @param $title
  *
- * @return
+ * @return $this
  *
- * @access
- * @static
- * @throws
- * @example
  */
 	public function title($title = '') {
 		return $this->data($this->page_prefix.'title', $title);
+	}
+	
+	/* this prepares the current page variables */
+	public function prepare_page_variables() {
+		foreach ($this->variables as $page_variable=>$entries) {
+			/* sort the keys (priority) */
+			ksort($entries);
+			
+			/* get the current content */
+			$current_content = ci('load')->get_var($page_variable);
+			
+			/* add the currently available entries */
+			foreach ($entries as $priority) {
+				foreach ($priority as $string) {
+					$current_content .= $string;
+				}
+			}
+			
+			ci('load')->vars($page_variable,$current_content);
+
+			/* now flush those assets since they have already been added to the page variables */
+			$this->variables = [];
+		}
 	}
 
 /**
@@ -157,16 +179,13 @@ class Page {
  * @param $attr
  * @param $name
  * @param $content
+ * @param $priority integer
  *
- * @return
+ * @return $this
  *
- * @access
- * @static
- * @throws
- * @example
  */
-	public function meta($attr, $name, $content = null) {
-		return $this->_asset_add('meta','<meta '.$attr.'="'.$name.'"'.(($content) ? ' content="'.$content.'"' : '').'>');
+	public function meta($attr, $name, $content = null,$priority = null) {
+		return $this->_asset_add('meta','<meta '.$attr.'="'.$name.'"'.(($content) ? ' content="'.$content.'"' : '').'>',$priority);
 	}
 
 /**
@@ -174,51 +193,53 @@ class Page {
  * Insert description here
  *
  * @param $class
+ * @param $priority integer
  *
- * @return
+ * @return $this
  *
- * @access
- * @static
- * @throws
- * @example
  */
-	public function body_class($class) {
+	public function body_class($class,$priority = null) {
 		if (is_array($class)) {
 			foreach ($class as $c) {
-				$this->body_class($c);
+				$this->body_class($c,$priority);
 			}
 			return $this;
 		}
-		$normalized = trim(preg_replace('/[^\da-z -]/i', '', strtolower($class)));
-		$this->assets['body_class'][$normalized] = $normalized;
-		return $this->data($this->page_prefix.'body_class',implode(' ',$this->assets['body_class']));
+		
+		return $this->_asset_add('body_class',' '.strtolower($class),$priority);
 	}
 
 /**
  * render
  * Insert description here
  *
- * @param $view
- * @param $data
+ * @param $view string
+ * @param $data array
  *
- * @return
+ * @return $this
  *
- * @access
- * @static
- * @throws
- * @example
  */
 	public function render($view = null, $data = []) {
 		log_message('debug', 'page::render::'.$view);
+
 		$view = ($view) ? $view : str_replace('-', '_', $this->route);
+
 		ci('event')->trigger('page.render',$this,$view);
 		ci('event')->trigger('page.render.'.str_replace('/','.',$view),$this,$view);
+		
+		/* this is going to be the "main" section */
 		$view_content = $this->view($view, $data);
-		if (pear::is_extending()) {
-			$view_content = $this->view(pear::is_extending());
+
+		$is_extending = pear::is_extending();
+
+		if ($is_extending) {
+			$view_content = $this->view($is_extending);
 		}
+
 		ci('event')->trigger('page.render.content',$view_content,$view,$data);
-		ci()->output->append_output($view_content);
+
+		ci('output')->append_output($view_content);
+
 		return $this;
 	}
 
@@ -226,22 +247,22 @@ class Page {
  * view
  * Insert description here
  *
- * @param $_view_file
- * @param $_data
- * @param $_return
+ * @param $_view_file string
+ * @param $_data array
+ * @param $_return mixed
  *
- * @return
+ * @return mixed
  *
- * @access
- * @static
- * @throws
- * @example
  */
 	public function view($_view_file = null, $_data = [], $_return = true) {
-		$_buffer = trim(view($_view_file,array_merge(ci()->load->get_vars(),$_data)));
+		$this->prepare_page_variables();
+
+		$_buffer = view($_view_file,array_merge(ci('load')->get_vars(),$_data));
+		
 		if (is_string($_return)) {
-			ci()->load->vars([$_return => $_buffer]);
+			ci('load')->vars([$_return => $_buffer]);
 		}
+		
 		return ($_return === true) ? $_buffer : $this;
 	}
 
@@ -252,21 +273,19 @@ class Page {
  * @param $name
  * @param $value
  *
- * @return
+ * @return $this
  *
- * @access
- * @static
- * @throws
- * @example
  */
 	public function data($name = null, $value = null) {
 		if (is_array($name)) {
 			foreach ($name as $k => $v) {
-				$this->data($k, $v);
+				ci('load')->vars($k,$v);
 			}
 			return $this;
 		}
-		ci()->load->vars([$name => $value]);
+		
+		ci('load')->vars($name,$value);
+		
 		return $this;
 	}
 
@@ -276,12 +295,8 @@ class Page {
  *
  * @param $image_path
  *
- * @return
+ * @return $this
  *
- * @access
- * @static
- * @throws
- * @example
  */
 	public function icon($image_path = '') {
 		return $this->data($this->page_prefix.'icon', '<link rel="icon" type="image/x-icon" href="'.$image_path.'"><link rel="apple-touch-icon" href="'.$image_path.'">');
@@ -292,22 +307,20 @@ class Page {
  * Insert description here
  *
  * @param $file
+ * @param $priority integer
  *
- * @return
+ * @return $this
  *
- * @access
- * @static
- * @throws
- * @example
  */
-	public function css($file = '') {
+	public function css($file = '',$priority = null) {
 		if (is_array($file)) {
 			foreach ($file as $f) {
-				$this->css($f);
+				$this->css($f,$priority);
 			}
 			return $this;
 		}
-		return $this->_asset_add('css',$this->link_html($file));
+
+		return $this->_asset_add('css',$this->link_html($file),$priority);
 	}
 
 /**
@@ -316,12 +329,8 @@ class Page {
  *
  * @param $file
  *
- * @return
+ * @return string
  *
- * @access
- * @static
- * @throws
- * @example
  */
 	public function link_html($file) {
 		return $this->ary2element('link', array_merge($this->link_attributes, ['href' => $file]));
@@ -332,16 +341,13 @@ class Page {
  * Insert description here
  *
  * @param $style
+ * @param $priority integer
  *
- * @return
+ * @return $this
  *
- * @access
- * @static
- * @throws
- * @example
  */
-	public function style($style) {
-		return $this->_asset_add('style',$style);
+	public function style($style,$priority = null) {
+		return $this->_asset_add('style',$style,$priority);
 	}
 
 /**
@@ -349,22 +355,20 @@ class Page {
  * Insert description here
  *
  * @param $file
+ * @param $priority integer
  *
- * @return
+ * @return $this
  *
- * @access
- * @static
- * @throws
- * @example
  */
-	public function js($file = '') {
+	public function js($file = '',$priority = null) {
 		if (is_array($file)) {
 			foreach ($file as $f) {
-				$this->js($f);
+				$this->js($f,$priority);
 			}
 			return $this;
 		}
-		return $this->_asset_add('js',$this->script_html($file));
+		
+		return $this->_asset_add('js',$this->script_html($file),$priority);
 	}
 
 /**
@@ -373,12 +377,8 @@ class Page {
  *
  * @param $file
  *
- * @return
+ * @return string
  *
- * @access
- * @static
- * @throws
- * @example
  */
 	public function script_html($file) {
 		return $this->ary2element('script', array_merge($this->script_attributes, ['src' => $file]), '');
@@ -390,16 +390,13 @@ class Page {
  *
  * @param $key
  * @param $value
+ * @param $priority integer
  *
- * @return
+ * @return $this
  *
- * @access
- * @static
- * @throws
- * @example
  */
-	public function js_variable($key,$value) {
-		return $this->_asset_add('js_variables',((is_scalar($value)) ? 'var '.$key.'="'.str_replace('"', '\"', $value).'";' : 'var '.$key.'='.json_encode($value, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE).';'));
+	public function js_variable($key,$value,$priority = null) {
+		return $this->_asset_add('js_variables',((is_scalar($value)) ? 'var '.$key.'="'.str_replace('"', '\"', $value).'";' : 'var '.$key.'='.json_encode($value, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE).';'),$priority);
 	}
 
 /**
@@ -408,17 +405,14 @@ class Page {
  *
  * @param $array
  *
- * @return
+ * @return $this
  *
- * @access
- * @static
- * @throws
- * @example
  */
 	public function js_variables($array) {
 		foreach ($array as $k => $v) {
 			$this->js_variable($k, $v);
 		}
+		
 		return $this;
 	}
 
@@ -427,16 +421,13 @@ class Page {
  * Insert description here
  *
  * @param $script
+ * @param $priority integer
  *
- * @return
+ * @return $this
  *
- * @access
- * @static
- * @throws
- * @example
  */
-	public function script($script) {
-		return $this->_asset_add('script',$script);
+	public function script($script,$priority = null) {
+		return $this->_asset_add('script',$script,$priority);
 	}
 
 /**
@@ -444,108 +435,99 @@ class Page {
  * Insert description here
  *
  * @param $script
+ * @param $priority integer
  *
- * @return
+ * @return $this
  *
- * @access
- * @static
- * @throws
- * @example
  */
-	public function domready($script) {
-		return $this->_asset_add('domready',$script);
+	public function domready($script,$priority = null) {
+		return $this->_asset_add('domready',$script,$priority);
 	}
 
 /**
  * ary2element
- * Insert description here
  *
  * @param $element
  * @param $attributes
  * @param $wrapper
  *
- * @return
+ * @return string
  *
- * @access
- * @static
- * @throws
- * @example
  */
 	public function ary2element($element, $attributes, $wrapper = false) {
 		$output = '<'.$element.' '.$this->convert2attributes($attributes);
+		
 		return ($wrapper === false) ? $output.'/>' : $output.'>'.$wrapper.'</'.$element.'>';
 	}
 
 /**
  * convert2attributes
- * Insert description here
  *
  * @param $attributes
  * @param $prefix
+ * @param $strip_empty boolean
  *
- * @return
+ * @return string
  *
- * @access
- * @static
- * @throws
- * @example
  */
-	public function convert2attributes($attributes,$prefix='') {
+	public function convert2attributes($attributes,$prefix='',$strip_empty=true) {
 		foreach ($attributes as $name => $value) {
-			if (!empty($value)) {
+			if (!empty($value) || !$strip_empty) {
 				$output .= $prefix.$name.'="'.trim($value).'" ';
 			}
 		}
+		
 		return trim($output);
 	}
 
 /**
- * prepend_asset
- * Insert description here
+ * set_priority
  *
- * @param $bol
+ * @param $priority integer
  *
- * @return
+ * @return $this
  *
- * @access
- * @static
- * @throws
- * @example
  */
-	public function prepend_asset($bol = true) {
-		$this->prepend_asset = $bol;
+	public function set_priority($priority) {
+		$this->priority = (int)$priority;
+		
+		return $this;
+	}
+	
+/**
+ * reset_priority
+ *
+ * @return $this
+ *
+ */
+	public function reset_priority() {
+		$this->priority = 50;
+		
+		return $this;
 	}
 
 /**
- * _asset_add
  * Insert description here
  *
  * @param $name
  * @param $value
+ * @param $priority
  *
- * @return
+ * @return $this
  *
- * @access
- * @static
- * @throws
- * @example
  */
-	protected function _asset_add($name,$value,$priority=50) {
+	protected function _asset_add($name,$value,$priority=null) {
+		$priority = ($priority) ? $priority : $this->priority;
+
 		$key = md5($value);
-		
-		if (!isset($this->assets_added[$key])) {
-			$this->assets_added[$key] = true;
-		
-			$complete_name = $this->page_prefix.$name;
-		
-			if ($this->prepend_asset) {
-				ci()->load->vars([$complete_name => $value.chr(10).ci()->load->get_var($complete_name)]);
-			} else {
-				ci()->load->vars([$complete_name => ci()->load->get_var($complete_name).$value.chr(10)]);
-			}
-		
+
+		if (!isset($this->prevent_duplicate[$key])) {
+			$this->prevent_duplicate[$key] = true;
+
+			$this->variables[$this->page_prefix.$name][$priority][] = $value;
 		}
-		
+
 		return $this;
 	}
-}
+
+} /* end page */

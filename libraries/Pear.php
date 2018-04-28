@@ -65,7 +65,7 @@ class Pear {
 		log_message('debug', 'Pear::__callStatic::'.$name);
 
 		/* Load as a class and save in attached classes for later use */
-		self::load_class($name);
+		self::load_plugin($name);
 
 		/* Is there a method on the class we are requesting? */
 		if (isset(self::$loaded[$name])) {
@@ -125,13 +125,10 @@ class Pear {
 	 *
 	 * @return
 	 *
-	 * @access
-	 * @static
-	 * @throws
-	 * @example
 	 */
 	public static function parent($name=null) {
 		$name = ($name) ? $name : end(self::$fragment);
+
 		echo ci('load')->get_var($name);
 	}
 
@@ -142,15 +139,12 @@ class Pear {
 	 *
 	 * @return
 	 *
-	 * @access
-	 * @static
-	 * @throws
-	 * @example
 	 */
 	public static function end() {
 		$name = array_pop(self::$fragment);
 		$buffer = ob_get_contents();
 		ob_end_clean();
+
 		ci('load')->vars([$name => $buffer]);
 	}
 
@@ -162,10 +156,6 @@ class Pear {
 	 *
 	 * @return
 	 *
-	 * @access
-	 * @static
-	 * @throws
-	 * @example
 	 */
 	public static function extends($name) {
 		if (self::$extends !== null) {
@@ -185,10 +175,6 @@ class Pear {
 	 *
 	 * @return
 	 *
-	 * @access
-	 * @static
-	 * @throws
-	 * @example
 	 */
 	public static function include($view = null, $data = [], $name = true) {
 		if ($name === true) {
@@ -199,72 +185,51 @@ class Pear {
 	}
 
 	/**
-	 * is_extending
-	 * Insert description here
+	 * is extending another "parent" template
 	 *
+	 * @return string
 	 *
-	 * @return
-	 *
-	 * @access
-	 * @static
-	 * @throws
-	 * @example
 	 */
 	public static function is_extending() {
 		return self::$extends;
 	}
 
 	/**
-	 * plugins
-	 * Insert description here
+	 * load plugins
 	 *
-	 * @param $name
+	 * @param $name - mixed string, comma separated plugin names, array
 	 *
-	 * @return
-	 *
-	 * @access
-	 * @static
-	 * @throws
-	 * @example
 	 */
-	public static function plugins($name) {
-		ci('page')->prepend_asset(true);
+	public static function plugins($name,$priority=10) {
+		ci('page')->set_priority($priority);
 
-		$name = (strpos($name,',') !== false) ? explode(',',$name) : $name;
+		$plugins = (strpos($name,',') !== false) ? explode(',',$name) : (array)$name;
 
-		if (is_array($name)) {
-			foreach ($name as $n) {
-				self::load_class($n,true);
-			}
-		} else {
-			self::load_class($name,true);
+		/* load the plug in and throw a error if it's not found */
+		foreach ($plugins as $plugin) {
+			self::load_plugin($plugin,true);
 		}
 
-		ci('page')->prepend_asset(false);
+		/* set it back to the default */
+		ci('page')->reset_priority();
 	}
 
 	/**
-	 * load_class
-	 * Insert description here
+	 * Load Plugin
 	 *
-	 * @param $name
+	 * @param $name string - name of the pear plugin to load
+	 * @param $throw_error boolean - throw a error if the pear plugin isn't found
 	 *
-	 * @return
-	 *
-	 * @access
-	 * @static
-	 * @throws
-	 * @example
 	 */
-	protected static function load_class($name,$throw_error=false) {
+	protected static function load_plugin($name,$throw_error=false) {
 		$class_name = 'Pear_'.str_replace('pear_','',strtolower($name));
 
-		if (class_exists($class_name,true)) {
-			if (!isset(self::$loaded[$name])) {
+		if (!isset(self::$loaded[$name])) {
+			if (class_exists($class_name,true)) {
 				self::$loaded[$name] = new $class_name;
+			} elseif ($throw_error) {
+				throw new Exception('Could not load "'.$class_name.'"');
 			}
-		} elseif ($throw_error) {
-			throw new Exception('Could not load "'.$class_name.'"');
 		}
 
 	}
