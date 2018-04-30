@@ -175,7 +175,7 @@ class Page {
 			/* now flush those assets since they have already been added to the page variables */
 			$this->variables = [];
 		}
-		
+
 		return $this;
 	}
 
