@@ -82,12 +82,8 @@ class Cache_export extends CI_Driver {
 	 *
 	 * @return
 	 *
-	 * @access
-	 * @static
-	 * @throws
-	 * @example
 	 */
-	public function save($id, $data, $ttl = null, $include = FALSE) {
+	public function save($id, $data, $ttl = null, $include = false) {
 		$ttl = ($ttl) ? $ttl : cache_ttl();
 
 		if (is_array($data) || is_object($data)) {
@@ -112,79 +108,53 @@ class Cache_export extends CI_Driver {
 	 *
 	 * @return
 	 *
-	 * @access
-	 * @static
-	 * @throws
-	 * @example
 	 */
 	public function delete($id) {
 		return ($this->config['cache_multiple_servers']) ? $this->multi_delete($id) : $this->single_delete($id);
 	}
 
 	/**
-	 * increment
-	 * Insert description here
+	 * increment - unsupported
 	 *
-	 * @param $id
-	 * @param $offset
+	 * @param $id - unsupported
+	 * @param $offset - unsupported
 	 *
-	 * @return
+	 * @return boolean
 	 *
-	 * @access
-	 * @static
-	 * @throws
-	 * @example
 	 */
 	public function increment($id, $offset = 1) {
-		return FALSE;
+		return false;
 	}
 
 	/**
-	 * decrement
-	 * Insert description here
+	 * decrement - unsupported
 	 *
-	 * @param $id
-	 * @param $offset
+	 * @param $id - unsupported
+	 * @param $offset - unsupported
 	 *
-	 * @return
+	 * @return boolean
 	 *
-	 * @access
-	 * @static
-	 * @throws
-	 * @example
 	 */
 	public function decrement($id, $offset = 1) {
-		return FALSE;
+		return false;
 	}
 
 	/**
-	 * clean
-	 * Insert description here
+	 * clean - unsupported
 	 *
-	 *
-	 * @return
-	 *
-	 * @access
-	 * @static
-	 * @throws
-	 * @example
+	 * @return boolean
 	 */
 	public function clean() {
-		return FALSE;
+		return false;
 	}
 
 	/**
-	 * cache_info
-	 * Insert description here
+	 * cache info
 	 *
-	 * @param $type
+	 * @param $type - unsupported
 	 *
-	 * @return
+	 * @return array
 	 *
-	 * @access
-	 * @static
-	 * @throws
-	 * @example
 	 */
 	public function cache_info($type = NULL) {
 		return [
@@ -199,33 +169,22 @@ class Cache_export extends CI_Driver {
 	}
 
 	/**
-	 * get_metadata
-	 * Insert description here
+	 * Return detailed information on a specific item in the cache.
 	 *
-	 * @param $id
+	 * @param $id string - Cache item name
 	 *
-	 * @return
+	 * @return mixed - Metadata for the cached item
 	 *
-	 * @access
-	 * @static
-	 * @throws
-	 * @example
 	 */
 	public function get_metadata($id) {
 		return (!is_file( $this->config['cache_path'].$id.'.meta.php') || !is_file( $this->config['cache_path'].$id.'.php')) ? FALSE : include  $this->config['cache_path'].$id.'.meta.php';
 	}
 
 	/**
-	 * is_supported
-	 * Insert description here
+	 * Is support
 	 *
+	 * @return boolean
 	 *
-	 * @return
-	 *
-	 * @access
-	 * @static
-	 * @throws
-	 * @example
 	 */
 	public function is_supported() {
 		return TRUE;
@@ -242,7 +201,7 @@ class Cache_export extends CI_Driver {
 	 * @access
 	 * @static
 	 * @throws
-	 * @example
+	 * @example ci('cache')->export->endpoint_delete($request);
 	 */
 	public function endpoint_delete($request) {
 		if (!in_array(ci()->input->ip_address(), $this->config['cache_allowed'])) {
@@ -315,20 +274,25 @@ class Cache_export extends CI_Driver {
 	 *
 	 * @param $id
 	 *
-	 * @return
+	 * @return boolean
 	 *
 	 * @access
 	 * @static
 	 * @throws
-	 * @example
+	 * @example ci('cache')->export->multi_delete($key);
 	 */
 	protected function multi_delete($id) {
+		/* get the array of other servers */
 		$cache_servers =  $this->config['cache_servers'];
-		$hmac = bin2hex(md5( $this->config['encryption_key'].$id).chr(0).$id);
+
+		/* create the hmac key */
+		$hmac = bin2hex(md5($this->config['encryption_key'].$id).chr(0).$id);
+
+		/* multiple threaded curl to other web heads */
 		$mh = curl_multi_init();
 
-		foreach ($cache_servers as $idx => $server) {
-			$url = 'http'.( $this->config['cache_server_secure'] ? 's://' : '://').$server.'/'.trim( $this->config['cache_url'], '/').'/'.$hmac;
+		foreach ($cache_servers as $idx=>$server) {
+			$url = 'http'.($this->config['cache_server_secure'] ? 's://' : '://').$server.'/'.trim( $this->config['cache_url'], '/').'/'.$hmac;
 			$ch[$idx] = curl_init();
 			curl_setopt($ch[$idx], CURLOPT_URL, $url);
 			curl_setopt($ch[$idx], CURLOPT_HEADER, 0);

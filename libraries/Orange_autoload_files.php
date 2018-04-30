@@ -10,13 +10,8 @@
  * @link https://github.com/ProjectOrangeBox
  * @version 2.0
  *
- * required
- * core:
- * libraries:
- * models:
- * helpers:
- * functions:
- *
+ * required: none
+ * constants: ENVIRONMENT, APPPATH, ORANGEPATH, ROOTPATH
  */
 class Orange_autoload_files {
 	/**

@@ -1,7 +1,7 @@
 <?php
 /**
  * Pear
- * Insert description here
+ * Orange View Plug library
  *
  * @package CodeIgniter / Orange
  * @author Don Myers
@@ -11,10 +11,10 @@
  * @version 2.0
  *
  * required
- * core:
- * libraries:
+ * core: load
+ * libraries: page
  * models:
- * helpers:
+ * helpers: html, form, date, inflector, language, number, text
  * functions:
  *
  */
@@ -54,12 +54,9 @@ class Pear {
 	 * @param $name
 	 * @param $arguments
 	 *
-	 * @return
+	 * @return mixed - output from plugin
 	 *
-	 * @access
-	 * @static
-	 * @throws
-	 * @example
+	 * @throws Plugin missing
 	 */
 	public static function __callStatic($name,$arguments) {
 		log_message('debug', 'Pear::__callStatic::'.$name);
@@ -77,6 +74,7 @@ class Pear {
 		/* Did we load the CodeIgniter helpers */
 		if (!self::$setup) {
 			ci('load')->helper(['html','form','date','inflector','language','number','text']);
+
 			self::$setup = true;
 		}
 
@@ -200,9 +198,10 @@ class Pear {
 	 * @param $name - mixed string, comma separated plugin names, array
 	 *
 	 */
-	public static function plugins($name,$priority=10) {
+	public static function plugins($name,$priority=25) {
 		ci('page')->set_priority($priority);
 
+		/* convert this to a array */
 		$plugins = (strpos($name,',') !== false) ? explode(',',$name) : (array)$name;
 
 		/* load the plug in and throw a error if it's not found */

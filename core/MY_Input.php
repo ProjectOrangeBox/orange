@@ -79,7 +79,11 @@ class MY_Input extends CI_Input {
 	 * @examples request_replace('name','Dr Pepper')
 	 */
 	public function request_replace($index = null, $replace_value = null) {
-		$this->_request[$index] = $replace_value;
+		if ($replace_value) {
+			$this->_request[$index] = $replace_value;
+		} elseif(is_array($index)) {
+			$this->_request = $index;
+		}
 
 		return $this;
 	}

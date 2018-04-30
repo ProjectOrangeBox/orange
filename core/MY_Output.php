@@ -19,6 +19,19 @@
  *
  */
 class MY_Output extends CI_Output {
+
+/**
+ * json
+ * Insert description here
+ *
+ *
+ * @return
+ *
+ * @access
+ * @static
+ * @throws
+ * @example
+ */
 	public function json($data = null, $val = null) {
 		if ($data === null) {
 			$json = json_encode(ci()->load->get_vars(),JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE);
@@ -101,4 +114,5 @@ class MY_Output extends CI_Output {
 
 		return $this;
 	}
+
 } /* end class */

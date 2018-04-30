@@ -16,6 +16,7 @@
  * models: o_permission_model, o_role_model, o_user_model
  * helpers:
  * functions:
+ * constants: NOBODY_USER_ID
  *
  */
 class Auth {

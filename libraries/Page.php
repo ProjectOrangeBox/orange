@@ -12,7 +12,7 @@
  *
  * required
  * core: router, load, output
- * libraries: event, user@
+ * libraries: event, pear, user@
  * models:
  * helpers: url
  * functions:
@@ -237,10 +237,13 @@ class Page {
 		/* this is going to be the "main" section */
 		$view_content = $this->view($view, $data);
 
-		$is_extending = pear::is_extending();
+		/* Are they using pear ? */
+		if (class_exists('pear',false)) {
+			$is_extending = pear::is_extending();
 
-		if ($is_extending) {
-			$view_content = $this->view($is_extending);
+			if ($is_extending) {
+				$view_content = $this->view($is_extending);
+			}
 		}
 
 		ci('event')->trigger('page.render.content',$view_content,$view,$data);
