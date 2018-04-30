@@ -84,14 +84,14 @@ class Page {
  */
 	public function __construct() {
 		define('PAGE_MIN',(env('SERVER_DEBUG') == 'development' ? '' : '.min'));
-		
+
 		$this->route = strtolower(trim(ci('router')->fetch_directory().ci('router')->fetch_class(true).'/'.ci('router')->fetch_method(true), '/'));
 		$controller_path = '/'.str_replace('/index', '', $this->route);
 		$this->body_class(trim(str_replace('/',' uri-',$controller_path)));
-		
+
 		$uid = 'guest';
 		$is = 'not-active';
-		
+
 		/* this is a variable test */
 		if (isset(ci()->user)) {
 			$uid = md5(ci('user')->id.config('config.encryption_key'));
@@ -100,13 +100,13 @@ class Page {
 			}
 			$this->data('user', ci('user'));
 		}
-		
+
 		$this->body_class(['uid-'.$uid,'is-'.$is]);
-		
+
 		ci('load')->helper('url');
-		
+
 		$base_url = trim(base_url(), '/');
-		
+
 		$merge_configs = [
 			'title',
 			'body_class',
@@ -119,13 +119,13 @@ class Page {
 			'js_variables',
 			'icon',
 		];
-		
+
 		foreach ($merge_configs as $mc) {
 			if ($config = config('page.'.$mc,false)) {
 				$this->$mc($config);
 			}
 		}
-		
+
 		$this->js_variables([
 			'base_url'				=> $base_url,
 			'app_id'					=> md5($base_url),
@@ -148,28 +148,35 @@ class Page {
 	public function title($title = '') {
 		return $this->data($this->page_prefix.'title', $title);
 	}
-	
-	/* this prepares the current page variables */
+
+/**
+ * This prepares the current page variables
+ *
+ * @return $this
+ *
+ */
 	public function prepare_page_variables() {
 		foreach ($this->variables as $page_variable=>$entries) {
 			/* sort the keys (priority) */
 			ksort($entries);
-			
+
 			/* get the current content */
 			$current_content = ci('load')->get_var($page_variable);
-			
+
 			/* add the currently available entries */
 			foreach ($entries as $priority) {
 				foreach ($priority as $string) {
 					$current_content .= $string;
 				}
 			}
-			
+
 			ci('load')->vars($page_variable,$current_content);
 
 			/* now flush those assets since they have already been added to the page variables */
 			$this->variables = [];
 		}
+		
+		return $this;
 	}
 
 /**
@@ -205,7 +212,7 @@ class Page {
 			}
 			return $this;
 		}
-		
+
 		return $this->_asset_add('body_class',' '.strtolower($class),$priority);
 	}
 
@@ -226,7 +233,7 @@ class Page {
 
 		ci('event')->trigger('page.render',$this,$view);
 		ci('event')->trigger('page.render.'.str_replace('/','.',$view),$this,$view);
-		
+
 		/* this is going to be the "main" section */
 		$view_content = $this->view($view, $data);
 
@@ -258,11 +265,11 @@ class Page {
 		$this->prepare_page_variables();
 
 		$_buffer = view($_view_file,array_merge(ci('load')->get_vars(),$_data));
-		
+
 		if (is_string($_return)) {
 			ci('load')->vars([$_return => $_buffer]);
 		}
-		
+
 		return ($_return === true) ? $_buffer : $this;
 	}
 
@@ -283,9 +290,9 @@ class Page {
 			}
 			return $this;
 		}
-		
+
 		ci('load')->vars($name,$value);
-		
+
 		return $this;
 	}
 
@@ -367,7 +374,7 @@ class Page {
 			}
 			return $this;
 		}
-		
+
 		return $this->_asset_add('js',$this->script_html($file),$priority);
 	}
 
@@ -412,7 +419,7 @@ class Page {
 		foreach ($array as $k => $v) {
 			$this->js_variable($k, $v);
 		}
-		
+
 		return $this;
 	}
 
@@ -456,7 +463,7 @@ class Page {
  */
 	public function ary2element($element, $attributes, $wrapper = false) {
 		$output = '<'.$element.' '.$this->convert2attributes($attributes);
-		
+
 		return ($wrapper === false) ? $output.'/>' : $output.'>'.$wrapper.'</'.$element.'>';
 	}
 
@@ -476,7 +483,7 @@ class Page {
 				$output .= $prefix.$name.'="'.trim($value).'" ';
 			}
 		}
-		
+
 		return trim($output);
 	}
 
@@ -490,10 +497,10 @@ class Page {
  */
 	public function set_priority($priority) {
 		$this->priority = (int)$priority;
-		
+
 		return $this;
 	}
-	
+
 /**
  * reset_priority
  *
@@ -502,7 +509,7 @@ class Page {
  */
 	public function reset_priority() {
 		$this->priority = 50;
-		
+
 		return $this;
 	}
 
