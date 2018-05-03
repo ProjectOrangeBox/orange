@@ -213,6 +213,10 @@ class Pear {
 		ci('page')->reset_priority();
 	}
 
+	public static function plugin($name,$priority=25) {
+		return self::plugins($name,$priority);
+	}
+
 	/**
 	 * Load Plugin
 	 *
