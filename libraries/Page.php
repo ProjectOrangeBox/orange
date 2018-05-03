@@ -267,7 +267,7 @@ class Page {
 	public function view($_view_file = null, $_data = [], $_return = true) {
 		$this->prepare_page_variables();
 
-		$_buffer = view($_view_file,array_merge(ci('load')->get_vars(),$_data));
+		$_buffer = view($_view_file,array_merge(ci('load')->get_vars(),(array)$_data));
 
 		if (is_string($_return)) {
 			ci('load')->vars([$_return => $_buffer]);
@@ -405,8 +405,14 @@ class Page {
  * @return $this
  *
  */
-	public function js_variable($key,$value,$priority = null) {
-		return $this->_asset_add('js_variables',((is_scalar($value)) ? 'var '.$key.'="'.str_replace('"', '\"', $value).'";' : 'var '.$key.'='.json_encode($value, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE).';'),$priority);
+	public function js_variable($key,$value,$priority = null,$raw=false) {
+		if ($raw) {
+			$value = 'var '.$key.'='.$value.';' ;
+		} else {
+			$value = ((is_scalar($value)) ? 'var '.$key.'="'.str_replace('"', '\"', $value).'";' : 'var '.$key.'='.json_encode($value, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE).';');
+		}
+
+		return $this->_asset_add('js_variables',$value,$priority);
 	}
 
 /**
