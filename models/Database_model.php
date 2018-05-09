@@ -751,60 +751,81 @@ class Database_model extends MY_Model {
 
  *
  */
-	public function catalog($array_key = null, $select_columns = null, $where = null, $order_by = null) {
+	public function catalog($array_key = null, $select_columns = null, $where = null, $order_by = null, $cache_key = null, $with_deleted = false) {
 		/* setup the default return value */
-		$results = [];
+		$is_cached = false;
 
-		/* we aren't looking for a single column by default */
-		$single_column = false;
+		if (is_string($cache_key)) {
+			$results = ci('cache')->get($this->cache_prefix.'.'.$cache_key);
 
-		/* if array_key is empty then use the primary key */
-		$array_key = ($array_key) ? $array_key : $this->primary_key;
-
-		/* are the select columns a comma sep. array or array already? */
-		$select_columns = is_array($select_columns) ? implode(',',$select_columns) : $select_columns;
-
-		/* if select columns is null or * (all) then select is all */
-		if ($select_columns === null || $select_columns == '*') {
-			$select = '*';
-		} else {
-			/* format the select to a comma sep list and add array key if needed */
-			$select = $array_key.','.$select_columns;
-			if (strpos($select_columns,',') === false) {
-				$single_column = $select_columns;
+			if (is_array($results)) {
+				$is_cached = true;
 			}
 		}
 
-		/* apply the select column */
-		$this->_database->select($select);
+		if (!$is_cached) {
+			$results = [];
 
-		/* does where contain anything? if so apply the where clause */
-		if ($where) {
-			$this->_database->where($where);
-		}
+			if ($with_deleted) {
+				$this->temporary_with_deleted = true;
+			}
 
-		/* does order by contain anything? if so apply it */
-		if ($order_by) {
-			$order_by = trim($order_by);
-			if (strpos($order_by,' ') === false) {
-				$this->_database->order_by($order_by);
+			/* we aren't looking for a single column by default */
+			$single_column = false;
+
+			/* if array_key is empty then use the primary key */
+			$array_key = ($array_key) ? $array_key : $this->primary_key;
+
+			/* are the select columns a comma sep. array or array already? */
+			$select_columns = is_array($select_columns) ? implode(',',$select_columns) : $select_columns;
+
+			/* if select columns is null or * (all) then select is all */
+			if ($select_columns === null || $select_columns == '*') {
+				$select = '*';
 			} else {
-				list($column,$direction) = explode(' ',$order_by,2);
-
-				$this->_database->order_by($column,$direction);
+				/* format the select to a comma sep list and add array key if needed */
+				$select = $array_key.','.$select_columns;
+				if (strpos($select_columns,',') === false) {
+					$single_column = $select_columns;
+				}
 			}
-		}
 
-		/* run the actual query */
-		$dbc = $this->_get(true);
+			/* apply the select column */
+			$this->_database->select($select);
 
-		/* for each returned row format into a simple array with keys and values or complex with keys and array of columns */
-		foreach ($dbc as $dbr) {
-			if ($single_column) {
-				$results[$dbr->$array_key] = $dbr->$single_column;
-			} else {
-				$results[$dbr->$array_key] = $dbr;
+			/* does where contain anything? if so apply the where clause */
+			if ($where) {
+				$this->_database->where($where);
 			}
+
+			/* does order by contain anything? if so apply it */
+			if ($order_by) {
+				$order_by = trim($order_by);
+				if (strpos($order_by,' ') === false) {
+					$this->_database->order_by($order_by);
+				} else {
+					list($column,$direction) = explode(' ',$order_by,2);
+
+					$this->_database->order_by($column,$direction);
+				}
+			}
+
+			/* run the actual query */
+			$dbc = $this->_get(true);
+
+			/* for each returned row format into a simple array with keys and values or complex with keys and array of columns */
+			foreach ($dbc as $dbr) {
+				if ($single_column) {
+					$results[$dbr->$array_key] = $dbr->$single_column;
+				} else {
+					$results[$dbr->$array_key] = $dbr;
+				}
+			}
+
+			if ($cache_key) {
+				ci('cache')->save($this->cache_prefix.'.'.$cache_key,$results);
+			}
+
 		}
 
 		return $results;
@@ -912,10 +933,8 @@ class Database_model extends MY_Model {
  * @example
  */
 	public function exists($arg) {
-		$record = $this->get_by($this->create_where($arg));
-
 		/* did we get one or more columns */
-		return (count((array)$record)) ? $record : false;
+		return $this->on_empty_return(false)->get_by($this->create_where($arg));
 	}
 
 /**

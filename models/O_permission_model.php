@@ -119,9 +119,10 @@ class O_permission_model extends Database_model {
  * @example
  */
 	public function insert($data) {
-		parent::insert($data);
+		$success = parent::insert($data);
 		$this->_refresh();
 		$this->delete_cache_by_tags();
+		return $success;
 	}
 
 /**
@@ -138,9 +139,10 @@ class O_permission_model extends Database_model {
  * @example
  */
 	public function update($data) {
-		parent::update($data);
+		$success = parent::update($data);
 		$this->_refresh();
 		$this->delete_cache_by_tags();
+		return $success;
 	}
 
 /**
@@ -179,6 +181,8 @@ class O_permission_model extends Database_model {
  * @example
  */
 	public function add($key,$group,$description) {
+		$success = false;
+
 		$data = [
 			'key' => $key,
 			'group' => $group,
@@ -187,8 +191,11 @@ class O_permission_model extends Database_model {
 			'edit_role_id'=>ADMIN_ROLE_ID,
 			'delete_role_id'=>ADMIN_ROLE_ID,
 		];
+
 		if (!$this->exists(['key'=>$key])) {
-			$this->insert($data);
+			$success = $this->insert($data);
 		}
+
+		return $success;
 	}
 }
