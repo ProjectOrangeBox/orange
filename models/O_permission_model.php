@@ -181,12 +181,9 @@ class O_permission_model extends Database_model {
  * @example
  */
 	public function add($key,$group,$description) {
-		$success = false;
+		$this->skip_rules = true;
 
-		if (!$this->exists(['key'=>$key])) {
-			$success = $this->insert(['key' => $key,	'group' => $group,'description' => $description,'read_role_id'=>ADMIN_ROLE_ID,	'edit_role_id'=>ADMIN_ROLE_ID,'delete_role_id'=>ADMIN_ROLE_ID]);
-		}
-
-		return $success;
+		/* we already verified the key that's the "real" primary key */
+		return (!$this->exists(['key'=>$key])) ? $this->insert(['key'=>$key,	'group'=>$group,'description'=>$description,'read_role_id'=>ADMIN_ROLE_ID,'edit_role_id'=>ADMIN_ROLE_ID,'delete_role_id'=>ADMIN_ROLE_ID]) : false;
 	}
 }
