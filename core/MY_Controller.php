@@ -134,9 +134,11 @@ class MY_Controller extends CI_Controller {
 				} else {
 					$model_name = $args['model'];
 				}
+
 				$this->load->model($model_name);
+
 				if (method_exists($this->$model_name, 'catalog')) {
-					$this->load->vars($variable_name, $this->$model_name->catalog($args['array_key'], $args['select'], $args['where'], $args['order_by']));
+					$this->load->vars($variable_name, $this->$model_name->catalog($args['array_key'], $args['select'], $args['where'], $args['order_by'], $args['cache'], $args['with_deleted']));
 				} else {
 					throw new Exception('Method "catalog" doesn\'t exist on "'.$model_name.'"');
 				}
