@@ -19,6 +19,7 @@
  *
  */
 class MY_Output extends CI_Output {
+	protected $json_options = JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE;
 
 /**
  * json
@@ -32,12 +33,19 @@ class MY_Output extends CI_Output {
  * @throws
  * @example
  */
-	public function json($data = null, $val = null) {
-		if ($data === null) {
-			$json = json_encode(ci()->load->get_vars(),JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE);
+	public function json($data = null, $val = null, $raw = false) {
+		if ($raw && $data === null) {
+			$json = $val;
+		} elseif ($raw && $data !== null) {
+			$json = '{"'.$data.'":'.$val.'}';
+		} elseif  (is_array($data) || is_object($data)) {
+			$json = json_encode($data,$this->json_options);
+		} elseif (is_string($data) && $val === null) {
+			$json = $data;
+		} elseif ($data === null && $val === null) {
+			$json = json_encode(ci()->load->get_vars(),$this->json_options);
 		} else {
-			$data = ($val !== NULL) ? [$data => $val] : $data;
-			$json = (is_array($data) || is_object($data)) ? json_encode($data,JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE) : $data;
+			$json = json_encode([$data => $val],$this->json_options);
 		}
 
 		$this
@@ -48,6 +56,7 @@ class MY_Output extends CI_Output {
 
 		return $this;
 	}
+
 
 /**
  * nocache
@@ -109,7 +118,7 @@ class MY_Output extends CI_Output {
  */
 	public function delete_all_cookies() {
 		foreach ($_COOKIE as $key=>$value) {
-	    setcookie($key,$value,(time() - 3600),config('config.cookie_path','/'));
+			setcookie($key,$value,(time() - 3600),config('config.cookie_path','/'));
 		}
 
 		return $this;
