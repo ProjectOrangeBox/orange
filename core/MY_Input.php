@@ -100,7 +100,7 @@ class MY_Input extends CI_Input {
 	 * @param string $only_index only return this model
 	 * @param string $separator if this is present then treat each array index as a parent + child pair
 	 * @param boolean $append_model should "_model" be append to the array indexes
-	 * @param mixed $_request associated array index=>value - or - TRUE to use client input
+	 * @param mixed $_request associated array index=>value - or - TRUE to use servers passed form data
 	 *
 	 * @return array
 	 *
