@@ -1,0 +1,6 @@
+<?php
+
+return [
+	'SERVER_ENVIRONMENT'=>'development', /* development, testing, production */
+	'SERVER_DEBUG'=>'development', /* development, testing, production */
+];
