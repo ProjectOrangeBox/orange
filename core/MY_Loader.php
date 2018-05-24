@@ -54,7 +54,7 @@ class MY_Loader extends CI_Loader {
 
 		$class_name = $prefix.$class;
 
-		if (!class_exists($class_name, FALSE)) {
+		if (!class_exists($class_name,FALSE)) {
 			log_message('error', 'Non-existent class: '.$class_name);
 			throw new Exception('Non-existent class: '.$class_name);
 		}
@@ -71,6 +71,7 @@ class MY_Loader extends CI_Loader {
 				log_message('debug', $class_name." has already been instantiated as '".$object_name."'. Second attempt aborted.");
 				return;
 			}
+
 			throw new Exception("Resource '".$object_name."' already exists and is not a ".$class_name." instance.");
 		}
 
@@ -132,6 +133,150 @@ class MY_Loader extends CI_Loader {
 		}
 
 		return $this->_ci_init_library($library_name, $prefix, $params, $object_name);
+	}
+
+	protected function _ci_load_library($class, $params = NULL, $object_name = NULL) {
+		// Get the class name, and while we're at it trim any slashes.
+		// The directory path can be included as part of the class name,
+		// but we don't want a leading slash
+		$class = str_replace('.php', '', trim($class, '/'));
+
+		// Was the path included with the class name?
+		// We look for a slash to determine this
+		if (($last_slash = strrpos($class, '/')) !== FALSE) 	{
+			// Extract the path
+			$subdir = substr($class, 0, ++$last_slash);
+
+			// Get the filename from the path
+			$class = substr($class, $last_slash);
+		} else {
+			$subdir = '';
+		}
+
+		$class = ucfirst($class);
+
+		// Is this a stock library? There are a few special conditions if so ...
+		if (file_exists(BASEPATH.'libraries/'.$subdir.$class.'.php')) {
+			return $this->_ci_load_stock_library($class, $subdir, $params, $object_name);
+		}
+
+		// Safety: Was the class already loaded by a previous call?
+		if (class_exists($class, FALSE)) {
+			$property = $object_name;
+			if (empty($property)) {
+				$property = strtolower($class);
+				isset($this->_ci_varmap[$property]) && $property = $this->_ci_varmap[$property];
+			}
+
+			$CI =& get_instance();
+
+			if (isset($CI->$property)) {
+				log_message('debug', $class.' class already loaded. Second attempt ignored.');
+				return;
+			}
+
+			return $this->_ci_init_library($class, '', $params, $object_name);
+		}
+
+		// Let's search for the requested library file and load it.
+		foreach ($this->_ci_library_paths as $path) {
+			// BASEPATH has already been checked for
+			if ($path === BASEPATH) {
+				continue;
+			}
+
+			$filepath = $path.'libraries/'.$subdir.$class.'.php';
+			// Does the file exist? No? Bummer...
+			if (!file_exists($filepath)) {
+				continue;
+			}
+
+			$pathinfo = pathinfo($filepath);
+
+			$orange_paths = orange_paths('libraries');
+
+			$lc_library_name = strtolower($pathinfo['filename']);
+
+			if (isset($orange_paths[$lc_library_name])) {
+				include $orange_paths[$lc_library_name];
+
+				return $this->_ci_init_library($class, '', $params, $object_name);
+			}
+		}
+
+		// One last attempt. Maybe the library is in a subdirectory, but it wasn't specified?
+		if ($subdir === '') {
+			return $this->_ci_load_library($class.'/'.$class, $params, $object_name);
+		}
+
+		// If we got this far we were unable to find the requested class.
+		log_message('error', 'Unable to load the requested class: '.$class);
+		show_error('Unable to load the requested class: '.$class);
+	}
+
+	public function model($model, $name = '', $db_conn = FALSE) 	{
+		if (empty($model)) {
+			return $this;
+		} elseif (is_array($model)) {
+			foreach ($model as $key => $value) {
+				is_int($key) ? $this->model($value, '', $db_conn) : $this->model($key, $value, $db_conn);
+			}
+
+			return $this;
+		}
+
+		$path = '';
+
+		// Is the model in a sub-folder? If so, parse out the filename and path.
+		if (($last_slash = strrpos($model, '/')) !== FALSE) 	{
+			// The path is in front of the last slash
+			$path = substr($model, 0, ++$last_slash);
+
+			// And the model name behind it
+			$model = substr($model, $last_slash);
+		}
+
+		if (empty($name)) {
+			$name = $model;
+		}
+
+		if (in_array($name, $this->_ci_models, TRUE)) 	{
+			return $this;
+		}
+
+		$CI =& get_instance();
+
+		if (isset($CI->$name)) {
+			throw new RuntimeException('The model name you are loading is the name of a resource that is already being used: '.$name);
+		}
+
+		if ($db_conn !== FALSE && ! class_exists('CI_DB', FALSE)) 	{
+			if ($db_conn === TRUE) {
+				$db_conn = '';
+			}
+
+			$this->database($db_conn, FALSE, TRUE);
+		}
+
+		$orange_paths = orange_paths('models');
+
+		$lc_name = strtolower($model);
+
+		if (!isset($orange_paths[$lc_name])) {
+			throw new RuntimeException('Could not load Model "'.$lc_name.'"');
+		}
+
+		require $orange_paths[$lc_name];
+
+		$this->_ci_models[] = $name;
+
+		$model = new $model();
+
+		$CI->$name = $model;
+
+		log_message('info', 'Model "'.get_class($model).'" initialized');
+
+		return $this;
 	}
 
 } /* end class */
