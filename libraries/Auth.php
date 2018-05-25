@@ -38,13 +38,13 @@ class Auth {
 		/* Are we in GUI mode? */
 		if (!is_cli()) {
 			/* yes - is there a user id in the session? */
-			$user_id = (int)ci('session')->userdata($this->session_key);
+			$user_identifier = ci('session')->userdata($this->session_key);
 
 			/* if not or it's 0 (there is no user 0) set the user to nobody */
-			$user_id = ($user_id > 0) ? $user_id : NOBODY_USER_ID;
+			$user_identifier = (!empty($user_identifier)) ? $user_identifier : NOBODY_USER_ID;
 
 			/* refresh the user based on the id */
-			$this->refresh_userdata($user_id,false);
+			$this->refresh_userdata($user_identifier,false);
 		} else {
 			/* no - in CLI you have the nobody user privileges */
 			$this->refresh_userdata(NOBODY_USER_ID,false);
@@ -67,10 +67,10 @@ class Auth {
  * @access public
  *
  */
-	public function login($email, $password) {
-		$success = $this->_login($email, $password);
+	public function login($user_identifier, $password) {
+		$success = $this->_login($user_identifier, $password);
 
-		ci('event')->trigger('auth.login', $email, $success);
+		ci('event')->trigger('auth.login', $user_identifier, $success);
 
 		log_message('info', 'Auth Class login');
 
@@ -99,7 +99,7 @@ class Auth {
  * Refresh the current user profile based on a user id
  * you can optionally save it to the current session
  *
- * @param $user_id integer
+ * @param $user_identifier integer
  * @param $save_session boolean
  *
  * @return integer
@@ -107,16 +107,17 @@ class Auth {
  * @access public
  *
  */
-	public function refresh_userdata($user_id,$save_session=true) {
-		log_message('debug', 'Auth::refresh_userdata::'.$user_id);
+	public function refresh_userdata($user_identifier,$save_session=true) {
+		log_message('debug', 'Auth::refresh_userdata::'.$user_identifier);
 
-		$user_id = ((int)$user_id > 0) ? (int)$user_id : NOBODY_USER_ID;
+		$user_identifier = (!empty($user_identifier)) ? $user_identifier : NOBODY_USER_ID;
 
-		$profile = ci('o_user_model')->get($user_id);
+		$profile = ci('o_user_model')->get($user_identifier);
 
 		if ((int)$profile->is_active != 1 || !$profile instanceof O_user_entity) {
-			$user_id = NOBODY_USER_ID;
-			$profile = ci('o_user_model')->get($user_id);
+			$user_identifier = NOBODY_USER_ID;
+
+			$profile = ci('o_user_model')->get($user_identifier);
 		}
 
 		/* no real need to have this floating around */
@@ -132,7 +133,7 @@ class Auth {
 
 		log_message('info', 'Auth Class Refreshed');
 
-		return $user_id; /* integer */
+		return $user_identifier; /* integer */
 	}
 
 /**
