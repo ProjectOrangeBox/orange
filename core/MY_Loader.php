@@ -50,10 +50,12 @@ class MY_Loader extends CI_Loader {
 			$CI->cache->request = new Cache_page($cache_config);
 			$CI->cache->page = new Cache_page($cache_config);
 			$CI->cache->export = new Cache_export($cache_config);
-			
-			include APPPATH.'/config/remap.php';
-			
-			$this->remap = $remap;
+
+			if (file_exists(APPPATH.'/config/remap.php')) {
+				include APPPATH.'/config/remap.php';
+
+				$this->remap = $remap;
+			}
 		}
 
 		$config = (!$config) ? config(strtolower($class),[]) : $config;
