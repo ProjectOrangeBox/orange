@@ -386,10 +386,16 @@ function console($var, $type = 'log') {
  * @return array
  *
  */
-function orange_paths($section=null) {
+function orange_paths($section=null,$file=null) {
 	global $_ORANGE_PATHS;
 
-	return ($section) ? (array)$_ORANGE_PATHS[$section] : (array)$_ORANGE_PATHS;
+	if ($file && $section) {
+		$responds = $_ORANGE_PATHS[$section][$file];
+	} else {
+		$responds = ($section) ? (array)$_ORANGE_PATHS[$section] : (array)$_ORANGE_PATHS;
+	}
+
+	return $responds;
 }
 
 /**
