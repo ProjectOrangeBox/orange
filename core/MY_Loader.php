@@ -25,6 +25,7 @@ class MY_Loader extends CI_Loader {
 	 * @var boolean
 	 */
 	protected $cache_drivers_loaded = false;
+	protected $remap = [];
 
 	/**
 	 * Internal Load extended function
@@ -49,9 +50,20 @@ class MY_Loader extends CI_Loader {
 			$CI->cache->request = new Cache_page($cache_config);
 			$CI->cache->page = new Cache_page($cache_config);
 			$CI->cache->export = new Cache_export($cache_config);
+			
+			include APPPATH.'/config/remap.php';
+			
+			$this->remap = $remap;
 		}
 
 		$config = (!$config) ? config(strtolower($class),[]) : $config;
+
+		$lowercase_class = strtolower($class);
+
+		if (isset($this->remap[$lowercase_class])) {
+			/* call closure */
+			return $this->remap[$lowercase_class]($config);
+		}
 
 		$class_name = $prefix.$class;
 
