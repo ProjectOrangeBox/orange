@@ -51,27 +51,22 @@ class MY_Loader extends CI_Loader {
 			$CI->cache->page = new Cache_page($cache_config);
 			$CI->cache->export = new Cache_export($cache_config);
 
-			if (file_exists(APPPATH.'/config/remap.php')) {
-				include APPPATH.'/config/remap.php';
+			include APPPATH.'/config/autoload.php';
 
-				$this->remap = $remap;
+			if (isset($autoload['remap'])) {
+				$this->remap = $autoload['remap'];
 			}
 		}
 
 		$config = (!$config) ? config(strtolower($class),[]) : $config;
 
-		$lowercase_class = strtolower($class);
-
-		if (isset($this->remap[$lowercase_class])) {
-			/* call closure */
-			return $this->remap[$lowercase_class]($config);
-		}
-
 		$class_name = $prefix.$class;
 
-		if (!class_exists($class_name,FALSE)) {
-			log_message('error', 'Non-existent class: '.$class_name);
-			throw new Exception('Non-existent class: '.$class_name);
+		$lowercase_class = strtolower($class_name);
+
+		if (isset($this->remap[$lowercase_class])) {
+			$object_name = $lowercase_class;
+			$class_name = $this->remap[$lowercase_class];
 		}
 
 		if (empty($object_name)) {
@@ -273,23 +268,27 @@ class MY_Loader extends CI_Loader {
 			$this->database($db_conn, FALSE, TRUE);
 		}
 
+		/* get a array of all the models */
 		$orange_paths = orange_paths('models');
 
-		$lc_name = strtolower($model);
+		$lowercase_class = strtolower($model);
 
-		if (!isset($orange_paths[$lc_name])) {
-			throw new RuntimeException('Could not load Model "'.$lc_name.'"');
+		if (isset($this->remap[$lowercase_class])) {
+			$name = $lowercase_class;
+			$model = $this->remap[$lowercase_class];
 		}
 
-		require $orange_paths[$lc_name];
+		if (!isset($orange_paths[$model])) {
+			throw new RuntimeException('Could not load Model "'.$model.'"');
+		}
+
+		require $orange_paths[$model];
 
 		$this->_ci_models[] = $name;
 
-		$model = new $model();
+		$CI->$name = new $model();
 
-		$CI->$name = $model;
-
-		log_message('info', 'Model "'.get_class($model).'" initialized');
+		log_message('info', 'Model "'.$lowercase_class.'" initialized');
 
 		return $this;
 	}
