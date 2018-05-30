@@ -1233,14 +1233,19 @@ class Database_model extends MY_Model {
 		}
 
 		if ($this->has_roles) {
+			$read_role_id = max((int)$this->read_role_id,(int)ci('user')->user_read_role_id);
+			$edit_role_id = max((int)$this->edit_role_id,(int)ci('user')->user_edit_role_id);
+			$delete_role_id = max((int)$this->delete_role_id,(int)ci('user')->user_delete_role_id);
+			$admin_role_id = config('auth.admin role id');
+
 			if (!isset($data['read_role_id'])) {
-				$data['read_role_id'] = ((int)$this->read_role_id > 0) ? (int)$this->read_role_id : (int)ci()->user->user_read_role_id;
+				$data['read_role_id'] = ($read_role_id > 0) ? $read_role_id : $admin_role_id;
 			}
 			if (!isset($data['edit_role_id'])) {
-				$data['edit_role_id'] = ((int)$this->edit_role_id > 0) ? (int)$this->edit_role_id : (int)ci()->user->user_edit_role_id;
+				$data['edit_role_id'] = ($edit_role_id > 0) ? $edit_role_id : $admin_role_id;
 			}
 			if (!isset($data['delete_role_id'])) {
-				$data['delete_role_id'] = ((int)$this->delete_role_id > 0) ? (int)$this->delete_role_id : (int)ci()->user->user_delete_role_id;
+				$data['delete_role_id'] = ($delete_role_id > 0) ? $delete_role_id : $admin_role_id;
 			}
 		}
 
