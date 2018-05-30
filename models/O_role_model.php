@@ -100,6 +100,12 @@ class O_role_model extends Database_model {
 		return $this->_database->delete(config('auth.role permission table'), ['role_id' => (int) $this->_find_role_id($role), 'permission_id' => (int) $this->_find_permission_id($permission)]);
 	}
 
+	public function delete($role_id) {
+		parent::delete($role_id);
+
+		return $this->_database->delete(config('auth.role permission table'), ['role_id' => (int) $this->_find_role_id($role_id)]);
+	}
+
 /**
  * permissions
  * Insert description here
