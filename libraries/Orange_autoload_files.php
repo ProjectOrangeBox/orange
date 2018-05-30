@@ -102,7 +102,7 @@ class Orange_autoload_files {
 			'filter_base'=>ORANGEPATH.'/libraries/Filter_base.php',
 		];
 
-		$base = [
+		return [
 			'classes' => array_merge(
 				$classes,
 				$this->globr(BASEPATH,'(.*).php'),
@@ -126,11 +126,6 @@ class Orange_autoload_files {
 			'controllers' => $this->cache_controllers(),
 			'configs' => $this->cache_config(),
 		];
-
-		$overriders = (isset($autoload['autoloader'])) ? $autoload['autoloader'] : [];
-
-		/* override what was found */
-		return array_replace_recursive($base,$overriders);
 	}
 
 	/**
