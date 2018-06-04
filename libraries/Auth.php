@@ -40,7 +40,7 @@ class Auth {
 			/* yes - is there a user id in the session? */
 			$user_identifier = ci('session')->userdata($this->session_key);
 
-			/* if not or it's 0 (there is no user 0) set the user to nobody */
+			/* if user identifier is empty then set the user to nobody */
 			$user_identifier = (!empty($user_identifier)) ? $user_identifier : NOBODY_USER_ID;
 
 			/* refresh the user based on the id */

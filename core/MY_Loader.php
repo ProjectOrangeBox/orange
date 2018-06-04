@@ -25,7 +25,7 @@ class MY_Loader extends CI_Loader {
 	 * @var boolean
 	 */
 	protected $cache_drivers_loaded = false;
-	protected $remap = [];
+	protected $remap = false;
 
 	/**
 	 * Internal Load extended function
@@ -50,23 +50,15 @@ class MY_Loader extends CI_Loader {
 			$CI->cache->request = new Cache_page($cache_config);
 			$CI->cache->page = new Cache_page($cache_config);
 			$CI->cache->export = new Cache_export($cache_config);
-
-			include APPPATH.'/config/autoload.php';
-
-			if (isset($autoload['remap'])) {
-				$this->remap = $autoload['remap'];
-			}
 		}
 
 		$config = (!$config) ? config(strtolower($class),[]) : $config;
 
 		$class_name = $prefix.$class;
 
-		$lowercase_class = strtolower($class_name);
-
-		if (isset($this->remap[$lowercase_class])) {
-			$object_name = $lowercase_class;
-			$class_name = $this->remap[$lowercase_class];
+		if ($remap = $this->_remap($class_name)) {
+			$object_name = strtolower($class_name);
+			$class_name = $remap;
 		}
 
 		if (empty($object_name)) {
@@ -271,11 +263,9 @@ class MY_Loader extends CI_Loader {
 		/* get a array of all the models */
 		$orange_paths = orange_paths('models');
 
-		$lowercase_class = strtolower($model);
-
-		if (isset($this->remap[$lowercase_class])) {
-			$name = $lowercase_class;
-			$model = $this->remap[$lowercase_class];
+		if ($remap = $this->_remap($model)) {
+			$name = strtolower($model);
+			$model = $remap;
 		}
 
 		if (!isset($orange_paths[$model])) {
@@ -291,6 +281,35 @@ class MY_Loader extends CI_Loader {
 		log_message('info', 'Model "'.$lowercase_class.'" initialized');
 
 		return $this;
+	}
+
+	public function entity($entity_name) {
+		if ($remap = $this->_remap($entity_name)) {
+			$entity_name = $remap;
+		}
+
+		/* try to load this entity */
+		if (!class_exists($entity_name,true)) {
+			log_message('error', 'Non-existent class: '.$entity_name);
+
+			throw new Exception('Non-existent class: '.$entity_name);
+		}
+
+		/* on single return this entity */
+		return new $entity_name();
+	}
+
+	protected function _remap($name) {
+		/* load on demand */
+		if (!$this->remap) {
+			include APPPATH.'/config/autoload.php';
+
+			$this->remap = (isset($autoload['remap'])) ? $autoload['remap'] : [];
+		}
+
+		$lowercase_name = strtolower($name);
+
+		return (isset($this->remap[$lowercase_name])) ? $this->remap[$lowercase_name] : false;
 	}
 
 } /* end class */

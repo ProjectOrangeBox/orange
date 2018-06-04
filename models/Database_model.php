@@ -30,6 +30,7 @@ class Database_model extends MY_Model {
 	protected $primary_key = 'id'; /* primary id used as default for many SQL commands */
 	protected $additional_cache_tags = ''; /* additional cache tags to add to cache prefix remember each tag is separated by . */
 	protected $entity = null; /* true or string name of the entity to use for records - if true it uses the class name and replaces _model with _entity */
+	protected $base_entity = null; /* empty entity */
 	protected $has_roles = false; /* does this table use the standard role columns? these are automatically added to index, insert query's */
 	protected $has_stamps = false; /* does this table use the standard timestamps columns? these are automatically added to insert, update, delete query's */
 	protected $has_soft_delete = false; /* does this table support soft delete? */
@@ -120,15 +121,9 @@ class Database_model extends MY_Model {
 			*/
 			$this->entity = ($this->entity === true) ? ucfirst(strtolower(substr(get_class($this),0,-5)).'entity') : $this->entity;
 
-			/* try to load this entity */
-			if (!class_exists($this->entity,true)) {
-				log_message('error', 'Non-existent class: '.$this->entity);
+			$this->base_entity = ci('load')->entity($this->entity);
 
-				throw new Exception('Non-existent class: '.$this->entity);
-			}
-
-			/* on single return this entity */
-			$this->default_return_on_single = new $this->entity();
+			$this->default_return_on_single = $this->base_entity;
 		} else {
 			/* on single record return a class */
 			$this->default_return_on_single = new stdClass();
@@ -378,7 +373,7 @@ class Database_model extends MY_Model {
 		$this->temporary_column_name = null;
 		$this->temporary_return_as_array = null;
 		$this->default_return_on_many = [];
-		$this->default_return_on_single = ($this->entity) ? new $this->entity() : new stdClass();
+		$this->default_return_on_single = ($this->base_entity) ? $this->base_entity : new stdClass();
 
 		return $this;
 	}

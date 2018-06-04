@@ -22,9 +22,23 @@ class O_user_entity extends model_entity {
 	public $id;
 	public $email;
 	public $username;
+	public $dashboard_url;
+	public $is_active;
+	public $user_read_role_id;
+	public $user_edit_role_id;
+	public $user_delete_role_id;
+
 	protected $roles       = [];
 	protected $permissions = [];
 	protected $lazy_loaded = false;
+
+	public function __construct() {
+		$this->_construct();
+	}
+
+	protected function _construct() {
+	
+	}
 
 /**
  * __get
@@ -327,7 +341,7 @@ class O_user_entity extends model_entity {
 		$cache_key = 'database.user_entity.'.$user_id.'.acl.php';
 		if (!$this->lazy_loaded) {
 			if (!$roles_permissions = ci()->cache->get($cache_key)) {
-				$roles_permissions = $this->_lazy_loader($user_id);
+				$roles_permissions = $this->_internal_query($user_id);
 				ci()->cache->save($cache_key,$roles_permissions,cache_ttl());
 			}
 			$this->roles       = (array) $roles_permissions['roles'];
@@ -349,7 +363,7 @@ class O_user_entity extends model_entity {
  * @throws
  * @example
  */
-	protected function _lazy_loader($user_id) {
+	protected function _internal_query($user_id) {
 		$roles_permissions = [];
 		$sql = "select
 			`user_id`,
