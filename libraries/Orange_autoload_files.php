@@ -96,7 +96,7 @@ class Orange_autoload_files {
 		$classes = [
 			'model_entity'=>ORANGEPATH.'/models/Model_entity.php',
 			'cache_export'=>ORANGEPATH.'/libraries/Cache_export.php',
-			'cache_page'=>ORANGEPATH.'/libraries/Cache_page.php',
+			'cache_request'=>ORANGEPATH.'/libraries/Cache_request.php',
 			'middleware_base'=>ORANGEPATH.'/libraries/Middleware_base.php',
 			'validate_base'=>ORANGEPATH.'/libraries/Validate_base.php',
 			'filter_base'=>ORANGEPATH.'/libraries/Filter_base.php',

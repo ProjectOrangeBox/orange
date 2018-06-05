@@ -1,6 +1,6 @@
 <?php
 /**
- * Cache_page
+ * Cache_request
  * Insert description here
  *
  * @package CodeIgniter / Orange
@@ -18,7 +18,7 @@
  * functions:
  *
  */
-class Cache_page extends CI_Driver {
+class Cache_request extends CI_Driver {
 	/**
 	 * track if the combined cached configuration has been loaded
 	 *
