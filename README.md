@@ -192,7 +192,7 @@ methods include but are not limited to:
 `libraries/Filter_base.php` Provides the abstract base class for all filters and extends validate_base class (just a basic placeholder)
 no need to focus on in the short term
 
-`libraries/filters/` Folder to contain filters all filters start with Filter_*.php
+`libraries/filters/` Folder to contain filters all filters start with `Filter_*.php`
 
 `libraries/Middleware_base.php` Provides the abstract base class for all middleware (just a basic placeholder) no need to focus on in the short term
 
