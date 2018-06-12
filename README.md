@@ -25,7 +25,7 @@ functions which can be called based on the url
 view specific functions. These are called using PHP static syntax
 
 ### trigger
-events or like Drupal Hooks
+events using the listener model
 
 ### Packages
 As the name indicates the packages folder contains HMVC or composer like packages
@@ -42,8 +42,6 @@ This is a PHP file without the .php extension but loaded with a standard php inc
 This file must return a PHP array
 
 It is common practice to not committing your `.env` file to version control.
-
-You can think of them as Drupals settings.php file
 
 `/application`
 As the name indicates the Application folder contains all the code of your application that you are building.
@@ -68,7 +66,6 @@ As the name indicates the packages folder contains HMVC or composer like package
 
 each independent package is like a mini application folder with a few exceptions
 These are usually individual GIT repros
-You can think of them as Drupal Modules
 
 `/public`
 This is the publicly accessible folder apache "servers" files from.
