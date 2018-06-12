@@ -13,10 +13,10 @@ Manual:
 a view variable which contains a array of model records.
 
 ###Filters
-functions used to “Filter” some type of input. ie. like PHPs trim for example.
+functions used to "Filter" some type of input. ie. like PHPs trim for example.
 
 ###validations
-functions used to “validate” some type of input. Failures are registered with the Errors object
+functions used to "Validate" some type of input. Failures are registered with the Errors object
 
 ###middleware
 functions which can be called based on the url
@@ -41,7 +41,7 @@ This is a PHP file without the .php extension but loaded with a standard php inc
 
 This file must return a PHP array
 
-It is common practice to not committing your .env file to version control.
+It is common practice to not committing your `.env` file to version control.
 
 You can think of them as Drupals settings.php file
 
@@ -71,16 +71,16 @@ These are usually individual GIT repros
 You can think of them as Drupal Modules
 
 `/public`
-This is the publicly accessible folder apache “servers” files from.
+This is the publicly accessible folder apache "servers" files from.
 
 `/public/index.php`
-The index.php serves as the front controller or router.
+The `index.php` serves as the front controller/router.
 
 
 https://www.codeigniter.com/user_guide/overview/appflow.html?highlight=index%20php
 
 `/support`
-In order to a project organized, This folder contain things such as database back ups, import files, migrations, SSL keys, etc…
+In order to a project organized, This folder contain things such as database back ups, import files, migrations, SSL keys, etc...
 
 `/var`
 
@@ -99,22 +99,22 @@ This folder is NOT managed in your GIT repo and should be ignored.
 `core/MY_Config.php`
 
 
-provides extensions to CodeIgniter config such as getting configuration using dot notation with a default, flushing of cached config data, loading configuration if needed from a database, etc…
+provides extensions to CodeIgniter config such as getting configuration using dot notation with a default, flushing of cached config data, loading configuration if needed from a database, etc
 
 `core/MY_Controller.php`
 
 
-provides extensions to CodeIgniter Controller for automatically handling if site is down for maintenance. Calling middleware if needed, auto loading libraries, models, helpers for this controller (not needed to much anymore using the new extended ci() function) auto loading “catalogs”. attaching a “controller” specific model
+provides extensions to CodeIgniter Controller for automatically handling if site is down for maintenance. Calling middleware if needed, auto loading libraries, models, helpers for this controller (not needed to much anymore using the new extended ci() function) auto loading catalogs. attaching a controller specific model
 
 `core/MY_Input.php`
 
 
-provides extensions to CodeIgniter Input for grouping PUT and POST into a single function (no need for the dev to switch between them). Advanced auto “remapping” of request data. Updated wrapper for reading cookies with default.
+provides extensions to CodeIgniter Input for grouping PUT and POST into a single function (no need for the dev to switch between them). Advanced auto remapping of request data. Updated wrapper for reading cookies with default.
 
 `core/MY_Loader.php`
 
 
-provides extensions to CodeIgniter loader to making loading and “overloading” classes faster (since it uses a array to locate classes and not a file system “scan”)
+provides extensions to CodeIgniter loader to making loading and overloading classes faster (since it uses a array to locate classes and not a file system scan)
 
 `core/MY_Log.php`
 
@@ -129,12 +129,12 @@ provides extensions to CodeIgniter Model with validation. Not specific to Databa
 `core/MY_Output.php`
 
 
-provides extensions to CodeIgniter Output with json, nocache, wrapper for inputs “set cookie” since setting cookies are more of a output function and simple function to delete all cookies
+provides extensions to CodeIgniter Output with json, nocache, wrapper for inputs set cookie since setting cookies are more of a output function and simple function to delete all cookies
 
 `core/MY_Router.php`
 
 
-provides extensions to CodeIgniter Router to automatically handle controllers in Packages. This also added the “Action” suffix and HTTP method (Post, Put, Delete, Cli (command line), Get (none)). This uses a advanced caching technique to make this lighting fast (no filesystem scanning etc.)…
+provides extensions to CodeIgniter Router to automatically handle controllers in Packages. This also added the Action suffix and HTTP method (Post, Put, Delete, Cli (command line), Get (none)). This uses a advanced caching technique to make this lighting fast (no filesystem scanning etc.)
 
 `core/Orange.php`
 
@@ -146,13 +146,13 @@ methods include but are not limited to:
 
 `site_url()` smarter site_url
 
-`config()` wrapper for config’s dot_item
+`config()` wrapper for configs dot_item
 
 `filter()` wrapper for running a validation filter
 
 `valid()` wrapper for running a validation
 
-`esc()` wrapper for escaping “
+`esc()` wrapper for escaping
 
 `e()` wrapper for html special chars
 
@@ -164,7 +164,7 @@ methods include but are not limited to:
 
 `console()` simple browser level debugger shows up in the javascript console
 
-`l()` “raw” logging function
+`l()` raw logging function
 
 `atomic_file_put_contents()` PHP necessary atomic file writing
 
@@ -178,7 +178,7 @@ methods include but are not limited to:
 
 `cache_ttl()` Get the current Cache Time to Live with optional "window" support to negate a cache stamped
 
-`delete_cache_by_tags()` Delete cache records based on dot notation “tags" to allow deleting cache records based on multiple values
+`delete_cache_by_tags()` Delete cache records based on dot notation tags" to allow deleting cache records based on multiple values
 
 `libraries/Auth.php` Provides the authorization for users. Functions include login(), logout(), refresh_userdata()
 
@@ -197,7 +197,7 @@ no need to focus on in the short term
 
 `libraries/Middleware_base.php` Provides the abstract base class for all middleware (just a basic placeholder) no need to focus on in the short term
 
-`libraries/Orange_autoload_files.php` Provides generates the autoload cache file of controllers, libraries, models, classes, etc…
+`libraries/Orange_autoload_files.php` Provides generates the autoload cache file of controllers, libraries, models, classes, etc
 no need to focus on in the short term
 
 `libraries/Page.php` Provides the heavy lifting of building HTML Pages. methods include but are not limited to:
@@ -208,7 +208,7 @@ no need to focus on in the short term
 
 `body_class()` Add a class to the body
 
-`render()` Render the page and send it’s output to the output class
+`render()` Render the page and send its output to the output class
 
 `view()` Basic MVC view function https://www.codeigniter.com/user_guide/libraries/loader.html#CI_Loader::view
 
@@ -242,12 +242,12 @@ no need to focus on in the short term
 
 `libraries/Pear_plugin.php` base class for pear plugins. Really only provides a `_convert2attributes()` for all children objects
 
-`libraries/Pear.php` Provides the HTML View Pear “plugin” functions (to be used in view only)
+`libraries/Pear.php` Provides the HTML View Pear plugin functions (to be used in view only)
 each plugin has really only 2 methods:
-it’s class constructor __construct and render()
+its class constructor __construct and render()
 the constructor is called when the plugin is loaded for the first time
 if a plugin just adds for example css or js to a page you can include it with the plugins() & plugin() methods
-if your plugin is used in a view to “do” something you simple call pear::foobar($foo,23) which will automatically load the “foobar” plugin  (which of course called the constructor if it’s present) and then sends $foo and 23 to the render method. the render method can then return something which can be echoed. Plugins should “echo” directly but instead return a value which can be echoed. <?=pear::foobar($foo,23) ?>
+if your plugin is used in a view to do something you simple call pear::foobar($foo,23) which will automatically load the foobar plugin  (which of course called the constructor if its present) and then sends $foo and 23 to the render method. the render method can then return something which can be echoed. Plugins should echo directly but instead return a value which can be echoed. <?=pear::foobar($foo,23) ?>
 
 Built in Pear methods include but are not limited to:
 All of the CodeIgniter Helpers functions for html, form, date, inflector, language, number, text
@@ -261,7 +261,7 @@ so pear::form_input() and pear::input() are the same thing
 
 `end` end the current page variable section
 
-`extends` a view can only extend 1 other view (normally the “base” template)
+`extends` a view can only extend 1 other view (normally the base template)
 
 `includes` include another template into scope
 
@@ -271,11 +271,11 @@ so pear::form_input() and pear::input() are the same thing
 
 libraries/User.php
 Static wrapper for the orange user object.
-no need to focus on in the short term since it’s just a 7 line wrapper
+no need to focus on in the short term since its just a 7 line wrapper
 
 libraries/Validate_base.php
 provides the abstract base class for all validations and filters
-it provides the basic method for length, trim, human, human_plus, strip, is_bol to all it’s children classes
+it provides the basic method for length, trim, human, human_plus, strip, is_bol to all its children classes
 
 libraries/Validate.php
 The heavy lifter for input validation
@@ -299,12 +299,12 @@ all validations start with `Validate_*.php`
 libraries/Wallet.php
 wallet provides additional features to CodeIgniter Flash Messaging as well as some other session based functions.
 methods include but are not limited to:
-`pocket` a more generic version of cache_request’s features it’s both a getter and setter
+`pocket` a more generic version of cache_requests features its both a getter and setter
 `snapdata` set session data and leave it there for up to 1 hour or until it read
 `get_snapdata` get session data and remove
 `keep_snapdata` get session data and do not remove
 `msg` set a flash msg with additional features such as color & redirect
-This uses custom CSS & Javascript to show OS X like “alerts” in a bootstrap
+This uses custom CSS & Javascript to show OS X like alerts in a bootstrap
 https://getbootstrap.com/docs/3.3/components/#alerts
 
 `stash` stores request array
@@ -318,7 +318,7 @@ methods include but are not limited to:
 `only_deleted`  select only deleted
 `as_array` return as a array not an object
 `column` select a single column
-`on_empty_return` if nothing found return…
+`on_empty_return` if nothing found return
 `get` select single record
 `get_by` select single record with filter
 `get_many` select multiple records
@@ -333,7 +333,7 @@ methods include but are not limited to:
 `exists` test if record exists with filter
 `count()` - count records
 `count_by()` - count records with filter
-`index()` select for “index” table view
+`index()` select for index table view
 
 `models/entities/` folder of model record entities
 Orange Entities include
