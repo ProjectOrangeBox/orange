@@ -1,4 +1,4 @@
-#Orange Framework
+# Orange Framework
 
 Extensions to the CodeIgniter Framework
 
@@ -8,31 +8,31 @@ URL:
 Manual:
 [https://www.codeigniter.com/user_guide/index.html]()
 
-##Terms
-###Catalog
+## Terms
+### Catalog
 a view variable which contains a array of model records.
 
-###Filters
+### Filters
 functions used to "Filter" some type of input. ie. like PHPs trim for example.
 
-###validations
+### validations
 functions used to "Validate" some type of input. Failures are registered with the Errors object
 
-###middleware
+### middleware
 functions which can be called based on the url
 
-###Pear
+### Pear
 view specific functions. These are called using PHP static syntax
 
-###trigger
+### trigger
 events or like Drupal Hooks
 
-###Packages
+### Packages
 As the name indicates the packages folder contains HMVC or composer like packages
 each independent package is like a mini application folder with a few exceptions
 
 
-##File Structure
+## File Structure
 
 `.env`
 Used to storing configuration in the environment separate from code.
@@ -94,7 +94,7 @@ This folder is NOT managed in your GIT repo and should be ignored.
 This folder is created and managed by PHP Composer.
 This folder is NOT managed in your GIT repo and should be ignored.
 
-##Core Classes
+## Core Classes
 
 `core/MY_Config.php`
 
@@ -104,7 +104,7 @@ provides extensions to CodeIgniter config such as getting configuration using do
 `core/MY_Controller.php`
 
 
-provides extensions to CodeIgniter Controller for automatically handling if site is down for maintenance. Calling middleware if needed, auto loading libraries, models, helpers for this controller (not needed to much anymore using the new extended ci() function) auto loading catalogs. attaching a controller specific model
+provides extensions to CodeIgniter Controller for automatically handling if site is down for maintenance. Calling middleware if needed, auto loading libraries, models, helpers for this controller (not needed to much anymore using the new extended `ci()` function) auto loading catalogs. attaching a controller specific model
 
 `core/MY_Input.php`
 
@@ -180,7 +180,9 @@ methods include but are not limited to:
 
 `delete_cache_by_tags()` Delete cache records based on dot notation tags" to allow deleting cache records based on multiple values
 
-`libraries/Auth.php` Provides the authorization for users. Functions include login(), logout(), refresh_userdata()
+## Libraries
+
+`libraries/Auth.php` Provides the authorization for users. Functions include `login()`, `logout()`, `refresh_userdata()`.
 
 `libraries/Cache_export.php` Provides the library to cache to the file system. no need to focus on in the short term
 
@@ -188,7 +190,7 @@ methods include but are not limited to:
 
 `libraries/Errors.php` Provides a unified library to register errors for further processing
 
-`libraries/Event.php` Provides the library to provides events in your app. Methods include register() & trigger() as well as some simple supporting methods (count, has)
+`libraries/Event.php` Provides the library to provides events in your app. Methods include `register()` & `trigger()` as well as some simple supporting methods (`count`, `has`)
 
 `libraries/Filter_base.php` Provides the abstract base class for all filters and extends validate_base class (just a basic placeholder)
 no need to focus on in the short term
@@ -200,162 +202,152 @@ no need to focus on in the short term
 `libraries/Orange_autoload_files.php` Provides generates the autoload cache file of controllers, libraries, models, classes, etc
 no need to focus on in the short term
 
-`libraries/Page.php` Provides the heavy lifting of building HTML Pages. methods include but are not limited to:
+`libraries/Page.php` Provides the heavy lifting of building HTML Pages.
+methods include but are not limited to:
 
-`title()` Set the pages title if different than the default
+* `title()` Set the pages title if different than the default
 
-`meta()` Add additional meta data
+* `meta()` Add additional meta data
 
-`body_class()` Add a class to the body
+* `body_class()` Add a class to the body
 
-`render()` Render the page and send its output to the output class
+* `render()` Render the page and send its output to the output class
 
-`view()` Basic MVC view function https://www.codeigniter.com/user_guide/libraries/loader.html#CI_Loader::view
+* `view()` Basic MVC view function https://www.codeigniter.com/user_guide/libraries/loader.html#CI_Loader::view
 
-`data()` Attach data to a page from any where in the application
+* `data()` Attach data to a page from any where in the application
 
-`icon()` Change the default icon
+* `icon()` Change the default icon
 
-`css()` Add additional links to page
+* `css()` Add additional links to page
 
-`link_html()` Create and return <link> html
+* `link_html()` Create and return <link> html
 
-`style()` Add style to page
+* `style()` Add style to page
 
-`js()` Add additional javascript to a page
+* `js()` Add additional javascript to a page
 
-`script_html()` Create and return <script> html
+* `script_html()` Create and return <script> html
 
-`js_variable()` & `js_variables()` Add a javascript variable to the page
+* `js_variable()` & `js_variables()` Add a javascript variable to the page
 
-`script()` Add additional scripts to a page
+* `script()` Add additional scripts to a page
 
-`domready()` Add javascript to the domready section
+* `domready()` Add javascript to the domready section
 
-`ary2element()` Convert PHP array to HTML element
+* `ary2element()` Convert PHP array to HTML element
 
-`convert2attributes()` Convert PHP array to HTML attributes
+* `convert2attributes()` Convert PHP array to HTML attributes
 
-`set_priority()` Set priority to added elements
+* `set_priority()` Set priority to added elements
 
-`reset_priority()` Reset element priority to default 50
+* `reset_priority()` Reset element priority to default 50
 
 `libraries/Pear_plugin.php` base class for pear plugins. Really only provides a `_convert2attributes()` for all children objects
 
 `libraries/Pear.php` Provides the HTML View Pear plugin functions (to be used in view only)
 each plugin has really only 2 methods:
-its class constructor __construct and render()
+its class constructor `__construct` and `render()`
 the constructor is called when the plugin is loaded for the first time
 if a plugin just adds for example css or js to a page you can include it with the plugins() & plugin() methods
-if your plugin is used in a view to do something you simple call pear::foobar($foo,23) which will automatically load the foobar plugin  (which of course called the constructor if its present) and then sends $foo and 23 to the render method. the render method can then return something which can be echoed. Plugins should echo directly but instead return a value which can be echoed. <?=pear::foobar($foo,23) ?>
+if your plugin is used in a view to do something you simple call `pear::foobar($foo,23)` which will automatically load the foobar plugin  (which of course called the constructor if its present) and then sends $foo and 23 to the render method. the render method can then return something which can be echoed. Plugins should echo directly but instead return a value which can be echoed. `<?=pear::foobar($foo,23) ?>`
 
 Built in Pear methods include but are not limited to:
 All of the CodeIgniter Helpers functions for html, form, date, inflector, language, number, text
 in additional you can call the form helper functions without the form_ prefix
-so pear::form_input() and pear::input() are the same thing
+so `pear::form_input()` and `pear::input()` are the same thing
 
-####Others added include:
-`section` start a page variable section with the supplied name
+### Others added include:
+* `section` start a page variable section with the supplied name
+* `parent` append to prepend to the current page variable section without this you will overwrite a page section if it already contains something
+* `end` end the current page variable section
+* `extends` a view can only extend 1 other view (normally the base template)
+* `includes` include another template into scope
+* `is_extending` returns the currently template we are extending if any
+* `plugins() & plugin` load plugins without actually calling the render function
 
-`parent` append to prepend to the current page variable section without this you will overwrite a page section if it already contains something
-
-`end` end the current page variable section
-
-`extends` a view can only extend 1 other view (normally the base template)
-
-`includes` include another template into scope
-
-`is_extending` returns the currently template we are extending if any
-
-`plugins() & plugin` load plugins without actually calling the render function
-
-libraries/User.php
+`libraries/User.php`
 Static wrapper for the orange user object.
 no need to focus on in the short term since its just a 7 line wrapper
 
-libraries/Validate_base.php
+`libraries/Validate_base.php`
 provides the abstract base class for all validations and filters
 it provides the basic method for length, trim, human, human_plus, strip, is_bol to all its children classes
 
-libraries/Validate.php
-The heavy lifter for input validation
-methods include but are not limited to:
-`clear` clear all current errors
-`attach` attach validation as a closure
-`die_on_fail` die on first validation fail.
-`redirect_on_fail` redirect to a different URL on fail.
-`json_on_fail` output errors as json on fail.
-`success` return boolean true or false
-`variable` easy way to run a validation on a variable
-`request` easy way to run a validation on a request value (via a key)
-`run` auto detects a single or multiple validations
-`single` run a single validation
-`multiple` run multiple validations
+`libraries/Validate.php`
+The heavy lifter for input validation. Methods include but are not limited to:
+
+* `clear` clear all current errors
+* `attach` attach validation as a closure
+* `die_on_fail` die on first validation fail.
+* `redirect_on_fail` redirect to a different URL on fail.
+* `json_on_fail` output errors as json on fail.
+* `success` return boolean true or false
+* `variable` easy way to run a validation on a variable
+* `request` easy way to run a validation on a request value (via a key)
+* `run` auto detects a single or multiple validations
+* `single` run a single validation
+* `multiple` run multiple validations
 
 `libraries/validations/`
-folder to contain validations
-all validations start with `Validate_*.php`
+folder to contain validations. all validations start with `Validate_*.php`
 
-libraries/Wallet.php
+`libraries/Wallet.php`
 wallet provides additional features to CodeIgniter Flash Messaging as well as some other session based functions.
 methods include but are not limited to:
-`pocket` a more generic version of cache_requests features its both a getter and setter
-`snapdata` set session data and leave it there for up to 1 hour or until it read
-`get_snapdata` get session data and remove
-`keep_snapdata` get session data and do not remove
-`msg` set a flash msg with additional features such as color & redirect
+* `pocket` a more generic version of cache_requests features its both a getter and setter
+* `snapdata` set session data and leave it there for up to 1 hour or until it read
+* `get_snapdata` get session data and remove
+* `keep_snapdata` get session data and do not remove
+* `msg` set a flash msg with additional features such as color & redirect
 This uses custom CSS & Javascript to show OS X like alerts in a bootstrap
 https://getbootstrap.com/docs/3.3/components/#alerts
+* `stash` stores request array
+* `unstash` retrieves and restores request array
 
-`stash` stores request array
-`unstash` retrieves and restores request arraymodels/Database_model.php
+## Models
+`models/Database_model.php`
 This provides the reusable methods for actual database table models
 methods include but are not limited to:
-`get_tablename` return models tablename
-`get_primary_key` return models primary key
-`get_soft_delete` is this table using soft deletes?
-`with_deleted` select with deleted
-`only_deleted`  select only deleted
-`as_array` return as a array not an object
-`column` select a single column
-`on_empty_return` if nothing found return
-`get` select single record
-`get_by` select single record with filter
-`get_many` select multiple records
-`get_many_by` select multiple records with filter
-`insert` insert record
-`update` update record
-`update_by` update record with filter
-`delete` delete record
-`delete_by` delete record with filter
-`delete_cache_by_tags` deleted cache by tags
-`catalog` select records for a data array
-`exists` test if record exists with filter
-`count()` - count records
-`count_by()` - count records with filter
-`index()` select for index table view
+* `get_tablename` return models tablename
+* `get_primary_key` return models primary key
+* `get_soft_delete` is this table using soft deletes?
+* `with_deleted` select with deleted
+* `only_deleted`  select only deleted
+* `as_array` return as a array not an object
+* `column` select a single column
+* `on_empty_return` if nothing found return
+* `get` select single record
+* `get_by` select single record with filter
+* `get_many` select multiple records
+* `get_many_by` select multiple records with filter
+* `insert` insert record
+* `update` update record
+* `update_by` update record with filter
+* `delete` delete record
+* `delete_by` delete record with filter
+* `delete_cache_by_tags` deleted cache by tags
+* `catalog` select records for a data array
+* `exists` test if record exists with filter
+* `count()` - count records
+* `count_by()` - count records with filter
+* `index()` select for index table view
 
-`models/entities/` folder of model record entities
-Orange Entities include
-`models/entities/O_permission_entity.php`
-`models/entities/O_role_entity.php`
-`models/entities/O_user_entity.php`
+### Included Models
+`models/O_permission_model.php` Model for permissions table
+`models/O_role_model.php` Model for roles table
+`models/O_setting_model.php` Model for settings table
+`models/O_user_model.php` Model for users table
 
+### Model Entities
 `models/Model_entity.php`
 provides the abstract base class for all model entities (just a basic placeholder)
 provides a `save()` method to have a entity save itself
 
-`models/O_permission_model.php`
-Model for permissions table
+### Included Models
+`models/entities/O_permission_entity.php`
+`models/entities/O_role_entity.php`
+`models/entities/O_user_entity.php`
 
-`models/O_role_model.php`
-Model for roles table
-
-`models/O_setting_model.php`
-Model for settings table
-
-`models/O_user_model.php`
-Model for users table
-
-`models/traits/`
-folder of traits models can inherit
+### Model Traits
+Folder of traits models can inherit
