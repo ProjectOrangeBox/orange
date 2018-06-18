@@ -267,6 +267,7 @@ class Page {
 	public function view($_view_file = null, $_data = [], $_return = true) {
 		$this->prepare_page_variables();
 
+		/* call core orange function view() */
 		$_buffer = view($_view_file,array_merge(ci('load')->get_vars(),(array)$_data));
 
 		if (is_string($_return)) {
