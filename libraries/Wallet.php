@@ -79,6 +79,7 @@ class Wallet {
 			'initial_pause'  => config('wallet.initial_pause', 3),
 			'pause_for_each' => config('wallet.pause_for_each', 1000),
 		]]);
+
 		log_message('info', 'Wallet Class Initialized');
 	}
 
@@ -124,6 +125,7 @@ class Wallet {
 	 */
 	public function snapdata($newdata = null, $newval = null) {
 		$newdata = (is_array($newdata)) ? $newdata : [$newdata => $newval];
+
 		ci('session')->set_tempdata($newdata, null, 3600);
 
 		return $this;
@@ -144,6 +146,7 @@ class Wallet {
 	 */
 	public function get_snapdata($key) {
 		$data = ci('session')->tempdata($key);
+
 		ci('session')->unset_tempdata($key);
 
 		return $data;
@@ -183,17 +186,21 @@ class Wallet {
 	 */
 	public function msg($msg = '', $type = 'yellow', $redirect = null) {
 		$sticky = ($type == 'red' || $type == 'danger' || $type == 'warning' || $type == 'yellow');
+
 		ci('event')->trigger('wallet.msg', $msg, $type, $sticky, $redirect);
 
 		if (is_string($redirect) || $redirect === true) {
 			$redirect = (is_string($redirect)) ? $redirect : ci('input')->server('HTTP_REFERER');
 			$this->redirect_messages[md5(trim($msg))] = ['msg' => trim($msg), 'type' => $type, 'sticky' => $sticky];
+
 			ci('session')->set_flashdata($this->msg_key, $this->redirect_messages);
+
 			redirect($redirect);
 		} else {
 			$wallet_messages = ci('load')->get_var('wallet_messages');
 			$current_msgs = (array) $wallet_messages['messages'];
 			$current_msgs[md5(trim($msg))] = ['msg' => trim($msg), 'type' => $type, 'sticky' => $sticky];
+
 			ci('load')->vars(['wallet_messages' => [
 				'messages'       => $current_msgs,
 				'initial_pause'  => config('wallet.initial_pause', 3),
@@ -236,6 +243,7 @@ class Wallet {
 	 */
 	public function unstash() {
 		$stashed = $this->get_snapdata($this->stash_key);
+
 		$_POST = (is_array($stashed)) ? $stashed : [];
 
 		return $stashed;
