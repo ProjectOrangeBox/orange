@@ -1,350 +1,769 @@
-# Orange Framework
-
-Extensions to the CodeIgniter Framework
+**Orange Framework**
 
 URL:
-[https://www.codeigniter.com/]()
+
+<https://www.codeigniter.com/>
 
 Manual:
-[https://www.codeigniter.com/user_guide/index.html]()
 
-## Terms
-### Catalog
+<https://www.codeigniter.com/user_guide/index.html>
+
+**Terms**
+
+Catalog
+
 a view variable which contains a array of model records.
 
-### Filters
+Filters
+
 functions used to "Filter" some type of input. ie. like PHPs trim for example.
 
-### validations
-functions used to "Validate" some type of input. Failures are registered with the Errors object
+validations
 
-### middleware
+functions used to "validate" some type of input. Failures are registered with the Errors object
+
+middleware
+
 functions which can be called based on the url
 
-### Pear
+Pear
+
 view specific functions. These are called using PHP static syntax
 
-### trigger
-events using the listener model
+trigger
 
-### Packages
+events or like Drupal Hooks
+
+Packages
+
 As the name indicates the packages folder contains HMVC or composer like packages
+
 each independent package is like a mini application folder with a few exceptions
 
+**File Structure**
 
-## File Structure
+.env
 
-`.env`
 Used to storing configuration in the environment separate from code.
 
 This is a PHP file without the .php extension but loaded with a standard php include function.
 
-This file must return a PHP array
+This file must return a PHP array 
 
-It is common practice to not committing your `.env` file to version control.
+It is common practice to not committing your .env file to version control.
 
-`/application`
+You can think of them as Drupals settings.php file
+
+/application
+
 As the name indicates the Application folder contains all the code of your application that you are building.
 
-`/bin`
+/bin
+
 Storage for misc shell scripts which pertain to your application
 
 for example special deployment scripts, script to start the PHP built in server
 
-`composer.json`
-PHP composer file see: https://getcomposer.org/doc/
+composer.json
 
-`deploy.json`
-PHP Deploy Library file see: https://github.com/dmyers2004/deploy
+PHP composer file see: <https://getcomposer.org/doc/>
 
+deploy.json
+
+PHP Deploy Library file see: <https://github.com/dmyers2004/deploy>
 
 Additional Documents to come.
 
-`/packages`
+/packages
+
 As the name indicates the packages folder contains HMVC or composer like packages
 
-
 each independent package is like a mini application folder with a few exceptions
+
 These are usually individual GIT repros
 
-`/public`
+You can think of them as Drupal Modules
+
+/public
+
 This is the publicly accessible folder apache "servers" files from.
 
-`/public/index.php`
-The `index.php` serves as the front controller/router.
+/public/index.php
 
+The index.php serves as the front controller or router.
 
-https://www.codeigniter.com/user_guide/overview/appflow.html?highlight=index%20php
+<https://www.codeigniter.com/user_guide/overview/appflow.html?highlight=index%20php>
 
-`/support`
+/support
+
 In order to a project organized, This folder contain things such as database back ups, import files, migrations, SSL keys, etc...
 
-`/var`
-
+/var
 
 This folder much like the Linux equivalent contains things like caches, downloads, emails, logs, sessions, uploads.
+
 This folder is NOT managed in your GIT repo and should be ignored.
 
-`/vendor`
-
+/vendor
 
 This folder is created and managed by PHP Composer.
+
 This folder is NOT managed in your GIT repo and should be ignored.
 
-## Core Classes
+**Core Classes**
 
-`core/MY_Config.php`
+**core/MY_Config.php**
 
+provides extensions to CodeIgniter config such as getting configuration using dot notation with a default, flushing of cached config data, loading configuration if needed from a database, etc...
 
-provides extensions to CodeIgniter config such as getting configuration using dot notation with a default, flushing of cached config data, loading configuration if needed from a database, etc
+**core/MY_Controller.php**
 
-`core/MY_Controller.php`
+provides extensions to CodeIgniter Controller for automatically handling if site is down for maintenance. Calling middleware if needed, auto loading libraries, models, helpers for this controller (not needed to much anymore using the new extended ci() function) auto loading "catalogs". attaching a "controller" specific model
 
+**core/MY_Input.php**
 
-provides extensions to CodeIgniter Controller for automatically handling if site is down for maintenance. Calling middleware if needed, auto loading libraries, models, helpers for this controller (not needed to much anymore using the new extended `ci()` function) auto loading catalogs. attaching a controller specific model
+provides extensions to CodeIgniter Input for grouping PUT and POST into a single function (no need for the dev to switch between them). Advanced auto "remapping" of request data. Updated wrapper for reading cookies with default.
 
-`core/MY_Input.php`
+**core/MY_Loader.php**
 
+provides extensions to CodeIgniter loader to making loading and "overloading" classes faster (since it uses a array to locate classes and not a file system "scan")
 
-provides extensions to CodeIgniter Input for grouping PUT and POST into a single function (no need for the dev to switch between them). Advanced auto remapping of request data. Updated wrapper for reading cookies with default.
-
-`core/MY_Loader.php`
-
-
-provides extensions to CodeIgniter loader to making loading and overloading classes faster (since it uses a array to locate classes and not a file system scan)
-
-`core/MY_Log.php`
-
+**core/MY_Log.php**
 
 provides extensions to CodeIgniter Log to provide support for PSR3 bitwise levels as well as monolog if necessary.
 
-`core/MY_Model.php`
-
+**core/MY_Model.php**
 
 provides extensions to CodeIgniter Model with validation. Not specific to Databases because not all models are modeling database tables.
 
-`core/MY_Output.php`
+**core/MY_Output.php**
 
+provides extensions to CodeIgniter Output with json, nocache, wrapper for inputs "set cookie" since setting cookies are more of a output function and simple function to delete all cookies
 
-provides extensions to CodeIgniter Output with json, nocache, wrapper for inputs set cookie since setting cookies are more of a output function and simple function to delete all cookies
+**core/MY_Router.php**
 
-`core/MY_Router.php`
+provides extensions to CodeIgniter Router to automatically handle controllers in Packages. This also added the "Action" suffix and HTTP method (Post, Put, Delete, Cli (command line), Get (none)). This uses a advanced caching technique to make this lighting fast (no filesystem scanning etc.)...
 
+**core/Orange.php**
 
-provides extensions to CodeIgniter Router to automatically handle controllers in Packages. This also added the Action suffix and HTTP method (Post, Put, Delete, Cli (command line), Get (none)). This uses a advanced caching technique to make this lighting fast (no filesystem scanning etc.)
+Provides additional functions to CodeIgniter.
 
-`core/Orange.php`
-
-
-provides additional core functions to CodeIgniter.
 methods include but are not limited to:
 
-`ci()` a much smarter get_instance()
+**ci(class)**
 
-`site_url()` smarter site_url
+a much smarter get_instance()
 
-`config()` wrapper for configs dot_item
+To get a reference to the CodeIgniter "Super Object" you simple use get_instance()
 
-`filter()` wrapper for running a validation filter
+<https://www.codeigniter.com/user_guide/general/ancillary_classes.html?highlight=get_instance#get_instance>
 
-`valid()` wrapper for running a validation
+But I've made it smarter by making it a little more like a dependency injection contain. 
 
-`esc()` wrapper for escaping
+You can autoload a library or model simply by entering it's name in the function ie.
 
-`e()` wrapper for html special chars
+**ci('email')->send();**
 
-`env()` wrapper to read environmental variables with a default
+this will auto load the email library if it's not already loaded and then call the send method. 
 
-`view()` most basic wrapper for loading views
+Then you don't need to call
 
-`unlock_session()` ajax necessity more english wrapper for PHP session_write_close() function
+**ci()->load->library('email');**
 
-`console()` simple browser level debugger shows up in the javascript console
+**ci()->email->send();**
 
-`l()` raw logging function
+This also becomes a dependency injection contain because the 'email' library can be something other than a class named 'email' (the default CI way of loading classes)
 
-`atomic_file_put_contents()` PHP necessary atomic file writing
+This "remapping" is handled by the remap entry in /config/autoload.php
 
-`remove_php_file_from_opcache()` APC / OPcache friendly Remove from cache function
+**$autoload['remap'] = [**
 
-`convert_to_real()` and `convert_to_string()` Converting to and from values
+**'auth'=>'ldap_auth',**
 
-`simplify_array()` Collapse a array with multiple values into a single key=>value pair
+**'o_user_entity'=>'O_ldap_user_entity',**
 
-`cache()` Wrapper function to sue the currently loaded cache library in a closure fashion
+**];**
 
-`cache_ttl()` Get the current Cache Time to Live with optional "window" support to negate a cache stamped
+in this example ldap_auth is loaded instead of auth when ci('auth') is called. or a mock_auth for testing etc...
 
-`delete_cache_by_tags()` Delete cache records based on dot notation tags" to allow deleting cache records based on multiple values
+**site_url(uri,protocol)**
 
-## Libraries
+smarter site_url
 
-`libraries/Auth.php` Provides the authorization for users. Functions include `login()`, `logout()`, `refresh_userdata()`.
+This does everything the CodeIgniter site_url() does
 
-`libraries/Cache_export.php` Provides the library to cache to the file system. no need to focus on in the short term
+<https://www.codeigniter.com/user_guide/helpers/url_helper.html?highlight=site_url#site_url>
 
-`libraries/Cache_request.php` Provides the library to create a cache for the current request (in stored in PHP memory) no need to focus on in the short term
+except this version of the function added a simple find and replace for {} tags. These tags are loaded from /config/paths.php. This then makes it easier to have any reused path in paths.php and by using site_url() load them.
 
-`libraries/Errors.php` Provides a unified library to register errors for further processing
+**$path = site_url('/{www theme}/assets/css')**
 
-`libraries/Event.php` Provides the library to provides events in your app. Methods include `register()` & `trigger()` as well as some simple supporting methods (`count`, `has`)
+**config(setting,default)**
 
-`libraries/Filter_base.php` Provides the abstract base class for all filters and extends validate_base class (just a basic placeholder)
+wrapper for config's dot_item calls
+
+**ci('config')->dot_item()**
+
+This makes loaded configuration values a lot easier and it's fully cached. 
+
+**config('auth.login h2')**
+
+will return the value for /config/auto.php array key 'login h2'.
+
+Just like
+
+**$html = ci('config')->dot_item('auth.login h2','Login');**
+
+you can also provided a default value. 
+
+**$html = config('auth.login h2','Login');**
+
+**filter(rules,field)**
+
+wrapper for running a validation filter calls
+
+**ci('validate')->single($rules,$field);**
+
+**valid(rule,field)**
+
+wrapper for running a validation calls
+
+**ci('validate')->single($rule,$field);**
+
+and returns value of
+
+**!ci('errors')->has();**
+
+**esc(string)**
+
+escape " with \"
+
+**e(html)**
+
+performs a html encoding of special characters
+
+**env(key,default)**
+
+wrapper to read environmental variables with a default loads values from the .env file. This should be used in the /config/*.php files. very rarely should you call it in actual code. exceptions might be to load the server environment or debug mode.
+
+**view(view,data)**
+
+most basic wrapper for loading views
+
+<https://www.codeigniter.com/user_guide/general/views.html?highlight=view#adding-dynamic-data-to-the-view>
+
+***NOTE*** this ALWAYS returns the rendered view. This does not echo anything.
+
+**unlock_session()**
+
+more english wrapper for PHP session_write_close() function
+
+**console(var,type)**
+
+simple browser level debugger shows up in the javascript console wrapper for
+
+**echo '<script type="text/javascript">console.'.$type.'('.json_encode($var).')</script>';**
+
+**l(...)**
+
+"raw" logging function 
+
+Simple Logging function for debugging purposes
+
+***ALWAYS*** writes to LOGPATH.'/orange_debug.log'
+
+**atomic_file_put_contents(file path,content)**
+
+PHP necessary atomic file writing
+
+Writes to a file without the needed to worry about another process loading it write it's still being written to.
+
+**remove_php_file_from_opcache(full path)**
+
+APC / OPcache friendly Remove from cache function
+
+removes a file from opcache or apache without worrying about if it's actually loaded
+
+**convert_to_real(value) and convert_to_string(value)**
+
+Converting to and from values
+
+Try to convert a value to it's real type this is nice for pulling string from a database such as configuration values stored in string format
+
+**simplify_array(array,key,value)**
+
+collapse a array with multiple values into a single key=>value pair
+
+this will collapse a array with multiple values into a single key=>value pair
+
+**cache(key,closure,ttl)**
+
+Wrapper function to sue the currently loaded cache library in a closure fashion
+
+**cache_ttl(use window)**
+
+Get the current Cache Time to Live with optional "window" support to negate a cache stamped
+
+**delete_cache_by_tags(tags)**
+
+Delete cache records based on dot notation "tags" therefore if you have a cache keys of:
+
+acl.users.database.table
+
+acl.groups.database.table
+
+food.database.table
+
+colors.file
+
+colors.table
+
+colors_status.table
+
+You can use different tags
+
+**delete_cache_by_tags('acl')**
+
+**delete_cache_by_tags('acl','user','roles')**
+
+**delete_cache_by_tags('acl.user.roles')**
+
+**delete_cache_by_tags(['acl','user','roles'])**
+
+if the cache key has one or more matching tag delete the record**libraries/Auth.php**
+
+provides the authorization for users. Functions include
+
+**login(user identifier, password)**
+
+**logout()**
+
+**refresh_userdata(user identifier, save session)**
+
+**libraries/Cache_export.php**
+
+provides the library to cache to the file system
+
+**libraries/Cache_request.php**
+
+provides the library to create a cache for the *current* request (in stored in PHP memory)
+
+**libraries/Errors.php**
+
+provides a unified library to register errors for further processing
+
+**libraries/Event.php**
+
+provides the library to provides events in your app
+
+methods include 
+
+**register(name, closure, priority)**
+
+**trigger(name, a#...)**
+
+**count(name)**
+
+**has(name)**
+
+**libraries/Filter_base.php**
+
+provides the abstract base class for all filters and extends validate_base class (just a basic placeholder)
+
 no need to focus on in the short term
 
-`libraries/filters/` Folder to contain filters all filters start with `Filter_*.php`
+**libraries/filters/**
 
-`libraries/Middleware_base.php` Provides the abstract base class for all middleware (just a basic placeholder) no need to focus on in the short term
+folder to contain filters
 
-`libraries/Orange_autoload_files.php` Provides generates the autoload cache file of controllers, libraries, models, classes, etc
-no need to focus on in the short term
+all filters start with Filter_*.php
 
-`libraries/Page.php` Provides the heavy lifting of building HTML Pages.
+**libraries/Middleware_base.php**
+
+provides the abstract base class for all middleware (just a basic placeholder)
+
+**libraries/Orange_autoload_files.php**
+
+provides generates the autoload cache file of controllers, libraries, models, classes, etc...
+
+**libraries/Page.php**
+
+provides the heavy lifting of building HTML Pages.
+
 methods include but are not limited to:
 
-* `title()` Set the pages title if different than the default
+**title(title)**
 
-* `meta()` Add additional meta data
+set the pages title if different than the default
 
-* `body_class()` Add a class to the body
+**meta(attribute, name, content, priority)**
 
-* `render()` Render the page and send its output to the output class
+add additional meta data
 
-* `view()` Basic MVC view function https://www.codeigniter.com/user_guide/libraries/loader.html#CI_Loader::view
+**body_class(class, priority)**
 
-* `data()` Attach data to a page from any where in the application
+add a class to the body
 
-* `icon()` Change the default icon
+**render(view, data)**
 
-* `css()` Add additional links to page
+render the page and send it's output to the output class
 
-* `link_html()` Create and return <link> html
+**view(view file, data, return)**
 
-* `style()` Add style to page
+basic MVC view function
 
-* `js()` Add additional javascript to a page
+<https://www.codeigniter.com/user_guide/libraries/loader.html#CI_Loader::view>
 
-* `script_html()` Create and return <script> html
+**data(name, value)**
 
-* `js_variable()` & `js_variables()` Add a javascript variable to the page
+attach data to a page from any where in the application
 
-* `script()` Add additional scripts to a page
+**icon(image path)**
 
-* `domready()` Add javascript to the domready section
+change the default icon
 
-* `ary2element()` Convert PHP array to HTML element
+**css(file, priority)**
 
-* `convert2attributes()` Convert PHP array to HTML attributes
+add additional links to page
 
-* `set_priority()` Set priority to added elements
+**link_html(file)**
 
-* `reset_priority()` Reset element priority to default 50
+create and return <link> html
 
-`libraries/Pear_plugin.php` base class for pear plugins. Really only provides a `_convert2attributes()` for all children objects
+**style(style, priority)**
 
-`libraries/Pear.php` Provides the HTML View Pear plugin functions (to be used in view only)
+add style to page
+
+**js(file, priority)**
+
+add additional javascript to a page
+
+**script_html(file)**
+
+create and return <script> html
+
+**js_variable(key, value, priority, raw) & js_variables(array)**
+
+add a javascript variable to the page
+
+**script(script, priority)**
+
+add additional scripts to a page
+
+**domready(script, priority)**
+
+add javascript to the domready section
+
+**ary2element(element, attributes, wrapper)**
+
+convert PHP array to HTML element
+
+**convert2attributes(attributes, prefix, strip_empty)**
+
+convert PHP array to HTML attributes
+
+**set_priority(priority)**
+
+set priority to added elements
+
+**reset_priority()**
+
+reset element priority to default 50
+
+**libraries/Pear_plugin.php**
+
+base class for pear plugins. Really only provides a _convert2attributes() for all children objects
+
+**libraries/Pear.php**
+
+provides the HTML View Pear "plugin" functions (to be used in view only)
+
 each plugin has really only 2 methods:
-its class constructor `__construct` and `render()`
+
+it's class constructor __construct and render()
+
 the constructor is called when the plugin is loaded for the first time
+
 if a plugin just adds for example css or js to a page you can include it with the plugins() & plugin() methods
-if your plugin is used in a view to do something you simple call `pear::foobar($foo,23)` which will automatically load the foobar plugin  (which of course called the constructor if its present) and then sends $foo and 23 to the render method. the render method can then return something which can be echoed. Plugins should echo directly but instead return a value which can be echoed. `<?=pear::foobar($foo,23) ?>`
+
+if your plugin is used in a view to "do" something you simple call pear::foobar($foo,23) which will automatically load the "foobar" plugin (which of course called the constructor if it's present) and then sends $foo and 23 to the render method. the render method can then return something which can be echoed. Plugins should "echo" directly but instead return a value which can be echoed. <?=pear::foobar($foo,23) ?>
 
 Built in Pear methods include but are not limited to:
+
 All of the CodeIgniter Helpers functions for html, form, date, inflector, language, number, text
+
 in additional you can call the form helper functions without the form_ prefix
-so `pear::form_input()` and `pear::input()` are the same thing
 
-### Others added include:
-* `section` start a page variable section with the supplied name
-* `parent` append to prepend to the current page variable section without this you will overwrite a page section if it already contains something
-* `end` end the current page variable section
-* `extends` a view can only extend 1 other view (normally the base template)
-* `includes` include another template into scope
-* `is_extending` returns the currently template we are extending if any
-* `plugins() & plugin` load plugins without actually calling the render function
+so pear::form_input() and pear::input() are the same thing
 
-`libraries/User.php`
+Others added include
+
+**section(name,value)**
+
+start a page variable section with the supplied name
+
+**parent(name)**
+
+append to prepend to the current page variable section without this you will overwrite a page section if it already contains something
+
+**end()**
+
+end the current page variable section
+
+**extends(name)**
+
+a view can only extend 1 other view (normally the "base" template)
+
+**includes(view, data, name)**
+
+include another template into scope
+
+**is_extending()**
+
+returns the currently template we are extending if any
+
+**plugins(name, priority) & plugin(name, priority)**
+
+load plugins without actually calling the render function
+
+**libraries/User.php**
+
 Static wrapper for the orange user object.
-no need to focus on in the short term since its just a 7 line wrapper
 
-`libraries/Validate_base.php`
+no need to focus on in the short term since it's just a 7 line wrapper
+
+**libraries/Validate_base.php**
+
 provides the abstract base class for all validations and filters
-it provides the basic method for length, trim, human, human_plus, strip, is_bol to all its children classes
 
-`libraries/Validate.php`
-The heavy lifter for input validation. Methods include but are not limited to:
+it provides the basic method for length, trim, human, human_plus, strip, is_bol to all it's children classes
 
-* `clear` clear all current errors
-* `attach` attach validation as a closure
-* `die_on_fail` die on first validation fail.
-* `redirect_on_fail` redirect to a different URL on fail.
-* `json_on_fail` output errors as json on fail.
-* `success` return boolean true or false
-* `variable` easy way to run a validation on a variable
-* `request` easy way to run a validation on a request value (via a key)
-* `run` auto detects a single or multiple validations
-* `single` run a single validation
-* `multiple` run multiple validations
+**libraries/Validate.php**
 
-`libraries/validations/`
-folder to contain validations. all validations start with `Validate_*.php`
+The heavy lifter for input validation
 
-`libraries/Wallet.php`
+methods include but are not limited to:
+
+**clear()**
+
+clear all current errors
+
+**attach(name, closure)**
+
+attach validation as a closure
+
+**die_on_fail(view)**
+
+die on first validation fail.
+
+**redirect_on_fail(url)**
+
+redirect to a different URL on fail.
+
+**json_on_fail()**
+
+output errors as json on fail.
+
+**success()**
+
+return boolean true or false
+
+**variable(rules, field, human)**
+
+easy way to run a validation on a variable
+
+**request(rules, key, human)**
+
+easy way to run a validation on a request value (via a key)
+
+**run(rules, fields, human)**
+
+auto detects a single or multiple validations
+
+**single(rules, fields, human)**
+
+run a single validation
+
+**multiple(rules, fields)**
+
+run multiple validations
+
+**libraries/validations/**
+
+folder to contain validations
+
+all validations start with Validate_*.php
+
+**libraries/Wallet.php**
+
 wallet provides additional features to CodeIgniter Flash Messaging as well as some other session based functions.
-methods include but are not limited to:
-* `pocket` a more generic version of cache_requests features its both a getter and setter
-* `snapdata` set session data and leave it there for up to 1 hour or until it read
-* `get_snapdata` get session data and remove
-* `keep_snapdata` get session data and do not remove
-* `msg` set a flash msg with additional features such as color & redirect
-This uses custom CSS & Javascript to show OS X like alerts in a bootstrap
-https://getbootstrap.com/docs/3.3/components/#alerts
-* `stash` stores request array
-* `unstash` retrieves and restores request array
 
-## Models
-`models/Database_model.php`
+methods include but are not limited to:
+
+**pocket(name, value)**
+
+a more generic version of cache_request's features it's both a getter and setter
+
+**snapdata(newdata, newval)**
+
+set session data and leave it there for up to 1 hour or until it read
+
+**get_snapdata(key)**
+
+get session data and remove
+
+**keep_snapdata(key)**
+
+get session data and do not remove
+
+**msg(msg, type, redirect)**
+
+set a flash msg with additional features such as color & redirect
+
+This uses custom CSS & Javascript to show OS X like "alerts" in a bootstrap
+
+<https://getbootstrap.com/docs/3.3/components/#alerts>
+
+**stash()**
+
+stores request array
+
+**unstash()**
+
+retrieves and restores request array**models/Database_model.php**
+
 This provides the reusable methods for actual database table models
+
 methods include but are not limited to:
-* `get_tablename` return models tablename
-* `get_primary_key` return models primary key
-* `get_soft_delete` is this table using soft deletes?
-* `with_deleted` select with deleted
-* `only_deleted`  select only deleted
-* `as_array` return as a array not an object
-* `column` select a single column
-* `on_empty_return` if nothing found return
-* `get` select single record
-* `get_by` select single record with filter
-* `get_many` select multiple records
-* `get_many_by` select multiple records with filter
-* `insert` insert record
-* `update` update record
-* `update_by` update record with filter
-* `delete` delete record
-* `delete_by` delete record with filter
-* `delete_cache_by_tags` deleted cache by tags
-* `catalog` select records for a data array
-* `exists` test if record exists with filter
-* `count()` - count records
-* `count_by()` - count records with filter
-* `index()` select for index table view
 
-### Included Models
-`models/O_permission_model.php` Model for permissions table
-`models/O_role_model.php` Model for roles table
-`models/O_setting_model.php` Model for settings table
-`models/O_user_model.php` Model for users table
+**get_tablename()**
 
-### Model Entities
-`models/Model_entity.php`
+return models tablename
+
+**get_primary_key()**
+
+return models primary key
+
+**get_soft_delete()**
+
+is this table using soft deletes?
+
+**with_deleted()**
+
+select with deleted
+
+**only_deleted()**
+
+select only deleted
+
+**as_array()**
+
+return as a array not an object
+
+**column(name)**
+
+select a single column
+
+**on_empty_return(return)**
+
+if nothing found return...
+
+**get(primary value)**
+
+select single record
+
+**get_by(where)**
+
+select single record with filter
+
+**get_many()**
+
+select multiple records
+
+**get_many_by(where)**
+
+select multiple records with filter
+
+**insert(data)**
+
+insert record
+
+**update(data)**
+
+update record
+
+**update_by(data, where)**
+
+update record with filter
+
+**delete(arg)**
+
+delete record
+
+**delete_by(where)**
+
+delete record with filter
+
+**delete_cache_by_tags()**
+
+deleted cache by tags
+
+**catalog(array key, select columns, where, order by, cache key, with deleted)**
+
+select records for a data array
+
+**exists(arg)**
+
+test if record exists with filter
+
+**count()**
+
+count records
+
+**count_by(where)**
+
+count records with filter
+
+**index(order by, limit, where, select)**
+
+select for "index" table view
+
+
+
+**models/entities/**
+
+folder of model record entities
+
+Entities include
+
+**O_permission_entity.php**
+
+**O_role_entity.php**
+
+**O_user_entity.php**
+
+**models/Model_entity.php**
+
 provides the abstract base class for all model entities (just a basic placeholder)
+
 provides a `save()` method to have a entity save itself
 
-### Included Models
-`models/entities/O_permission_entity.php`
-`models/entities/O_role_entity.php`
-`models/entities/O_user_entity.php`
+**models/O_permission_model.php**
 
-### Model Traits
-Folder of traits models can inherit
+Model for permissions table
+
+**models/O_role_model.php**
+
+Model for roles table
+
+**models/O_setting_model.php**
+
+Model for settings table
+
+**models/O_user_model.php**
+
+Model for users table
+
+**models/traits/**
+
+folder of traits models can inherit
