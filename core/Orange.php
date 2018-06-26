@@ -612,9 +612,17 @@ function simplify_array($array, $key = 'id', $value = null) {
 
 	foreach ($array as $row) {
 		if (is_object($row)) {
-			$new_array[$row->$key] = $row->$value;
+			if ($value == '*') {
+				$new_array[$row->$key] = $row;
+			} else {
+				$new_array[$row->$key] = $row->$value;
+			}
 		} else {
-			$new_array[$row[$key]] = $row[$value];
+			if ($value == '*') {
+				$new_array[$row[$key]] = $row;
+			} else {
+				$new_array[$row[$key]] = $row[$value];
+			}
 		}
 	}
 
@@ -667,7 +675,7 @@ function cache_ttl($use_window=true) {
 /**
  * Delete cache records based on dot notation "tags"
  *
- * @param $args mixed rray, period separated list of tags or multiple arguments
+ * @param $args mixed array, period separated list of tags or multiple arguments
  *
  * @return
  *
