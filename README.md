@@ -1,3 +1,4 @@
+
 **Orange Framework**
 
 URL:
@@ -48,9 +49,9 @@ Used to storing configuration in the environment separate from code.
 
 This is a PHP file without the .php extension but loaded with a standard php include function.
 
-This file must return a PHP array 
+This file must return a PHP array 
 
-It is common practice to not committing your .env file to version control.
+It is common practice to not committing your .env file to version control.
 
 You can think of them as Drupals settings.php file
 
@@ -66,11 +67,11 @@ for example special deployment scripts, script to start the PHP built in server
 
 composer.json
 
-PHP composer file see: <https://getcomposer.org/doc/>
+PHP composer file see: <https://getcomposer.org/doc/>
 
 deploy.json
 
-PHP Deploy Library file see: <https://github.com/dmyers2004/deploy>
+PHP Deploy Library file see: <https://github.com/dmyers2004/deploy>
 
 Additional Documents to come.
 
@@ -90,7 +91,7 @@ This is the publicly accessible folder apache "servers" files from.
 
 /public/index.php
 
-The index.php serves as the front controller or router.
+The index.php serves as the front controller or router.
 
 <https://www.codeigniter.com/user_guide/overview/appflow.html?highlight=index%20php>
 
@@ -158,13 +159,13 @@ To get a reference to the CodeIgniter "Super Object" you simple use get_instance
 
 <https://www.codeigniter.com/user_guide/general/ancillary_classes.html?highlight=get_instance#get_instance>
 
-But I've made it smarter by making it a little more like a dependency injection contain. 
+But I've made it smarter by making it a little more like a dependency injection contain. 
 
 You can autoload a library or model simply by entering it's name in the function ie.
 
 **ci('email')->send();**
 
-this will auto load the email library if it's not already loaded and then call the send method. 
+this will auto load the email library if it's not already loaded and then call the send method. 
 
 Then you don't need to call
 
@@ -204,7 +205,7 @@ wrapper for config's dot_item calls
 
 **ci('config')->dot_item()**
 
-This makes loaded configuration values a lot easier and it's fully cached. 
+This makes loaded configuration values a lot easier and it's fully cached. 
 
 **config('auth.login h2')**
 
@@ -214,7 +215,7 @@ Just like
 
 **$html = ci('config')->dot_item('auth.login h2','Login');**
 
-you can also provided a default value. 
+you can also provided a default value. 
 
 **$html = config('auth.login h2','Login');**
 
@@ -252,7 +253,7 @@ most basic wrapper for loading views
 
 <https://www.codeigniter.com/user_guide/general/views.html?highlight=view#adding-dynamic-data-to-the-view>
 
-***NOTE*** this ALWAYS returns the rendered view. This does not echo anything.
+***NOTE*** this ALWAYS returns the rendered view. This does not echo anything.
 
 **unlock_session()**
 
@@ -266,11 +267,11 @@ simple browser level debugger shows up in the javascript console wrapper for
 
 **l(...)**
 
-"raw" logging function 
+"raw" logging function 
 
 Simple Logging function for debugging purposes
 
-***ALWAYS*** writes to LOGPATH.'/orange_debug.log'
+***ALWAYS*** writes to LOGPATH.'/orange_debug.log'
 
 **atomic_file_put_contents(file path,content)**
 
@@ -346,7 +347,7 @@ provides the library to cache to the file system
 
 **libraries/Cache_request.php**
 
-provides the library to create a cache for the *current* request (in stored in PHP memory)
+provides the library to create a cache for the *current* request (in stored in PHP memory)
 
 **libraries/Errors.php**
 
@@ -356,7 +357,7 @@ provides a unified library to register errors for further processing
 
 provides the library to provides events in your app
 
-methods include 
+methods include 
 
 **register(name, closure, priority)**
 
@@ -486,7 +487,7 @@ the constructor is called when the plugin is loaded for the first time
 
 if a plugin just adds for example css or js to a page you can include it with the plugins() & plugin() methods
 
-if your plugin is used in a view to "do" something you simple call pear::foobar($foo,23) which will automatically load the "foobar" plugin (which of course called the constructor if it's present) and then sends $foo and 23 to the render method. the render method can then return something which can be echoed. Plugins should "echo" directly but instead return a value which can be echoed. <?=pear::foobar($foo,23) ?>
+if your plugin is used in a view to "do" something you simple call pear::foobar($foo,23) which will automatically load the "foobar" plugin (which of course called the constructor if it's present) and then sends \$foo and 23 to the render method. the render method can then return something which can be echoed. Plugins should "echo" directly but instead return a value which can be echoed. <?=pear::foobar($foo,23) ?>
 
 Built in Pear methods include but are not limited to:
 
@@ -767,3 +768,29 @@ Model for users table
 **models/traits/**
 
 folder of traits models can inherit
+
+
+**Differences between "Default" CodeIgniter and Orange**
+
+1. All Controller files must end in "Controller" ie. ExampleController and of course the Class Name matches the file name (standard PHP practice)
+2. All Controller Methods must end in Action ie. indexAction
+3. The HTTP method must also be included in the Controller Method ie. indexPostAction, indexDeleteAction, indexPutAction unless it's GET (http default) it is not required ie. indexAction (http method get).
+4. If the Controller Method is to be called by the command line the HTTP Action is Cli ie. indexCliAction
+
+**Everything else is Standard CodeIgniter.**
+That said I have added a number of "helpers" (which is what Orange actually does for CodeIgniter).
+
+For example you can still use:
+
+`$this->load->view('folder/view_file') `
+
+and that will still work but if you use:
+
+`$this->page->render()`
+
+this will give you all the benefits of using the Orange Page Library (Auto view file loading, Asset Management, Pear Plugins, etc...) of course this can also be called with a view file
+
+`$this->page->render('folder/view_file')`
+
+You will also notice I extended CodeIgniters Model class to include Validation (see `MY_Model.php`).
+I also created a `Database_model.php` which extends MY_Model to include database generic methods. This class was based on the ideas originally presented by Jamie Rumbelow https://github.com/jamierumbelow/codeigniter-base-model
