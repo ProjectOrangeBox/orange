@@ -33,7 +33,7 @@ view specific functions. These are called using PHP static syntax
 
 trigger
 
-events or like Drupal Hooks
+Trigger a event
 
 Packages
 
@@ -53,7 +53,6 @@ This file must return a PHP array
 
 It is common practice to not committing your .env file to version control.
 
-You can think of them as Drupals settings.php file
 
 /application
 
@@ -82,8 +81,6 @@ As the name indicates the packages folder contains HMVC or composer like package
 each independent package is like a mini application folder with a few exceptions
 
 These are usually individual GIT repros
-
-You can think of them as Drupal Modules
 
 /public
 
