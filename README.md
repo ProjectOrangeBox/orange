@@ -791,3 +791,28 @@ this will give you all the benefits of using the Orange Page Library (Auto view 
 
 You will also notice I extended CodeIgniters Model class to include Validation (see `MY_Model.php`).
 I also created a `Database_model.php` which extends MY_Model to include database generic methods. This class was based on the ideas originally presented by Jamie Rumbelow https://github.com/jamierumbelow/codeigniter-base-model
+
+*Extensions to Controller*
+
+Properties:
+
+$cache_page_for (integer) minutes to cache a pages output for
+
+$controller (string) name of the controller (can be used is various places throughout code)
+
+$controller_path (string) path to this controller (can be used is various places throughout code, page adds this to the view variables)
+
+$libraries (array) list of libraries to auto load (not really needed anymore using ci('???') syntax.
+
+$helpers (array) list of helpers to auto load.
+
+$models (array) list of models to auto load (not really needed anymore using ci('???') syntax.
+
+$catalogs (array) list of model catalogs to load (see documentation)
+
+$data (array) controller global avaiable key value pair for view data storage.
+
+$controller_model (string) name of the controllers default model (can be used is various places throughout code)
+
+**Also see controller middleware**
+
