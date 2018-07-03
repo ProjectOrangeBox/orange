@@ -153,7 +153,7 @@ class MY_Controller extends CI_Controller {
 
 		/* does the controller have a "default" model? */
 		if ($this->controller_model) {
-			$this->load->model($this->controller_model);
+			$this->load->model(strtolower($this->controller_model));
 		}
 
 		/* trigger our start up event */
