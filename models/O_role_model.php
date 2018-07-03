@@ -21,8 +21,6 @@
 class O_role_model extends Database_model {
 	protected $table;
 	protected $additional_cache_tags = '.acl';
-	protected $has_roles = true;
-	protected $has_stamps = true;
 	protected $entity = true;
 	protected $rules = [
 		'id'          => ['field' => 'id', 'label' => 'Id', 'rules' => 'required|integer|max_length[10]|less_than[4294967295]|filter_int[10]'],
@@ -207,4 +205,18 @@ class O_role_model extends Database_model {
 	public function _find_permission_id($permission) {
 		return (int) ((int) $permission > 0) ? $permission : $this->o_permission_model->column('id')->get_by(['key' => $permission]);
 	}
+	
+	public function add($name=null,$description=null) {
+		foreach (func_get_args() as $v) {
+			if (empty($v)) {
+				throw new exception(__METHOD__.' Required Field Empty.'.chr(10));
+			}
+		}
+
+		$this->skip_rules = true;
+
+		/* we already verified the key that's the "real" primary key */
+		return (!$this->exists(['name'=>$name])) ? $this->insert(['name'=>$name,'description'=>$description]) : false;
+	}
+	
 }

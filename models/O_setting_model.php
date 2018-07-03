@@ -65,4 +65,30 @@ class O_setting_model extends Database_model {
 
 		return parent::delete_cache_by_tags();
 	}
+	
+	public function add($name=null,$group=null,$value=null,$help=null,$options=null) {
+		foreach (func_get_args() as $v) {
+			if (empty($v)) {
+				throw new exception(__METHOD__.' Required Field Empty.'.chr(10));
+			}
+		}
+
+		$this->skip_rules = true;
+
+		$defaults = [
+			'read_role_id'=>ADMIN_ROLE_ID,
+			'edit_role_id'=>ADMIN_ROLE_ID,
+			'delete_role_id'=>ADMIN_ROLE_ID,
+			'created_on'=>date('Y-m-d H:i:s'),
+			'created_by'=>0,
+			'created_ip'=>'0.0.0.0',
+			'updated_on'=>date('Y-m-d H:i:s'),
+			'updated_by'=>0,
+			'updated_ip'=>'0.0.0.0',
+		];
+
+		/* we already verified the key that's the "real" primary key */
+		return (!$this->exists(['internal'=>$group.'::'.$name])) ? $this->insert($defaults + ['name'=>$name,'group'=>$group,'value'=>$value,'help'=>$help,'options'=>$options]) : false;
+	}
+	
 }
