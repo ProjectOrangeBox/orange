@@ -672,6 +672,10 @@ function cache_ttl($use_window=true) {
 	return $cache_ttl;
 }
 
+function strip_rp($path) {
+	return str_replace(ROOTPATH,'',$path);
+}
+
 /**
  * Delete cache records based on dot notation "tags"
  *
