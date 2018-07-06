@@ -211,6 +211,22 @@ function site_url($uri = '', $protocol = NULL) {
 	/* Call CodeIgniter version first */
 	$uri = ci()->config->site_url($uri, $protocol);
 
+	/* get our cache data */
+	$paths = __cache_paths();
+
+	/* return the merge str replace */
+	return str_replace($paths['keys'], $paths['values'], $uri);
+}
+
+function path($path = '') {
+	/* get our cache data */
+	$paths = __cache_paths();
+
+	/* return the merge str replace */
+	return str_replace($paths['keys'], $paths['values'], $path);
+}
+
+function __cache_paths() {
 	/* now let's merge if needed */
 
 	/* where is the cache file? */
@@ -232,10 +248,7 @@ function site_url($uri = '', $protocol = NULL) {
 	}
 
 	/* include the cache file */
-	$paths = include $cache_file_path;
-
-	/* return the merge str replace */
-	return str_replace($paths['keys'], $paths['values'], $uri);
+	return include $cache_file_path;
 }
 
 /**
@@ -629,6 +642,10 @@ function simplify_array($array, $key = 'id', $value = null) {
 	return $new_array;
 }
 
+function strip_rp($path) {
+	return str_replace(ROOTPATH,'',$path);
+}
+
 /**
  * Wrapper function to sue the currently loaded cache library in a closure fashion
  *
@@ -670,10 +687,6 @@ function cache_ttl($use_window=true) {
 	}
 
 	return $cache_ttl;
-}
-
-function strip_rp($path) {
-	return str_replace(ROOTPATH,'',$path);
 }
 
 /**
