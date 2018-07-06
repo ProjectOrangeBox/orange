@@ -101,7 +101,9 @@ class MY_Config extends CI_Config {
 			foreach ($orange_paths['root'] as $group_key=>$filepath) {
 				$config = null;
 
-				include $filepath;
+				if (file_exists($filepath)) {
+					include $filepath;
+				}
 
 				if (is_array($config)) {
 					foreach ($config as $key => $value) {
