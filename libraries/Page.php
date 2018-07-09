@@ -40,7 +40,7 @@ class Page {
 	 *
 	 * @var boolean
 	 */
-	protected $variables            = [];
+	protected $variables = [];
 
 	/**
 	 * track if the combined cached configuration has been loaded
