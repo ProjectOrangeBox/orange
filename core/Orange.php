@@ -15,14 +15,14 @@ if (!file_exists($paths_config_file)) {
 /* load the paths file */
 include $paths_config_file;
 
-/* get out the 2 paths we need now and set them as constants these are pretty "necessary" paths used thought the system */
+/* get out the 2 paths we need now and set them as constants these are pretty "necessary" paths used thought out the system */
 define('CACHEPATH',ROOTPATH.$config['cache']);
 define('LOGPATH',ROOTPATH.$config['logs']);
 
-/* load the orange autoloader library */
+/* load the orange autoloader library - this builds the "super" search array */
 include ORANGEPATH.'/libraries/Orange_autoload_files.php';
 
-/* instancte the orange autoloader class and save the returned array */
+/* instantiate the orange autoloader class and save the returned array */
 $_ORANGE_PATHS = (new Orange_autoload_files(CACHEPATH.'/autoload_files.php',2))->read_cache();
 
 /* register the Orange Autoloader */
@@ -54,9 +54,9 @@ assert_options(ASSERT_CALLBACK,function($file,$line,$code,$desc='') {
 /* Ok now Orange is setup so bring in the CodeIgniter "Bootstrapper" */
 require_once BASEPATH.'core/CodeIgniter.php';
 
-/******************
-* Global Functions
-*******************/
+/************************
+* Orange Global Functions
+*************************/
 
 /**
  * newer / smarter version of CodeIgniter get_instance()
@@ -276,7 +276,7 @@ function config($setting,$default='%%no_value%%') {
 }
 
 /**
- * Wrapper for validate
+ * Wrapper for filter
  *
 */
 function filter($rule,$field) {
@@ -291,7 +291,7 @@ function filter($rule,$field) {
 }
 
 /**
- * Wrapper for valid
+ * Wrapper for validate single
  *
 */
 function valid($rule,$field) {
@@ -393,8 +393,10 @@ function console($var, $type = 'log') {
 
 /**
  * Get the current Orange Paths Array
+ * by section and/or file
  *
- * @param $var string specific section you are looking for (optional)
+ * @param $section string specific section you are looking for
+ * @param $file string file in that section
  *
  * @return array
  *
@@ -451,9 +453,6 @@ function view($_view,$_data=[]) {
 		throw new Exception('Could not locate view "'.$_file.'"');
 	}
 
-	/* get the view file */
-	$_view_file = $_op[$_file];
-
 	/* import variables into the current symbol table from an only prefix invalid/numeric variable names with _ 	*/
 	extract($_data, EXTR_PREFIX_INVALID, '_');
 
@@ -461,7 +460,7 @@ function view($_view,$_data=[]) {
 	ob_start();
 
 	/* bring in the view file */
-	include $_view_file;
+	include $_op[$_file];
 
 	/* return the current buffer contents and delete current output buffer */
 	return ob_get_clean();
@@ -640,10 +639,6 @@ function simplify_array($array, $key = 'id', $value = null) {
 	}
 
 	return $new_array;
-}
-
-function strip_rp($path) {
-	return str_replace(ROOTPATH,'',$path);
 }
 
 /**

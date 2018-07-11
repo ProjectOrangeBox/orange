@@ -206,17 +206,21 @@ class O_role_model extends Database_model {
 		return (int) ((int) $permission > 0) ? $permission : $this->o_permission_model->column('id')->get_by(['key' => $permission]);
 	}
 	
-	public function add($name=null,$description=null) {
-		foreach (func_get_args() as $v) {
-			if (empty($v)) {
-				throw new exception(__METHOD__.' Required Field Empty.'.chr(10));
-			}
-		}
-
+	public function migration_add($name=null,$description=null,$migration=null) {
 		$this->skip_rules = true;
 
 		/* we already verified the key that's the "real" primary key */
-		return (!$this->exists(['name'=>$name])) ? $this->insert(['name'=>$name,'description'=>$description]) : false;
+		return (!$this->exists(['name'=>$name])) ? $this->insert(['name'=>$name,'description'=>$description,'migration'=>$migration]) : false;
+	}
+
+	public function migration_remove($where=null) {
+		$this->skip_rules = true;
+
+		if (!is_array($where)) {
+			$where = ['migration'=>$where];
+		}
+
+		return $this->delete_by($where);
 	}
 	
 }

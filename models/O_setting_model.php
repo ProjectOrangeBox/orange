@@ -66,13 +66,7 @@ class O_setting_model extends Database_model {
 		return parent::delete_cache_by_tags();
 	}
 	
-	public function add($name=null,$group=null,$value=null,$help=null,$options=null) {
-		foreach (func_get_args() as $v) {
-			if (empty($v)) {
-				throw new exception(__METHOD__.' Required Field Empty.'.chr(10));
-			}
-		}
-
+	public function migration_add($name=null,$group=null,$value=null,$help=null,$options=null,$migration=null) {
 		$this->skip_rules = true;
 
 		$defaults = [
@@ -88,7 +82,17 @@ class O_setting_model extends Database_model {
 		];
 
 		/* we already verified the key that's the "real" primary key */
-		return (!$this->exists(['internal'=>$group.'::'.$name])) ? $this->insert($defaults + ['name'=>$name,'group'=>$group,'value'=>$value,'help'=>$help,'options'=>$options]) : false;
+		return (!$this->exists(['name'=>$name,'group'=>$group])) ? $this->insert($defaults + ['name'=>$name,'group'=>$group,'value'=>$value,'help'=>$help,'options'=>$options,'migration'=>$migration]) : false;
+	}
+
+	public function migration_remove($where=null) {
+		$this->skip_rules = true;
+
+		if (!is_array($where)) {
+			$where = ['migration'=>$where];
+		}
+
+		return $this->delete_by($where);
 	}
 	
 }

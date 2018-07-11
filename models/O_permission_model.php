@@ -185,16 +185,29 @@ class O_permission_model extends Database_model {
  * @throws
  * @example
  */
-	public function add($key=null,$group=null,$description=null) {
-		foreach (func_get_args() as $v) {
-			if (empty($v)) {
-				throw new exception(__METHOD__.' Required Field Empty.'.chr(10));
-			}
-		}
-
+	public function migration_add($key=null,$group=null,$description=null,$migration=null) {
 		$this->skip_rules = true;
 
 		/* we already verified the key that's the "real" primary key */
-		return (!$this->exists(['key'=>$key])) ? $this->insert(['key'=>$key,	'group'=>$group,'description'=>$description]) : false;
+		$success = (!$this->exists(['key'=>$key])) ? $this->insert(['key'=>$key,	'group'=>$group,'description'=>$description,'migration'=>$migration]) : false;
+		
+		$this->_refresh();
+		
+		return $success;
 	}
+	
+	public function migration_remove($where=null) {
+		$this->skip_rules = true;
+
+		if (!is_array($where)) {
+			$where = ['migration'=>$where];
+		}
+
+		$success = $this->delete_by($where);
+
+		$this->_refresh();
+		
+		return $success;
+	}
+	
 }

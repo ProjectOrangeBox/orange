@@ -102,7 +102,8 @@ class Page {
 		}
 
 		$this->body_class(['uid-'.$uid,'is-'.$is]);
-
+		
+		/* used in plugins and views */
 		ci('load')->helper('url');
 
 		$base_url = trim(base_url(), '/');

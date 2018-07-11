@@ -32,16 +32,16 @@ class MY_Config extends CI_Config {
 	 * provide dot notation selection
 	 * this is the new "recommended" way to make sure you get database values as well
 	 *
-	 * @param string $item Config item name or dot notation format
-	 * @param mixed $index Index name or default if dot notation used
+	 * @param string $setting dot notation format config item
+	 * @param mixed $default if not found
 	 *
 	 * @return string|null The configuration item or NULL if the item doesn't exist
 	 *
 	 * @access public
 	 * @uses none
-	 * @examples item('email.mailtype','html')
+	 * @examples dot_item('email.mailtype','html')
 	 */
-	public function dot_item($setting,$default) {
+	public function dot_item($setting,$default=null) {
 		log_message('debug', 'MY_Config::item_dot::'.$setting);
 
 		if (!$this->setup) {
@@ -62,6 +62,43 @@ class MY_Config extends CI_Config {
 		}
 
 		return $value;
+	}
+	
+	/**
+	 * Change dot notation config value
+	 * NOT Saved between requests
+	 *
+	 * @param string $setting Config item name in dot notation format
+	 * @param mixed $value value to set configuration value to
+	 *
+	 * @return this
+	 *
+	 * @access public
+	 * @uses none
+	 * @examples set_dot_item('email.mailtype','html')
+	 */
+	public function set_dot_item($setting,$value=null) {
+		log_message('debug', 'MY_Config::set_item_dot::'.$setting);
+	
+		if (!$this->setup) {
+			if (class_exists('CI_Controller',false)) {
+				if (class_exists('Cache_export',false)) {
+					$this->setup = true;
+					$this->config = $this->_load_combined_config();
+				}
+			}
+		}
+
+		list($file,$key) = explode('.', strtolower($setting), 2);
+
+		if ($key) {
+			$this->config[$file][$key] = $value;
+		} else {
+			$this->config[$file] = $value;
+		}
+		
+		/* allow chaining */
+		return $this;
 	}
 
 	/**
