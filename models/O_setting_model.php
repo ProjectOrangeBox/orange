@@ -66,7 +66,7 @@ class O_setting_model extends Database_model {
 		return parent::delete_cache_by_tags();
 	}
 	
-	public function migration_add($name=null,$group=null,$value=null,$help=null,$options=null,$migration=null) {
+	public function migration_add($name=null,$group=null,$value=null,$help=null,$options=null,$migration=null,$optional=[]) {
 		$this->skip_rules = true;
 
 		$defaults = [
@@ -80,6 +80,10 @@ class O_setting_model extends Database_model {
 			'updated_by'=>0,
 			'updated_ip'=>'0.0.0.0',
 		];
+
+		foreach ($optional as $key=>$val) {
+			$columns[$key] = $val;
+		}
 
 		/* we already verified the key that's the "real" primary key */
 		return (!$this->exists(['name'=>$name,'group'=>$group])) ? $this->insert($defaults + ['name'=>$name,'group'=>$group,'value'=>$value,'help'=>$help,'options'=>$options,'migration'=>$migration]) : false;
