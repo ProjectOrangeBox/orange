@@ -44,14 +44,7 @@ class MY_Config extends CI_Config {
 	public function dot_item($setting,$default=null) {
 		log_message('debug', 'MY_Config::item_dot::'.$setting);
 
-		if (!$this->setup) {
-			if (class_exists('CI_Controller',false)) {
-				if (class_exists('Cache_export',false)) {
-					$this->setup = true;
-					$this->config = $this->_load_combined_config();
-				}
-			}
-		}
+		$this->_load_config();
 
 		list($file,$key) = explode('.', strtolower($setting), 2);
 
@@ -80,14 +73,7 @@ class MY_Config extends CI_Config {
 	public function set_dot_item($setting,$value=null) {
 		log_message('debug', 'MY_Config::set_item_dot::'.$setting);
 	
-		if (!$this->setup) {
-			if (class_exists('CI_Controller',false)) {
-				if (class_exists('Cache_export',false)) {
-					$this->setup = true;
-					$this->config = $this->_load_combined_config();
-				}
-			}
-		}
+		$this->_load_config();
 
 		list($file,$key) = explode('.', strtolower($setting), 2);
 
@@ -115,6 +101,17 @@ class MY_Config extends CI_Config {
 		$this->setup = false;
 
 		return ci('cache')->export->delete('config');
+	}
+
+	protected function _load_config() {
+		if (!$this->setup) {
+			if (class_exists('CI_Controller',false)) {
+				if (class_exists('Cache_export',false)) {
+					$this->setup = true;
+					$this->config = $this->_load_combined_config();
+				}
+			}
+		}
 	}
 
 	/**
