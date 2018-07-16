@@ -1,41 +1,40 @@
-
-**Orange Framework**
+-   **Orange Framework**
 
 URL:
 
-<https://www.codeigniter.com/>
+[**https://www.codeigniter.com/**](https://www.codeigniter.com/)
 
 Manual:
 
-<https://www.codeigniter.com/user_guide/index.html>
+[**https://www.codeigniter.com/user_guide/index.html**](https://www.codeigniter.com/user_guide/index.html)
 
 **Terms**
 
-Catalog
+**Catalog**
 
 a view variable which contains a array of model records.
 
-Filters
+**Filters**
 
 functions used to "Filter" some type of input. ie. like PHPs trim for example.
 
-validations
+**Validations**
 
 functions used to "validate" some type of input. Failures are registered with the Errors object
 
-middleware
+**Middleware**
 
 functions which can be called based on the url
 
-Pear
+**Pear**
 
 view specific functions. These are called using PHP static syntax
 
-trigger
+**Trigger**
 
-Trigger a event
+Event package for your app and domain
 
-Packages
+**Packages**
 
 As the name indicates the packages folder contains HMVC or composer like packages
 
@@ -43,70 +42,73 @@ each independent package is like a mini application folder with a few exceptions
 
 **File Structure**
 
-.env
+**.env**
 
 Used to storing configuration in the environment separate from code.
 
-This is a PHP file without the .php extension but loaded with a standard php include function.
+[**http://php.net/manual/en/configuration.file.php**](http://php.net/manual/en/configuration.file.php)
 
-This file must return a PHP array 
+[**http://php.net/manual/en/function.parse-ini-file.php**](http://php.net/manual/en/function.parse-ini-file.php)
 
 It is common practice to not committing your .env file to version control.
 
+**/application**
 
-/application
+As the name indicates the Application folder contains the application specific code.
 
-As the name indicates the Application folder contains all the code of your application that you are building.
+When using CodeIgniter / Orange thou you should put as much code in packages as possible this makes code reuse a lot easier.
 
-/bin
+**/bin**
 
 Storage for misc shell scripts which pertain to your application
 
-for example special deployment scripts, script to start the PHP built in server
+for example special deployment scripts, a script to start the PHP built in server
 
-composer.json
+**composer.json**
 
-PHP composer file see: <https://getcomposer.org/doc/>
+PHP composer file see
 
-deploy.json
+[**https://getcomposer.org/doc/**](https://getcomposer.org/doc/)
 
-PHP Deploy Library file see: <https://github.com/dmyers2004/deploy>
+**deploy.json**
 
-Additional Documents to come.
+PHP Deploy file see
 
-/packages
+[**https://github.com/dmyers2004/deploy**](https://github.com/dmyers2004/deploy)
+
+**/packages**
 
 As the name indicates the packages folder contains HMVC or composer like packages
 
 each independent package is like a mini application folder with a few exceptions
 
-These are usually individual GIT repros
+These are usually individual GIT repositories to simplify package reuse.
 
-/public
+**/public**
 
 This is the publicly accessible folder apache "servers" files from.
 
-/public/index.php
+**/public/index.php**
 
-The index.php serves as the front controller or router.
+The index.php serves as the front controller or router.
 
-<https://www.codeigniter.com/user_guide/overview/appflow.html?highlight=index%20php>
+[**https://www.codeigniter.com/user_guide/overview/appflow.html?highlight=index%20php**](https://www.codeigniter.com/user_guide/overview/appflow.html?highlight=index%20php)
 
-/support
+**/support**
 
-In order to a project organized, This folder contain things such as database back ups, import files, migrations, SSL keys, etc...
+In order to keep a project organized, This folder contain things such as database backups, import files, migrations, SSL keys, etc...
 
-/var
+**/var**
 
 This folder much like the Linux equivalent contains things like caches, downloads, emails, logs, sessions, uploads.
 
-This folder is NOT managed in your GIT repo and should be ignored.
+This folder should NOT be managed in your GIT repository and should be ignored.
 
-/vendor
+**/vendor**
 
 This folder is created and managed by PHP Composer.
 
-This folder is NOT managed in your GIT repo and should be ignored.
+This folder is NOT managed in your GIT repositories and should be ignored.
 
 **Core Classes**
 
@@ -142,6 +144,8 @@ provides extensions to CodeIgniter Output with json, nocache, wrapper for inputs
 
 provides extensions to CodeIgniter Router to automatically handle controllers in Packages. This also added the "Action" suffix and HTTP method (Post, Put, Delete, Cli (command line), Get (none)). This uses a advanced caching technique to make this lighting fast (no filesystem scanning etc.)...
 
+**Orange.php File**
+
 **core/Orange.php**
 
 Provides additional functions to CodeIgniter.
@@ -154,15 +158,15 @@ a much smarter get_instance()
 
 To get a reference to the CodeIgniter "Super Object" you simple use get_instance()
 
-<https://www.codeigniter.com/user_guide/general/ancillary_classes.html?highlight=get_instance#get_instance>
+[**https://www.codeigniter.com/user_guide/general/ancillary_classes.html?highlight=get_instance#get_instance**](https://www.codeigniter.com/user_guide/general/ancillary_classes.html?highlight=get_instance#get_instance)
 
-But I've made it smarter by making it a little more like a dependency injection contain. 
+But I've made it smarter by making it a little more like a dependency injection contain. 
 
 You can autoload a library or model simply by entering it's name in the function ie.
 
 **ci('email')->send();**
 
-this will auto load the email library if it's not already loaded and then call the send method. 
+this will auto load the email library if it's not already loaded and then call the send method. 
 
 Then you don't need to call
 
@@ -190,7 +194,7 @@ smarter site_url
 
 This does everything the CodeIgniter site_url() does
 
-<https://www.codeigniter.com/user_guide/helpers/url_helper.html?highlight=site_url#site_url>
+[**https://www.codeigniter.com/user_guide/helpers/url_helper.html?highlight=site_url#site_url**](https://www.codeigniter.com/user_guide/helpers/url_helper.html?highlight=site_url#site_url)
 
 except this version of the function added a simple find and replace for {} tags. These tags are loaded from /config/paths.php. This then makes it easier to have any reused path in paths.php and by using site_url() load them.
 
@@ -202,7 +206,7 @@ wrapper for config's dot_item calls
 
 **ci('config')->dot_item()**
 
-This makes loaded configuration values a lot easier and it's fully cached. 
+This makes loaded configuration values a lot easier and it's fully cached. 
 
 **config('auth.login h2')**
 
@@ -212,7 +216,7 @@ Just like
 
 **$html = ci('config')->dot_item('auth.login h2','Login');**
 
-you can also provided a default value. 
+you can also provided a default value. 
 
 **$html = config('auth.login h2','Login');**
 
@@ -248,9 +252,9 @@ wrapper to read environmental variables with a default loads values from the .en
 
 most basic wrapper for loading views
 
-<https://www.codeigniter.com/user_guide/general/views.html?highlight=view#adding-dynamic-data-to-the-view>
+[**https://www.codeigniter.com/user_guide/general/views.html?highlight=view#adding-dynamic-data-to-the-view**](https://www.codeigniter.com/user_guide/general/views.html?highlight=view#adding-dynamic-data-to-the-view)
 
-***NOTE*** this ALWAYS returns the rendered view. This does not echo anything.
+NOTE this ALWAYS returns the rendered view. This does not echo anything.
 
 **unlock_session()**
 
@@ -264,11 +268,13 @@ simple browser level debugger shows up in the javascript console wrapper for
 
 **l(...)**
 
-"raw" logging function 
+"raw" logging function 
 
 Simple Logging function for debugging purposes
 
-***ALWAYS*** writes to LOGPATH.'/orange_debug.log'
+ALWAYS writes to 
+
+**LOGPATH.'/orange_debug.log'**
 
 **atomic_file_put_contents(file path,content)**
 
@@ -282,7 +288,9 @@ APC / OPcache friendly Remove from cache function
 
 removes a file from opcache or apache without worrying about if it's actually loaded
 
-**convert_to_real(value) and convert_to_string(value)**
+**convert_to_real(value)**
+
+**convert_to_string(value)**
 
 Converting to and from values
 
@@ -306,17 +314,17 @@ Get the current Cache Time to Live with optional "window" support to negate a ca
 
 Delete cache records based on dot notation "tags" therefore if you have a cache keys of:
 
-acl.users.database.table
+**acl.users.database.table**
 
-acl.groups.database.table
+**acl.groups.database.table**
 
-food.database.table
+**food.database.table**
 
-colors.file
+**colors.file**
 
-colors.table
+**colors.table**
 
-colors_status.table
+**colors_status.table**
 
 You can use different tags
 
@@ -328,7 +336,13 @@ You can use different tags
 
 **delete_cache_by_tags(['acl','user','roles'])**
 
-if the cache key has one or more matching tag delete the record**libraries/Auth.php**
+if the cache key has one or more matching tag delete the record
+
+**Libraries**
+
+**Auth**
+
+**libraries/Auth.php**
 
 provides the authorization for users. Functions include
 
@@ -338,23 +352,31 @@ provides the authorization for users. Functions include
 
 **refresh_userdata(user identifier, save session)**
 
+**Cache Export**
+
 **libraries/Cache_export.php**
 
 provides the library to cache to the file system
 
+**Cache Request**
+
 **libraries/Cache_request.php**
 
-provides the library to create a cache for the *current* request (in stored in PHP memory)
+provides the library to create a cache for the current request (in stored in PHP memory)
+
+**Errors**
 
 **libraries/Errors.php**
 
 provides a unified library to register errors for further processing
 
+**Event**
+
 **libraries/Event.php**
 
 provides the library to provides events in your app
 
-methods include 
+methods include 
 
 **register(name, closure, priority)**
 
@@ -363,6 +385,8 @@ methods include
 **count(name)**
 
 **has(name)**
+
+**Filters**
 
 **libraries/Filter_base.php**
 
@@ -376,13 +400,19 @@ folder to contain filters
 
 all filters start with Filter_*.php
 
+**Middleware**
+
 **libraries/Middleware_base.php**
 
 provides the abstract base class for all middleware (just a basic placeholder)
 
+**Orange Autoload Files**
+
 **libraries/Orange_autoload_files.php**
 
 provides generates the autoload cache file of controllers, libraries, models, classes, etc...
+
+**Pages**
 
 **libraries/Page.php**
 
@@ -410,7 +440,7 @@ render the page and send it's output to the output class
 
 basic MVC view function
 
-<https://www.codeigniter.com/user_guide/libraries/loader.html#CI_Loader::view>
+[**https://www.codeigniter.com/user_guide/libraries/loader.html#CI_Loader::view**](https://www.codeigniter.com/user_guide/libraries/loader.html#CI_Loader::view)
 
 **data(name, value)**
 
@@ -468,6 +498,8 @@ set priority to added elements
 
 reset element priority to default 50
 
+**Pear View Plugins**
+
 **libraries/Pear_plugin.php**
 
 base class for pear plugins. Really only provides a _convert2attributes() for all children objects
@@ -484,7 +516,9 @@ the constructor is called when the plugin is loaded for the first time
 
 if a plugin just adds for example css or js to a page you can include it with the plugins() & plugin() methods
 
-if your plugin is used in a view to "do" something you simple call pear::foobar($foo,23) which will automatically load the "foobar" plugin (which of course called the constructor if it's present) and then sends \$foo and 23 to the render method. the render method can then return something which can be echoed. Plugins should "echo" directly but instead return a value which can be echoed. <?=pear::foobar($foo,23) ?>
+if your plugin is used in a view to "do" something you simple call pear::foobar($foo,23) which will automatically load the "foobar" plugin (which of course called the constructor if it's present) and then sends $foo and 23 to the render method. the render method can then return something which can be echoed. Plugins should "echo" directly but instead return a value which can be echoed.
+
+**<?=pear::foobar($foo,23) ?>**
 
 Built in Pear methods include but are not limited to:
 
@@ -494,41 +528,45 @@ in additional you can call the form helper functions without the form_ prefix
 
 so pear::form_input() and pear::input() are the same thing
 
-Others added include
+**Included Pear Methods**
 
-**section(name,value)**
+**pear::section(name,value)**
 
 start a page variable section with the supplied name
 
-**parent(name)**
+**pear::parent(name)**
 
 append to prepend to the current page variable section without this you will overwrite a page section if it already contains something
 
-**end()**
+**pear::end()**
 
 end the current page variable section
 
-**extends(name)**
+**pear::extends(name)**
 
 a view can only extend 1 other view (normally the "base" template)
 
-**includes(view, data, name)**
+**pear::includes(view, data, name)**
 
 include another template into scope
 
-**is_extending()**
+**pear::is_extending()**
 
 returns the currently template we are extending if any
 
-**plugins(name, priority) & plugin(name, priority)**
+**pear::plugins(name, priority) & plugin(name, priority)**
 
 load plugins without actually calling the render function
+
+**User Wrapper**
 
 **libraries/User.php**
 
 Static wrapper for the orange user object.
 
 no need to focus on in the short term since it's just a 7 line wrapper
+
+**Validation**
 
 **libraries/Validate_base.php**
 
@@ -592,6 +630,8 @@ folder to contain validations
 
 all validations start with Validate_*.php
 
+**Wallet**
+
 **libraries/Wallet.php**
 
 wallet provides additional features to CodeIgniter Flash Messaging as well as some other session based functions.
@@ -620,7 +660,7 @@ set a flash msg with additional features such as color & redirect
 
 This uses custom CSS & Javascript to show OS X like "alerts" in a bootstrap
 
-<https://getbootstrap.com/docs/3.3/components/#alerts>
+[**https://getbootstrap.com/docs/3.3/components/#alerts**](https://getbootstrap.com/docs/3.3/components/#alerts)
 
 **stash()**
 
@@ -628,7 +668,11 @@ stores request array
 
 **unstash()**
 
-retrieves and restores request array**models/Database_model.php**
+retrieves and restores request array
+
+**Database Model Base Class**
+
+**models/Database_model.php**
 
 This provides the reusable methods for actual database table models
 
@@ -726,7 +770,7 @@ count records with filter
 
 select for "index" table view
 
-
+**Models**
 
 **models/entities/**
 
@@ -744,7 +788,7 @@ Entities include
 
 provides the abstract base class for all model entities (just a basic placeholder)
 
-provides a `save()` method to have a entity save itself
+provides a save() method to have a entity save itself
 
 **models/O_permission_model.php**
 
@@ -766,53 +810,908 @@ Model for users table
 
 folder of traits models can inherit
 
+**SkyNET GIT "Flow"**
 
-**Differences between "Default" CodeIgniter and Orange**
+**Creating a Example "package"**
 
-1. All Controller files must end in "Controller" ie. ExampleController and of course the Class Name matches the file name (standard PHP practice)
-2. All Controller Methods must end in Action ie. indexAction
-3. The HTTP method must also be included in the Controller Method ie. indexPostAction, indexDeleteAction, indexPutAction unless it's GET (http default) it is not required ie. indexAction (http method get).
-4. If the Controller Method is to be called by the command line the HTTP Action is Cli ie. indexCliAction
+In this example we are going to create a public and private (administrator) web page for managing and displaying cookies.
 
-**Everything else is Standard CodeIgniter.**
-That said I have added a number of "helpers" (which is what Orange actually does for CodeIgniter).
+Our public url will be at /cookies and the administrator url will be /admin/cookies
 
-For example you can still use:
+First we create our "package" folder and add it to the autoload packages array.
 
-`$this->load->view('folder/view_file') `
+Inside the /packages folder create a "cookies" folder. This will contain out cookies package.
 
-and that will still work but if you use:
+Then add that folders path to the /config/autoload.php packages array.
 
-`$this->page->render()`
+**Create the Controllers**
 
-this will give you all the benefits of using the Orange Page Library (Auto view file loading, Asset Management, Pear Plugins, etc...) of course this can also be called with a view file
+Then create the controllers, model, and view folders (see picture below).
 
-`$this->page->render('folder/view_file')`
+for the public URL create
 
-You will also notice I extended CodeIgniters Model class to include Validation (see `MY_Model.php`).
-I also created a `Database_model.php` which extends MY_Model to include database generic methods. This class was based on the ideas originally presented by Jamie Rumbelow https://github.com/jamierumbelow/codeigniter-base-model
+/cookies/controllers/CookiesController.php
 
-*Extensions to Controller*
+for the private administrator view create a folder admin inside the controllers folder and inside that create another
 
-Properties:
+/cookies/controllers/admin/CookiesController.php
 
-$cache_page_for (integer) minutes to cache a pages output for
+This should give you something like this:
 
-$controller (string) name of the controller (can be used is various places throughout code)
+We will work on the administrator controller first so inside
 
-$controller_path (string) path to this controller (can be used is various places throughout code, page adds this to the view variables)
+/cookies/controllers/admin/CookiesController.php
 
-$libraries (array) list of libraries to auto load (not really needed anymore using ci('???') syntax.
+enter the following
 
-$helpers (array) list of helpers to auto load.
+**<?php**
 
-$models (array) list of models to auto load (not really needed anymore using ci('???') syntax.
+**class CookiesController extends MY_Controller {**
 
-$catalogs (array) list of model catalogs to load (see documentation)
+**use admin_controller_trait;**
 
-$data (array) controller global avaiable key value pair for view data storage.
+**public $controller_model = 'cookies_model';**
 
-$controller_model (string) name of the controllers default model (can be used is various places throughout code)
+**public $controller = 'cookies';**
 
-**Also see controller middleware**
+**public $controller_path = '/admin/cookies';**
 
+**public $controller_title = 'Cookie';**
+
+**public $controller_titles = 'Cookies';**
+
+**} /* end controller */**
+
+Because we are using the Administrator Controller Trait we automatically get all of it's methods.
+
+If you want to look at the methods you can find them in the Controllers Traits folder this one happens to come with the orange theme therefore it's in the orange theme controllers traits folder. You of course can create your own in your controllers folder.
+
+**/packages/projectorangebox/theme-orange/controllers/traits/admin_controller_trait.php**
+
+**Create the model**
+
+First create the database table
+
+This can be anything you want including secondary keys to additional tables.
+
+In this example we are going to keep it simple.
+
+Then for the model
+
+**/models/Cookies_model.php**
+
+you can enter the following:
+
+**<?php**
+
+**class Cookies_model extends Database_model {**
+
+**protected $table = 'cookies_example';**
+
+**protected $rules = [**
+
+**'id' => ['field' => 'id','label' => 'Id','rules' => 'required|integer|max_length[10]|less_than[10000]|filter_int[10]'],**
+
+**'name' => ['field' => 'name','label' => 'Name','rules' => 'required|max_length[128]|filter_input[128]'],**
+
+**'size' => ['field' => 'size','label' => 'Size','rules' => 'if_empty[0]|integer|filter_int[4]'],**
+
+**'price' => ['field' => 'price','label' => 'Price','rules' => 'required|float'],**
+
+**'color' => ['field' => 'color','label' => 'Color','rules' => 'max_length[8]|filter_input[8]'],**
+
+**];**
+
+**} /* end class */**
+
+This will tell the Database_model parent class what the name of the table you want to use is as well as the rules for the columns.
+
+**Create the Administrator list and detail views.**
+
+So the Controller can automatically pick up the view files automatically you place them in the same path structure as the controller and it's method
+
+So in the index.php (list view) put the following. There is nothing special about this since it's plain old HTML, PHP and BootStrap CSS.
+
+**/views/admin/cookies/index.php**
+
+**<? pear::extends('_templates/orange_admin') ?>**
+
+**<? pear::section('section_container') ?>**
+
+**<div class="row">**
+
+**<div class="col-md-6"><h3><?=$controller_titles ?></h3></div>**
+
+**<div class="col-md-6">**
+
+**<div class="pull-right">**
+
+**<?=pear::search_sort_field() ?>**
+
+**<? if (user::has_permission('url::/admin/configure/tooltips::index~post')) { ?>**
+
+**<?=pear::new_button($controller_path.'/details','New '.$controller_title) ?>**
+
+**  <? } ?>**
+
+**</div>**
+
+**</div>**
+
+**</div>**
+
+**<div class="row">**
+
+**<table class="table orange sortable table-hover">**
+
+**<thead>**
+
+**<tr class="panel-default">**
+
+**<th class="panel-heading">Name</th>**
+
+**<th class="panel-heading text-center">Size</th>**
+
+**<th class="panel-heading text-right">Price</th>**
+
+**<th class="panel-heading text-center">Color</th>**
+
+**<th class="panel-heading text-center">Actions</th>**
+
+**</tr>**
+
+**</thead>**
+
+**<tbody class="searchable">**
+
+**<? foreach ($records as $row) { ?>**
+
+**<tr>**
+
+**<td><?=e($row->name) ?></td>**
+
+**<td class="text-center"><?=pear::sprintf($row->size,'%d oz.') ?></td>**
+
+**<td class="text-right"><?=pear::sprintf($row->price,'$%01.2f') ?></td>**
+
+**<td class="text-center"><?=pear::color_block($row->color) ?></td>**
+
+**<td class="text-center actions">**
+
+**<?=pear::edit_button($controller_path.'/details/'.bin2hex($row->id)) ?>**
+
+**<?=pear::delete_button($controller_path,['id'=>$row->id]) ?>**
+
+**</td>**
+
+**</tr>**
+
+**<? } ?>**
+
+**</tbody>**
+
+**</table>**
+
+**</div>**
+
+**<? pear::end() ?>**
+
+This should give you something like this. 
+
+**/views/admin/cookies/details.php**
+
+**<? pear::extends('_templates/orange_admin') ?>**
+
+**<? pear::section('section_container') ?>**
+
+**<?=pear::open_multipart($controller_path,['class'=>'form-horizontal','method'=>$form_method,'data-success'=>'Record Saved|blue'],['id'=>$record->id]) ?>**
+
+**<div class="row">**
+
+**<div class="col-md-6"><h3><?=$ci_title_prefix ?> <?=$controller_title ?></h3></div>**
+
+** <div class="col-md-6">**
+
+**  <div class="pull-right">**
+
+**<?=pear::goback_button($controller_path) ?>**
+
+**  </div>**
+
+** </div>**
+
+**</div>**
+
+**<hr>**
+
+**<div class="form-group">**
+
+**<?=pear::field_label('cookies_model','name') ?>**
+
+**<div class="col-md-4">**
+
+**<?=pear::input('name',$record->name,['class'=>'form-control input-md']) ?>**
+
+**</div>**
+
+**</div>**
+
+**<div class="form-group">**
+
+**<?=pear::field_label('cookies_model','size') ?>**
+
+**<div class="col-md-2">**
+
+**<div class="input-group">**
+
+**<?=pear::input('size',$record->size,['class'=>'form-control input-md','data-mask'=>'int']) ?>**
+
+**<div class="input-group-addon">oz</div>**
+
+**</div>**
+
+**</div>**
+
+**</div>**
+
+**<div class="form-group">**
+
+**<?=pear::field_label('cookies_model','price') ?>**
+
+**<div class="col-md-2">**
+
+**<div class="input-group">**
+
+**<div class="input-group-addon">$</div>**
+
+**<?=pear::input('price',$record->price,['class'=>'form-control input-md','data-mask'=>'money']) ?>**
+
+**</div>**
+
+**</div>**
+
+**</div>**
+
+**<div class="form-group">**
+
+**<?=pear::field_label('cookies_model','color') ?>**
+
+**<div class="col-md-2">**
+
+**<?=pear::color_picker('color',$record->color,['class'=>'form-control input-md']) ?>**
+
+**</div>**
+
+**</div>**
+
+**<div class="form-group">**
+
+**<div class="col-md-12">**
+
+**<div class="pull-right">**
+
+**<?=pear::button(null,'Save',['class'=>'js-button-submit keymaster-s btn btn-primary']) ?>**
+
+**</div>**
+
+**</div>**
+
+**</div>**
+
+**<?=pear::close() ?>**
+
+**<? pear::end() ?>**
+
+Again just plain old HTML, PHP and BootStrap CSS.
+
+Which should give you something like this.
+
+Finally we need a "public" controller and it's view.
+
+In the public controller at
+
+/packages/cookies/controllers/CookiesController.php
+
+add the following.
+
+**<?php**
+
+**class CookiesController extends MY_Controller {**
+
+**public function indexAction() {**
+
+**ci('page')->render(null,['records'=>ci('cookies_model')->get_many()]);**
+
+**}**
+
+**} /* end controller */**
+
+This will load the public view with the cookie records.
+
+Again just plain old HTML, PHP and BootStrap CSS.
+
+**<? pear::extends('_templates/orange_default') ?>**
+
+**<? pear::section('section_container') ?>**
+
+**<h3>Cookies</h3>**
+
+**<table class="table">**
+
+**<tr>**
+
+**<th class="text-center">#</th>**
+
+**<th>Name Of Cookie</th>**
+
+**<th class="text-center">Size</th>**
+
+**<th class="text-right">Price</th>**
+
+**<td class="text-center">Color</td>**
+
+**</tr>**
+
+**<? foreach ($records as $record) { ?>**
+
+**<tr>**
+
+**<td class="text-center"><?=e($record->id) ?></td>**
+
+**<td><?=e($record->name) ?></td>**
+
+**<td class="text-center"><?=pear::sprintf($record->size,'%d oz.') ?></td>**
+
+**<td class="text-right"><?=pear::sprintf($record->price,'$%01.2f') ?></td>**
+
+**<td class="text-center"><?=pear::color_block($record->color) ?></td>**
+
+**</tr>**
+
+**<? } ?>**
+
+**</table>**
+
+**<? pear::end() ?>**
+
+Finally this should give you the following folder structure
+
+**HMVC CodeIgniter / Orange**
+
+How to find a Controller, library, model or view in a HMVC framework
+
+"Hierarchical model--view--controller (HMVC) is a software architectural pattern, a variation of model--view--controller (MVC)"
+
+**https://en.wikipedia.org/wiki/Hierarchical_model--view--controller**
+
+In MVC the Models, Views and Controllers are in a single Structure (folder).
+
+In HMVC the Models, Views and Controllers are in a multiple Structures (folders) and loaded in a Hierarchical manner. This allows you to organize your project and code into smaller "packages". Loading these is done in a Hierarchical fashion.
+
+This has many advantages some of which are:
+
+-   Reusability (reuse a package in another project)
+-   Organization (both GIT and File management)
+-   Scaleability <https://inviqa.com/blog/scaling-web-applications-hmvc>
+
+There are many articles about this on the internet
+
+[**http://lmgtfy.com/?q=HMVC**](http://lmgtfy.com/?q=HMVC)
+
+How do know if something is being "overridden"?
+
+If you look into the Application Configuration file "autoload.php" you will see a configuration setting for "packages".
+
+[**https://www.codeigniter.com/user_guide/libraries/config.html?highlight=autoload#auto-loading**](https://www.codeigniter.com/user_guide/libraries/config.html?highlight=autoload#auto-loading)
+
+These are the paths of each of the packages loaded by CodeIgniter. These are "searched" in order when looking for a specific file.
+
+**$autoload['packages'] = array(**
+
+**ROOTPATH.'/packages/quadratec/backorder',**
+
+**ROOTPATH.'/packages/quadratec/stock-status-check',**
+
+**ROOTPATH.'/packages/quadratec/drop-ships',**
+
+**ROOTPATH.'/packages/quadratec/affirm',**
+
+**ROOTPATH.'/packages/quadratec/quad_ldap',**
+
+**ROOTPATH.'/packages/projectorangebox/extra-validations',**
+
+**ROOTPATH.'/packages/projectorangebox/forgot',**
+
+**ROOTPATH.'/packages/projectorangebox/remember',**
+
+**ROOTPATH.'/packages/projectorangebox/register',**
+
+**ROOTPATH.'/packages/projectorangebox/opcache',**
+
+**ROOTPATH.'/packages/projectorangebox/config-viewer',**
+
+**ROOTPATH.'/packages/projectorangebox/librarian',**
+
+**ROOTPATH.'/packages/projectorangebox/migrations',**
+
+**ROOTPATH.'/packages/projectorangebox/scaffolding',**
+
+**ROOTPATH.'/packages/projectorangebox/cache-viewer',**
+
+**ROOTPATH.'/packages/projectorangebox/login-success',**
+
+**ROOTPATH.'/packages/projectorangebox/tooltips',**
+
+**ROOTPATH.'/packages/projectorangebox/handlebars',**
+
+**ROOTPATH.'/packages/projectorangebox/general_addons',**
+
+**ROOTPATH.'/packages/projectorangebox/tasks',**
+
+**ROOTPATH.'/packages/projectorangebox/orange',**
+
+**ROOTPATH.'/packages/projectorangebox/theme-orange',**
+
+**ROOTPATH.'/packages/projectorangebox/user_msgs',**
+
+**);**
+
+NOTE: In addition to what you see here take note that the Application folder is prepended to the beginning and the system is appended to the end.
+
+This way anything in the Application package (folder) can override anything in any other package and the system package (folder) is the last place searched for something.
+
+So the packages search array actually looks like this
+
+**$autoload['packages'] = array(**
+
+**ROOTPATH.'/application',**
+
+**ROOTPATH.'/packages/quadratec/backorder',**
+
+**ROOTPATH.'/packages/quadratec/stock-status-check',**
+
+**ROOTPATH.'/packages/quadratec/drop-ships',**
+
+**ROOTPATH.'/packages/quadratec/affirm',**
+
+**ROOTPATH.'/packages/quadratec/quad_ldap',**
+
+**ROOTPATH.'/packages/projectorangebox/extra-validations',**
+
+**ROOTPATH.'/packages/projectorangebox/forgot',**
+
+**ROOTPATH.'/packages/projectorangebox/remember',**
+
+**ROOTPATH.'/packages/projectorangebox/register',**
+
+**ROOTPATH.'/packages/projectorangebox/opcache',**
+
+**ROOTPATH.'/packages/projectorangebox/config-viewer',**
+
+**ROOTPATH.'/packages/projectorangebox/librarian',**
+
+**ROOTPATH.'/packages/projectorangebox/migrations',**
+
+**ROOTPATH.'/packages/projectorangebox/scaffolding',**
+
+**ROOTPATH.'/packages/projectorangebox/cache-viewer',**
+
+**ROOTPATH.'/packages/projectorangebox/login-success',**
+
+**ROOTPATH.'/packages/projectorangebox/tooltips',**
+
+**ROOTPATH.'/packages/projectorangebox/handlebars',**
+
+**ROOTPATH.'/packages/projectorangebox/general_addons',**
+
+**ROOTPATH.'/packages/projectorangebox/tasks',**
+
+**ROOTPATH.'/packages/projectorangebox/orange',**
+
+**ROOTPATH.'/packages/projectorangebox/theme-orange',**
+
+**ROOTPATH.'/packages/projectorangebox/user_msgs',**
+
+**ROOTPATH.'/vendor/codeigniter/framework/system',**
+
+**);**
+
+Now your probably saying! All that "searching" must take forever and slow down the Framework!
+
+Fear Not!
+
+Every time the application is loaded it looks for a cache file at
+
+**/var/cache/autoload_files.php**
+
+If the file isn't there it is created.
+
+On a production system this only needs to happen ONCE because new files aren't being created. As part of the deployment script this file is deleted so it can be refreshed (once). See deploy.json
+
+**https://github.com/dmyers2004/deploy**
+
+On a development system this is done every time because your are "developing" new files and moving stuff around and renaming files etc... This still happens in less than 1/2 second thou.So back to our original question.
+
+How do know if something is being "overridden"?
+
+Well I'll give you 3 examples.
+
+In this example the User Index view is overridden in the Application folder to give it addition features that the original User Index view in the project orange box theme didn't provide.
+
+Using a editor like Espresso or Sublime.
+
+You simply search for the file you are looking for: 
+
+You can see all of the index.php files matching our criteria.
+
+In this case you can see:
+
+**application/views/admin/users/index.php**
+
+Which as I mentioned earlier is higher in the Hierarchy over the original which is at
+
+**packages/projectorangebox/...ws/admin/users/index.php**
+
+Therefore the application one that is used by the framework.Another way is to search on the .../admin/utilities/config-viewer/autoload webpage (part of the config-view package so that must be loaded).
+
+You can preform a "find" in your browser. To get something like above.
+
+admin/users/index
+
+view is being loaded from this file.
+
+**/var/www/www/app/application/views/admin/users/index.php**
+
+Finally if you don't have access to the config-viewer autoload webpage.
+
+You can search the actual autoload_files.php file. 
+
+In closing...
+
+Now fortunately we don't need to override models, views, or controllers much but this should help you understand HMVC a little bit better when it comes to loading files.**Basic Package Folder Structure **
+
+The basic CodeIgniter HMVC package matches the CodeIgniter Application folder. By breaking your projects into packages it allows you to manage your projects in smaller "parts" and allow you to reuse packages in multiple CodeIgniter projects easily.
+
+Note: each package can have it's own config folder and files just like the CodeIgniter Application folder but, I like to keep all the config files in the Application config folder so you don't need to search for configuration in different packages. This of course can easily change based on the teams best practices.
+
+CodeIgniter can just like most MVC frameworks allow you to write custom routes to point to custom controllers and methods. CodeIgniter also like many MVC frameworks can automatically route URLs to matching Controllers and Methods.
+
+[**https://www.codeigniter.com/user_guide/general/urls.html**](https://www.codeigniter.com/user_guide/general/urls.html)
+
+A basic database table "List" and "Details" view can be setup with the following controller.
+
+**<?php**
+
+**class TooltipsController extends MY_Controller {**
+
+**use admin_controller_trait;**
+
+**public $controller  = 'tooltips';**
+
+**public $controller_path = '/admin/configure/tooltips';**
+
+**public $controller_title  = 'Tooltip';**
+
+**public $controller_titles = 'ToolTips';**
+
+**public $controller_model  = 'a_tooltips_model';**
+
+**} /* end controller */**
+
+This will inherit  all of the methods from the admin_controller_trait.
+
+This trait comes with the orange theme and is not part of the orange package because each theme/project might have different requirements for displaying and editing the actual data.
+
+Orange provides standard models for users, roles, permissions, and settings but does not enforce how you display or edit the data. It only enforces that the data set into the model passes the models validation.
+
+The class properties are then setup so admin_controller_trait can do some logic.
+
+Most of this could be figured out by the controller but at the cost of resources and speed.
+
+$controller - name of the controller
+
+$controller_path - url of the controller
+
+$controller_title - singular title used in displays
+
+$controller_titles - plural title used in displays
+
+$controller_model - the model to interact with in the admin_controller_trait methods
+
+**<?php**
+
+**class A_tooltips_model extends Database_model {**
+
+**protected $table = 'addon_tooltips';**
+
+**protected $rules = [**
+
+**'id' => ['field' => 'id','label' => 'Id','rules' => 'required|integer|max_length[10]|less_than[4294967295]|filter_int[10]'],**
+
+**'selector' => ['field' => 'selector','label' => 'Selector','rules' => 'required|max_length[255]|filter_input[255]'],**
+
+**'text' => ['field' => 'text','label' => 'Tooltip','rules' => 'required|max_length[255]|filter_input[255]'],**
+
+**'active' => ['field' => 'active','label' => 'Active','rules' => 'if_empty[0]|in_list[0,1]|filter_int[1]|max_length[1]|less_than[2]'],**
+
+**];**
+
+**} /* end class */**
+
+By extending the orange frameworks Database_model and setting up a few properties you can interact with database table.
+
+$table - database table name
+
+$rules - validation rules basically follows the validation library guidelines
+
+[**https://www.codeigniter.com/user_guide/libraries/form_validation.html#setting-rules-using-an-array**](https://www.codeigniter.com/user_guide/libraries/form_validation.html#setting-rules-using-an-array)
+
+**"list" view**
+
+Using Bootstrap CSS and some theme pear plugins you can setup a completely customizable list view in about 5 minutes.
+
+(normally can just cut in paste from this example)
+
+**<? pear::extends('_templates/orange_admin') ?>**
+
+**<? pear::section('section_container') ?>**
+
+**<div class="row">**
+
+** <div class="col-md-6"><h3><i class="fa fa-comment"></i> <?=$controller_titles ?></h3></div>**
+
+** <div class="col-md-6">**
+
+**  <div class="pull-right">**
+
+**  <?=pear::search_sort_field() ?>**
+
+**<? if (user::has_permission('url::/admin/configure/tooltips::index~post')) { ?>**
+
+**<?=pear::new_button($controller_path.'/details','New '.$controller_title) ?>**
+
+**  <? } ?>**
+
+**  </div>**
+
+** </div>**
+
+**</div>**
+
+**<div class="row">**
+
+**<table class="table orange sortable table-hover">**
+
+**<thead>**
+
+**<tr class="panel-default">**
+
+**<th class="panel-heading"><?=pear::field_human('a_tooltips_model','selector') ?></th>**
+
+**<th class="panel-heading"><?=pear::field_human('a_tooltips_model','text') ?></th>**
+
+**<th class="panel-heading text-center"><?=pear::field_human('a_tooltips_model','active') ?></th>**
+
+**<th class="panel-heading text-center">Actions</th>**
+
+**</tr>**
+
+**</thead>**
+
+**<tbody class="searchable">**
+
+**<? foreach ($records as $row) { ?>**
+
+**<tr>**
+
+**<td><?=e($row->selector) ?></td>**
+
+**<td><?=e($row->text) ?></td>**
+
+**<td class="text-center"><?=pear::fa_enum_icon($row->active) ?></td>**
+
+**<td class="text-center actions">**
+
+**<?=pear::edit_button($controller_path.'/details/'.bin2hex($row->id)) ?>**
+
+**<?=pear::delete_button($controller_path,['id'=>$row->id]) ?>**
+
+**</td>**
+
+**</tr>**
+
+**<? } ?>**
+
+**</tbody>**
+
+**</table>**
+
+**</div>**
+
+**<? pear::end() ?>**
+
+Using Bootstrap CSS and some theme pear plugins you can setup a completely customizable details view in about 5 minutes. (normally can just cut in paste from other views)
+
+**"details" view**
+
+**<? pear::extends('_templates/orange_admin') ?>**
+
+**<? pear::section('section_container') ?>**
+
+**<?=pear::open_multipart($controller_path,['class'=>'form-horizontal','method'=>$form_method,'data-success'=>'Record Saved|blue'],['id'=>$record->id]) ?>**
+
+**<div class="row">**
+
+**<div class="col-md-6"><h3><?=$ci_title_prefix ?> <?=$controller_title ?></h3></div>**
+
+** <div class="col-md-6">**
+
+**  <div class="pull-right">**
+
+**<?=pear::goback_button($controller_path) ?>**
+
+**  </div>**
+
+** </div>**
+
+**</div>**
+
+**<hr>**
+
+**<!-- Text input-->**
+
+**<div class="form-group">**
+
+**<?=pear::field_label('a_tooltips_model','selector') ?>**
+
+**<div class="col-md-4">**
+
+**<?=pear::input('selector',$record->selector,['class'=>'form-control input-md','autocomplete'=>'off']) ?>**
+
+**</div>**
+
+**</div>**
+
+**<!-- Text input-->**
+
+**<div class="form-group">**
+
+**<?=pear::field_label('a_tooltips_model','text') ?>**
+
+**<div class="col-md-4">**
+
+**<?=pear::input('text',$record->text,['class'=>'form-control input-md','autocomplete'=>'off']) ?>**
+
+**</div>**
+
+**</div>**
+
+**<!-- Text input-->**
+
+**<div class="form-group">**
+
+**<label class="col-md-3 control-label">&nbsp;</label>**
+
+**<div class="col-md-9">**
+
+**<?=pear::checkbox('active', 1,($record->active == 1),['class'=>'js-checker']) ?> <?=pear::field_human('a_tooltips_model','active') ?>**
+
+**</div>**
+
+**</div>**
+
+**<!-- Submit Button -->**
+
+**<div class="form-group">**
+
+**<div class="col-md-12">**
+
+**<div class="pull-right">**
+
+**<?=pear::button(null,'Save',['class'=>'js-button-submit keymaster-s btn btn-primary']) ?>**
+
+**</div>**
+
+**</div>**
+
+**</div>**
+
+**<?=pear::close() ?>**
+
+**<? pear::end() ?>**
+
+**CodeIgniter / Orange Command Line**
+
+As well as calling an applications Controllers via the URL in a browser they can also be loaded via the command-line interface (CLI).
+
+[**https://www.codeigniter.com/userguide3/general/cli.html**](https://www.codeigniter.com/userguide3/general/cli.html)
+
+Normally I place my command line scripts in a "cli" folder. This organizes them a little bit better and give you the following url structure.
+
+**php index.php cli/some_command**
+
+I have provided a number of building commands. One of the most helpful is the "Help" command which you can access by calling php index.php cli/help
+
+Below is some of it's output. 
+
+Note: when adding Command line Methods to a controller remember to add the Cli Method
+
+**public function downCliAction() {...}**
+
+This not only protects them from being called via the web browser by also organizes them.
+
+**CodeIgniter Migrations**
+
+CodeIgniter supports Migrations natively you can read more about it here
+
+[**https://www.codeigniter.com/userguide3/libraries/migration.html?highlight=migrations**](https://www.codeigniter.com/userguide3/libraries/migration.html?highlight=migrations)
+
+I made a change which provides support for migrations in packages because normally a application only has one migration folder.
+
+I made a additional change in which you must return TRUE on success and FALSE on failure from your migration UP and Down methods (see examples in zip). This will automatically allow/stop further migrations when you are running multiple one after another.
+
+I have provided Command Line options which include:
+
+**cli/migrate/up**
+
+**cli/migrate/down ???**
+
+**cli/migrate/latest**
+
+**cli/migrate/version ???**
+
+**cli/migrate/find**
+
+**cli/migrate/create "migration description"**
+
+These also include all packages so you can do the following
+
+**cli/migrate/up packages/projectorangebox/scaffolding**
+
+**cli/migrate/down packages/projectorangebox/scaffolding ???**
+
+**cli/migrate/latest packages/projectorangebox/scaffolding**
+
+**cli/migrate/version packages/projectorangebox/scaffolding ???**
+
+**cli/migrate/find**
+
+**cli/migrate/create packages/projectorangebox/scaffolding "migration description"**
+
+You can see from this example I migrated to version 4 in the "scaffolding" package.
+
+Migration Included Methods
+
+The Base Migration Class
+
+**Migration_base.php**
+
+includes some of the following methods
+
+**_copy_config()**
+
+**_unlink_config()**
+
+**_link_public()**
+
+**_unlink_public()**
+
+**_add_rw_folder()**
+
+**_remove_rw_folder()**
+
+**_describe_table()**
+
+**_db_has_column()**
+
+**_find_n_replace()**
+
+The following models also have migration_add() and migration_remove() methods:
+
+**O_permission_model**
+
+**O_role_model**
+
+**O_setting_model**
+
+**O_nav_model (included with orange-theme)**
