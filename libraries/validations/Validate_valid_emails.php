@@ -19,7 +19,7 @@
  *
  */
 class Validate_valid_emails extends Validate_base {
-	public function validate($field, $options) {
+	public function validate(&$field, $options) {
 		$this->error_string = '%s must contain all valid email addresses.';
 		if (strpos($field, ',') === FALSE) {
 			return $this->valid_email(trim($field));
