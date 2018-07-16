@@ -759,11 +759,6 @@ https://www.codeigniter.com/user_guide/libraries/config.html?highlight=autoload#
 These are the paths of each of the packages loaded by CodeIgniter. These are “searched” in  order when looking for a specific file.
 
 $autoload['packages'] = array(
-	ROOTPATH.'/packages/quadratec/backorder',
-	ROOTPATH.'/packages/quadratec/stock-status-check',
-	ROOTPATH.'/packages/quadratec/drop-ships',
-	ROOTPATH.'/packages/quadratec/affirm',
-	ROOTPATH.'/packages/quadratec/quad_ldap',
 	ROOTPATH.'/packages/projectorangebox/extra-validations',
 	ROOTPATH.'/packages/projectorangebox/forgot',
 	ROOTPATH.'/packages/projectorangebox/remember',
@@ -791,11 +786,6 @@ So the packages search array actually looks like this
 
 $autoload['packages'] = array(
 	ROOTPATH.'/application',
-	ROOTPATH.'/packages/quadratec/backorder',
-	ROOTPATH.'/packages/quadratec/stock-status-check',
-	ROOTPATH.'/packages/quadratec/drop-ships',
-	ROOTPATH.'/packages/quadratec/affirm',
-	ROOTPATH.'/packages/quadratec/quad_ldap',
 	ROOTPATH.'/packages/projectorangebox/extra-validations',
 	ROOTPATH.'/packages/projectorangebox/forgot',
 	ROOTPATH.'/packages/projectorangebox/remember',
