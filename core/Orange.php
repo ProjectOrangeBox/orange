@@ -445,7 +445,7 @@ function view($_view,$_data=[]) {
 	$_op = orange_paths('views');
 
 	/* clean up the view path */
-	$_file = ltrim(str_replace('.php','',$_view),'/');
+	$_file = trim(str_replace('.php','',$_view),'/');
 
 	/* is the view file found? */
 	if (!isset($_op[$_file])) {
