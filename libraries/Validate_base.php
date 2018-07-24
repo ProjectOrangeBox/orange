@@ -20,37 +20,27 @@
  */
 abstract class Validate_base {
 	/**
-	 * track if the combined cached configuration has been loaded
-	 *
-	 * @var boolean
+	 * true values
 	 */
 	protected $true_array = [1, '1', 'y', 'on', 'yes', 't', 'true', true];
 
 	/**
-	 * track if the combined cached configuration has been loaded
-	 *
-	 * @var boolean
+	 * false values
 	 */
 	protected $false_array = [0, '0', 'n', 'off', 'no', 'f', 'false', false];
 
 	/**
-	 * track if the combined cached configuration has been loaded
-	 *
-	 * @var boolean
+	 * Error String
 	 */
 	protected $error_string = '';
 
 	/**
 	 * track if the combined cached configuration has been loaded
-	 *
-	 * @var boolean
 	 */
-
 	protected $field_data;
+
 	/**
 	 * track if the combined cached configuration has been loaded
-	 *
-	 * @var boolean
 	 */
 	protected $field;
 
