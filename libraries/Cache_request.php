@@ -17,6 +17,7 @@
  * helpers:
  * functions:
  *
+ * @show Cache for this request only
  */
 class Cache_request extends CI_Driver {
 	/**

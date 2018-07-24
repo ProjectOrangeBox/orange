@@ -17,6 +17,7 @@
  * helpers:
  * functions:
  *
+ * @show Unified Error collecting class
  */
 class Errors {
 	/**

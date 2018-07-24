@@ -9,6 +9,7 @@
  * @license http://opensource.org/licenses/MIT MIT License
  * @link	https://github.com/ProjectOrangeBox
  *
+ * @show clean for use as a filename
  */
 class Filter_filename extends Filter_base {
 	public function filter(&$field, $options) {

@@ -16,6 +16,7 @@
  * models:
  * helpers:
  * functions:
+ * @show may only contain alpha-numeric characters and spaces.
  *
  */
 class Validate_alpha_numeric_spaces extends Validate_base {

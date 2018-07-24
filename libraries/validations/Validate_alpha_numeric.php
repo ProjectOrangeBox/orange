@@ -16,6 +16,7 @@
  * models:
  * helpers:
  * functions:
+ * @show may only contain alpha-numeric characters.
  *
  */
 class Validate_alpha_numeric extends Validate_base {

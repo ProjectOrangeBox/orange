@@ -18,6 +18,7 @@
  * functions:
  * constants: NOBODY_USER_ID
  *
+ * @show Authorization class
  */
 class Auth {
 	/**

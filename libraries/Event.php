@@ -17,6 +17,7 @@
  * helpers:
  * functions:
  *
+ * @show Event handler
  */
 class Event {
 	/**

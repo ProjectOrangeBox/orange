@@ -9,6 +9,7 @@
  * @license http://opensource.org/licenses/MIT MIT License
  * @link	https://github.com/ProjectOrangeBox
  *
+ * @show clean for use as human text
  */
 class Filter_human extends Filter_base {
 	public function filter(&$field, $options) {
