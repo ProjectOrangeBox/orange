@@ -1,5 +1,11 @@
-```
-Orange Framework
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+<head>
+	<meta charset="utf-8"/>
+</head>
+<body>
+
+<pre><code>Orange Framework
 
 URL:
 https://www.codeigniter.com/
@@ -119,20 +125,20 @@ https://www.codeigniter.com/user_guide/general/ancillary_classes.html?highlight=
 But I’ve made it smarter by making it a little more like a dependency injection contain. 
 You can autoload a library or model simply by entering it’s name in the function ie.
 
-ci('email')->send();
+ci('email')-&gt;send();
 
 this will auto load the email library if it’s not already loaded and then call the send method. 
 Then you don’t need to call
-ci()->load->library(‘email’);
-ci()->email->send();
+ci()-&gt;load-&gt;library(‘email’);
+ci()-&gt;email-&gt;send();
 
 This also becomes a dependency injection contain because the ‘email’ library can be something other than a class named ‘email’ (the default CI way of loading classes)
 
 This “remapping” is handled by the remap entry in /config/autoload.php
 
 $autoload['remap'] = [
-	'auth'=>'ldap_auth',
-	'o_user_entity'=>'O_ldap_user_entity',
+	'auth'=&gt;'ldap_auth',
+	'o_user_entity'=&gt;'O_ldap_user_entity',
 ];
 
 in this example ldap_auth is loaded instead of auth when ci(‘auth’) is called. or a mock_auth for testing etc…
@@ -149,28 +155,28 @@ $path = site_url('/{www theme}/assets/css')
 
 config(setting,default)
 wrapper for config’s dot_item calls
-ci('config')->dot_item()
+ci('config')-&gt;dot_item()
 This makes loaded configuration values a lot easier and it's fully cached. 
 config('auth.login h2')
 will return the value for /config/auto.php array key 'login h2'.
 
 Just like
-$html = ci('config')->dot_item('auth.login h2','Login');
+$html = ci('config')-&gt;dot_item('auth.login h2','Login');
 you can also provided a default value. 
 $html = config('auth.login h2','Login');
 
 filter(rules,field)
 wrapper for running a validation filter calls
-ci('validate')->single($rules,$field);
+ci('validate')-&gt;single($rules,$field);
 
 valid(rule,field)
 wrapper for running a validation calls
-ci('validate')->single($rule,$field);
+ci('validate')-&gt;single($rule,$field);
 and returns value of
-!ci('errors')->has();
+!ci('errors')-&gt;has();
 
 esc(string)
-escape " with \" 
+escape &quot; with \&quot; 
 
 e(html)
 performs a html encoding of special characters
@@ -189,10 +195,10 @@ more english wrapper for PHP session_write_close() function
 
 console(var,type)
 simple browser level debugger shows up in the javascript console wrapper for
-echo '<script type="text/javascript">console.'.$type.'('.json_encode($var).')</script>';
+echo '&lt;script type=&quot;text/javascript&quot;&gt;console.'.$type.'('.json_encode($var).')&lt;/script&gt;';
 
 l(...)
-"raw" logging function 
+&quot;raw&quot; logging function 
 Simple Logging function for debugging purposes
 ALWAYS writes to 
 LOGPATH.'/orange_debug.log'
@@ -211,17 +217,17 @@ Converting to and from values
 Try to convert a value to it's real type this is nice for pulling string from a database such as configuration values stored in string format
 
 simplify_array(array,key,value)
-collapse a array with multiple values into a single key=>value pair
-this will collapse a array with multiple values into a single key=>value pair
+collapse a array with multiple values into a single key=&gt;value pair
+this will collapse a array with multiple values into a single key=&gt;value pair
 
 cache(key,closure,ttl)
 Wrapper function to sue the currently loaded cache library in a closure fashion 
 
 cache_ttl(use window)
-Get the current Cache Time to Live with optional "window" support to negate a cache stamped
+Get the current Cache Time to Live with optional &quot;window&quot; support to negate a cache stamped
 
 delete_cache_by_tags(tags)
-Delete cache records based on dot notation "tags" therefore if you have a cache keys of:
+Delete cache records based on dot notation &quot;tags&quot; therefore if you have a cache keys of:
 
 acl.users.database.table
 acl.groups.database.table
@@ -306,14 +312,14 @@ change the default icon
 css(file, priority)
 add additional links to page
 link_html(file)
-create and return <link> html
+create and return &lt;link&gt; html
 style(style, priority)
 add style to page
 js(file, priority)
 add additional javascript to a page
 script_html(file)
-create and return <script> html
-js_variable(key, value, priority, raw) & js_variables(array)
+create and return &lt;script&gt; html
+js_variable(key, value, priority, raw) &amp; js_variables(array)
 add a javascript variable to the page
 script(script, priority)
 add additional scripts to a page
@@ -336,9 +342,9 @@ provides the HTML View Pear “plugin” functions (to be used in view only)
 each plugin has really only 2 methods:
 it’s class constructor __construct and render()
 the constructor is called when the plugin is loaded for the first time
-if a plugin just adds for example css or js to a page you can include it with the plugins() & plugin() methods
+if a plugin just adds for example css or js to a page you can include it with the plugins() &amp; plugin() methods
 if your plugin is used in a view to “do” something you simple call pear::foobar($foo,23) which will automatically load the “foobar” plugin (which of course called the constructor if it’s present) and then sends $foo and 23 to the render method. the render method can then return something which can be echoed. Plugins should “echo” directly but instead return a value which can be echoed.
-<?=pear::foobar($foo,23) ?>
+&lt;?=pear::foobar($foo,23) ?&gt;
 
 Built in Pear methods include but are not limited to:
 All of the CodeIgniter Helpers functions for html, form, date, inflector, language, number, text
@@ -358,7 +364,7 @@ pear::includes(view, data, name)
 include another template into scope
 pear::is_extending()
 returns the currently template we are extending if any
-pear::plugins(name, priority) & plugin(name, priority)
+pear::plugins(name, priority) &amp; plugin(name, priority)
 load plugins without actually calling the render function
 
 User Wrapper
@@ -414,8 +420,8 @@ get session data and remove
 keep_snapdata(key)
 get session data and do not remove
 msg(msg, type, redirect)
-set a flash msg with additional features such as color & redirect
-This uses custom CSS & Javascript to show OS X like “alerts” in a bootstrap
+set a flash msg with additional features such as color &amp; redirect
+This uses custom CSS &amp; Javascript to show OS X like “alerts” in a bootstrap
 https://getbootstrap.com/docs/3.3/components/#alerts
 stash()
 stores request array
@@ -499,7 +505,7 @@ Model for users table
 
 models/traits/
 folder of traits models can inherit
-SkyNET GIT "Flow"
+SkyNET GIT &quot;Flow&quot;
 
 Creating a Example “package”
 
@@ -532,7 +538,7 @@ We will work on the administrator controller first so inside
 
 enter the following
 
-<?php
+&lt;?php
 class CookiesController extends MY_Controller {
 	use admin_controller_trait;
 	public $controller_model = 'cookies_model';
@@ -560,15 +566,15 @@ Then for the model
 /models/Cookies_model.php
 you can enter the following:
 
-<?php
+&lt;?php
 class Cookies_model extends Database_model {
 	protected $table = 'cookies_example';
 	protected $rules = [
-		'id' => ['field' => 'id','label' => 'Id','rules' => 'required|integer|max_length[10]|less_than[10000]|filter_int[10]'],
-		'name' => ['field' => 'name','label' => 'Name','rules' => 'required|max_length[128]|filter_input[128]'],
-		'size' => ['field' => 'size','label' => 'Size','rules' => 'if_empty[0]|integer|filter_int[4]'],
-		'price' => ['field' => 'price','label' => 'Price','rules' => 'required|float'],
-		'color' => ['field' => 'color','label' => 'Color','rules' => 'max_length[8]|filter_input[8]'],
+		'id' =&gt; ['field' =&gt; 'id','label' =&gt; 'Id','rules' =&gt; 'required|integer|max_length[10]|less_than[10000]|filter_int[10]'],
+		'name' =&gt; ['field' =&gt; 'name','label' =&gt; 'Name','rules' =&gt; 'required|max_length[128]|filter_input[128]'],
+		'size' =&gt; ['field' =&gt; 'size','label' =&gt; 'Size','rules' =&gt; 'if_empty[0]|integer|filter_int[4]'],
+		'price' =&gt; ['field' =&gt; 'price','label' =&gt; 'Price','rules' =&gt; 'required|float'],
+		'color' =&gt; ['field' =&gt; 'color','label' =&gt; 'Color','rules' =&gt; 'max_length[8]|filter_input[8]'],
 	];
 } /* end class */
 
@@ -582,103 +588,103 @@ So in the index.php (list view) put the following. There is nothing special abou
 
 /views/admin/cookies/index.php
 
-<? pear::extends('_templates/orange_admin') ?>
-<? pear::section('section_container') ?>
-<div class="row">
-	<div class="col-md-6"><h3><?=$controller_titles ?></h3></div>
-	<div class="col-md-6">
-		<div class="pull-right">
-	  		<?=pear::table_search_field() ?>
-			<? if (user::has_permission('url::/admin/configure/tooltips::index~post')) { ?>
-				<?=pear::new_button($controller_path.'/details','New '.$controller_title) ?>
-  		<? } ?>
-		</div>
-	</div>
-</div>
-<div class="row">
-		<table class="table table-sticky-header table-search table-sort table-hover">
-		<thead>
-			<tr class="panel-default">
-				<th class="panel-heading">Name</th>
-				<th class="panel-heading text-center">Size</th>
-				<th class="panel-heading text-right">Price</th>
-				<th class="panel-heading text-center">Color</th>
-				<th class="panel-heading text-center">Actions</th>
-			</tr>
-		</thead>
-		<tbody>
-			<? foreach ($records as $row) { ?>
-			<tr>
-				<td><?=e($row->name) ?></td>
-				<td class="text-center"><?=pear::sprintf($row->size,'%d oz.') ?></td>
-				<td class="text-right"><?=pear::sprintf($row->price,'$%01.2f') ?></td>
-				<td class="text-center"><?=pear::color_block($row->color) ?></td>
-				<td class="text-center actions">
-					<?=pear::edit_button($controller_path.'/details/'.bin2hex($row->id)) ?>
-					<?=pear::delete_button($controller_path,['id'=>$row->id]) ?>
-				</td>
-			</tr>
-			<? } ?>
-		</tbody>
-	</table>
-</div>
-<? pear::end() ?>
+&lt;? pear::extends('_templates/orange_admin') ?&gt;
+&lt;? pear::section('section_container') ?&gt;
+&lt;div class=&quot;row&quot;&gt;
+	&lt;div class=&quot;col-md-6&quot;&gt;&lt;h3&gt;&lt;?=$controller_titles ?&gt;&lt;/h3&gt;&lt;/div&gt;
+	&lt;div class=&quot;col-md-6&quot;&gt;
+		&lt;div class=&quot;pull-right&quot;&gt;
+	  		&lt;?=pear::table_search_field() ?&gt;
+			&lt;? if (user::has_permission('url::/admin/configure/tooltips::index~post')) { ?&gt;
+				&lt;?=pear::new_button($controller_path.'/details','New '.$controller_title) ?&gt;
+  		&lt;? } ?&gt;
+		&lt;/div&gt;
+	&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;row&quot;&gt;
+		&lt;table class=&quot;table table-sticky-header table-search table-sort table-hover&quot;&gt;
+		&lt;thead&gt;
+			&lt;tr class=&quot;panel-default&quot;&gt;
+				&lt;th class=&quot;panel-heading&quot;&gt;Name&lt;/th&gt;
+				&lt;th class=&quot;panel-heading text-center&quot;&gt;Size&lt;/th&gt;
+				&lt;th class=&quot;panel-heading text-right&quot;&gt;Price&lt;/th&gt;
+				&lt;th class=&quot;panel-heading text-center&quot;&gt;Color&lt;/th&gt;
+				&lt;th class=&quot;panel-heading text-center&quot;&gt;Actions&lt;/th&gt;
+			&lt;/tr&gt;
+		&lt;/thead&gt;
+		&lt;tbody&gt;
+			&lt;? foreach ($records as $row) { ?&gt;
+			&lt;tr&gt;
+				&lt;td&gt;&lt;?=e($row-&gt;name) ?&gt;&lt;/td&gt;
+				&lt;td class=&quot;text-center&quot;&gt;&lt;?=pear::sprintf($row-&gt;size,'%d oz.') ?&gt;&lt;/td&gt;
+				&lt;td class=&quot;text-right&quot;&gt;&lt;?=pear::sprintf($row-&gt;price,'$%01.2f') ?&gt;&lt;/td&gt;
+				&lt;td class=&quot;text-center&quot;&gt;&lt;?=pear::color_block($row-&gt;color) ?&gt;&lt;/td&gt;
+				&lt;td class=&quot;text-center actions&quot;&gt;
+					&lt;?=pear::edit_button($controller_path.'/details/'.bin2hex($row-&gt;id)) ?&gt;
+					&lt;?=pear::delete_button($controller_path,['id'=&gt;$row-&gt;id]) ?&gt;
+				&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;? } ?&gt;
+		&lt;/tbody&gt;
+	&lt;/table&gt;
+&lt;/div&gt;
+&lt;? pear::end() ?&gt;
 
 
 This should give you something like this.
 /views/admin/cookies/details.php
 
-<? pear::extends('_templates/orange_admin') ?>
-<? pear::section('section_container') ?>
-<?=pear::open_multipart($controller_path,['class'=>'form-horizontal','method'=>$form_method,'data-success'=>'Record Saved|blue'],['id'=>$record->id]) ?>
-	<div class="row">
-		<div class="col-md-6"><h3><?=$ci_title_prefix ?> <?=$controller_title ?></h3></div>
-	  <div class="col-md-6">
-	  	<div class="pull-right">
-				<?=pear::goback_button($controller_path) ?>
-	  	</div>
-	  </div>
-	</div>
-	<hr>
-	<div class="form-group">
-		<?=pear::field_label('cookies_model','name') ?>
-		<div class="col-md-4">
-			<?=pear::input('name',$record->name,['class'=>'form-control input-md']) ?>
-		</div>
-	</div>
-	<div class="form-group">
-		<?=pear::field_label('cookies_model','size') ?>
-		<div class="col-md-2">
-			<div class="input-group">
-				<?=pear::input('size',$record->size,['class'=>'form-control input-md','data-mask'=>'int']) ?>
-				<div class="input-group-addon">oz</div>
-			</div>
-		</div>
-	</div>
-	<div class="form-group">
-		<?=pear::field_label('cookies_model','price') ?>
-		<div class="col-md-2">
-			<div class="input-group">
-				<div class="input-group-addon">$</div>
-				<?=pear::input('price',$record->price,['class'=>'form-control input-md','data-mask'=>'money']) ?>
-			</div>
-		</div>
-	</div>
-	<div class="form-group">
-		<?=pear::field_label('cookies_model','color') ?>
-		<div class="col-md-2">
-			<?=pear::color_picker('color',$record->color,['class'=>'form-control input-md']) ?>
-		</div>
-	</div>
-	<div class="form-group">
-		<div class="col-md-12">
-			<div class="pull-right">
-				<?=pear::button(null,'Save',['class'=>'js-button-submit keymaster-s btn btn-primary']) ?>
-			</div>
-		</div>
-	</div>
-<?=pear::close() ?>
-<? pear::end() ?>
+&lt;? pear::extends('_templates/orange_admin') ?&gt;
+&lt;? pear::section('section_container') ?&gt;
+&lt;?=pear::open_multipart($controller_path,['class'=&gt;'form-horizontal','method'=&gt;$form_method,'data-success'=&gt;'Record Saved|blue'],['id'=&gt;$record-&gt;id]) ?&gt;
+	&lt;div class=&quot;row&quot;&gt;
+		&lt;div class=&quot;col-md-6&quot;&gt;&lt;h3&gt;&lt;?=$ci_title_prefix ?&gt; &lt;?=$controller_title ?&gt;&lt;/h3&gt;&lt;/div&gt;
+	  &lt;div class=&quot;col-md-6&quot;&gt;
+	  	&lt;div class=&quot;pull-right&quot;&gt;
+				&lt;?=pear::goback_button($controller_path) ?&gt;
+	  	&lt;/div&gt;
+	  &lt;/div&gt;
+	&lt;/div&gt;
+	&lt;hr&gt;
+	&lt;div class=&quot;form-group&quot;&gt;
+		&lt;?=pear::field_label('cookies_model','name') ?&gt;
+		&lt;div class=&quot;col-md-4&quot;&gt;
+			&lt;?=pear::input('name',$record-&gt;name,['class'=&gt;'form-control input-md']) ?&gt;
+		&lt;/div&gt;
+	&lt;/div&gt;
+	&lt;div class=&quot;form-group&quot;&gt;
+		&lt;?=pear::field_label('cookies_model','size') ?&gt;
+		&lt;div class=&quot;col-md-2&quot;&gt;
+			&lt;div class=&quot;input-group&quot;&gt;
+				&lt;?=pear::input('size',$record-&gt;size,['class'=&gt;'form-control input-md','data-mask'=&gt;'int']) ?&gt;
+				&lt;div class=&quot;input-group-addon&quot;&gt;oz&lt;/div&gt;
+			&lt;/div&gt;
+		&lt;/div&gt;
+	&lt;/div&gt;
+	&lt;div class=&quot;form-group&quot;&gt;
+		&lt;?=pear::field_label('cookies_model','price') ?&gt;
+		&lt;div class=&quot;col-md-2&quot;&gt;
+			&lt;div class=&quot;input-group&quot;&gt;
+				&lt;div class=&quot;input-group-addon&quot;&gt;$&lt;/div&gt;
+				&lt;?=pear::input('price',$record-&gt;price,['class'=&gt;'form-control input-md','data-mask'=&gt;'money']) ?&gt;
+			&lt;/div&gt;
+		&lt;/div&gt;
+	&lt;/div&gt;
+	&lt;div class=&quot;form-group&quot;&gt;
+		&lt;?=pear::field_label('cookies_model','color') ?&gt;
+		&lt;div class=&quot;col-md-2&quot;&gt;
+			&lt;?=pear::color_picker('color',$record-&gt;color,['class'=&gt;'form-control input-md']) ?&gt;
+		&lt;/div&gt;
+	&lt;/div&gt;
+	&lt;div class=&quot;form-group&quot;&gt;
+		&lt;div class=&quot;col-md-12&quot;&gt;
+			&lt;div class=&quot;pull-right&quot;&gt;
+				&lt;?=pear::button(null,'Save',['class'=&gt;'js-button-submit keymaster-s btn btn-primary']) ?&gt;
+			&lt;/div&gt;
+		&lt;/div&gt;
+	&lt;/div&gt;
+&lt;?=pear::close() ?&gt;
+&lt;? pear::end() ?&gt;
 
 Again just plain old HTML, PHP and BootStrap CSS.
 
@@ -690,11 +696,11 @@ In the public controller at
 /packages/cookies/controllers/CookiesController.php
 add the following.
 
-<?php
+&lt;?php
 
 class CookiesController extends MY_Controller {
 	public function indexAction() {
-		ci('page')->render(null,['records'=>ci('cookies_model')->get_many()]);
+		ci('page')-&gt;render(null,['records'=&gt;ci('cookies_model')-&gt;get_many()]);
 	}
 } /* end controller */
 
@@ -702,28 +708,28 @@ This will load the public view with the cookie records.
 
 Again just plain old HTML, PHP and BootStrap CSS.
 
-<? pear::extends('_templates/orange_default') ?>
-<? pear::section('section_container') ?>
-<h3>Cookies</h3>
-<table class="table">
-<tr>
-	<th class="text-center">#</th>
-	<th>Name Of Cookie</th>
-	<th class="text-center">Size</th>
-	<th class="text-right">Price</th>
-	<td class="text-center">Color</td>
-</tr>
-<? foreach ($records as $record) { ?>
-<tr>
-	<td class="text-center"><?=e($record->id) ?></td>
-	<td><?=e($record->name) ?></td>
-	<td class="text-center"><?=pear::sprintf($record->size,'%d oz.') ?></td>
-	<td class="text-right"><?=pear::sprintf($record->price,'$%01.2f') ?></td>
-	<td class="text-center"><?=pear::color_block($record->color) ?></td>
-</tr>
-<? } ?>
-</table>
-<? pear::end() ?>
+&lt;? pear::extends('_templates/orange_default') ?&gt;
+&lt;? pear::section('section_container') ?&gt;
+&lt;h3&gt;Cookies&lt;/h3&gt;
+&lt;table class=&quot;table&quot;&gt;
+&lt;tr&gt;
+	&lt;th class=&quot;text-center&quot;&gt;#&lt;/th&gt;
+	&lt;th&gt;Name Of Cookie&lt;/th&gt;
+	&lt;th class=&quot;text-center&quot;&gt;Size&lt;/th&gt;
+	&lt;th class=&quot;text-right&quot;&gt;Price&lt;/th&gt;
+	&lt;td class=&quot;text-center&quot;&gt;Color&lt;/td&gt;
+&lt;/tr&gt;
+&lt;? foreach ($records as $record) { ?&gt;
+&lt;tr&gt;
+	&lt;td class=&quot;text-center&quot;&gt;&lt;?=e($record-&gt;id) ?&gt;&lt;/td&gt;
+	&lt;td&gt;&lt;?=e($record-&gt;name) ?&gt;&lt;/td&gt;
+	&lt;td class=&quot;text-center&quot;&gt;&lt;?=pear::sprintf($record-&gt;size,'%d oz.') ?&gt;&lt;/td&gt;
+	&lt;td class=&quot;text-right&quot;&gt;&lt;?=pear::sprintf($record-&gt;price,'$%01.2f') ?&gt;&lt;/td&gt;
+	&lt;td class=&quot;text-center&quot;&gt;&lt;?=pear::color_block($record-&gt;color) ?&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;? } ?&gt;
+&lt;/table&gt;
+&lt;? pear::end() ?&gt;
 
 
 Finally this should give you the following folder structure
@@ -866,7 +872,7 @@ https://www.codeigniter.com/user_guide/general/urls.html
 
 A basic database table “List” and “Details” view can be setup with the following controller.
 
-<?php
+&lt;?php
 
 class TooltipsController extends MY_Controller {
 	use admin_controller_trait;
@@ -891,14 +897,14 @@ $controller_title - singular title used in displays
 $controller_titles - plural title used in displays
 $controller_model - the model to interact with in the admin_controller_trait methods
 
-<?php
+&lt;?php
 class A_tooltips_model extends Database_model {
 	protected $table = 'addon_tooltips';
 	protected $rules = [
-		‘id' => ['field' => 'id','label' => 'Id','rules' => 'required|integer|max_length[10]|less_than[4294967295]|filter_int[10]'],
-		‘selector' => ['field' => 'selector','label' => 'Selector','rules' => 'required|max_length[255]|filter_input[255]'],
-		‘text' => ['field' => 'text','label' => 'Tooltip','rules' => 'required|max_length[255]|filter_input[255]'],
-		‘active' => ['field' => 'active','label' => 'Active','rules' => 'if_empty[0]|in_list[0,1]|filter_int[1]|max_length[1]|less_than[2]'],
+		‘id' =&gt; ['field' =&gt; 'id','label' =&gt; 'Id','rules' =&gt; 'required|integer|max_length[10]|less_than[4294967295]|filter_int[10]'],
+		‘selector' =&gt; ['field' =&gt; 'selector','label' =&gt; 'Selector','rules' =&gt; 'required|max_length[255]|filter_input[255]'],
+		‘text' =&gt; ['field' =&gt; 'text','label' =&gt; 'Tooltip','rules' =&gt; 'required|max_length[255]|filter_input[255]'],
+		‘active' =&gt; ['field' =&gt; 'active','label' =&gt; 'Active','rules' =&gt; 'if_empty[0]|in_list[0,1]|filter_int[1]|max_length[1]|less_than[2]'],
 	];
 } /* end class */
 
@@ -914,105 +920,105 @@ https://www.codeigniter.com/user_guide/libraries/form_validation.html#setting-ru
 Using Bootstrap CSS and some theme pear plugins you can setup a completely customizable list view in about 5 minutes.
 (normally can just cut in paste from this example)
 
-<? pear::extends('_templates/orange_admin') ?>
-<? pear::section('section_container') ?>
-<div class="row">
-  <div class="col-md-6"><h3><i class="fa fa-comment"></i> <?=$controller_titles ?></h3></div>
-  <div class="col-md-6">
-  	<div class="pull-right">
-  		  		<?=pear::table_search_field() ?>
+&lt;? pear::extends('_templates/orange_admin') ?&gt;
+&lt;? pear::section('section_container') ?&gt;
+&lt;div class=&quot;row&quot;&gt;
+  &lt;div class=&quot;col-md-6&quot;&gt;&lt;h3&gt;&lt;i class=&quot;fa fa-comment&quot;&gt;&lt;/i&gt; &lt;?=$controller_titles ?&gt;&lt;/h3&gt;&lt;/div&gt;
+  &lt;div class=&quot;col-md-6&quot;&gt;
+  	&lt;div class=&quot;pull-right&quot;&gt;
+  		  		&lt;?=pear::table_search_field() ?&gt;
 
-			<? if (user::has_permission('url::/admin/configure/tooltips::index~post')) { ?>
-				<?=pear::new_button($controller_path.'/details','New '.$controller_title) ?>
-  		<? } ?>
-  	</div>
-  </div>
-</div>
-<div class="row">
-		<table class="table table-sticky-header table-search table-sort table-hover">
-			<thead>
-				<tr class="panel-default">
-					<th class="panel-heading"><?=pear::field_human('a_tooltips_model','selector') ?></th>
-					<th class="panel-heading"><?=pear::field_human('a_tooltips_model','text') ?></th>
-					<th class="panel-heading text-center"><?=pear::field_human('a_tooltips_model','active') ?></th>
-					<th class="panel-heading text-center">Actions</th>
-				</tr>
-			</thead>
-		<tbody>
-			<? foreach ($records as $row) { ?>
-			<tr>
-				<td><?=e($row->selector) ?></td>
-				<td><?=e($row->text) ?></td>
-				<td class="text-center"><?=pear::fa_enum_icon($row->active) ?></td>
-				<td class="text-center actions">
-					<?=pear::edit_button($controller_path.'/details/'.bin2hex($row->id)) ?>
-					<?=pear::delete_button($controller_path,['id'=>$row->id]) ?>
-				</td>
-			</tr>
-			<? } ?>
-		</tbody>
-	</table>
-</div>
-<? pear::end() ?>
+			&lt;? if (user::has_permission('url::/admin/configure/tooltips::index~post')) { ?&gt;
+				&lt;?=pear::new_button($controller_path.'/details','New '.$controller_title) ?&gt;
+  		&lt;? } ?&gt;
+  	&lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;row&quot;&gt;
+		&lt;table class=&quot;table table-sticky-header table-search table-sort table-hover&quot;&gt;
+			&lt;thead&gt;
+				&lt;tr class=&quot;panel-default&quot;&gt;
+					&lt;th class=&quot;panel-heading&quot;&gt;&lt;?=pear::field_human('a_tooltips_model','selector') ?&gt;&lt;/th&gt;
+					&lt;th class=&quot;panel-heading&quot;&gt;&lt;?=pear::field_human('a_tooltips_model','text') ?&gt;&lt;/th&gt;
+					&lt;th class=&quot;panel-heading text-center&quot;&gt;&lt;?=pear::field_human('a_tooltips_model','active') ?&gt;&lt;/th&gt;
+					&lt;th class=&quot;panel-heading text-center&quot;&gt;Actions&lt;/th&gt;
+				&lt;/tr&gt;
+			&lt;/thead&gt;
+		&lt;tbody&gt;
+			&lt;? foreach ($records as $row) { ?&gt;
+			&lt;tr&gt;
+				&lt;td&gt;&lt;?=e($row-&gt;selector) ?&gt;&lt;/td&gt;
+				&lt;td&gt;&lt;?=e($row-&gt;text) ?&gt;&lt;/td&gt;
+				&lt;td class=&quot;text-center&quot;&gt;&lt;?=pear::fa_enum_icon($row-&gt;active) ?&gt;&lt;/td&gt;
+				&lt;td class=&quot;text-center actions&quot;&gt;
+					&lt;?=pear::edit_button($controller_path.'/details/'.bin2hex($row-&gt;id)) ?&gt;
+					&lt;?=pear::delete_button($controller_path,['id'=&gt;$row-&gt;id]) ?&gt;
+				&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;? } ?&gt;
+		&lt;/tbody&gt;
+	&lt;/table&gt;
+&lt;/div&gt;
+&lt;? pear::end() ?&gt;
 
 Using Bootstrap CSS and some theme pear plugins you can setup a completely customizable details view in about 5 minutes. (normally can just cut in paste from other views)
 
 “details” view
 
-<? pear::extends('_templates/orange_admin') ?>
-<? pear::section('section_container') ?>
-<?=pear::open_multipart($controller_path,['class'=>'form-horizontal','method'=>$form_method,'data-success'=>'Record Saved|blue'],['id'=>$record->id]) ?>
-	<div class="row">
-		<div class="col-md-6"><h3><?=$ci_title_prefix ?> <?=$controller_title ?></h3></div>
-	  <div class="col-md-6">
-	  	<div class="pull-right">
-				<?=pear::goback_button($controller_path) ?>
-	  	</div>
-	  </div>
-	</div>
-	<hr>
+&lt;? pear::extends('_templates/orange_admin') ?&gt;
+&lt;? pear::section('section_container') ?&gt;
+&lt;?=pear::open_multipart($controller_path,['class'=&gt;'form-horizontal','method'=&gt;$form_method,'data-success'=&gt;'Record Saved|blue'],['id'=&gt;$record-&gt;id]) ?&gt;
+	&lt;div class=&quot;row&quot;&gt;
+		&lt;div class=&quot;col-md-6&quot;&gt;&lt;h3&gt;&lt;?=$ci_title_prefix ?&gt; &lt;?=$controller_title ?&gt;&lt;/h3&gt;&lt;/div&gt;
+	  &lt;div class=&quot;col-md-6&quot;&gt;
+	  	&lt;div class=&quot;pull-right&quot;&gt;
+				&lt;?=pear::goback_button($controller_path) ?&gt;
+	  	&lt;/div&gt;
+	  &lt;/div&gt;
+	&lt;/div&gt;
+	&lt;hr&gt;
 	<!-- Text input-->
-	<div class="form-group">
-		<?=pear::field_label('a_tooltips_model','selector') ?>
-		<div class="col-md-4">
-			<?=pear::input('selector',$record->selector,['class'=>'form-control input-md','autocomplete'=>'off']) ?>
-		</div>
-	</div>
+	&lt;div class=&quot;form-group&quot;&gt;
+		&lt;?=pear::field_label('a_tooltips_model','selector') ?&gt;
+		&lt;div class=&quot;col-md-4&quot;&gt;
+			&lt;?=pear::input('selector',$record-&gt;selector,['class'=&gt;'form-control input-md','autocomplete'=&gt;'off']) ?&gt;
+		&lt;/div&gt;
+	&lt;/div&gt;
 	<!-- Text input-->
-	<div class="form-group">
-		<?=pear::field_label('a_tooltips_model','text') ?>
-		<div class="col-md-4">
-			<?=pear::input('text',$record->text,['class'=>'form-control input-md','autocomplete'=>'off']) ?>
-		</div>
-	</div>
+	&lt;div class=&quot;form-group&quot;&gt;
+		&lt;?=pear::field_label('a_tooltips_model','text') ?&gt;
+		&lt;div class=&quot;col-md-4&quot;&gt;
+			&lt;?=pear::input('text',$record-&gt;text,['class'=&gt;'form-control input-md','autocomplete'=&gt;'off']) ?&gt;
+		&lt;/div&gt;
+	&lt;/div&gt;
 	<!-- Text input-->
-	<div class="form-group">
-		<label class="col-md-3 control-label">&nbsp;</label>
-		<div class="col-md-9">
-			<?=pear::checker('active', 1,$record->active) ?> <?=pear::field_human('a_tooltips_model','active') ?>
-		</div>
-	</div>
+	&lt;div class=&quot;form-group&quot;&gt;
+		&lt;label class=&quot;col-md-3 control-label&quot;&gt;&amp;nbsp;&lt;/label&gt;
+		&lt;div class=&quot;col-md-9&quot;&gt;
+			&lt;?=pear::checker('active', 1,$record-&gt;active) ?&gt; &lt;?=pear::field_human('a_tooltips_model','active') ?&gt;
+		&lt;/div&gt;
+	&lt;/div&gt;
 	<!-- Submit Button -->
-	<div class="form-group">
-		<div class="col-md-12">
-			<div class="pull-right">
-				<?=pear::button(null,'Save',['class'=>'js-button-submit keymaster-s btn btn-primary']) ?>
-			</div>
-		</div>
-	</div>
-<?=pear::close() ?>
-<? pear::end() ?>
+	&lt;div class=&quot;form-group&quot;&gt;
+		&lt;div class=&quot;col-md-12&quot;&gt;
+			&lt;div class=&quot;pull-right&quot;&gt;
+				&lt;?=pear::button(null,'Save',['class'=&gt;'js-button-submit keymaster-s btn btn-primary']) ?&gt;
+			&lt;/div&gt;
+		&lt;/div&gt;
+	&lt;/div&gt;
+&lt;?=pear::close() ?&gt;
+&lt;? pear::end() ?&gt;
 
 CodeIgniter / Orange Command Line
 As well as calling an applications Controllers via the URL in a browser they can also be loaded via the command-line interface (CLI).
 
 https://www.codeigniter.com/userguide3/general/cli.html
 
-Normally I place my command line scripts in a "cli" folder. This organizes them a little bit better and give you the following url structure.
+Normally I place my command line scripts in a &quot;cli&quot; folder. This organizes them a little bit better and give you the following url structure.
 
 php index.php cli/some_command
 
-I have provided a number of building commands. One of the most helpful is the "Help" command which you can access by calling php index.php cli/help
+I have provided a number of building commands. One of the most helpful is the &quot;Help&quot; command which you can access by calling php index.php cli/help
 Below is some of it's output.
 Note: when adding Command line Methods to a controller remember to add the Cli Method
 public function downCliAction() {...}
@@ -1035,7 +1041,7 @@ cli/migrate/down ???
 cli/migrate/latest
 cli/migrate/version ???
 cli/migrate/find
-cli/migrate/create "migration description"
+cli/migrate/create &quot;migration description&quot;
 
 
 These also include all packages so you can do the following
@@ -1045,10 +1051,10 @@ cli/migrate/down packages/projectorangebox/scaffolding ???
 cli/migrate/latest packages/projectorangebox/scaffolding
 cli/migrate/version packages/projectorangebox/scaffolding ???
 cli/migrate/find
-cli/migrate/create packages/projectorangebox/scaffolding "migration description"
+cli/migrate/create packages/projectorangebox/scaffolding &quot;migration description&quot;
 
 
-You can see from this example I migrated to version 4 in the "scaffolding" package.
+You can see from this example I migrated to version 4 in the &quot;scaffolding&quot; package.
 
 Migration Included Methods
 
@@ -1075,4 +1081,8 @@ O_permission_model
 O_role_model
 O_setting_model
 O_nav_model (included with orange-theme)
-```
+</code></pre>
+
+</body>
+</html>
+
