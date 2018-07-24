@@ -603,7 +603,7 @@ So in the index.php (list view) put the following. There is nothing special abou
 				<th class="panel-heading text-center">Size</th>
 				<th class="panel-heading text-right">Price</th>
 				<th class="panel-heading text-center">Color</th>
-				<th class="panel-heading text-center">Actions</th>
+				<th class="panel-heading text-center nosort">Actions</th>
 			</tr>
 		</thead>
 		<tbody>
@@ -935,7 +935,7 @@ Using Bootstrap CSS and some theme pear plugins you can setup a completely custo
 					<th class="panel-heading"><?=pear::field_human('a_tooltips_model','selector') ?></th>
 					<th class="panel-heading"><?=pear::field_human('a_tooltips_model','text') ?></th>
 					<th class="panel-heading text-center"><?=pear::field_human('a_tooltips_model','active') ?></th>
-					<th class="panel-heading text-center">Actions</th>
+					<th class="panel-heading text-center nosort">Actions</th>
 				</tr>
 			</thead>
 		<tbody>
