@@ -618,7 +618,7 @@ function convert_to_string($value) {
  * @return array
  *
  */
-function simplify_array($array, $key = 'id', $value = null) {
+function simplify_array($array, $key = 'id', $value = null, $sort = null) {
 	$value = ($value) ? $value : $key;
 	$new_array = [];
 
@@ -636,6 +636,17 @@ function simplify_array($array, $key = 'id', $value = null) {
 				$new_array[$row[$key]] = $row[$value];
 			}
 		}
+	}
+
+	switch($sort) {
+		case 'desc':
+		case 'd':
+			krsort($new_array,SORT_NATURAL | SORT_FLAG_CASE);
+		break;
+		case 'asc':
+		case 'a':
+			ksort($new_array,SORT_NATURAL | SORT_FLAG_CASE);
+		break;
 	}
 
 	return $new_array;
