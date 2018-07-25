@@ -170,21 +170,7 @@ class O_permission_model extends Database_model {
 		$this->o_role_model->remove_permission(NOBODY_USER_ID);
 	}
 
-/**
- * add
- * Insert description here
- *
- * @param $key
- * @param $group
- * @param $description
- *
- * @return
- *
- * @access
- * @static
- * @throws
- * @example
- */
+	/* migration */
 	public function migration_add($key=null,$group=null,$description=null,$migration=null) {
 		$this->skip_rules = true;
 

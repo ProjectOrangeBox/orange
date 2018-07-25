@@ -42,7 +42,9 @@ class O_role_model extends Database_model {
  */
 	public function __construct() {
 		$this->table = config('auth.role table');
+		
 		parent::__construct();
+		
 		log_message('info', 'o_role_model Class Initialized');
 	}
 
@@ -67,6 +69,7 @@ class O_role_model extends Database_model {
 			}
 			return true;
 		}
+		
 		return $this->_database->replace(config('auth.role permission table'), ['role_id' => (int) $this->_find_role_id($role), 'permission_id' => (int) $this->_find_permission_id($permission)]);
 	}
 
@@ -91,10 +94,12 @@ class O_role_model extends Database_model {
 			}
 			return true;
 		}
+		
 		if ($permission === null) {
 			$this->_database->delete(config('auth.role permission table'), ['role_id' => (int) $this->_find_role_id($role)]);
 			return true;
 		}
+		
 		return $this->_database->delete(config('auth.role permission table'), ['role_id' => (int) $this->_find_role_id($role), 'permission_id' => (int) $this->_find_permission_id($permission)]);
 	}
 
@@ -119,11 +124,13 @@ class O_role_model extends Database_model {
  */
 	public function permissions($role) {
 		$role_id = $this->_find_role_id($role);
+		
 		$dbc = $this->_database
 			->from(config('auth.role permission table'))
 			->join(config('auth.permission table'), config('auth.permission table').'.id = '.config('auth.role permission table').'.permission_id')
 			->where(['role_id' => (int) $role_id])
 			->get();
+		
 		return ($dbc->num_rows() > 0) ? $dbc->result() : [];
 	}
 
@@ -142,11 +149,13 @@ class O_role_model extends Database_model {
  */
 	public function users($role) {
 		$role_id = $this->_find_role_id($role);
+		
 		$dbc = $this->_database
 			->from(config('auth.user role table'))
 			->join(config('auth.user table'), config('auth.user table').'.id = '.config('auth.user role table').'.user_id')
 			->where(['role_id' => (int) $role_id])
 			->get();
+		
 		return ($dbc->num_rows() > 0) ? $dbc->result() : [];
 	}
 
@@ -167,8 +176,10 @@ class O_role_model extends Database_model {
 		if ($ensure !== true) {
 			throw new Exception(__METHOD__.' please provide "true" to truncate a database model');
 		}
+		
 		$this->_database->truncate(config('auth.role permission table'));
 		$this->_database->truncate(config('auth.user role table'));
+		
 		return parent::truncate($ensure);
 	}
 
@@ -206,6 +217,7 @@ class O_role_model extends Database_model {
 		return (int) ((int) $permission > 0) ? $permission : $this->o_permission_model->column('id')->get_by(['key' => $permission]);
 	}
 	
+	/* migration */
 	public function migration_add($name=null,$description=null,$migration=null) {
 		$this->skip_rules = true;
 

@@ -66,6 +66,7 @@ class O_setting_model extends Database_model {
 		return parent::delete_cache_by_tags();
 	}
 	
+	/* migration */
 	public function migration_add($name=null,$group=null,$value=null,$help=null,$options=null,$migration=null,$optional=[]) {
 		$this->skip_rules = true;
 
