@@ -45,8 +45,14 @@ class MY_Config extends CI_Config {
 		log_message('debug', 'MY_Config::item_dot::'.$setting);
 
 		$this->_load_config();
-
-		list($file,$key) = explode('.', strtolower($setting), 2);
+		
+		$key = false;
+		
+		if (strpos($setting,'.')) {
+			list($file,$key) = explode('.', strtolower($setting), 2);
+		} else {
+			$file = strtolower($setting);
+		}
 
 		if ($key) {
 			$value = isset($this->config[$file], $this->config[$file][$key]) ? $this->config[$file][$key] : $default;
@@ -147,15 +153,17 @@ class MY_Config extends CI_Config {
 			}
 
 			/* load the environment configs */
-			if (is_array($orange_paths[ENVIRONMENT])) {
-				foreach ($orange_paths[ENVIRONMENT] as $group_key=>$filepath) {
-					$config = null;
-
-					include $filepath;
-
-					if (is_array($config)) {
-						foreach ($config as $key => $value) {
-							$built_config[$group_key][strtolower($key)] = $value;
+			if (isset($orange_paths[ENVIRONMENT])) {
+				if (is_array($orange_paths[ENVIRONMENT])) {
+					foreach ($orange_paths[ENVIRONMENT] as $group_key=>$filepath) {
+						$config = null;
+	
+						include $filepath;
+	
+						if (is_array($config)) {
+							foreach ($config as $key => $value) {
+								$built_config[$group_key][strtolower($key)] = $value;
+							}
 						}
 					}
 				}

@@ -111,7 +111,7 @@ class Cache_export extends CI_Driver {
 	 *
 	 */
 	public function delete($id) {
-		return ($this->config['cache_multiple_servers']) ? $this->multi_delete($id) : $this->single_delete($id);
+		return (isset($this->config['cache_multiple_servers'])) ? $this->multi_delete($id) : $this->single_delete($id);
 	}
 
 	/**

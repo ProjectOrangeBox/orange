@@ -489,6 +489,8 @@ class Page {
  *
  */
 	public function convert2attributes($attributes,$prefix='',$strip_empty=true) {
+		$output = '';
+		
 		foreach ($attributes as $name => $value) {
 			if (!empty($value) || !$strip_empty) {
 				$output .= $prefix.$name.'="'.trim($value).'" ';

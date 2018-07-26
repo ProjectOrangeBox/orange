@@ -127,7 +127,7 @@ class MY_Controller extends CI_Controller {
 		}
 
 		if ($this->catalogs) {
-			foreach ($this->catalogs as $variable_name => $args) {
+			foreach ($this->catalogs as $variable_name=>$args) {
 				if (!is_array($args)) {
 					$model_name = $args;
 					$args = [];
@@ -141,7 +141,7 @@ class MY_Controller extends CI_Controller {
 
 				if (method_exists($this->$model_name,$model_method)) {
 					if ($model_method == 'catalog') {
-						$this->load->vars($variable_name, $this->$model_name->$model_method($args['array_key'], $args['select'], $args['where'], $args['order_by'], $args['cache'], $args['with_deleted']));
+						$this->load->vars($variable_name, $this->$model_name->$model_method(@$args['array_key'],@$args['select'],@$args['where'],@$args['order_by'],@$args['cache'],@$args['with_deleted']));
 					} else {
 						$this->load->vars($variable_name, $this->$model_name->$model_method($args));
 					}

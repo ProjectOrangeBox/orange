@@ -22,7 +22,7 @@
 class User {
 	public static function __callStatic($name,$arguments) {
 		if (method_exists(ci('user'),$name)) {
-			return ci('user')->$name($arguments[0]);
+			return (isset($arguments[0])) ? ci('user')->$name($arguments[0]) : ci('user')->$name();
 		} elseif (property_exists(ci('user'),$name)) {
 			return ci('user')->$name;
 		} else {

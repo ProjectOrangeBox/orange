@@ -89,6 +89,8 @@ class Orange_autoload_files {
 	 *
 	 */
 	protected static function write_cache($array) {
+		$php1 = $php2 = '';
+		
 		for ($i = 0; $i < self::$folder_levels; $i++) {
 			$php1 .= 'dirname(';
 			$php2 .= ')';

@@ -462,7 +462,7 @@ if (!function_exists('atomic_file_put_contents')) {
  *
  */
 if (!function_exists('remove_php_file_from_opcache')) {
-	function remove_php_file_from_opcache($fullpath) {
+	function remove_php_file_from_opcache($filepath) {
 		/* flush from the cache */
 		if (function_exists('opcache_invalidate')) {
 			opcache_invalidate($filepath, true);
