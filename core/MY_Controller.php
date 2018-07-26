@@ -102,7 +102,7 @@ class MY_Controller extends CI_Controller {
 		}
 
 		/* fire off middleware if necessary */
-		foreach (middleware() as $middleware_file) {
+		foreach (orange_middleware::get() as $middleware_file) {
 			/* this loads the class / middleware */
 			if (class_exists($middleware_file)) {
 				/* this fires it off */
@@ -159,4 +159,8 @@ class MY_Controller extends CI_Controller {
 		/* trigger our start up event */
 		ci('event')->trigger('ci.controller.startup', $this);
 	}
+	
+	/* place holder */
+	public function indexCliAction(){}
+	
 } /* end class */

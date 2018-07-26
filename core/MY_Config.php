@@ -129,7 +129,7 @@ class MY_Config extends CI_Config {
 		if (!is_array($built_config)) {
 			/* no - so we need to build our dynamic configuration */
 			$built_config = [];
-			$orange_paths = orange_paths('configs');
+			$orange_paths = orange_autoload_files::paths('configs');
 
 			/* load the application configs */
 			foreach ($orange_paths['root'] as $group_key=>$filepath) {

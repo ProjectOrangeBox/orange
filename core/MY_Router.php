@@ -78,7 +78,7 @@ class MY_Router extends CI_Router {
 	public function _validate_request($segments) {
 		$uri = implode('/',str_replace('-','_',$segments));
 
-		foreach (orange_paths('controllers') as $key=>$rec) {
+		foreach (orange_autoload_files::paths('controllers') as $key=>$rec) {
 			if (preg_match('#^'.$key.'$#', strtolower($uri), $matches)) {
 				$segs = explode('/',trim($matches[1],'/'));
 				$this->directory = $rec['directory'];

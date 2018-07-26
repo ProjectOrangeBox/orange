@@ -1,59 +1,5 @@
 <?php
 
-/* register the version */
-define('ORANGE_VERSION','2.0.0');
-
-/* Where is the paths configuration file? */
-$paths_config_file = APPPATH.'config/paths.php';
-
-/* is the paths configuration file even there? */
-if (!file_exists($paths_config_file)) {
-	/* no show error */
-	die('Paths Config File Not found at "'.$paths_config_file.'"'.chr(10));
-}
-
-/* load the paths file */
-include $paths_config_file;
-
-/* get out the 2 paths we need now and set them as constants these are pretty "necessary" paths used thought out the system */
-define('CACHEPATH',ROOTPATH.$config['cache']);
-define('LOGPATH',ROOTPATH.$config['logs']);
-
-/* load the orange autoloader library - this builds the "super" search array */
-include ORANGEPATH.'/libraries/Orange_autoload_files.php';
-
-/* instantiate the orange autoloader class and save the returned array */
-$_ORANGE_PATHS = (new Orange_autoload_files(CACHEPATH.'/autoload_files.php',2))->read_cache();
-
-/* register the Orange Autoloader */
-spl_autoload_register('codeigniter_autoload');
-
-/* setup a assertion handler HTML & CLI output supported */
-assert_options(ASSERT_CALLBACK,function($file,$line,$code,$desc='') {
-	$error = '<!doctype html>
-	<title>Assertion Failed</title>
-	<style>
-	body, html { text-align: center; padding: 150px; background-color: #492727; font: 20px Helvetica, sans-serif; color: #fff; font-size: 18px;}
-	h1 { font-size: 150%; }
-	article { display: block; text-align: left; width: 650px; margin: 0 auto; }
-	</style>
-	<article>
-	<h1>Assertion Failed</h1>
-	<div>
-	<p>File: '.$file.'</p>
-	<p>Line: '.$line.'</p>
-	<p>Code: '.$code.'</p>
-	<p>Description: '.$desc.'</p>
-	</div>
-	</article>';
-
-	echo (defined('STDIN')) ? strip_tags(substr($error,strpos($error,'<article>'),strpos($error,'</article>') - strpos($error,'<article>'))).chr(10) : $error;
-	exit(1);
-});
-
-/* Ok now Orange is setup so bring in the CodeIgniter "Bootstrapper" */
-require_once BASEPATH.'core/CodeIgniter.php';
-
 /************************
 * Orange Global Functions
 *************************/
@@ -70,50 +16,52 @@ require_once BASEPATH.'core/CodeIgniter.php';
  * @examples ci('email')->send()
  * @examples ci('page')->render()
  */
-function &ci($class=null) {
-	/* this function uses the "return on first match" */
-
-	/* did they include a class name? */
-	if ($class) {
-		/* normalize it */
-		$class = strtolower($class);
-
-		/* is it load? that kind of special so handle that directly */
-		if ($class == 'load') {
-			return CI_Controller::get_instance()->load;
-
-		/* is the class loaded? */
-		} elseif (CI_Controller::get_instance()->load->is_loaded($class)) {
-			/* yes - then just return that */
-			return CI_Controller::get_instance()->$class;
-		} else {
-			/* ok let's see if it's a class we know about */
-
-			/* get the autoloader array */
-			$orange_paths = orange_paths('classes');
-
-			/* is it a CI_ class or MY_ class? */
-			if (isset($orange_paths[config_item('subclass_prefix').$class]) || isset($orange_paths['ci_'.$class])) {
-				/* yes - then load it */
-				CI_Controller::get_instance()->load->library($class);
-
-				/* and return it */
-				return CI_Controller::get_instance()->$class;
-
-			/* did the codeigniter autoloader load it? */
-			} elseif (codeigniter_autoload($class)) {
-
-				/* yes - then return it */
+if (!function_exists('ci')) {
+	function &ci($class=null) {
+		/* this function uses the "return on first match" */
+	
+		/* did they include a class name? */
+		if ($class) {
+			/* normalize it */
+			$class = strtolower($class);
+	
+			/* is it load? that kind of special so handle that directly */
+			if ($class == 'load') {
+				return CI_Controller::get_instance()->load;
+	
+			/* is the class loaded? */
+			} elseif (CI_Controller::get_instance()->load->is_loaded($class)) {
+				/* yes - then just return that */
 				return CI_Controller::get_instance()->$class;
 			} else {
-				/* not sure what they are looking for */
-				throw new Exception('ci('.$class.') not found');
+				/* ok let's see if it's a class we know about */
+	
+				/* get the autoloader array */
+				$orange_paths = orange_autoload_files::paths('classes');
+	
+				/* is it a CI_ class or MY_ class? */
+				if (isset($orange_paths[config_item('subclass_prefix').$class]) || isset($orange_paths['ci_'.$class])) {
+					/* yes - then load it */
+					CI_Controller::get_instance()->load->library($class);
+	
+					/* and return it */
+					return CI_Controller::get_instance()->$class;
+	
+				/* did the codeigniter autoloader load it? */
+				} elseif (orange_autoload($class)) {
+	
+					/* yes - then return it */
+					return CI_Controller::get_instance()->$class;
+				} else {
+					/* not sure what they are looking for */
+					throw new Exception('ci('.$class.') not found');
+				}
 			}
 		}
+	
+		/* default CodeIgniter get_instance() */
+		return CI_Controller::get_instance();
 	}
-
-	/* default CodeIgniter get_instance() */
-	return CI_Controller::get_instance();
 }
 
 /**
@@ -128,34 +76,39 @@ function &ci($class=null) {
  * @param	mixed	an optional argument to pass to the class constructor
  * @return	object
  */
-function &load_class($class, $directory = 'libraries', $param = NULL) {
-	static $_classes = array();
+if (!function_exists('load_class')) {
+	function &load_class($class, $directory = 'libraries', $param = NULL) {
+		static $_classes = array();
+	
+		if (isset($_classes[$class])) {
+			return $_classes[$class];
+		}
 
-	if (isset($_classes[$class])) {
+		$name = false;
+		$subclass_prefix = config_item('subclass_prefix');
+	
+		/* this will use the Orange Autoloader */
+		if (class_exists('CI_'.$class)) {
+			$name = 'CI_'.$class;
+		}
+		
+		/* this will use the Orange Autoloader */
+		if (class_exists($subclass_prefix.$class)) {
+			$name = $subclass_prefix.$class;
+		}
+	
+		if ($name === false) {
+			set_status_header(503);
+			echo 'Unable to locate the specified class: '.$class.'.php';
+			exit(1);
+		}
+	
+		is_loaded($class);
+	
+		$_classes[$class] = isset($param) ? new $name($param) : new $name();
+	
 		return $_classes[$class];
 	}
-
-	$name = false;
-	$subclass_prefix = config_item('subclass_prefix');
-
-	if (class_exists('ci_'.$class)) {
-		$name = 'CI_'.$class;
-	}
-
-	if (class_exists($subclass_prefix.$class)) {
-		$name = $subclass_prefix.$class;
-	}
-
-	if ($name === false) {
-		set_status_header(503);
-		echo 'Unable to locate the specified class: '.$class.'.php';
-		exit(1);
-	}
-
-	is_loaded($class);
-	$_classes[$class] = isset($param) ? new $name($param) : new $name();
-
-	return $_classes[$class];
 }
 
 /**
@@ -166,33 +119,38 @@ function &load_class($class, $directory = 'libraries', $param = NULL) {
  * @return boolean
  *
  */
-function codeigniter_autoload($class) {
-	/* load the autoload config array */
-	$orange_paths = orange_paths();
-
-	/* normalize the class name */
-	$class = strtolower($class);
-
-	/* is it in the class array? */
-	if (isset($orange_paths['classes'][$class])) {
-		require $orange_paths['classes'][$class];
-		return true;
+if (!function_exists('orange_autoload')) {
+	function orange_autoload($class) {
+		/* load the autoload config array */
+		$orange_paths = orange_autoload_files::paths();
+	
+		/* normalize the class name */
+		$class = strtolower($class);
+	
+		/* is it in the class array? */
+		if (isset($orange_paths['classes'][$class])) {
+			require $orange_paths['classes'][$class];
+	
+			return true;
+		}
+	
+		/* is it in the models array? */
+		if (isset($orange_paths['models'][$class])) {
+			ci()->load->model($class);
+	
+			return true;
+		}
+	
+		/* is it in the libraries array? */
+		if (isset($orange_paths['libraries'][$class])) {
+			ci()->load->library($class);
+	
+			return true;
+		}
+	
+		/* can't find this class file notify the autoload (return false) to let somebody else have a shot */
+		return false;
 	}
-
-	/* is it in the models array? */
-	if (isset($orange_paths['models'][$class])) {
-		ci()->load->model($class);
-		return true;
-	}
-
-	/* is it in the libraries array? */
-	if (isset($orange_paths['libraries'][$class])) {
-		ci()->load->library($class);
-		return true;
-	}
-
-	/* can't find this class file notify the autoload (return false) to let somebody else have a shot */
-	return false;
 }
 
 /**
@@ -207,48 +165,37 @@ function codeigniter_autoload($class) {
  *
  * @example site_url('/{www theme}/assets/css');
  */
-function site_url($uri = '', $protocol = NULL) {
-	/* Call CodeIgniter version first */
-	$uri = ci()->config->site_url($uri, $protocol);
-
-	/* get our cache data */
-	$paths = __cache_paths();
-
-	/* return the merge str replace */
-	return str_replace($paths['keys'], $paths['values'], $uri);
-}
-
-function path($path = '') {
-	/* get our cache data */
-	$paths = __cache_paths();
-
-	/* return the merge str replace */
-	return str_replace($paths['keys'], $paths['values'], $path);
-}
-
-function __cache_paths() {
-	/* now let's merge if needed */
-
-	/* where is the cache file? */
-	$cache_file_path = CACHEPATH.'/site_url.php';
-
-	/* are we in development mode or is the cache file missing */
-	if (ENVIRONMENT == 'development' || !file_exists($cache_file_path)) {
-		/* yes - then we need to generate it */
-		$paths = config('paths',[]);
-
-		/* build the array for easier access later */
-		foreach ($paths as $find => $replace) {
-			$site_url['keys'][] = '{'.strtolower($find).'}';
-			$site_url['values'][] = $replace;
+if (!function_exists('site_url')) {
+	function site_url($uri = '', $protocol = NULL) {
+		if ($protocol !== false) {
+			/* Call CodeIgniter version first */
+			$uri = ci()->config->site_url($uri, $protocol);
 		}
-
-		/* save it */
-		atomic_file_put_contents($cache_file_path,'<?php return '.var_export($site_url,true).';');
+		
+		/* where is the cache file? */
+		$cache_file_path = CACHEPATH.'/site_url.php';
+	
+		/* are we in development mode or is the cache file missing */
+		if (ENVIRONMENT == 'development' || !file_exists($cache_file_path)) {
+			/* yes - then we need to generate it */
+			$paths = config('paths',[]);
+	
+			/* build the array for easier access later */
+			foreach ($paths as $find => $replace) {
+				$site_url['keys'][] = '{'.strtolower($find).'}';
+				$site_url['values'][] = $replace;
+			}
+	
+			/* save it */
+			atomic_file_put_contents($cache_file_path,'<?php return '.var_export($site_url,true).';');
+		}
+	
+		/* include the cache file */
+		$paths = include $cache_file_path;
+	
+		/* return the merge str replace */
+		return str_replace($paths['keys'], $paths['values'], $uri);
 	}
-
-	/* include the cache file */
-	return include $cache_file_path;
 }
 
 /**
@@ -264,40 +211,46 @@ function __cache_paths() {
  * @example $foo = config('file.key2','default value');
  *
  */
-function config($setting,$default='%%no_value%%') {
-	$value = ci('config')->dot_item($setting,$default);
-
-	/* only throw an error if nothing found and no default given */
-	if ($value === '%%no_value%%') {
-		throw new Exception('The config variable "'.$setting.'" is not set and no default was provided.');
+if (!function_exists('config')) {
+	function config($setting,$default='%%no_value%%') {
+		$value = ci('config')->dot_item($setting,$default);
+	
+		/* only throw an error if nothing found and no default given */
+		if ($value === '%%no_value%%') {
+			throw new Exception('The config variable "'.$setting.'" is not set and no default was provided.');
+		}
+	
+		return $value;
 	}
-
-	return $value;
 }
 
 /**
  * Wrapper for filter
  *
 */
-function filter($rule,$field) {
-	/* add filter_ if it's not there */
-	foreach (explode('|',$rule) as $r) {
-		$a[] = 'filter_'.str_replace('filter_','',strtolower($r));
+if (!function_exists('filter')) {
+	function filter($rule,$field) {
+		/* add filter_ if it's not there */
+		foreach (explode('|',$rule) as $r) {
+			$a[] = 'filter_'.str_replace('filter_','',strtolower($r));
+		}
+	
+		ci('validate')->single(implode('|',$a),$field);
+	
+		return $field;
 	}
-
-	ci('validate')->single(implode('|',$a),$field);
-
-	return $field;
 }
 
 /**
  * Wrapper for validate single
  *
 */
-function valid($rule,$field) {
-	ci('validate')->single($rule,$field);
-
-	return (!ci('errors')->has());
+if (!function_exists('valid')) {
+	function valid($rule,$field) {
+		ci('validate')->single($rule,$field);
+	
+		return (!ci('errors')->has());
+	}
 }
 
 /**
@@ -308,8 +261,10 @@ function valid($rule,$field) {
  * @return string
  *
  */
-function esc($string) {
-	return str_replace('"', '\"', $string);
+if (!function_exists('esc')) {
+	function esc($string) {
+		return str_replace('"', '\"', $string);
+	}
 }
 
 /**
@@ -320,8 +275,10 @@ function esc($string) {
  * @return string
  *
  */
-function e($string) {
-	return htmlspecialchars($string, ENT_QUOTES, 'UTF-8');
+if (!function_exists('e')) {
+	function e($string) {
+		return html_escape($string);
+	}
 }
 
 /**
@@ -336,12 +293,14 @@ function e($string) {
  * @example $foo = env('key2','default value');
  *
  */
-function env($key,$default=null) {
-	if (!isset($_ENV[$key]) && $default === null) {
-		throw new Exception('The environmental variable "'.$key.'" is not set and no default was provided.');
+if (!function_exists('env')) {
+	function env($key,$default=null) {
+		if (!isset($_ENV[$key]) && $default === null) {
+			throw new Exception('The environmental variable "'.$key.'" is not set and no default was provided.');
+		}
+	
+		return (isset($_ENV[$key])) ? $_ENV[$key] : $default;
 	}
-
-	return (isset($_ENV[$key])) ? $_ENV[$key] : $default;
 }
 
 /**
@@ -354,20 +313,22 @@ function env($key,$default=null) {
  * @return the number of bytes that were written to the file, or FALSE on failure.
  *
  */
-function l() {
-	/* get the number of arguments passed */
-	$args = func_get_args();
-
-	$log[] = date('Y-m-d H:i:s');
-
-	/* loop over the arguments */
-	foreach ($args as $idx=>$arg) {
-		/* is it's not scalar then convert it to json */
-		$log[] = (!is_scalar($arg)) ? chr(9).json_encode($arg) : chr(9).$arg;
+if (!function_exists('l')) {
+	function l() {
+		/* get the number of arguments passed */
+		$args = func_get_args();
+	
+		$log[] = date('Y-m-d H:i:s');
+	
+		/* loop over the arguments */
+		foreach ($args as $idx=>$arg) {
+			/* is it's not scalar then convert it to json */
+			$log[] = (!is_scalar($arg)) ? chr(9).json_encode($arg) : chr(9).$arg;
+		}
+	
+		/* write it to the log file */
+		return file_put_contents(LOGPATH.'/orange_debug.log',implode(chr(10),$log).chr(10),FILE_APPEND | LOCK_EX);
 	}
-
-	/* write it to the log file */
-	return file_put_contents(LOGPATH.'/orange_debug.log',implode(chr(10),$log).chr(10),FILE_APPEND | LOCK_EX);
 }
 
 /**
@@ -376,8 +337,10 @@ function l() {
  * @return boolean TRUE on success or FALSE on failure.
  *
  */
-function unlock_session() {
-	session_write_close();
+if (!function_exists('unlock_session')) {
+	function unlock_session() {
+		session_write_close();
+	}
 }
 
 /**
@@ -387,46 +350,10 @@ function unlock_session() {
  * @param $type - browser console log types defaults to log
  *
  */
-function console($var, $type = 'log') {
-	echo '<script type="text/javascript">console.'.$type.'('.json_encode($var).')</script>';
-}
-
-/**
- * Get the current Orange Paths Array
- * by section and/or file
- *
- * @param $section string specific section you are looking for
- * @param $file string file in that section
- *
- * @return array
- *
- */
-function orange_paths($section=null,$file=null) {
-	global $_ORANGE_PATHS;
-
-	if ($file && $section) {
-		$responds = $_ORANGE_PATHS[$section][$file];
-	} else {
-		$responds = ($section) ? (array)$_ORANGE_PATHS[$section] : (array)$_ORANGE_PATHS;
+if (!function_exists('console')) {
+	function console($var, $type = 'log') {
+		echo '<script type="text/javascript">console.'.$type.'('.json_encode($var).')</script>';
 	}
-
-	return $responds;
-}
-
-/**
- * Getter / Setter for the current Middleware
- * Note: using it as a setter will overwrite what is currently stored
- *
- * @return array
- *
- * @example middleware('AdminMiddleware','PublicMiddleware','GuiMiddleware','TooltipMiddleware');
- *
- */
-function middleware() {
-	global $_ORANGE_MIDDLEWARE;
-
-	/* setting or getting? */
-	return (func_num_args()) ? $_ORANGE_MIDDLEWARE = func_get_args() :  (array)$_ORANGE_MIDDLEWARE;
 }
 
 /**
@@ -440,30 +367,32 @@ function middleware() {
  * @example $html = view('admin/users/show',['name'=>'Johnny Appleseed']);
  *
  */
-function view($_view,$_data=[]) {
-	/* get a list of all the found views */
-	$_op = orange_paths('views');
-
-	/* clean up the view path */
-	$_file = trim(str_replace('.php','',$_view),'/');
-
-	/* is the view file found? */
-	if (!isset($_op[$_file])) {
-		/* nope! */
-		throw new Exception('Could not locate view "'.$_file.'"');
+if (!function_exists('view')) {
+	function view($_view,$_data=[]) {
+		/* get a list of all the found views */
+		$_op = orange_autoload_files::paths('views');
+	
+		/* clean up the view path */
+		$_file = trim(str_replace('.php','',$_view),'/');
+	
+		/* is the view file found? */
+		if (!isset($_op[$_file])) {
+			/* nope! */
+			throw new Exception('Could not locate view "'.$_file.'"');
+		}
+	
+		/* import variables into the current symbol table from an only prefix invalid/numeric variable names with _ 	*/
+		extract($_data, EXTR_PREFIX_INVALID, '_');
+	
+		/* turn on output buffering */
+		ob_start();
+	
+		/* bring in the view file */
+		include $_op[$_file];
+	
+		/* return the current buffer contents and delete current output buffer */
+		return ob_get_clean();
 	}
-
-	/* import variables into the current symbol table from an only prefix invalid/numeric variable names with _ 	*/
-	extract($_data, EXTR_PREFIX_INVALID, '_');
-
-	/* turn on output buffering */
-	ob_start();
-
-	/* bring in the view file */
-	include $_op[$_file];
-
-	/* return the current buffer contents and delete current output buffer */
-	return ob_get_clean();
 }
 
 /**
@@ -475,51 +404,53 @@ function view($_view,$_data=[]) {
  * @return the number of bytes that were written to the file, or FALSE on failure.
  *
  */
-function atomic_file_put_contents($filepath, $content) {
-	/* get the path where you want to save this file so we can put our file in the same file */
-	$dirname = dirname($filepath);
-
-	/* is the directory writeable */
-	if (!is_writable($dirname)) {
-		throw new Exception('atomic file put contents folder "'.$dirname.'" not writable');
+if (!function_exists('atomic_file_put_contents')) {
+	function atomic_file_put_contents($filepath, $content) {
+		/* get the path where you want to save this file so we can put our file in the same file */
+		$dirname = dirname($filepath);
+	
+		/* is the directory writeable */
+		if (!is_writable($dirname)) {
+			throw new Exception('atomic file put contents folder "'.$dirname.'" not writable');
+		}
+	
+		/* create file with unique file name with prefix */
+		$tmpfname = tempnam($dirname, 'afpc_');
+	
+		/* did we get a temporary filename */
+		if ($tmpfname === false) {
+			throw new Exception('atomic file put contents could not create temp file');
+		}
+	
+		/* write to the temporary file */
+		$bytes = file_put_contents($tmpfname, $content);
+	
+		/* did we write anything? */
+		if ($bytes === false) {
+			throw new Exception('atomic file put contents could not file put contents');
+		}
+	
+		/* changes file permissions so I can read/write and everyone else read */
+		if (chmod($tmpfname, 0644) === false) {
+			throw new Exception('atomic file put contents could not change file mode');
+		}
+	
+		/* move it into place - this is the atomic function */
+		if (rename($tmpfname, $filepath) === false) {
+			throw new Exception('atomic file put contents could not make atomic switch');
+		}
+	
+		/* if it's cached we need to flush it out so the old one isn't loaded */
+		remove_php_file_from_opcache($filepath);
+	
+		/* if log message function is loaded at this point log a debug entry */
+		if (function_exists('log_message')) {
+			log_message('debug', 'atomic_file_put_contents wrote '.$filepath.' '.$bytes.' bytes');
+		}
+	
+		/* return the number of bytes written */
+		return $bytes;
 	}
-
-	/* create file with unique file name with prefix */
-	$tmpfname = tempnam($dirname, 'afpc_');
-
-	/* did we get a temporary filename */
-	if ($tmpfname === false) {
-		throw new Exception('atomic file put contents could not create temp file');
-	}
-
-	/* write to the temporary file */
-	$bytes = file_put_contents($tmpfname, $content);
-
-	/* did we write anything? */
-	if ($bytes === false) {
-		throw new Exception('atomic file put contents could not file put contents');
-	}
-
-	/* changes file permissions so I can read/write and everyone else read */
-	if (chmod($tmpfname, 0644) === false) {
-		throw new Exception('atomic file put contents could not change file mode');
-	}
-
-	/* move it into place - this is the atomic function */
-	if (rename($tmpfname, $filepath) === false) {
-		throw new Exception('atomic file put contents could not make atomic switch');
-	}
-
-	/* if it's cached we need to flush it out so the old one isn't loaded */
-	remove_php_file_from_opcache($filepath);
-
-	/* if log message function is loaded at this point log a debug entry */
-	if (function_exists('log_message')) {
-		log_message('debug', 'atomic_file_put_contents wrote '.$filepath.' '.$bytes.' bytes');
-	}
-
-	/* return the number of bytes written */
-	return $bytes;
 }
 
 /**
@@ -530,12 +461,14 @@ function atomic_file_put_contents($filepath, $content) {
  * @return
  *
  */
-function remove_php_file_from_opcache($fullpath) {
-	/* flush from the cache */
-	if (function_exists('opcache_invalidate')) {
-		opcache_invalidate($filepath, true);
-	} elseif (function_exists('apc_delete_file')) {
-		apc_delete_file($filepath);
+if (!function_exists('remove_php_file_from_opcache')) {
+	function remove_php_file_from_opcache($fullpath) {
+		/* flush from the cache */
+		if (function_exists('opcache_invalidate')) {
+			opcache_invalidate($filepath, true);
+		} elseif (function_exists('apc_delete_file')) {
+			apc_delete_file($filepath);
+		}
 	}
 }
 
@@ -549,31 +482,33 @@ function remove_php_file_from_opcache($fullpath) {
  * @return mixed
  *
  */
-function convert_to_real($value) {
-	/* return on first match multiple exists */
-
-	switch (trim(strtolower($value))) {
-	case 'true':
-		return true;
-		break;
-	case 'false':
-		return false;
-		break;
-	case 'empty':
-		return '';
-		break;
-	case 'null':
-		return null;
-		break;
-	default:
-		if (is_numeric($value)) {
-			return (is_float($value)) ? (float)$value : (int)$value;
+if (!function_exists('convert_to_real')) {
+	function convert_to_real($value) {
+		/* return on first match multiple exists */
+	
+		switch (trim(strtolower($value))) {
+		case 'true':
+			return true;
+			break;
+		case 'false':
+			return false;
+			break;
+		case 'empty':
+			return '';
+			break;
+		case 'null':
+			return null;
+			break;
+		default:
+			if (is_numeric($value)) {
+				return (is_float($value)) ? (float)$value : (int)$value;
+			}
 		}
+	
+		$json = @json_decode($value, true);
+	
+		return ($json !== null) ? $json : $value;
 	}
-
-	$json = @json_decode($value, true);
-
-	return ($json !== null) ? $json : $value;
 }
 
 /**
@@ -586,26 +521,28 @@ function convert_to_real($value) {
  * @return string
  *
  */
-function convert_to_string($value) {
-	/* return on first match multiple exists */
-
-	if (is_array($value)) {
-		return var_export($value, true);
+if (!function_exists('convert_to_string')) {
+	function convert_to_string($value) {
+		/* return on first match multiple exists */
+	
+		if (is_array($value)) {
+			return var_export($value, true);
+		}
+	
+		if ($value === true) {
+			return 'true';
+		}
+	
+		if ($value === false) {
+			return 'false';
+		}
+	
+		if ($value === null) {
+			return 'null';
+		}
+	
+		return (string) $value;
 	}
-
-	if ($value === true) {
-		return 'true';
-	}
-
-	if ($value === false) {
-		return 'false';
-	}
-
-	if ($value === null) {
-		return 'null';
-	}
-
-	return (string) $value;
 }
 
 /**
@@ -618,38 +555,40 @@ function convert_to_string($value) {
  * @return array
  *
  */
-function simplify_array($array, $key = 'id', $value = null, $sort = null) {
-	$value = ($value) ? $value : $key;
-	$new_array = [];
-
-	foreach ($array as $row) {
-		if (is_object($row)) {
-			if ($value == '*') {
-				$new_array[$row->$key] = $row;
+if (!function_exists('simplify_array')) {
+	function simplify_array($array, $key = 'id', $value = null, $sort = null) {
+		$value = ($value) ? $value : $key;
+		$new_array = [];
+	
+		foreach ($array as $row) {
+			if (is_object($row)) {
+				if ($value == '*') {
+					$new_array[$row->$key] = $row;
+				} else {
+					$new_array[$row->$key] = $row->$value;
+				}
 			} else {
-				$new_array[$row->$key] = $row->$value;
-			}
-		} else {
-			if ($value == '*') {
-				$new_array[$row[$key]] = $row;
-			} else {
-				$new_array[$row[$key]] = $row[$value];
+				if ($value == '*') {
+					$new_array[$row[$key]] = $row;
+				} else {
+					$new_array[$row[$key]] = $row[$value];
+				}
 			}
 		}
+	
+		switch($sort) {
+			case 'desc':
+			case 'd':
+				krsort($new_array,SORT_NATURAL | SORT_FLAG_CASE);
+			break;
+			case 'asc':
+			case 'a':
+				ksort($new_array,SORT_NATURAL | SORT_FLAG_CASE);
+			break;
+		}
+	
+		return $new_array;
 	}
-
-	switch($sort) {
-		case 'desc':
-		case 'd':
-			krsort($new_array,SORT_NATURAL | SORT_FLAG_CASE);
-		break;
-		case 'asc':
-		case 'a':
-			ksort($new_array,SORT_NATURAL | SORT_FLAG_CASE);
-		break;
-	}
-
-	return $new_array;
 }
 
 /**
@@ -662,14 +601,16 @@ function simplify_array($array, $key = 'id', $value = null, $sort = null) {
  * @return mixed cached data
  *
  */
-function cache($key, $closure, $ttl = null) {
-	if (!$cache = ci('cache')->get($key)) {
-		$cache = $closure();
-		$ttl = ($ttl) ? (int) $ttl : cache_ttl();
-		ci('cache')->save($key, $cache, $ttl);
+if (!function_exists('cache')) {
+	function cache($key, $closure, $ttl = null) {
+		if (!$cache = ci('cache')->get($key)) {
+			$cache = $closure();
+			$ttl = ($ttl) ? (int) $ttl : cache_ttl();
+			ci('cache')->save($key, $cache, $ttl);
+		}
+	
+		return $cache;
 	}
-
-	return $cache;
 }
 
 /**
@@ -680,19 +621,21 @@ function cache($key, $closure, $ttl = null) {
  * @return integer
  *
  */
-function cache_ttl($use_window=true) {
-	/* get the cache ttl from the config file */
-	$cache_ttl = (int)config_item('cache_ttl');
-
-	/* are they using the window option? */
-	if ($use_window) {
-		/* let determine the window size based on there cache time to live length no more than 5 minutes */
-		$window = min(300,ceil($cache_ttl * .02));
-		/* add it to the cache_ttl to get our "new" cache time to live */
-		$cache_ttl += mt_rand(-$window,$window);
+if (!function_exists('cache_ttl')) {
+	function cache_ttl($use_window=true) {
+		/* get the cache ttl from the config file */
+		$cache_ttl = (int)config_item('cache_ttl');
+	
+		/* are they using the window option? */
+		if ($use_window) {
+			/* let determine the window size based on there cache time to live length no more than 5 minutes */
+			$window = min(300,ceil($cache_ttl * .02));
+			/* add it to the cache_ttl to get our "new" cache time to live */
+			$cache_ttl += mt_rand(-$window,$window);
+		}
+	
+		return $cache_ttl;
 	}
-
-	return $cache_ttl;
 }
 
 /**
@@ -706,31 +649,86 @@ function cache_ttl($use_window=true) {
  * @example delete_cache_by_tags('acl.user.roles');
  * @example delete_cache_by_tags(['acl','user','roles']);
  */
-function delete_cache_by_tags($args) {
-	/* determine if it's a array, period separated list of tags or multiple arguments */
-	if (is_array($args)) {
-		$tags = $args;
-	} elseif(strpos($args,'.') !== false) {
-		$tags = explode('.', $args);
-	} else {
-		$tags = func_get_args();
-	}
-
-	/* log a debug entry */
-	log_message('debug', 'delete_cache_by_tags '.implode(', ', $tags));
-
-	/* trigger a event incase somebody else needs to know send in our array of tags by reference */
-	ci('event')->trigger('delete-cache-by-tags',$tags);
-
-	/* get all of the currently loaded cache driver cache keys */
-	$cached_keys = ci('cache')->cache_info();
-
-	/* if the cache key has 1 or more matching tag delete the entry */
-	if (is_array($cached_keys)) {
-		foreach ($cached_keys as $key) {
-			if (count(array_intersect(explode('.', $key['name']), $tags))) {
-				ci()->cache->delete($key['name']);
+if (!function_exists('delete_cache_by_tags')) {
+	function delete_cache_by_tags($args) {
+		/* determine if it's a array, period separated list of tags or multiple arguments */
+		if (is_array($args)) {
+			$tags = $args;
+		} elseif(strpos($args,'.') !== false) {
+			$tags = explode('.', $args);
+		} else {
+			$tags = func_get_args();
+		}
+	
+		/* log a debug entry */
+		log_message('debug', 'delete_cache_by_tags '.implode(', ', $tags));
+	
+		/* trigger a event incase somebody else needs to know send in our array of tags by reference */
+		ci('event')->trigger('delete-cache-by-tags',$tags);
+	
+		/* get all of the currently loaded cache driver cache keys */
+		$cached_keys = ci('cache')->cache_info();
+	
+		/* if the cache key has 1 or more matching tag delete the entry */
+		if (is_array($cached_keys)) {
+			foreach ($cached_keys as $key) {
+				if (count(array_intersect(explode('.', $key['name']), $tags))) {
+					ci()->cache->delete($key['name']);
+				}
 			}
 		}
+	}
+}
+
+/**
+ * Reference to the CI_Controller method.
+ *
+ * Returns current CI instance object
+ *
+ * @return CI_Controller
+ */
+if (!function_exists('get_instance')) {
+	function &get_instance() {
+		return CI_Controller::get_instance();
+	}
+}
+
+if (!function_exists('_assert_handler')) {
+	function _assert_handler($file,$line,$code,$desc='') {
+		$error = '<!doctype html>
+		<title>Assertion Failed</title>
+		<style>
+		body, html { text-align: center; padding: 150px; background-color: #492727; font: 20px Helvetica, sans-serif; color: #fff; font-size: 18px;}
+		h1 { font-size: 150%; }
+		article { display: block; text-align: left; width: 650px; margin: 0 auto; }
+		</style>
+		<article>
+		<h1>Assertion Failed</h1>
+		<div>
+		<p>File: '.$file.'</p>
+		<p>Line: '.$line.'</p>
+		<p>Code: '.$code.'</p>
+		<p>Description: '.$desc.'</p>
+		</div>
+		</article>';
+	
+		echo (defined('STDIN')) ? strip_tags(substr($error,strpos($error,'<article>'),strpos($error,'</article>') - strpos($error,'<article>'))).chr(10) : $error;
+		exit(1);
+	}
+}
+
+if (!function_exists('load_config')) {
+	function load_config($name) {
+		$config = false;
+		
+		if (file_exists(APPPATH.'config/'.$name.'.php')) {
+			require_once APPPATH.'config/'.$name.'.php';
+		}
+
+		if (file_exists(APPPATH.'config/'.ENVIRONMENT.'/'.$name.'.php')) {
+			require_once APPPATH.'config/'.ENVIRONMENT.'/'.$name.'.php';
+		}
+				
+		return $config;
 	}
 }

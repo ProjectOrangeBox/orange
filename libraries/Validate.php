@@ -280,10 +280,15 @@ class Validate {
 	 * @example
 	 */
 	public function single($rules, &$field, $human = null) {
-		$rules = (isset($this->config[$rules])) ? $this->config[$rules] : $rules;
+		if (!is_array($rules)) {
+			$rules = (isset($this->config[$rules])) ? $this->config[$rules] : $rules;
+			
+			if (is_string($rules)) {
+				$rules = explode('|', $rules);
+			}
+		}
 
-		if (!empty($rules)) {
-			$rules = explode('|', $rules);
+		if (count($rules)) {
 			foreach ($rules as $rule) {
 				if (empty($rule)) {
 					$success = true;

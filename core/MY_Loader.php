@@ -106,7 +106,7 @@ class MY_Loader extends CI_Loader {
 			return;
 		}
 
-		$orange_paths = orange_paths('classes');
+		$orange_paths = orange_autoload_files::paths('classes');
 
 		$lc_library_name = strtolower($library_name);
 
@@ -194,7 +194,7 @@ class MY_Loader extends CI_Loader {
 
 			$pathinfo = pathinfo($filepath);
 
-			$orange_paths = orange_paths('libraries');
+			$orange_paths = orange_autoload_files::paths('libraries');
 
 			$lc_library_name = strtolower($pathinfo['filename']);
 
@@ -260,7 +260,7 @@ class MY_Loader extends CI_Loader {
 		}
 
 		/* get a array of all the models */
-		$orange_paths = orange_paths('models');
+		$orange_paths = orange_autoload_files::paths('models');
 
 		if ($remap = $this->_remap($model)) {
 			$name = strtolower($model);
@@ -277,7 +277,7 @@ class MY_Loader extends CI_Loader {
 
 		$CI->$name = new $model();
 
-		log_message('info', 'Model "'.$lowercase_class.'" initialized');
+		log_message('info', 'Model "'.$model.'" initialized');
 
 		return $this;
 	}
