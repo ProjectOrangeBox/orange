@@ -1,14 +1,23 @@
-<?php 
+<?php
 
 class Orange_middleware {
-	protected static $middleware = [];
+	protected static $requests = [];
+	protected static $responds = [];
 
-	public static function set() {
-		self::$middleware = func_get_args();
+	public static function on_request() {
+		self::$requests = func_get_args();
 	}
-	
-	public static function get() {
-		return self::$middleware;
+
+	public static function on_responds() {
+		self::$responds = func_get_args();
+	}
+
+	public static function requests() {
+		return self::$requests;
+	}
+
+	public static function responds() {
+		return self::$responds;
 	}
 
 }

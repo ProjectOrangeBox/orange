@@ -34,7 +34,7 @@ class Orange_autoload_files {
 	 * @var int
 	 */
 	protected static $folder_levels;
-	
+
 	/**
 	 * actual file array
 	 *
@@ -56,17 +56,17 @@ class Orange_autoload_files {
 		/* if we are in development mode or the cache path is missing */
 		if (ENVIRONMENT == 'development' || !file_exists(self::$cache_path)) {
 			/* load $autoload config variable */
-			require APPPATH.'/config/autoload.php';
-			
+			$autoload = load_config('autoload','autoload');
+
 			self::$paths = explode(PATH_SEPARATOR,rtrim(APPPATH,'/').PATH_SEPARATOR.implode(PATH_SEPARATOR,$autoload['packages']));
-			
+
 			self::$array = self::build_cache($autoload);
-			
+
 			self::write_cache(self::$array);
 		} else {
 			self::$array = include self::$cache_path;
 		}
-		
+
 		return self::$array;
 	}
 
@@ -76,8 +76,16 @@ class Orange_autoload_files {
 		} else {
 			$responds = ($section) ? self::$array[$section] : self::$array;
 		}
-	
+
 		return $responds;
+	}
+
+	public static function update($array,$permanent=true) {
+		if ($permanent) {
+			self::write_cache($array);
+		}
+
+		self::$array = $array;
 	}
 
 	/**
@@ -90,7 +98,7 @@ class Orange_autoload_files {
 	 */
 	protected static function write_cache($array) {
 		$php1 = $php2 = '';
-		
+
 		for ($i = 0; $i < self::$folder_levels; $i++) {
 			$php1 .= 'dirname(';
 			$php2 .= ')';
@@ -111,7 +119,7 @@ class Orange_autoload_files {
 			'model_entity'=>ORANGEPATH.'/models/Model_entity.php',
 			'cache_export'=>ORANGEPATH.'/libraries/Cache_export.php',
 			'cache_request'=>ORANGEPATH.'/libraries/Cache_request.php',
-			'middleware_base'=>ORANGEPATH.'/libraries/Middleware_base.php',
+			'orange_middleware' => ORANGEPATH.'/libraries/Orange_middleware.php',
 			'validate_base'=>ORANGEPATH.'/libraries/Validate_base.php',
 			'filter_base'=>ORANGEPATH.'/libraries/Filter_base.php',
 		];
@@ -135,10 +143,10 @@ class Orange_autoload_files {
 				$count = 0;
 				str_replace(['/validations/','/pear_plugins/','/filters/','/traits/'],'',$filepath,$count);
 				return (!$count) ? strtolower(basename($filepath,'.php')) : null;
-			})	,$classes),
+			}),$classes),
 			'views' => self::search('/views/','(.*).php',function($filepath) { return strtolower(substr($filepath,strpos($filepath,'/views/') + 7,-4)); 	}),
 			'controllers' => self::cache_controllers(),
-			'configs' => self::cache_config(),
+			/*'configs' => self::cache_config(),*/
 		];
 	}
 

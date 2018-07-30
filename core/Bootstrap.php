@@ -1,4 +1,6 @@
-<?php 
+<?php
+/* Orange */
+
 /* register the version */
 const ORANGE_VERSION = '2.1';
 
@@ -10,7 +12,6 @@ define('LOGPATH',ROOTPATH.$config['logs']);
 
 /* load the orange autoloader library - this builds the "super" search array */
 require ORANGEPATH.'/libraries/Orange_autoload_files.php';
-require ORANGEPATH.'/libraries/Orange_middleware.php';
 
 /* instantiate the orange autoloader static class */
 orange_autoload_files::load(CACHEPATH.'/autoload_files.php',2);
@@ -149,19 +150,6 @@ ini_set('php.internal_encoding', $charset);
 
 /*
 * ------------------------------------------------------
-*  Load compatibility features
-* ------------------------------------------------------
-*/
-
-/*
-require_once(BASEPATH.'core/compat/mbstring.php');
-require_once(BASEPATH.'core/compat/hash.php');
-require_once(BASEPATH.'core/compat/password.php');
-require_once(BASEPATH.'core/compat/standard.php');
-*/
-
-/*
-* ------------------------------------------------------
 *  Instantiate the UTF-8 class
 * ------------------------------------------------------
 */
@@ -286,13 +274,13 @@ if ($e404) {
 		if (!class_exists($error_class, FALSE)) 	{
 			if (file_exists(APPPATH.'controllers/'.$RTR->directory.$error_class.'.php')) {
 				require_once(APPPATH.'controllers/'.$RTR->directory.$error_class.'.php');
-				
+
 				$e404 = !class_exists($error_class, FALSE);
 			}
 			// Were we in a directory? If so, check for a global override
 			elseif (!empty($RTR->directory) && file_exists(APPPATH.'controllers/'.$error_class.'.php')) 	{
 				require_once(APPPATH.'controllers/'.$error_class.'.php');
-				
+
 				if (($e404 = !class_exists($error_class, FALSE)) === FALSE) {
 					$RTR->directory = '';
 				}

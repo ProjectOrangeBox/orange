@@ -129,64 +129,44 @@ class MY_Config extends CI_Config {
 	 */
 	protected function _load_combined_config() {
 		/* load from the cache */
-		$built_config = ci('cache')->export->get('config');
+		$complete_config = ci('cache')->export->get('config');
 
 		/* did we get a array? */
-		if (!is_array($built_config)) {
+		if (!is_array($complete_config)) {
 			/* no - so we need to build our dynamic configuration */
 			$built_config = [];
-			$orange_paths = orange_autoload_files::paths('configs');
 
 			/* load the application configs */
-			foreach ($orange_paths['root'] as $group_key=>$filepath) {
-				$config = null;
-
-				if (file_exists($filepath)) {
-					include $filepath;
-				}
-
+			foreach (glob(APPPATH.'/config/*.php') as $filepath) {
+				$basename = basename($filepath,'.php');
+				
+				$config = load_config($basename);
+				
 				if (is_array($config)) {
-					foreach ($config as $key => $value) {
-						$built_config[$group_key][strtolower($key)] = $value;
-					}
-				}
-			}
-
-			/* load the environment configs */
-			if (isset($orange_paths[ENVIRONMENT])) {
-				if (is_array($orange_paths[ENVIRONMENT])) {
-					foreach ($orange_paths[ENVIRONMENT] as $group_key=>$filepath) {
-						$config = null;
-	
-						include $filepath;
-	
-						if (is_array($config)) {
-							foreach ($config as $key => $value) {
-								$built_config[$group_key][strtolower($key)] = $value;
-							}
-						}
+					foreach ($config as $key=>$value) {
+						$built_config[strtolower($basename)][strtolower($key)] = $value;
 					}
 				}
 			}
 
 			/* load the database configs (settings) */
 			if (parent::item('no_database_settings') !== true) {
-				$config = ci('o_setting_model')->for_config();
+				$db_configs = ci('o_setting_model')->for_config();
 
-				if (is_array($config)) {
-					foreach ($config as $record) {
+				if (is_array($db_configs)) {
+					foreach ($db_configs as $record) {
 						$built_config[strtolower($record->group)][strtolower($record->name)] = convert_to_real($record->value);
 					}
 				}
 			}
 
 			/* combined with any configuration already loaded */
-			$built_config = $this->config + $built_config;
+			$complete_config = array_replace($this->config,$built_config);
 
 			/* save it in the cache */
-			ci('cache')->export->save('config',$built_config);
+			ci('cache')->export->save('config',$complete_config);
 		}
 
-		return $built_config;
+		return $complete_config;
 	}
 } /* end class */
