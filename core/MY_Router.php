@@ -98,6 +98,7 @@ class MY_Router extends CI_Router {
 		}
 
 		$this->directory = '';
+		
 		log_message('debug', 'MY_Router::_validate_request::404');
 
 		return $this->controller_method($this->routes['404_override']);

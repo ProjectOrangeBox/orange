@@ -325,7 +325,7 @@ reset_priority()
 reset element priority to default 50
 Pear View Plugins
 libraries/Pear_plugin.php
-base class for pear plugins. Really only provides a _convert2attributes() for all children objects 
+base class for pear plugins. 
 
 libraries/Pear.php
 provides the HTML View Pear “plugin” functions (to be used in view only)
