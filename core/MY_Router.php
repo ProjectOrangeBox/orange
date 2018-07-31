@@ -98,7 +98,7 @@ class MY_Router extends CI_Router {
 		}
 
 		$this->directory = '';
-		
+
 		log_message('debug', 'MY_Router::_validate_request::404');
 
 		return $this->controller_method($this->routes['404_override']);
@@ -201,4 +201,94 @@ class MY_Router extends CI_Router {
 
 		return $segments;
 	}
+
+
+	/**
+	 * Set route mapping
+	 *
+	 * Determines what should be served based on the URI request,
+	 * as well as any "routes" that have been set in the routing config file.
+	 *
+	 * @return	void
+	 */
+	protected function _set_routing() {
+		$route = load_config('routes','route');
+
+		// Validate & get reserved routes
+		if (isset($route) && is_array($route)) {
+			isset($route['default_controller']) && $this->default_controller = $route['default_controller'];
+			isset($route['translate_uri_dashes']) && $this->translate_uri_dashes = $route['translate_uri_dashes'];
+			unset($route['default_controller'], $route['translate_uri_dashes']);
+
+			$this->routes = $route;
+		}
+
+		// Is there anything to parse?
+		if ($this->uri->uri_string !== '') {
+			$this->_parse_routes();
+		} else {
+			$this->_set_default_controller();
+
+			$this->_parse_routes(true);
+		}
+	}
+
+	/**
+	 * Parse Routes
+	 *
+	 * Matches any routes that may exist in the config/routes.php file
+	 * against the URI to determine if the class/method need to be remapped.
+	 *
+	 * @return	void
+	 */
+	protected function _parse_routes($skip_set=false) {
+		// Turn the segment array into a URI string
+		$uri = implode('/', $this->uri->segments);
+
+		// Get HTTP verb
+		$http_verb = isset($_SERVER['REQUEST_METHOD']) ? strtolower($_SERVER['REQUEST_METHOD']) : 'cli';
+
+		// Loop through the route array looking for wildcards
+		foreach ($this->routes as $key => $val) 	{
+			// Check if route format is using HTTP verbs
+			if (is_array($val)) {
+				$val = array_change_key_case($val, CASE_LOWER);
+				
+				if (isset($val[$http_verb])) {
+					$val = $val[$http_verb];
+				} else {
+					continue;
+				}
+			}
+
+			// Convert wildcards to RegEx
+			$key = str_replace(array(':any', ':num'), array('[^/]+', '[0-9]+'), $key);
+
+			// Does the RegEx match?
+			if (preg_match('#^'.$key.'$#', $uri, $matches)) 	{
+				// Are we using callbacks to process back-references?
+				if (!is_string($val) && is_callable($val)) {
+					// Remove the original string from the matches array.
+					array_shift($matches);
+
+					// Execute the callback using the values in matches as its parameters.
+					$val = call_user_func_array($val, $matches);
+				} elseif (strpos($val, '$') !== FALSE && strpos($key, '(') !== FALSE) 	{
+					// Are we using the default routing method for back-references?
+					$val = preg_replace('#^'.$key.'$#', $val, $uri);
+				}
+
+				if (!$skip_set) {
+					$this->_set_request(explode('/', $val));
+				}
+				
+				return;
+			}
+		}
+
+		// If we got this far it means we didn't encounter a
+		// matching route so we'll set the site default route
+		$this->_set_request(array_values($this->uri->segments));
+	}
+
 } /* end class */
