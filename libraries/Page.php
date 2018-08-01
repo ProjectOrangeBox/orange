@@ -84,55 +84,17 @@ class Page {
  */
 	public function __construct() {
 		define('PAGE_MIN',(env('SERVER_DEBUG') == 'development' ? '' : '.min'));
-
-		$this->route = strtolower(trim(ci('router')->fetch_directory().ci('router')->fetch_class(true).'/'.ci('router')->fetch_method(true), '/'));
-		$controller_path = '/'.str_replace('/index', '', $this->route);
-		$this->body_class(trim(str_replace('/',' uri-',$controller_path)));
-
-		$uid = 'guest';
-		$is = 'not-active';
-
-		/* this is a variable test */
-		if (isset(ci()->user)) {
-			$uid = md5(ci('user')->id.config('config.encryption_key'));
-			if (ci('user')->logged_in()) {
-				$is = 'active';
-			}
-			$this->data('user', ci('user'));
-		}
-
-		$this->body_class(['uid-'.$uid,'is-'.$is]);
 		
 		/* used in plugins and views */
 		ci('load')->helper('url');
 
-		$base_url = trim(base_url(), '/');
-
-		$merge_configs = [
-			'title',
-			'body_class',
-			'data',
-			'css',
-			'js',
-			'script',
-			'style',
-			'domready',
-			'js_variables',
-			'icon',
-		];
-
-		foreach ($merge_configs as $mc) {
-			if ($config = config('page.'.$mc,false)) {
-				$this->$mc($config);
+		$page_configs = config('page');
+		
+		foreach ($page_configs as $key=>$value) {
+			if (method_exists($this,$key)) {
+				$this->$key($value);
 			}
 		}
-
-		$this->js_variables([
-			'base_url'				=> $base_url,
-			'app_id'					=> md5($base_url),
-			'controller_path' => $controller_path,
-			'user_id'					=> $uid,
-		]);
 
 		log_message('info', 'Page Class Initialized');
 	}
@@ -230,7 +192,7 @@ class Page {
 	public function render($view = null, $data = []) {
 		log_message('debug', 'page::render::'.$view);
 
-		$view = ($view) ? $view : str_replace('-', '_', $this->route);
+		$view = ($view) ? $view : str_replace('-', '_',ci('router')->fetch_route());
 
 		ci('event')->trigger('page.render',$this,$view);
 		ci('event')->trigger('page.render.'.str_replace('/','.',$view),$this,$view);
@@ -240,6 +202,7 @@ class Page {
 
 		/* Are they using pear ? */
 		if (class_exists('pear',false)) {
+			/* are we extending another template? */
 			$is_extending = pear::is_extending();
 
 			if ($is_extending) {
