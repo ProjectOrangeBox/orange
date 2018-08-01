@@ -84,32 +84,6 @@ class Wallet {
 	}
 
 	/**
-	 * pocket
-	 * Insert description here
-	 *
-	 * @param $name
-	 * @param $value
-	 *
-	 * @return
-	 *
-	 * @access
-	 * @static
-	 * @throws
-	 * @example
-	 */
-	public function pocket($name, $value = null) {
-		$return = $this;
-
-		if ($value) {
-			$this->request[$name] = $value;
-		} else {
-			$return = (isset($this->request[$name])) ? $this->request[$name] : null;
-		}
-
-		return $return;
-	}
-
-	/**
 	 * snapdata
 	 * Insert description here
 	 *
