@@ -21,18 +21,20 @@
 class MY_Router extends CI_Router {
 
 	/**
-	 * track if the combined cached configuration has been loaded
+	 * class without Controller suffix
 	 *
-	 * @var boolean
+	 * @var string
 	 */
-	protected $clean_controller = null;
+	protected $clean_class = null;
 
 	/**
-	 * track if the combined cached configuration has been loaded
+	 * method without Http Method and Action suffix
 	 *
-	 * @var boolean
+	 * @var string
 	 */
 	protected $clean_method = null;
+	
+	protected $route = false;
 
 	/**
 	 * _set_default_controller
@@ -81,12 +83,16 @@ class MY_Router extends CI_Router {
 		foreach (orange_autoload_files::paths('controllers') as $key=>$rec) {
 			if (preg_match('#^'.$key.'$#', strtolower($uri), $matches)) {
 				$segs = explode('/',trim($matches[1],'/'));
+				
 				$this->directory = $rec['directory'];
-				$this->clean_controller = $rec['clean_controller'];
+				$this->clean_class = $rec['clean_controller'];
 				$this->clean_method = (empty($segs[0])) ? 'index' : strtolower($segs[0]);
+				
 				$segments = [];
-				$segments[0] = $this->clean_controller.'Controller';
+				
+				$segments[0] = $this->clean_class.'Controller';
 				$segments[1] = $this->clean_method.$this->fetch_request_method(true).'Action';
+				
 				array_shift($segs);
 
 				foreach ($segs as $uu) {
@@ -153,7 +159,7 @@ class MY_Router extends CI_Router {
 	 * @example
 	 */
 	public function fetch_class($clean=false) {
-		return ($clean) ? $this->clean_controller : $this->class;
+		return ($clean) ? $this->clean_class : $this->class;
 	}
 
 	/**
@@ -171,6 +177,14 @@ class MY_Router extends CI_Router {
 	 */
 	public function fetch_method($clean=false) {
 		return ($clean) ? $this->clean_method : $this->method;
+	}
+
+	public function fetch_route() {
+		if (!$this->route) {
+			$this->route = strtolower(trim($this->fetch_directory().$this->fetch_class(true).'/'.$this->fetch_method(true), '/'));
+		}
+	
+		return $this->route;
 	}
 
 	/**
@@ -194,8 +208,9 @@ class MY_Router extends CI_Router {
 			$segments = explode('/', $input, 2);
 		}
 
-		$this->clean_controller = ucfirst(strtolower($segments[0]));
+		$this->clean_class = ucfirst(strtolower($segments[0]));
 		$this->clean_method = strtolower($segments[1]);
+		
 		$segments[0] .= 'Controller';
 		$segments[1] .= 'Action';
 
@@ -217,8 +232,8 @@ class MY_Router extends CI_Router {
 		// Validate & get reserved routes
 		if (isset($route) && is_array($route)) {
 			isset($route['default_controller']) && $this->default_controller = $route['default_controller'];
-			isset($route['translate_uri_dashes']) && $this->translate_uri_dashes = $route['translate_uri_dashes'];
-			unset($route['default_controller'], $route['translate_uri_dashes']);
+			
+			unset($route['default_controller']);
 
 			$this->routes = $route;
 		}
@@ -246,10 +261,10 @@ class MY_Router extends CI_Router {
 		$uri = implode('/', $this->uri->segments);
 
 		// Get HTTP verb
-		$http_verb = isset($_SERVER['REQUEST_METHOD']) ? strtolower($_SERVER['REQUEST_METHOD']) : 'cli';
+		$http_verb = $this->fetch_request_method(false);
 
 		// Loop through the route array looking for wildcards
-		foreach ($this->routes as $key => $val) 	{
+		foreach ($this->routes as $key=>$val) 	{
 			// Check if route format is using HTTP verbs
 			if (is_array($val)) {
 				$val = array_change_key_case($val, CASE_LOWER);
@@ -262,7 +277,7 @@ class MY_Router extends CI_Router {
 			}
 
 			// Convert wildcards to RegEx
-			$key = str_replace(array(':any', ':num'), array('[^/]+', '[0-9]+'), $key);
+			$key = str_replace(array(':any',':num'), array('[^/]+','[0-9]+'),$key);
 
 			// Does the RegEx match?
 			if (preg_match('#^'.$key.'$#', $uri, $matches)) 	{

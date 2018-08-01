@@ -42,10 +42,17 @@ class Errors {
 	 */
 	public function add($msg) {
 		log_message('debug', 'Errors::add::'.$msg);
-		$current_errors = ci('load')->get_var( $this->errors_variable);
+		
+		/* get the current errors from the view data */
+		$current_errors = ci('load')->get_var($this->errors_variable);
+		
+		/* add this error */
 		$current_errors[$msg] = $msg;
-		ci('load')->vars( $this->errors_variable, $current_errors);
+		
+		/* put it back into the view data */
+		ci('load')->vars($this->errors_variable,$current_errors);
 
+		/* chain-able */
 		return $this;
 	}
 
@@ -62,8 +69,10 @@ class Errors {
 	 * @example
 	 */
 	public function clear() {
-		ci('load')->vars( $this->errors_variable, []);
+		/* empty out the view data */
+		ci('load')->vars($this->errors_variable,[]);
 
+		/* chain-able */
 		return $this;
 	}
 
@@ -80,6 +89,7 @@ class Errors {
 	 * @example
 	 */
 	public function has() {
+		/* do we have any errors? */
 		return (count(ci('load')->get_var( $this->errors_variable)) != 0);
 	}
 
@@ -96,7 +106,8 @@ class Errors {
 	 * @example
 	 */
 	public function as_array() {
-		return ci('load')->get_var( $this->errors_variable);
+		/* return the errors as an array */
+		return ci('load')->get_var($this->errors_variable);
 	}
 
 	/**
@@ -114,24 +125,32 @@ class Errors {
 	 * @example
 	 */
 	public function as_html($prefix = null, $suffix = null) {
-		$str = '';
-
-		if ( $this->has()) {
-			$errors = ci('load')->get_var( $this->errors_variable);
+		$html = '';
+		
+		/* do we have any errors? */
+		if ($this->has()) {
+			/* get them from the view data */
+			$errors = ci('load')->get_var($this->errors_variable);
+			
+			/* if they didn't send in a default prefix then use ours */
 			if ($prefix === null) {
 				$prefix = '<p class="orange error">';
 			}
+			
+			/* if they didn't send in a default suffix then use ours */
 			if ($suffix === null) {
 				$suffix = '</p>';
 			}
+			
+			/* format the output */
 			foreach ($errors as $val) {
 				if (!empty(trim($val))) {
-					$str .= $prefix.trim($val).$suffix;
+					$html .= $prefix.trim($val).$suffix;
 				}
 			}
 		}
 
-		return $str;
+		return $html;
 	}
 
 	/**
@@ -147,7 +166,8 @@ class Errors {
 	 * @example
 	 */
 	public function as_cli() {
-		return $this->as_html(chr(9), chr(10));
+		/* return as string with tabs and line-feeds */
+		return $this->as_html(chr(9),chr(10));
 	}
 
 	/**
@@ -163,8 +183,10 @@ class Errors {
 	 * @example
 	 */
 	public function as_data() {
-		$errors = ci('load')->get_var( $this->errors_variable);
-
+		/* get them from the view data */
+		$errors = ci('load')->get_var($this->errors_variable);
+		
+		/* return as a array */
 		return ['records' => array_values($errors)] + ['count' => count($errors)];
 	}
 
@@ -181,7 +203,8 @@ class Errors {
 	 * @example
 	 */
 	public function as_json() {
-		return json_encode( $this->as_data(), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE | JSON_FORCE_OBJECT);
+		/* get the as data array and convert to json */
+		return json_encode($this->as_data(), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE | JSON_FORCE_OBJECT);
 	}
 
 	/**
@@ -200,6 +223,7 @@ class Errors {
 	 * @example
 	 */
 	public function show($message, $status_code, $heading = 'An Error Was Encountered') {
+		/* show the errors */
 		$this->display('general',['heading'=>$heading,'message'=>$message],$status_code);
 	}
 
@@ -221,28 +245,35 @@ class Errors {
 	 */
 	public function display($view, $data = [], $status_code = 500, $override = []) {
 		if (is_numeric($view)) {
-			$status_code = (int) $view;
+			$status_code = (int)$view;
 		}
-
+		
+		/* setup the defaults */
 		$config = config('errors',[]);
 		$view = ($config['named'][$view]) ? $config['named'][$view] : $view;
 		$charset     = 'utf-8';
 		$mime_type   = 'text/html';
 		$view_folder = 'html';
+		
 		$data['heading'] = ($data['heading']) ? $data['heading'] : 'Fatal Error';
 		$data['message'] = ($data['message']) ? $data['message'] : 'Unknown Error';
 
 		if (ci()->input->is_cli_request()) {
+			/* if it's a cli request then output for cli */
 			$view_folder = 'cli';
 			$message     = '';
+
 			foreach ($data as $key => $val) {
 				$message .= '  '.$key.': '.strip_tags($val).chr(10);
 			}
+
 			$data['message'] = $message;
 		} elseif (ci()->input->is_ajax_request()) {
+			/* if it's a ajax request then format for ajax (json) */
 			$view_folder = 'ajax';
 			$mime_type   = 'application/json';
 		} else {
+			/* else prepare for html */
 			$data['message'] = '<p>'.(is_array($data['message']) ? implode('</p><p>', $data['message']) : $data['message']).'</p>';
 			$view_folder     = 'html';
 		}
