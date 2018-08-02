@@ -192,6 +192,10 @@ class Pear {
 		return self::$extends;
 	}
 
+	public static function variable($name,$prefix='',$suffix='') {
+		return ci('page')->variable($name,$prefix,$suffix);
+	}
+
 	/**
 	 * load plugins
 	 *
@@ -239,7 +243,6 @@ class Pear {
 				throw new Exception('Could not load "'.$class_name.'"');
 			}
 		}
-
 	}
 
 } /* end class */

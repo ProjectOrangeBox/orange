@@ -84,12 +84,12 @@ class Page {
  */
 	public function __construct() {
 		define('PAGE_MIN',(env('SERVER_DEBUG') == 'development' ? '' : '.min'));
-		
+
 		/* used in plugins and views */
 		ci('load')->helper('url');
 
 		$page_configs = config('page');
-		
+
 		foreach ($page_configs as $key=>$value) {
 			if (method_exists($this,$key)) {
 				$this->$key($value);
@@ -113,33 +113,29 @@ class Page {
 	}
 
 /**
- * This prepares the current page variables
+ * post process any page variables
  *
  * @return $this
  *
  */
-	public function prepare_page_variables() {
-		foreach ($this->variables as $page_variable=>$entries) {
+	public function variable($name,$prefix='',$suffix='') {
+		$html = ci('load')->get_var($name);
+
+		$entries = $this->variables[$name];
+
+		if (is_array($entries)) {
 			/* sort the keys (priority) */
 			ksort($entries);
-
-			/* get the current content */
-			$current_content = ci('load')->get_var($page_variable);
-
+	
 			/* add the currently available entries */
 			foreach ($entries as $priority) {
 				foreach ($priority as $string) {
-					$current_content .= $string;
+					$html .= $string;
 				}
 			}
-
-			ci('load')->vars($page_variable,$current_content);
-
-			/* now flush those assets since they have already been added to the page variables */
-			$this->variables = [];
 		}
 
-		return $this;
+		return (!empty($html)) ? $prefix.$html.$suffix : '';
 	}
 
 /**
@@ -229,8 +225,6 @@ class Page {
  *
  */
 	public function view($_view_file = null, $_data = [], $_return = true) {
-		$this->prepare_page_variables();
-
 		/* call core orange function view() */
 		$_buffer = view($_view_file,array_merge(ci('load')->get_vars(),(array)$_data));
 
@@ -453,7 +447,7 @@ class Page {
  */
 	public function convert2attributes($attributes,$prefix='',$strip_empty=true) {
 		$output = '';
-		
+
 		foreach ($attributes as $name => $value) {
 			if (!empty($value) || !$strip_empty) {
 				$output .= $prefix.$name.'="'.trim($value).'" ';

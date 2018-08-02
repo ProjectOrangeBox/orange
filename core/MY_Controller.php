@@ -163,7 +163,7 @@ class MY_Controller extends CI_Controller {
 			}
 		}
 
-		echo $output;
+		echo trim($output);
 	}
 
 	/* place holder */
