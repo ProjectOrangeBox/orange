@@ -20,7 +20,9 @@
  * @ used but not required
  */
 class Page {
-	protected $priority = 50;
+	protected $default_priority = 50;
+
+	protected $priority;
 	/**
 	 * track if the combined cached configuration has been loaded
 	 *
@@ -83,6 +85,8 @@ class Page {
  * @example
  */
 	public function __construct() {
+		$this->priority = $this->default_priority;
+
 		define('PAGE_MIN',(env('SERVER_DEBUG') == 'development' ? '' : '.min'));
 
 		/* used in plugins and views */
@@ -110,35 +114,6 @@ class Page {
  */
 	public function title($title = '') {
 		return $this->data($this->page_prefix.'title', $title);
-	}
-
-/**
- * post process any page variables
- *
- * @return $this
- *
- */
-	public function variable($name,$prefix='',$suffix='',$on_empty='') {
-		/* get what's already in there */
-		$html = ci('load')->get_var($name);
-
-		/* do we have a array of things to process? */
-		$entries = $this->variables[$name];
-
-		if (is_array($entries)) {
-			/* yep! - sort the keys (priority) */
-			ksort($entries);
-
-			/* add the currently available entries */
-			foreach ($entries as $priority) {
-				foreach ($priority as $string) {
-					$html .= $string;
-				}
-			}
-		}
-		
-		/* if html contains content then also include prefix and suffix if it exists */
-		return (!empty($html)) ? $prefix.$html.$suffix : $on_empty;
 	}
 
 /**
@@ -481,7 +456,7 @@ class Page {
  *
  */
 	public function reset_priority() {
-		$this->priority = 50;
+		$this->priority = $this->default_priority;
 
 		return $this;
 	}
