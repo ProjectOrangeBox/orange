@@ -157,10 +157,12 @@ class Pear {
 	 * @return
 	 *
 	 */
-	public static function extends($name) {
+	public static function extends($name,$data=[]) {
 		if (self::$extends !== null) {
 			throw new Exception('Pear Templating is already extending "'.self::$extends.'" therefore we cannot extend "'.$name.'"');
 		}
+
+		ci('load')->vars($data);
 
 		self::$extends = $name;
 	}

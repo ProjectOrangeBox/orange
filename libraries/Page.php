@@ -20,57 +20,15 @@
  * @ used but not required
  */
 class Page {
-	protected $default_priority = 50;
+	protected $default_priority;
+	protected $priority;	
+	protected $page_prefix;
+	protected $script_attributes;
+	protected $link_attributes;
+	protected $domready_javascript;
 
-	protected $priority;
-	/**
-	 * track if the combined cached configuration has been loaded
-	 *
-	 * @var boolean
-	 */
-	protected $route;
-
-	/**
-	 * track if the combined cached configuration has been loaded
-	 *
-	 * @var boolean
-	 */
-	protected $page_prefix = 'page_';
-
-	/**
-	 * track if the combined cached configuration has been loaded
-	 *
-	 * @var boolean
-	 */
 	protected $variables = [];
-
-	/**
-	 * track if the combined cached configuration has been loaded
-	 *
-	 * @var boolean
-	 */
 	protected $prevent_duplicate = [];
-
-	/**
-	 * track if the combined cached configuration has been loaded
-	 *
-	 * @var boolean
-	 */
-	protected $script_attributes = ['src' => '', 'type' => 'text/javascript', 'charset' => 'utf-8'];
-
-	/**
-	 * track if the combined cached configuration has been loaded
-	 *
-	 * @var boolean
-	 */
-	protected $link_attributes   = ['href' => '', 'type' => 'text/css', 'rel' => 'stylesheet'];
-
-	/**
-	 * track if the combined cached configuration has been loaded
-	 *
-	 * @var boolean
-	 */
-	protected $domready_javascript = 'document.addEventListener("DOMContentLoaded",function(e){%%});';
 
 /**
  * __construct
@@ -85,14 +43,18 @@ class Page {
  * @example
  */
 	public function __construct() {
-		$this->priority = $this->default_priority;
-
+		$config = config('page');
+		
+		$this->script_attributes = $config['script_attributes'];
+		$this->link_attributes = $config['link_attributes'];
+		$this->domready_javascript = $config['domready_javascript'];
+		$this->default_priority = (int)$config['default_priority'];
+		$this->priority = $this->default_priority;		
+		$this->page_prefix = $config['page_prefix'];
+		
 		define('PAGE_MIN',(env('SERVER_DEBUG') == 'development' ? '' : '.min'));
 
-		/* used in plugins and views */
-		ci('load')->helper('url');
-
-		$page_configs = config('page');
+		$page_configs = $config[$this->page_prefix];
 
 		foreach ($page_configs as $key=>$value) {
 			if (method_exists($this,$key)) {
@@ -227,13 +189,10 @@ class Page {
  */
 	public function data($name = null, $value = null) {
 		if (is_array($name)) {
-			foreach ($name as $k => $v) {
-				ci('load')->vars($k,$v);
-			}
-			return $this;
+			ci('load')->vars($name);
+		} else {
+			ci('load')->vars($name,$value);
 		}
-
-		ci('load')->vars($name,$value);
 
 		return $this;
 	}
