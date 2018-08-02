@@ -113,6 +113,8 @@ class Pear {
 			self::$fragment[$name] = $name;
 			ob_start();
 		}
+		
+		return ci('load')->get_var($name);
 	}
 
 	/**

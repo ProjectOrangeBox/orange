@@ -119,14 +119,16 @@ class Page {
  *
  */
 	public function variable($name,$prefix='',$suffix='') {
+		/* get what's already in there */
 		$html = ci('load')->get_var($name);
 
+		/* do we have any post process stuff */
 		$entries = $this->variables[$name];
 
 		if (is_array($entries)) {
 			/* sort the keys (priority) */
 			ksort($entries);
-	
+
 			/* add the currently available entries */
 			foreach ($entries as $priority) {
 				foreach ($priority as $string) {
@@ -151,7 +153,7 @@ class Page {
  *
  */
 	public function meta($attr, $name, $content = null,$priority = null) {
-		return $this->_asset_add('meta','<meta '.$attr.'="'.$name.'"'.(($content) ? ' content="'.$content.'"' : '').'>',$priority);
+		return $this->asset_add($this->page_prefix.'meta','<meta '.$attr.'="'.$name.'"'.(($content) ? ' content="'.$content.'"' : '').'>',$priority);
 	}
 
 /**
@@ -172,7 +174,7 @@ class Page {
 			return $this;
 		}
 
-		return $this->_asset_add('body_class',' '.strtolower($class),$priority);
+		return $this->asset_add($this->page_prefix.'body_class',' '.strtolower($class),$priority);
 	}
 
 /**
@@ -289,7 +291,7 @@ class Page {
 			return $this;
 		}
 
-		return $this->_asset_add('css',$this->link_html($file),$priority);
+		return $this->asset_add($this->page_prefix.'css',$this->link_html($file),$priority);
 	}
 
 /**
@@ -316,7 +318,7 @@ class Page {
  *
  */
 	public function style($style,$priority = null) {
-		return $this->_asset_add('style',$style,$priority);
+		return $this->asset_add($this->page_prefix.'style',$style,$priority);
 	}
 
 /**
@@ -337,7 +339,7 @@ class Page {
 			return $this;
 		}
 
-		return $this->_asset_add('js',$this->script_html($file),$priority);
+		return $this->asset_add($this->page_prefix.'js',$this->script_html($file),$priority);
 	}
 
 /**
@@ -371,7 +373,7 @@ class Page {
 			$value = ((is_scalar($value)) ? 'var '.$key.'="'.str_replace('"', '\"', $value).'";' : 'var '.$key.'='.json_encode($value, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE).';');
 		}
 
-		return $this->_asset_add('js_variables',$value,$priority);
+		return $this->asset_add($this->page_prefix.'js_variables',$value,$priority);
 	}
 
 /**
@@ -402,7 +404,7 @@ class Page {
  *
  */
 	public function script($script,$priority = null) {
-		return $this->_asset_add('script',$script,$priority);
+		return $this->asset_add($this->page_prefix.'script',$script,$priority);
 	}
 
 /**
@@ -416,7 +418,7 @@ class Page {
  *
  */
 	public function domready($script,$priority = null) {
-		return $this->_asset_add('domready',$script,$priority);
+		return $this->asset_add($this->page_prefix.'domready',$script,$priority);
 	}
 
 /**
@@ -493,7 +495,7 @@ class Page {
  * @return $this
  *
  */
-	protected function _asset_add($name,$value,$priority=null) {
+	public function asset_add($name,$value,$priority=null) {
 		$priority = ($priority) ? $priority : $this->priority;
 
 		$key = md5($value);
@@ -501,7 +503,7 @@ class Page {
 		if (!isset($this->prevent_duplicate[$key])) {
 			$this->prevent_duplicate[$key] = true;
 
-			$this->variables[$this->page_prefix.$name][$priority][] = $value;
+			$this->variables[$name][$priority][] = $value;
 		}
 
 		return $this;
