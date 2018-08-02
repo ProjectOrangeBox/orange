@@ -32,14 +32,6 @@ class O_user_entity extends model_entity {
 	protected $permissions = [];
 	protected $lazy_loaded = false;
 
-	public function __construct() {
-		$this->_construct();
-	}
-
-	protected function _construct() {
-	
-	}
-
 /**
  * __get
  * Insert description here

@@ -167,7 +167,7 @@ $URI =& load_class('URI', 'core');
 *  Instantiate the routing class and set the routing
 * ------------------------------------------------------
 */
-$RTR =& load_class('Router', 'core', isset($routing) ? $routing : NULL);
+$RTR =& load_class('Router', 'core');
 
 /*
 * ------------------------------------------------------
