@@ -194,10 +194,6 @@ class Pear {
 		return self::$extends;
 	}
 
-	public static function variable($name,$prefix='',$suffix='',$on_empty='') {
-		return ci('page')->variable($name,$prefix,$suffix,$on_empty);
-	}
-
 	/**
 	 * load plugins
 	 *

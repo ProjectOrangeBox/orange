@@ -129,7 +129,7 @@ class Page {
  *
  */
 	public function meta($attr, $name, $content = null,$priority = null) {
-		return $this->asset_add($this->page_prefix.'meta','<meta '.$attr.'="'.$name.'"'.(($content) ? ' content="'.$content.'"' : '').'>',$priority);
+		return $this->asset_add($this->page_prefix.'meta','<meta '.$attr.'="'.$name.'"'.(($content) ? ' content="'.$content.'"' : '').'>'.PHP_E,$priority);
 	}
 
 /**
@@ -203,6 +203,8 @@ class Page {
  *
  */
 	public function view($_view_file = null, $_data = [], $_return = true) {
+		$this->prepare_page_variables();
+
 		/* call core orange function view() */
 		$_buffer = view($_view_file,array_merge(ci('load')->get_vars(),(array)$_data));
 
@@ -267,7 +269,7 @@ class Page {
 			return $this;
 		}
 
-		return $this->asset_add($this->page_prefix.'css',$this->link_html($file),$priority);
+		return $this->asset_add($this->page_prefix.'css',$this->link_html($file).PHP_EOL,$priority);
 	}
 
 /**
@@ -294,7 +296,7 @@ class Page {
  *
  */
 	public function style($style,$priority = null) {
-		return $this->asset_add($this->page_prefix.'style',$style,$priority);
+		return $this->asset_add($this->page_prefix.'style',$style.PHP_EOL,$priority);
 	}
 
 /**
@@ -315,7 +317,7 @@ class Page {
 			return $this;
 		}
 
-		return $this->asset_add($this->page_prefix.'js',$this->script_html($file),$priority);
+		return $this->asset_add($this->page_prefix.'js',$this->script_html($file).PHP_EOL,$priority);
 	}
 
 /**
@@ -380,7 +382,7 @@ class Page {
  *
  */
 	public function script($script,$priority = null) {
-		return $this->asset_add($this->page_prefix.'script',$script,$priority);
+		return $this->asset_add($this->page_prefix.'script',$script.PHP_EOL,$priority);
 	}
 
 /**
@@ -394,7 +396,7 @@ class Page {
  *
  */
 	public function domready($script,$priority = null) {
-		return $this->asset_add($this->page_prefix.'domready',$script,$priority);
+		return $this->asset_add($this->page_prefix.'domready',$script.PHP_EOL,$priority);
 	}
 
 /**
@@ -457,6 +459,36 @@ class Page {
  */
 	public function reset_priority() {
 		$this->priority = $this->default_priority;
+
+		return $this;
+	}
+
+/**
+ * This prepares the current page variables
+ *
+ * @return $this
+ *
+ */
+	public function prepare_page_variables() {
+		foreach ($this->variables as $page_variable=>$entries) {
+			/* sort the keys (priority) */
+			ksort($entries);
+
+			/* get the current content */
+			$current_content = ci('load')->get_var($page_variable);
+
+			/* add the currently available entries */
+			foreach ($entries as $priority) {
+				foreach ($priority as $string) {
+					$current_content .= $string;
+				}
+			}
+
+			ci('load')->vars($page_variable,$current_content);
+
+			/* now flush those assets since they have already been added to the page variables */
+			$this->variables = [];
+		}
 
 		return $this;
 	}
