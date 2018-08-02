@@ -118,15 +118,15 @@ class Page {
  * @return $this
  *
  */
-	public function variable($name,$prefix='',$suffix='') {
+	public function variable($name,$prefix='',$suffix='',$on_empty='') {
 		/* get what's already in there */
 		$html = ci('load')->get_var($name);
 
-		/* do we have any post process stuff */
+		/* do we have a array of things to process? */
 		$entries = $this->variables[$name];
 
 		if (is_array($entries)) {
-			/* sort the keys (priority) */
+			/* yep! - sort the keys (priority) */
 			ksort($entries);
 
 			/* add the currently available entries */
@@ -136,8 +136,9 @@ class Page {
 				}
 			}
 		}
-
-		return (!empty($html)) ? $prefix.$html.$suffix : '';
+		
+		/* if html contains content then also include prefix and suffix if it exists */
+		return (!empty($html)) ? $prefix.$html.$suffix : $on_empty;
 	}
 
 /**
