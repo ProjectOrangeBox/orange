@@ -20,12 +20,34 @@
  * @show Unified Error collecting class
  */
 class Errors {
-	/**
-	 * track if the combined cached configuration has been loaded
-	 *
-	 * @var boolean
-	 */
-	protected $errors_variable = 'ci_errors';
+	protected $config;
+	protected $load;
+	protected $input;
+	protected $output;
+	protected $event;
+	
+	protected $errors_variable;
+	protected $html_prefix;
+	protected $html_suffix;
+	protected $data_records;
+	protected $data_count;
+
+	public function __construct(&$config,&$ci) {
+		$this->config = &$config;
+		
+		$this->load = &$ci->load;
+		$this->input = &$ci->input;
+		$this->output = &$ci->output;
+		$this->event = &$ci->event;
+		
+		$this->errors_variable = $this->config['errors_variable'] ?? 'ci_errors';
+		
+		$this->html_prefix = $this->config['html_prefix'] ?? '<p class="orange error">';
+		$this->html_suffix = $this->config['html_suffix'] ?? '</p>';
+
+		$this->data_records = $this->config['data_records'] ?? 'records';
+		$this->data_count = $this->config['data_count'] ?? 'count';
+	}
 
 	/**
 	 * add
@@ -44,13 +66,13 @@ class Errors {
 		log_message('debug', 'Errors::add::'.$msg);
 		
 		/* get the current errors from the view data */
-		$current_errors = ci('load')->get_var($this->errors_variable);
+		$current_errors = $this->load->get_var($this->errors_variable);
 		
 		/* add this error */
 		$current_errors[$msg] = $msg;
 		
 		/* put it back into the view data */
-		ci('load')->vars($this->errors_variable,$current_errors);
+		$this->load->vars($this->errors_variable,$current_errors);
 
 		/* chain-able */
 		return $this;
@@ -70,7 +92,7 @@ class Errors {
 	 */
 	public function clear() {
 		/* empty out the view data */
-		ci('load')->vars($this->errors_variable,[]);
+		$this->load->vars($this->errors_variable,[]);
 
 		/* chain-able */
 		return $this;
@@ -90,7 +112,7 @@ class Errors {
 	 */
 	public function has() {
 		/* do we have any errors? */
-		return (count(ci('load')->get_var( $this->errors_variable)) != 0);
+		return (count($this->load->get_var( $this->errors_variable)) != 0);
 	}
 
 	/**
@@ -107,7 +129,7 @@ class Errors {
 	 */
 	public function as_array() {
 		/* return the errors as an array */
-		return ci('load')->get_var($this->errors_variable);
+		return $this->load->get_var($this->errors_variable);
 	}
 
 	/**
@@ -130,16 +152,16 @@ class Errors {
 		/* do we have any errors? */
 		if ($this->has()) {
 			/* get them from the view data */
-			$errors = ci('load')->get_var($this->errors_variable);
+			$errors = $this->load->get_var($this->errors_variable);
 			
 			/* if they didn't send in a default prefix then use ours */
 			if ($prefix === null) {
-				$prefix = '<p class="orange error">';
+				$prefix = $this->html_prefix;
 			}
 			
 			/* if they didn't send in a default suffix then use ours */
 			if ($suffix === null) {
-				$suffix = '</p>';
+				$suffix = $this->html_suffix;
 			}
 			
 			/* format the output */
@@ -184,10 +206,10 @@ class Errors {
 	 */
 	public function as_data() {
 		/* get them from the view data */
-		$errors = ci('load')->get_var($this->errors_variable);
+		$errors = $this->load->get_var($this->errors_variable);
 		
 		/* return as a array */
-		return ['records' => array_values($errors)] + ['count' => count($errors)];
+		return [$this->data_records => array_values($errors)] + [$this->data_count => count($errors)];
 	}
 
 	/**
@@ -258,7 +280,7 @@ class Errors {
 		$data['heading'] = ($data['heading']) ? $data['heading'] : 'Fatal Error';
 		$data['message'] = ($data['message']) ? $data['message'] : 'Unknown Error';
 
-		if (ci()->input->is_cli_request()) {
+		if ($this->input->is_cli_request()) {
 			/* if it's a cli request then output for cli */
 			$view_folder = 'cli';
 			$message     = '';
@@ -268,13 +290,13 @@ class Errors {
 			}
 
 			$data['message'] = $message;
-		} elseif (ci()->input->is_ajax_request()) {
+		} elseif ($this->input->is_ajax_request()) {
 			/* if it's a ajax request then format for ajax (json) */
 			$view_folder = 'ajax';
 			$mime_type   = 'application/json';
 		} else {
 			/* else prepare for html */
-			$data['message'] = '<p>'.(is_array($data['message']) ? implode('</p><p>', $data['message']) : $data['message']).'</p>';
+			$data['message'] = $this->html_prefix.(is_array($data['message']) ? implode($this->html_suffix.$this->html_prefix, $data['message']) : $data['message']).$this->html_suffix;
 			$view_folder     = 'html';
 		}
 
@@ -293,9 +315,9 @@ class Errors {
 
 		log_message('error', 'Error: '.$view_path.' '.$status_code.' '.print_r($data,true));
 
-		ci('event')->trigger('death.show');
+		$this->event->trigger('death.show');
 
-		ci()->output
+		$this->output
 			->enable_profiler(false)
 			->set_status_header($status_code)
 			->set_content_type($mime_type, $charset)

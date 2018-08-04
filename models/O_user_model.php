@@ -26,14 +26,14 @@ class O_user_model extends Database_model {
 	protected $has_soft_delete = true;
 	protected $entity = true;
 	protected $rules = [
-		'id'              => ['field' => 'id', 'label' => 'Id', 'rules' => 'required|integer|max_length[10]|less_than[4294967295]|filter_int[10]'],
-		'username'        => ['field' => 'username', 'label' => 'User Name', 'rules' => 'required|trim|is_uniquem[o_user_model.username.id]'],
-		'password'        => ['field' => 'password', 'label' => 'Password', 'rules' => 'required|max_length[255]|filter_input[255]'],
-		'email'           => ['field' => 'email', 'label' => 'Email', 'rules' => 'required|trim|strtolower|valid_email|is_uniquem[o_user_model.email.id]|max_length[255]|filter_input[255]'],
-		'is_active'       => ['field' => 'is_active', 'label' => 'Active', 'rules' => 'if_empty[0]|in_list[0,1]|filter_int[1]|max_length[1]|less_than[2]'],
-		'user_read_role_id'    => ['field' => 'user_read_role_id', 'label' => 'User Read Role', 'rules' => 'required|integer|max_length[10]|less_than[4294967295]|filter_int[10]'],
-		'user_edit_role_id'    => ['field' => 'user_edit_role_id', 'label' => 'User Edit Role', 'rules' => 'required|integer|max_length[10]|less_than[4294967295]|filter_int[10]'],
-		'user_delete_role_id'  => ['field' => 'user_delete_role_id', 'label' => 'User Delete Role', 'rules' => 'required|integer|max_length[10]|less_than[4294967295]|filter_int[10]'],
+		'id' => ['field' => 'id', 'label' => 'Id', 'rules' => 'required|integer|max_length[10]|less_than[4294967295]|filter_int[10]'],
+		'username' => ['field' => 'username', 'label' => 'User Name', 'rules' => 'required|trim|is_uniquem[o_user_model.username.id]'],
+		'password' => ['field' => 'password', 'label' => 'Password', 'rules' => 'required|max_length[255]|filter_input[255]'],
+		'email' => ['field' => 'email', 'label' => 'Email', 'rules' => 'required|trim|strtolower|valid_email|is_uniquem[o_user_model.email.id]|max_length[255]|filter_input[255]'],
+		'is_active' => ['field' => 'is_active', 'label' => 'Active', 'rules' => 'if_empty[0]|in_list[0,1]|filter_int[1]|max_length[1]|less_than[2]'],
+		'user_read_role_id' => ['field' => 'user_read_role_id', 'label' => 'User Read Role', 'rules' => 'required|integer|max_length[10]|less_than[4294967295]|filter_int[10]'],
+		'user_edit_role_id' => ['field' => 'user_edit_role_id', 'label' => 'User Edit Role', 'rules' => 'required|integer|max_length[10]|less_than[4294967295]|filter_int[10]'],
+		'user_delete_role_id' => ['field' => 'user_delete_role_id', 'label' => 'User Delete Role', 'rules' => 'required|integer|max_length[10]|less_than[4294967295]|filter_int[10]'],
 	];
 
 /**
@@ -76,7 +76,7 @@ class O_user_model extends Database_model {
  */
 	public function insert($data) {
 		$this->_password_check('insert',$data);
-		
+
 		if (!ci('errors')->has()) {
 			return parent::insert($data);
 		}
@@ -101,7 +101,7 @@ class O_user_model extends Database_model {
 		} else {
 			unset($data['password']);
 		}
-		
+
 		if (!ci('errors')->has()) {
 			return parent::update($data);
 		}
@@ -123,20 +123,20 @@ class O_user_model extends Database_model {
  */
 	protected function _password_check($which,&$data) {
 		$password_info = password_get_info($data['password']);
-		
+
 		if ($password_info['algo'] == 0) {
 			if ($data['password'] != $data['confirm_password']) {
 				ci('errors')->add('Passwords do not match.');
 			}
-		
+
 			$this->rules['password']['rules'] .= '|user_password';
-		
+
 			if ($which == 'insert') {
 				unset($data['id']);
 			}
-		
+
 			$this->only_columns($data,$this->rules)->add_rule_set_columns($data,$which)->validate($data);
-		
+
 			$data['password'] = $this->hash_password($data['password']);
 		}
 	}
@@ -156,7 +156,7 @@ class O_user_model extends Database_model {
  */
 	public function delete($user_id) {
 		parent::delete($user_id);
-		
+
 		if (!ci('errors')->has()) {
 			$this->update_by(['is_active'=>0],['id'=>$user_id]);
 			$this->remove_role($user_id);
@@ -181,14 +181,14 @@ class O_user_model extends Database_model {
 		if ((int) $user_id < 0) {
 			throw new Exception(__METHOD__.' please provide a integer for the user id');
 		}
-		
+
 		if (is_array($role)) {
 			foreach ($role as $role_id) {
 				$this->add_role($user_id, $role_id);
 			}
 			return;
 		}
-		
+
 		return $this->_database->replace(config('auth.user role table'), ['role_id' => (int) $this->_find_role_id($role), 'user_id' => (int) $user_id]);
 	}
 
@@ -210,19 +210,19 @@ class O_user_model extends Database_model {
 		if ((int) $user_id < 0) {
 			throw new Exception(__METHOD__.' please provide a integer for the user id');
 		}
-		
+
 		if (is_array($role)) {
 			foreach ($role as $role_id) {
 				$this->remove_role($user_id, $role_id);
 			}
 			return;
 		}
-		
+
 		if ($role === null) {
 			$this->_database->delete(config('auth.user role table'), ['user_id' => (int) $user_id]);
 			return;
 		}
-		
+
 		return $this->_database->delete(config('auth.user role table'), ['user_id' => (int) $user_id, 'role_id' => (int) $this->_find_role_id($role)]);
 	}
 
@@ -245,7 +245,7 @@ class O_user_model extends Database_model {
 			->join(config('auth.role table'), config('auth.role table').'.id = '.config('auth.user role table').'.role_id')
 			->where(['user_id' => (int) $user_id])
 			->get();
-		
+
 		return ($dbc->num_rows() > 0) ? $dbc->result() : [];
 	}
 
@@ -264,11 +264,11 @@ class O_user_model extends Database_model {
  */
 	public function hash_password($password) {
 		$password_info = password_get_info($password);
-		
+
 		if ($password_info['algo'] == 0) {
 			$password = password_hash($password, PASSWORD_DEFAULT);
 		}
-		
+
 		return $password;
 	}
 
@@ -338,7 +338,7 @@ class O_user_model extends Database_model {
  */
 	public function password($password) {
 		$this->validate->single($this->rules['password']['rules'], $password);
-		
+
 		return ci('errors')->has();
 	}
 

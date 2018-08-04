@@ -19,12 +19,6 @@
  *
  */
 class Validate {
-	/**
-	 * track if the combined cached configuration has been loaded
-	 *
-	 * @var array
-	 */
-	protected $config = [];
 
 	/**
 	 * track if the combined cached configuration has been loaded
@@ -47,6 +41,12 @@ class Validate {
 	 */
 	protected $field_data = [];
 
+	protected $config;
+	protected $input;
+	protected $output;
+	protected $errors;
+	protected $wallet;
+
 	/**
 	 * __construct
 	 * Insert description here
@@ -59,24 +59,22 @@ class Validate {
 	 * @throws
 	 * @example
 	 */
-	public function __construct() {
-		$this->config = config('validate',[]);
+	public function __construct(&$config,&$ci) {
+		$this->config = &$config;
+
+		$this->input =& $ci->input;
+		$this->output =& $ci->output;
+		$this->errors =& $ci->errors;
+		$this->wallet =& $ci->wallet;
+
 		$this->clear();
 
-		if (file_exists(APPPATH.'/config/validate.php')) {
-			$attach = [];
-			include APPPATH.'/config/validate.php';
+		$attach = load_config('validate','attach');
+
+		if (is_array($attach)) {
 			foreach ($attach as $name=>$closure) {
 				log_message('debug', 'Application "validate_'.$name.'" attached to Validate library.');
-				$this->attached['validate_'.$name] = $closure;
-			}
-		}
-
-		if (file_exists(APPPATH.'/config/'.ENVIRONMENT.'/validate.php')) {
-			$attach = [];
-			include APPPATH.'/config/'.ENVIRONMENT.'/validate.php';
-			foreach ($attach as $name=>$closure) {
-				log_message('debug', ENVIRONMENT.' "validate_'.$name.'" attached to Validate library.');
+	
 				$this->attached['validate_'.$name] = $closure;
 			}
 		}
@@ -97,7 +95,7 @@ class Validate {
 	 * @example
 	 */
 	public function clear() {
-		ci('errors')->clear();
+		$this->errors->clear();
 
 		return $this;
 	}
@@ -137,8 +135,8 @@ class Validate {
 	 * @example
 	 */
 	public function die_on_fail($view = '400') {
-		if (ci('errors')->has()) {
-			ci('errors')->display($view, ['heading' => 'Validation Failed', 'message' => ci('errors')->as_html()]);
+		if ($this->errors->has()) {
+			$this->errors->display($view, ['heading' => 'Validation Failed', 'message' => $this->errors->as_html()]);
 		}
 
 		return $this;
@@ -158,9 +156,9 @@ class Validate {
 	 * @example
 	 */
 	public function redirect_on_fail($url = null) {
-		if (ci('errors')->has()) {
+		if ($this->errors->has()) {
 			$url = (is_string($url)) ? $url : true;
-			ci('wallet')->msg(ci('errors')->as_html(), 'red', $url);
+			$this->wallet->msg($this->errors->as_html(), 'red', $url);
 		}
 
 		return $this;
@@ -179,8 +177,8 @@ class Validate {
 	 * @example
 	 */
 	public function json_on_fail() {
-		if (ci('errors')->has()) {
-			ci('output')->json(['ci_errors'=>ci('errors')->as_data()])->_display();
+		if ($this->errors->has()) {
+			$this->output->json(['ci_errors'=>$this->errors->as_data()])->_display();
 			exit(1);
 		}
 
@@ -200,7 +198,7 @@ class Validate {
 	 * @example
 	 */
 	public function success() {
-		return !ci('errors')->has();
+		return !$this->errors->has();
 	}
 
 	/**
@@ -238,9 +236,9 @@ class Validate {
 	 * @example
 	 */
 	public function request($rules = '', $key, $human = null) {
-		$field = ci('input')->request($key);
+		$field = $this->input->request($key);
 		$this->single($rules, $field, $human);
-		ci('input')->request_replace($key,$field);
+		$this->input->request_replace($key,$field);
 
 		return ($human === true) ? $field : $this;
 	}
@@ -344,7 +342,7 @@ class Validate {
 								$param = substr_replace($param, ' or ', $pos, 2);
 							}
 						}
-						ci('errors')->add(sprintf($this->error_string, $human, $param));
+						$this->errors->add(sprintf($this->error_string, $human, $param));
 						break;
 					}
 				}

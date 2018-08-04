@@ -30,6 +30,25 @@ Packages
 As the name indicates the packages folder contains HMVC or composer like packages
 each independent package is like a mini application folder with a few exceptions
 
+Required Composer Packages:
+CodeIgntier Loaded as Composer Package
+	https://packagist.org/packages/codeigniter/framework
+
+CLImate allows you to easily output colored text, special formatting, and more. It makes output to the terminal clearer and debugging a lot simpler.	
+	https://packagist.org/packages/league/climate
+	http://climate.thephpleague.com/
+	
+KRUMO - version 2.0 of print_r(); and var_dump(); (with new updates)
+	https://packagist.org/packages/mmucklo/krumo
+	https://github.com/mmucklo/krumo
+	
+lightncandy - An extremely fast PHP implementation of handlebars ( http://handlebarsjs.com/ ) and mustache ( http://mustache.github.io/ ).
+	https://packagist.org/packages/zordius/lightncandy
+	https://github.com/zordius/lightncandy
+
+Whoops - php error handling for cool kids
+	https://packagist.org/packages/filp/whoops
+	https://github.com/filp/whoops
 
 File Structure
 

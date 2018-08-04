@@ -2,13 +2,13 @@
 /* Orange */
 
 /* register the version */
-const ORANGE_VERSION = '2.1';
+const ORANGE_VERSION = '2.2';
 
-$config = load_config('paths');
+$paths = load_config('paths');
 
 /* get out the 2 paths we need now and set them as constants these are pretty "necessary" paths used thought out the system */
-define('CACHEPATH',ROOTPATH.$config['cache']);
-define('LOGPATH',ROOTPATH.$config['logs']);
+define('CACHEPATH',ROOTPATH.$paths['cache']);
+define('LOGPATH',ROOTPATH.$paths['logs']);
 
 /* load the orange autoloader library - this builds the "super" search array */
 require ORANGEPATH.'/libraries/Orange_autoload_files.php';

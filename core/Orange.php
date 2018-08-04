@@ -30,7 +30,7 @@ if (!function_exists('ci')) {
 				return CI_Controller::get_instance()->load;
 
 			/* is the class loaded? */
-			} elseif (CI_Controller::get_instance()->load->is_loaded($class)) {
+			} elseif (isset(CI_Controller::get_instance()->$class)) {
 				/* yes - then just return that */
 				return CI_Controller::get_instance()->$class;
 			} else {

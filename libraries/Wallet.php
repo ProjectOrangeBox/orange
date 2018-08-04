@@ -61,6 +61,15 @@ class Wallet {
 		'deleted' => 'Record Deleted',
 	];
 
+	protected $config;
+	protected $load;
+	protected $session;
+	protected $input;
+	protected $event;
+	
+	protected $initial_pause;
+	protected $pause_for_each;
+
 	/**
 	 * __construct
 	 * Insert description here
@@ -73,11 +82,21 @@ class Wallet {
 	 * @throws
 	 * @example
 	 */
-	public function __construct() {
-		ci('load')->vars(['wallet_messages' => [
-			'messages'       => ci('session')->flashdata($this->msg_key),
-			'initial_pause'  => config('wallet.initial_pause', 3),
-			'pause_for_each' => config('wallet.pause_for_each', 1000),
+	public function __construct(&$config,&$ci) {
+		$this->config =& $config;
+
+		$this->session =& $ci->session;
+		$this->event =& $ci->event;
+		$this->load =& $ci->load;
+		$this->input =& $ci->input;
+	
+		$this->pause_for_each = ($this->config['pause_for_each']) ?? 1000;
+		$this->initial_pause = ($this->config['initial_pause']) ?? 3;
+	
+		$this->load->vars(['wallet_messages' => [
+			'messages'       => $this->session->flashdata($this->msg_key),
+			'initial_pause'  => $this->initial_pause,
+			'pause_for_each' => $this->pause_for_each,
 		]]);
 
 		log_message('info', 'Wallet Class Initialized');
@@ -100,7 +119,7 @@ class Wallet {
 	public function snapdata($newdata = null, $newval = null) {
 		$newdata = (is_array($newdata)) ? $newdata : [$newdata => $newval];
 
-		ci('session')->set_tempdata($newdata, null, 3600);
+		$this->session->set_tempdata($newdata, null, 3600);
 
 		return $this;
 	}
@@ -119,9 +138,9 @@ class Wallet {
 	 * @example
 	 */
 	public function get_snapdata($key) {
-		$data = ci('session')->tempdata($key);
+		$data = $this->session->tempdata($key);
 
-		ci('session')->unset_tempdata($key);
+		$this->session->unset_tempdata($key);
 
 		return $data;
 	}
@@ -140,7 +159,7 @@ class Wallet {
 	 * @example
 	 */
 	public function keep_snapdata($key) {
-		return ci('session')->tempdata($key);
+		return $this->session->tempdata($key);
 	}
 
 	/**
@@ -161,24 +180,24 @@ class Wallet {
 	public function msg($msg = '', $type = 'yellow', $redirect = null) {
 		$sticky = ($type == 'red' || $type == 'danger' || $type == 'warning' || $type == 'yellow');
 
-		ci('event')->trigger('wallet.msg', $msg, $type, $sticky, $redirect);
+		$this->event->trigger('wallet.msg', $msg, $type, $sticky, $redirect);
 
 		if (is_string($redirect) || $redirect === true) {
-			$redirect = (is_string($redirect)) ? $redirect : ci('input')->server('HTTP_REFERER');
+			$redirect = (is_string($redirect)) ? $redirect : $this->input->server('HTTP_REFERER');
 			$this->redirect_messages[md5(trim($msg))] = ['msg' => trim($msg), 'type' => $type, 'sticky' => $sticky];
 
-			ci('session')->set_flashdata($this->msg_key, $this->redirect_messages);
+			$this->session->set_flashdata($this->msg_key, $this->redirect_messages);
 
 			redirect($redirect);
 		} else {
-			$wallet_messages = ci('load')->get_var('wallet_messages');
+			$wallet_messages = $this->load->get_var('wallet_messages');
 			$current_msgs = (array) $wallet_messages['messages'];
 			$current_msgs[md5(trim($msg))] = ['msg' => trim($msg), 'type' => $type, 'sticky' => $sticky];
 
-			ci('load')->vars(['wallet_messages' => [
+			$this->load->vars(['wallet_messages' => [
 				'messages'       => $current_msgs,
-				'initial_pause'  => config('wallet.initial_pause', 3),
-				'pause_for_each' => config('wallet.pause_for_each', 1000),
+				'initial_pause'  => $this->initial_pause,
+				'pause_for_each' => $this->pause_for_each,
 			]]);
 		}
 
@@ -198,7 +217,7 @@ class Wallet {
 	 * @example
 	 */
 	public function stash() {
-		$this->snapdata($this->stash_key, ci('input')->request());
+		$this->snapdata($this->stash_key, $this->input->request());
 
 		return $this;
 	}

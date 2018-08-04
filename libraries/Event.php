@@ -10,12 +10,7 @@
  * @link https://github.com/ProjectOrangeBox
  * @version 2.0
  *
- * required
- * core:
- * libraries:
- * models:
- * helpers:
- * functions:
+ * required Nothing!
  *
  * @show Event handler
  */

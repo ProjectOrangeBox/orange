@@ -54,7 +54,8 @@ class MY_Loader extends CI_Loader {
 		$config = (!$config) ? config(strtolower($class),[]) : $config;
 
 		$class_name = $prefix.$class;
-
+		
+		/* should this class name be remapped to another class? */
 		if ($remap = $this->_remap($class_name)) {
 			$object_name = strtolower($class_name);
 			$class_name = $remap;
@@ -78,7 +79,9 @@ class MY_Loader extends CI_Loader {
 
 		$this->_ci_classes[$object_name] = $class;
 
-		$CI->$object_name = isset($config) ? new $class_name($config) : new $class_name();
+		$config = (is_array($config)) ?? [];
+
+		$CI->$object_name = new $class_name($config,ci());
 	}
 
 	/**
@@ -299,13 +302,14 @@ class MY_Loader extends CI_Loader {
 	}
 
 	protected function _remap($name) {
-		/* load on demand */
+		/* load config on demand */
 		if (!$this->remap) {
-			include APPPATH.'/config/autoload.php';
+			$autoload = load_config('autoload','autoload');
 
 			$this->remap = (isset($autoload['remap'])) ? $autoload['remap'] : [];
 		}
 
+		/* normalize the name */
 		$lowercase_name = strtolower($name);
 
 		return (isset($this->remap[$lowercase_name])) ? $this->remap[$lowercase_name] : false;

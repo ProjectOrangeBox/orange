@@ -35,6 +35,34 @@ class MY_Router extends CI_Router {
 	protected $clean_method = null;
 	
 	protected $route = false;
+	
+	protected $requests = [];
+	protected $responds = [];
+
+	public function on_request() {
+		$this->requests = func_get_args();
+	}
+
+	public function on_responds() {
+		$this->responds = func_get_args();
+	}
+
+	public function handle_requests(&$ci) {
+		/* fire off middleware if necessary */
+		foreach ($this->requests as $middleware) {
+			(new $middleware($ci))->request();
+		}
+	}
+
+	public function handle_responds(&$ci,$output) {
+		/* fire off middleware if necessary */
+		foreach ($this->responds as $middleware) {
+			$output = (new $middleware($ci))->responds($output);
+		}
+		
+		return $output;
+	}
+
 
 	/**
 	 * _set_default_controller
@@ -285,6 +313,8 @@ class MY_Router extends CI_Router {
 				if (!is_string($val) && is_callable($val)) {
 					// Remove the original string from the matches array.
 					array_shift($matches);
+
+					$matches[] = &$this;
 
 					// Execute the callback using the values in matches as its parameters.
 					$val = call_user_func_array($val, $matches);

@@ -119,9 +119,11 @@ class Orange_autoload_files {
 			'model_entity'=>ORANGEPATH.'/models/Model_entity.php',
 			'cache_export'=>ORANGEPATH.'/libraries/Cache_export.php',
 			'cache_request'=>ORANGEPATH.'/libraries/Cache_request.php',
-			'orange_middleware' => ORANGEPATH.'/libraries/Orange_middleware.php',
-			'validate_base'=>ORANGEPATH.'/libraries/Validate_base.php',
-			'filter_base'=>ORANGEPATH.'/libraries/Filter_base.php',
+			
+			'validate_base'=>ORANGEPATH.'/libraries/abstracts/Validate_base.php',
+			'filter_base'=>ORANGEPATH.'/libraries/abstracts/Filter_base.php',
+			'pear_plugin'=>ORANGEPATH.'/libraries/abstracts/Pear_plugin.php',
+			'middleware_base'=>ORANGEPATH.'/libraries/abstracts/Middleware_base.php',
 		];
 
 		return [

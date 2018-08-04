@@ -12,23 +12,25 @@
  *
  * required
  * core: router, load, output
- * libraries: event, pear, user@
+ * libraries: event
  * models:
- * helpers: url
+ * helpers:
  * functions:
+ * constants: PAGE_MIN
  *
  * @ used but not required
  */
 class Page {
-	protected $default_priority;
 	protected $priority;	
-	protected $page_prefix;
-	protected $script_attributes;
-	protected $link_attributes;
-	protected $domready_javascript;
 
 	protected $variables = [];
 	protected $prevent_duplicate = [];
+	
+	protected $config;
+	protected $router;
+	protected $load;
+	protected $output;
+	protected $event;
 
 /**
  * __construct
@@ -42,23 +44,27 @@ class Page {
  * @throws
  * @example
  */
-	public function __construct() {
-		$config = config('page');
+	public function __construct(&$config,&$ci) {
+		$this->config = &$config;
+
+		$this->router = &$ci->router;
+		$this->load = &$ci->load;
+		$this->output = &$ci->output;
+		$this->event = &$ci->event;
 		
-		$this->script_attributes = $config['script_attributes'];
-		$this->link_attributes = $config['link_attributes'];
-		$this->domready_javascript = $config['domready_javascript'];
-		$this->default_priority = (int)$config['default_priority'];
-		$this->priority = $this->default_priority;		
-		$this->page_prefix = $config['page_prefix'];
+		$default_priority = ($this->config['default_priority']) ?? 50;
+		
+		$this->priority = $default_priority;		
 		
 		define('PAGE_MIN',(env('SERVER_DEBUG') == 'development' ? '' : '.min'));
 
-		$page_configs = $config[$this->page_prefix];
-
-		foreach ($page_configs as $key=>$value) {
-			if (method_exists($this,$key)) {
-				$this->$key($value);
+		$page_configs = $this->config[$this->config['page_prefix']];
+		
+		if (is_array($page_configs)) {
+			foreach ($page_configs as $key=>$value) {
+				if (method_exists($this,$key)) {
+					$this->$key($value);
+				}
 			}
 		}
 
@@ -75,7 +81,7 @@ class Page {
  *
  */
 	public function title($title = '') {
-		return $this->data($this->page_prefix.'title', $title);
+		return $this->data($this->config['page_prefix'].'title', $title);
 	}
 
 /**
@@ -91,7 +97,7 @@ class Page {
  *
  */
 	public function meta($attr, $name, $content = null,$priority = null) {
-		return $this->asset_add($this->page_prefix.'meta','<meta '.$attr.'="'.$name.'"'.(($content) ? ' content="'.$content.'"' : '').'>'.PHP_E,$priority);
+		return $this->asset_add($this->config['page_prefix'].'meta','<meta '.$attr.'="'.$name.'"'.(($content) ? ' content="'.$content.'"' : '').'>'.PHP_E,$priority);
 	}
 
 /**
@@ -112,7 +118,7 @@ class Page {
 			return $this;
 		}
 
-		return $this->asset_add($this->page_prefix.'body_class',' '.strtolower($class),$priority);
+		return $this->asset_add($this->config['page_prefix'].'body_class',' '.strtolower($class),$priority);
 	}
 
 /**
@@ -128,27 +134,27 @@ class Page {
 	public function render($view = null, $data = []) {
 		log_message('debug', 'page::render::'.$view);
 
-		$view = ($view) ? $view : str_replace('-', '_',ci('router')->fetch_route());
+		$view = ($view) ? $view : str_replace('-', '_',$this->router->fetch_route());
 
-		ci('event')->trigger('page.render',$this,$view);
-		ci('event')->trigger('page.render.'.str_replace('/','.',$view),$this,$view);
+		$this->event->trigger('page.render',$this,$view);
+		$this->event->trigger('page.render.'.str_replace('/','.',$view),$this,$view);
 
 		/* this is going to be the "main" section */
 		$view_content = $this->view($view, $data);
 
-		/* Are they using pear ? */
+		/* Are they using pear? */
 		if (class_exists('pear',false)) {
 			/* are we extending another template? */
 			$is_extending = pear::is_extending();
 
 			if ($is_extending) {
-				$view_content = $this->view($is_extending);
+				$view_content = trim($this->view($is_extending));
 			}
 		}
 
-		ci('event')->trigger('page.render.content',$view_content,$view,$data);
+		$this->event->trigger('page.render.content',$view_content,$view,$data);
 
-		ci('output')->append_output($view_content);
+		$this->output->append_output(trim($view_content));
 
 		return $this;
 	}
@@ -168,10 +174,10 @@ class Page {
 		$this->prepare_page_variables();
 
 		/* call core orange function view() */
-		$_buffer = view($_view_file,array_merge(ci('load')->get_vars(),(array)$_data));
+		$_buffer = view($_view_file,array_merge($this->load->get_vars(),(array)$_data));
 
 		if (is_string($_return)) {
-			ci('load')->vars([$_return => $_buffer]);
+			$this->load->vars([$_return => $_buffer]);
 		}
 
 		return ($_return === true) ? $_buffer : $this;
@@ -189,9 +195,9 @@ class Page {
  */
 	public function data($name = null, $value = null) {
 		if (is_array($name)) {
-			ci('load')->vars($name);
+			$this->load->vars($name);
 		} else {
-			ci('load')->vars($name,$value);
+			$this->load->vars($name,$value);
 		}
 
 		return $this;
@@ -207,7 +213,7 @@ class Page {
  *
  */
 	public function icon($image_path = '') {
-		return $this->data($this->page_prefix.'icon', '<link rel="icon" type="image/x-icon" href="'.$image_path.'"><link rel="apple-touch-icon" href="'.$image_path.'">');
+		return $this->data($this->config['page_prefix'].'icon', '<link rel="icon" type="image/x-icon" href="'.$image_path.'"><link rel="apple-touch-icon" href="'.$image_path.'">');
 	}
 
 /**
@@ -228,7 +234,7 @@ class Page {
 			return $this;
 		}
 
-		return $this->asset_add($this->page_prefix.'css',$this->link_html($file).PHP_EOL,$priority);
+		return $this->asset_add($this->config['page_prefix'].'css',$this->link_html($file).PHP_EOL,$priority);
 	}
 
 /**
@@ -241,7 +247,7 @@ class Page {
  *
  */
 	public function link_html($file) {
-		return $this->ary2element('link', array_merge($this->link_attributes, ['href' => $file]));
+		return $this->ary2element('link', array_merge($this->config['link_attributes'], ['href' => $file]));
 	}
 
 /**
@@ -255,7 +261,7 @@ class Page {
  *
  */
 	public function style($style,$priority = null) {
-		return $this->asset_add($this->page_prefix.'style',$style.PHP_EOL,$priority);
+		return $this->asset_add($this->config['page_prefix'].'style',$style.PHP_EOL,$priority);
 	}
 
 /**
@@ -276,7 +282,7 @@ class Page {
 			return $this;
 		}
 
-		return $this->asset_add($this->page_prefix.'js',$this->script_html($file).PHP_EOL,$priority);
+		return $this->asset_add($this->config['page_prefix'].'js',$this->script_html($file).PHP_EOL,$priority);
 	}
 
 /**
@@ -289,7 +295,7 @@ class Page {
  *
  */
 	public function script_html($file) {
-		return $this->ary2element('script', array_merge($this->script_attributes, ['src' => $file]), '');
+		return $this->ary2element('script', array_merge($this->config['script_attributes'], ['src' => $file]), '');
 	}
 
 /**
@@ -310,7 +316,7 @@ class Page {
 			$value = ((is_scalar($value)) ? 'var '.$key.'="'.str_replace('"', '\"', $value).'";' : 'var '.$key.'='.json_encode($value, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE).';');
 		}
 
-		return $this->asset_add($this->page_prefix.'js_variables',$value,$priority);
+		return $this->asset_add($this->config['page_prefix'].'js_variables',$value,$priority);
 	}
 
 /**
@@ -341,7 +347,7 @@ class Page {
  *
  */
 	public function script($script,$priority = null) {
-		return $this->asset_add($this->page_prefix.'script',$script.PHP_EOL,$priority);
+		return $this->asset_add($this->config['page_prefix'].'script',$script.PHP_EOL,$priority);
 	}
 
 /**
@@ -355,7 +361,7 @@ class Page {
  *
  */
 	public function domready($script,$priority = null) {
-		return $this->asset_add($this->page_prefix.'domready',$script.PHP_EOL,$priority);
+		return $this->asset_add($this->config['page_prefix'].'domready',$script.PHP_EOL,$priority);
 	}
 
 /**
@@ -417,7 +423,7 @@ class Page {
  *
  */
 	public function reset_priority() {
-		$this->priority = $this->default_priority;
+		$this->priority = (int)$this->config['default_priority'];
 
 		return $this;
 	}
@@ -434,7 +440,7 @@ class Page {
 			ksort($entries);
 
 			/* get the current content */
-			$current_content = ci('load')->get_var($page_variable);
+			$current_content = $this->load->get_var($page_variable);
 
 			/* add the currently available entries */
 			foreach ($entries as $priority) {
@@ -443,7 +449,7 @@ class Page {
 				}
 			}
 
-			ci('load')->vars($page_variable,$current_content);
+			$this->load->vars($page_variable,$current_content);
 
 			/* now flush those assets since they have already been added to the page variables */
 			$this->variables = [];

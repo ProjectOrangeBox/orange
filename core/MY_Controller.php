@@ -96,17 +96,12 @@ class MY_Controller extends CI_Controller {
 		if (php_sapi_name() !== 'cli') {
 			if (!config('application.site open',true)) {
 				if ($_COOKIE['ISOPEN'] !== config('application.is open cookie', md5(uniqid(true)))) {
-					ci('errors')->display(503, ['heading' => 'Please Stand By', 'message' => 'Site Down for Maintenance']);
+					$this->errors->display(503, ['heading' => 'Please Stand By', 'message' => 'Site Down for Maintenance']);
 				}
 			}
 		}
 
-		/* fire off middleware if necessary */
-		foreach (orange_middleware::requests() as $middleware) {
-			if (method_exists($middleware,'request')) {
-				$middleware::request();
-			}
-		}
+		$this->router->handle_requests($this);
 
 		/* load the libraries, models, helpers, catalogs from the properties as needed */
 		if ($this->libraries) {
@@ -152,21 +147,14 @@ class MY_Controller extends CI_Controller {
 		}
 
 		/* trigger our start up event */
-		ci('event')->trigger('ci.controller.startup', $this);
+		$this->event->trigger('ci.controller.startup', $this);
 	}
 
 	public function _output($output) {
-		/* fire off middleware if necessary */
-		foreach (orange_middleware::responds() as $middleware) {
-			if (method_exists($middleware,'responds')) {
-				$output = $middleware::responds($output);
-			}
-		}
-
-		echo trim($output);
+		echo $this->router->handle_responds($this,$output);
 	}
 
-	/* place holder */
+	/* place holder for cli */
 	public function indexCliAction(){}
 
 } /* end class */

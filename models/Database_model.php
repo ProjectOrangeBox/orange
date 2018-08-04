@@ -1108,7 +1108,7 @@ class Database_model extends MY_Model {
  * @example
  */
 	protected function where_can_read() {
-		$this->_database->where_in('read_role_id',array_keys(user::roles()));
+		$this->_database->where_in('read_role_id',array_keys(ci('user')->roles()));
 
 		return $this;
 	}
@@ -1126,7 +1126,7 @@ class Database_model extends MY_Model {
  * @example
  */
 	protected function where_can_edit() {
-		$this->_database->where_in('edit_role_id',array_keys(user::roles()));
+		$this->_database->where_in('edit_role_id',array_keys(ci('user')->roles()));
 
 		return $this;
 	}
@@ -1144,7 +1144,7 @@ class Database_model extends MY_Model {
  * @example
  */
 	protected function where_can_delete() {
-		$this->_database->where_in('delete_role_id',array_keys(user::roles()));
+		$this->_database->where_in('delete_role_id',array_keys(ci('user')->roles()));
 
 		return $this;
 	}
