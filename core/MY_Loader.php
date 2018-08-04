@@ -79,7 +79,7 @@ class MY_Loader extends CI_Loader {
 
 		$this->_ci_classes[$object_name] = $class;
 
-		$config = (is_array($config)) ?? [];
+		$config = (is_array($config)) ? $config : [];
 
 		$CI->$object_name = new $class_name($config,ci());
 	}
