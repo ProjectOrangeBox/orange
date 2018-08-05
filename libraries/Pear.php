@@ -46,6 +46,7 @@ class Pear {
 	 * @var boolean
 	 */
 	protected static $fragment = null;
+	
 
 	/**
 	 * __callStatic
@@ -141,6 +142,10 @@ class Pear {
 	 *
 	 */
 	public static function end() {
+		if (!count(self::$fragment)) {
+			throw new Exception('Cannot end section because you are not in a section.');
+		}
+
 		$name = array_pop(self::$fragment);
 		$buffer = ob_get_contents();
 		ob_end_clean();
@@ -202,9 +207,7 @@ class Pear {
 	 * @param $name - mixed string, comma separated plugin names, array
 	 *
 	 */
-	public static function plugins($name,$priority=25) {
-		ci('page')->set_priority($priority);
-
+	public static function plugins($name) {
 		/* convert this to a array */
 		$plugins = (strpos($name,',') !== false) ? explode(',',$name) : (array)$name;
 
@@ -212,18 +215,10 @@ class Pear {
 		foreach ($plugins as $plugin) {
 			self::load_plugin($plugin,true);
 		}
-
-		/* set it back to the default */
-		ci('page')->reset_priority();
 	}
 
-	public static function plugin($name,$priority=25) {
-		ci('page')->set_priority($priority);
-
+	public static function plugin($name) {
 		self::load_plugin($name,true);
-
-		/* set it back to the default */
-		ci('page')->reset_priority();
 	}
 
 	/**
