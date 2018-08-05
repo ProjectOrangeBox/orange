@@ -38,13 +38,6 @@ class Pear {
 	 *
 	 * @var boolean
 	 */
-	protected static $extends  = null;
-
-	/**
-	 * track if the combined cached configuration has been loaded
-	 *
-	 * @var boolean
-	 */
 	protected static $fragment = null;
 	
 
@@ -163,13 +156,9 @@ class Pear {
 	 *
 	 */
 	public static function extends($name,$data=[]) {
-		if (self::$extends !== null) {
-			throw new Exception('Pear Templating is already extending "'.self::$extends.'" therefore we cannot extend "'.$name.'"');
-		}
-
 		ci('load')->vars($data);
 
-		self::$extends = $name;
+		ci('page')->extend($name);
 	}
 
 	/**
@@ -189,16 +178,6 @@ class Pear {
 		} else {
 			ci('page')->view($view, $data, $name);
 		}
-	}
-
-	/**
-	 * is extending another "parent" template
-	 *
-	 * @return string
-	 *
-	 */
-	public static function is_extending() {
-		return self::$extends;
 	}
 
 	/**
