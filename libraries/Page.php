@@ -101,7 +101,7 @@ class Page {
  *
  */
 	public function meta($attr, $name, $content = null,$priority = 50) {
-		return $this->asset_add($this->page_variable_prefix.'meta','<meta '.$attr.'="'.$name.'"'.(($content) ? ' content="'.$content.'"' : '').'>'.PHP_E,$priority);
+		return $this->add($this->page_variable_prefix.'meta','<meta '.$attr.'="'.$name.'"'.(($content) ? ' content="'.$content.'"' : '').'>'.PHP_E,$priority);
 	}
 
 /**
@@ -122,7 +122,7 @@ class Page {
 			return $this;
 		}
 
-		return $this->asset_add($this->page_variable_prefix.'body_class',' '.strtolower($class),$priority);
+		return $this->add($this->page_variable_prefix.'body_class',' '.strtolower($class),$priority);
 	}
 
 /**
@@ -242,7 +242,7 @@ class Page {
 			return $this;
 		}
 
-		return $this->asset_add($this->page_variable_prefix.'css',$this->link_html($file).PHP_EOL,$priority);
+		return $this->add($this->page_variable_prefix.'css',$this->link_html($file).PHP_EOL,$priority);
 	}
 
 /**
@@ -269,7 +269,7 @@ class Page {
  *
  */
 	public function style($style,$priority = 50) {
-		return $this->asset_add($this->page_variable_prefix.'style',$style.PHP_EOL,$priority);
+		return $this->add($this->page_variable_prefix.'style',$style.PHP_EOL,$priority);
 	}
 
 /**
@@ -290,7 +290,7 @@ class Page {
 			return $this;
 		}
 
-		return $this->asset_add($this->page_variable_prefix.'js',$this->script_html($file).PHP_EOL,$priority);
+		return $this->add($this->page_variable_prefix.'js',$this->script_html($file).PHP_EOL,$priority);
 	}
 
 /**
@@ -303,7 +303,7 @@ class Page {
  *
  */
 	public function script_html($file) {
-		return $this->ary2element('script', array_merge($this->config['script_attributes'], ['src' => $file]), '');
+		return $this->ary2element('script', array_merge($this->config['script_attributes'], ['src' => $file]),'');
 	}
 
 /**
@@ -324,7 +324,7 @@ class Page {
 			$value = ((is_scalar($value)) ? 'var '.$key.'="'.str_replace('"', '\"', $value).'";' : 'var '.$key.'='.json_encode($value, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE).';');
 		}
 
-		return $this->asset_add($this->page_variable_prefix.'js_variables',$value,$priority);
+		return $this->add($this->page_variable_prefix.'js_variables',$value,$priority);
 	}
 
 /**
@@ -355,7 +355,7 @@ class Page {
  *
  */
 	public function script($script,$priority = 50) {
-		return $this->asset_add($this->page_variable_prefix.'script',$script.PHP_EOL,$priority);
+		return $this->add($this->page_variable_prefix.'script',$script.PHP_EOL,$priority);
 	}
 
 /**
@@ -369,7 +369,7 @@ class Page {
  *
  */
 	public function domready($script,$priority = 50) {
-		return $this->asset_add($this->page_variable_prefix.'domready',$script.PHP_EOL,$priority);
+		return $this->add($this->page_variable_prefix.'domready',$script.PHP_EOL,$priority);
 	}
 
 /**
@@ -383,31 +383,9 @@ class Page {
  *
  */
 	public function ary2element($element, $attributes, $wrapper = false) {
-		$output = '<'.$element.' '.$this->convert2attributes($attributes);
+		$output = '<'.$element._stringify_attributes($attributes);
 
 		return ($wrapper === false) ? $output.'/>' : $output.'>'.$wrapper.'</'.$element.'>';
-	}
-
-/**
- * convert2attributes
- *
- * @param $attributes
- * @param $prefix
- * @param $strip_empty boolean
- *
- * @return string
- *
- */
-	public function convert2attributes($attributes,$prefix='',$strip_empty=true) {
-		$output = '';
-
-		foreach ($attributes as $name => $value) {
-			if (!empty($value) || !$strip_empty) {
-				$output .= $prefix.$name.'="'.trim($value).'" ';
-			}
-		}
-
-		return trim($output);
 	}
 
 /**
@@ -441,7 +419,7 @@ class Page {
  * @return $this
  *
  */
-	public function asset_add($name,$value,$priority=50) {
+	public function add($name,$value,$priority=50) {
 		$key = md5($value);
 
 		if (!isset($this->prevent_duplicate[$key])) {
