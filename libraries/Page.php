@@ -21,10 +21,9 @@
  * @ used but not required
  */
 class Page {
-	protected $priority;	
-
 	protected $variables = [];
 	protected $prevent_duplicate = [];
+	protected $route;
 	
 	protected $config;
 	protected $router;
@@ -52,10 +51,6 @@ class Page {
 		$this->output = &$ci->output;
 		$this->event = &$ci->event;
 		
-		$default_priority = ($this->config['default_priority']) ?? 50;
-		
-		$this->priority = $default_priority;		
-		
 		define('PAGE_MIN',(env('SERVER_DEBUG') == 'development' ? '' : '.min'));
 
 		$page_configs = $this->config[$this->config['page_prefix']];
@@ -69,6 +64,12 @@ class Page {
 		}
 
 		log_message('info', 'Page Class Initialized');
+	}
+
+	public function route($route) {
+		$this->route = $route;
+		
+		return $this;
 	}
 
 /**
@@ -400,32 +401,6 @@ class Page {
 		}
 
 		return trim($output);
-	}
-
-/**
- * set_priority
- *
- * @param $priority integer
- *
- * @return $this
- *
- */
-	public function set_priority($priority) {
-		$this->priority = (int)$priority;
-
-		return $this;
-	}
-
-/**
- * reset_priority
- *
- * @return $this
- *
- */
-	public function reset_priority() {
-		$this->priority = (int)$this->config['default_priority'];
-
-		return $this;
 	}
 
 /**
