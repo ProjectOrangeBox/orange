@@ -51,7 +51,12 @@ class Event {
 		log_message('debug','event::register::'.$name);
 
 		/* save the listener */
-		$this->listeners[$name][$priority][] = $closure;
+		if (!isset($this->listeners[$name])) {
+			$this->listeners[$name] = new SplPriorityQueue();
+		}
+		
+		/* flip the priority because we are using UNIX priority not SplPriorityQueue format */
+		$this->listeners[$name]->insert($closure,-$priority);
 
 		/* allow chaining */
 		return $this;
@@ -77,20 +82,10 @@ class Event {
 
 		/* do we even have any events with this name? */
 		if ($this->has($name)) {
-			/* let's get them all then */
-			$events = $this->listeners[$name];
-
-			/* sort the keys (priority) */
-			ksort($events);
-
-			/* call each event */
-			foreach ($events as $priority) {
-				foreach ($priority as $event) {
-					/* if false is returned from the event then do not process the rest of the events */
-					if ($event($a1, $a2, $a3, $a4, $a5, $a6, $a7, $a8) === false) {
-						/* jump out of both foreach loops */
-						break 2;
-					}
+			foreach(clone $this->listeners[$name] as $event) {
+				if ($event($a1, $a2, $a3, $a4, $a5, $a6, $a7, $a8) === false) {
+					/* jump out of foreach loops on return of false */
+					break;
 				}
 			}
 		}
@@ -113,7 +108,7 @@ class Event {
 		/* clean up the name */
 		$name = $this->_normalize_name($name);
 
-		return (isset($this->listeners[$name]) && count($this->listeners[$name]) > 0);
+		return (isset($this->listeners[$name]) && !$this->listeners[$name]->isEmpty());
 	}
 
 	/**
@@ -137,10 +132,7 @@ class Event {
    * @access public
 	 */
 	public function count($name) {
-		/* clean up the name */
-		$name = $this->_normalize_name($name);
-
-		return count($this->listeners[$name]);
+		return count($this->listeners[$this->_normalize_name($name)]);
 	}
 
 	/**
