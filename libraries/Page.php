@@ -100,7 +100,7 @@ class Page {
  * @return $this
  *
  */
-	public function meta($attr, $name, $content = null,$priority = null) {
+	public function meta($attr, $name, $content = null,$priority = 50) {
 		return $this->asset_add($this->page_variable_prefix.'meta','<meta '.$attr.'="'.$name.'"'.(($content) ? ' content="'.$content.'"' : '').'>'.PHP_E,$priority);
 	}
 
@@ -114,7 +114,7 @@ class Page {
  * @return $this
  *
  */
-	public function body_class($class,$priority = null) {
+	public function body_class($class,$priority = 50) {
 		if (is_array($class)) {
 			foreach ($class as $c) {
 				$this->body_class($c,$priority);
@@ -234,7 +234,7 @@ class Page {
  * @return $this
  *
  */
-	public function css($file = '',$priority = null) {
+	public function css($file = '',$priority = 50) {
 		if (is_array($file)) {
 			foreach ($file as $f) {
 				$this->css($f,$priority);
@@ -268,7 +268,7 @@ class Page {
  * @return $this
  *
  */
-	public function style($style,$priority = null) {
+	public function style($style,$priority = 50) {
 		return $this->asset_add($this->page_variable_prefix.'style',$style.PHP_EOL,$priority);
 	}
 
@@ -282,7 +282,7 @@ class Page {
  * @return $this
  *
  */
-	public function js($file = '',$priority = null) {
+	public function js($file = '',$priority = 50) {
 		if (is_array($file)) {
 			foreach ($file as $f) {
 				$this->js($f,$priority);
@@ -317,7 +317,7 @@ class Page {
  * @return $this
  *
  */
-	public function js_variable($key,$value,$priority = null,$raw=false) {
+	public function js_variable($key,$value,$priority = 50,$raw=false) {
 		if ($raw) {
 			$value = 'var '.$key.'='.$value.';' ;
 		} else {
@@ -354,7 +354,7 @@ class Page {
  * @return $this
  *
  */
-	public function script($script,$priority = null) {
+	public function script($script,$priority = 50) {
 		return $this->asset_add($this->page_variable_prefix.'script',$script.PHP_EOL,$priority);
 	}
 
@@ -368,7 +368,7 @@ class Page {
  * @return $this
  *
  */
-	public function domready($script,$priority = null) {
+	public function domready($script,$priority = 50) {
 		return $this->asset_add($this->page_variable_prefix.'domready',$script.PHP_EOL,$priority);
 	}
 
@@ -418,23 +418,14 @@ class Page {
  */
 	public function prepare_page_variables() {
 		foreach ($this->variables as $page_variable=>$entries) {
-			/* sort the keys (priority) */
-			ksort($entries);
-
 			/* get the current content */
 			$current_content = $this->load->get_var($page_variable);
 
-			/* add the currently available entries */
-			foreach ($entries as $priority) {
-				foreach ($priority as $string) {
-					$current_content .= $string;
-				}
+			foreach($entries as $string) {
+				$current_content .= $string;
 			}
 
 			$this->load->vars($page_variable,$current_content);
-
-			/* now flush those assets since they have already been added to the page variables */
-			$this->variables = [];
 		}
 
 		return $this;
@@ -450,17 +441,19 @@ class Page {
  * @return $this
  *
  */
-	public function asset_add($name,$value,$priority=null) {
-		$priority = ($priority) ? $priority : $this->priority;
-
+	public function asset_add($name,$value,$priority=50) {
 		$key = md5($value);
 
 		if (!isset($this->prevent_duplicate[$key])) {
 			$this->prevent_duplicate[$key] = true;
 
-			$this->variables[$name][$priority][] = $value;
-		}
+			if (!isset($this->variables[$name])) {
+				$this->variables[$name] = new SplPriorityQueue();
+			}
 
+			$this->variables[$name]->insert($value,$priority);
+		}
+		
 		return $this;
 	}
 
