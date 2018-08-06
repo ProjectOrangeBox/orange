@@ -92,9 +92,9 @@ class Pear {
 	 *
 	 */
 	public static function plugin($name,$throw_error=true) {
-		$class_name = 'Pear_'.str_replace('pear_','',strtolower($name));
-
 		if (!isset(self::$loaded_plugins[$name])) {
+			$class_name = 'Pear_'.str_replace('pear_','',strtolower($name));
+
 			if (class_exists($class_name,true)) {
 				self::$loaded_plugins[$name] = new $class_name;
 			} elseif ($throw_error) {

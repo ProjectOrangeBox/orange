@@ -24,12 +24,12 @@ class Page {
 	protected $variables = [];
 	protected $prevent_duplicate = [];
 	protected $route;
-	
+
 	protected $config;
 	protected $load;
 	protected $output;
 	protected $event;
-	
+
 	protected $page_variable_prefix;
 	protected $extending = false;
 
@@ -51,13 +51,13 @@ class Page {
 		$this->load = &$ci->load;
 		$this->output = &$ci->output;
 		$this->event = &$ci->event;
-		
+
 		define('PAGE_MIN',(env('SERVER_DEBUG') == 'development' ? '' : '.min'));
 
 		$this->page_variable_prefix = ($this->config['page_prefix']) ?? 'page_';
 
 		$page_configs = $this->config[$this->page_variable_prefix];
-		
+
 		if (is_array($page_configs)) {
 			foreach ($page_configs as $key=>$value) {
 				if (method_exists($this,$key)) {
@@ -71,7 +71,7 @@ class Page {
 
 	public function route($route) {
 		$this->route = $route;
-		
+
 		return $this;
 	}
 
@@ -85,7 +85,7 @@ class Page {
  *
  */
 	public function title($title = '') {
-		return $this->data($this->page_variable_prefix.'title', $title);
+		return $this->data($this->page_variable_prefix.'title',$title);
 	}
 
 /**
@@ -101,7 +101,7 @@ class Page {
  *
  */
 	public function meta($attr, $name, $content = null,$priority = 50) {
-		return $this->add($this->page_variable_prefix.'meta','<meta '.$attr.'="'.$name.'"'.(($content) ? ' content="'.$content.'"' : '').'>'.PHP_E,$priority);
+		return $this->add($this->page_variable_prefix.'meta','<meta '.$attr.'="'.$name.'"'.(($content) ? ' content="'.$content.'"' : '').'>'.PHP_EOL,$priority);
 	}
 
 /**
@@ -115,6 +115,12 @@ class Page {
  *
  */
 	public function body_class($class,$priority = 50) {
+		if (is_string($class)) {
+			if (strpos($class,' ') !== false) {
+				$class = explode(' ',$class);
+			}
+		}
+
 		if (is_array($class)) {
 			foreach ($class as $c) {
 				$this->body_class($c,$priority);
@@ -122,7 +128,7 @@ class Page {
 			return $this;
 		}
 
-		return $this->add($this->page_variable_prefix.'body_class',' '.strtolower($class),$priority);
+		return $this->add($this->page_variable_prefix.'body_class',strtolower($class).' ',$priority);
 	}
 
 /**
@@ -143,30 +149,21 @@ class Page {
 		$this->event->trigger('page.render',$this,$view);
 		$this->event->trigger('page.render.'.str_replace('/','.',$view),$this,$view);
 
+		$this->data($data);
+
 		/* this is going to be the "main" section */
-		$view_content = $this->view($view, $data);
+		$view_content = $this->view($view);
 
 		if ($this->extending) {
-			$view_content = trim($this->view($this->extending));
+			$view_content = $this->view($this->extending);
 		}
 
 		$this->event->trigger('page.render.content',$view_content,$view,$data);
 
-		$this->output->append_output(trim($view_content));
+		$this->output->append_output($view_content);
 
 		return $this;
 	}
-
-	public function extend($template=null) {
-		if ($this->extending) {
-			throw new Exception('You are already extending "'.$this->extending.'" therefore we cannot extend "'.$name.'".');
-		}
-
-		$this->extending = $template;
-		
-		return $this;
-	}
-
 /**
  * view
  * Insert description here
@@ -203,6 +200,17 @@ class Page {
  */
 	public function data($name = null, $value = null) {
 		$this->load->vars($name,$value);
+
+		return $this;
+	}
+
+
+	public function extend($template=null) {
+		if ($this->extending) {
+			throw new Exception('You are already extending "'.$this->extending.'" therefore we cannot extend "'.$name.'".');
+		}
+
+		$this->extending = $template;
 
 		return $this;
 	}
@@ -391,12 +399,12 @@ class Page {
  *
  */
 	public function prepare_page_variables() {
-		foreach ($this->variables as $page_variable=>$entries) {
+		foreach ($this->variables as $page_variable=>$priorityqueue) {
 			/* get the current content */
 			$current_content = $this->load->get_var($page_variable);
 
-			foreach($entries as $string) {
-				$current_content .= $string;
+			while (!$priorityqueue->isEmpty()) {
+				$current_content .= $priorityqueue->extract();
 			}
 
 			$this->data($page_variable,$current_content);
@@ -406,7 +414,7 @@ class Page {
 	}
 
 /**
- * Insert description here
+ * add element
  *
  * @param $name
  * @param $value
@@ -427,7 +435,7 @@ class Page {
 
 			$this->variables[$name]->insert($value,$priority);
 		}
-		
+
 		return $this;
 	}
 

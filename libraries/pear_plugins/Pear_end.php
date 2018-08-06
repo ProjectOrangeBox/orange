@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 // @show end a section.
 

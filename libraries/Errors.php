@@ -25,7 +25,7 @@ class Errors {
 	protected $input;
 	protected $output;
 	protected $event;
-	
+
 	protected $errors_variable;
 	protected $html_prefix;
 	protected $html_suffix;
@@ -34,14 +34,14 @@ class Errors {
 
 	public function __construct(&$config,&$ci) {
 		$this->config = &$config;
-		
+
 		$this->load = &$ci->load;
 		$this->input = &$ci->input;
 		$this->output = &$ci->output;
 		$this->event = &$ci->event;
-		
+
 		$this->errors_variable = $this->config['errors_variable'] ?? 'ci_errors';
-		
+
 		$this->html_prefix = $this->config['html_prefix'] ?? '<p class="orange error">';
 		$this->html_suffix = $this->config['html_suffix'] ?? '</p>';
 
@@ -64,13 +64,13 @@ class Errors {
 	 */
 	public function add($msg) {
 		log_message('debug', 'Errors::add::'.$msg);
-		
+
 		/* get the current errors from the view data */
 		$current_errors = $this->load->get_var($this->errors_variable);
-		
+
 		/* add this error */
 		$current_errors[$msg] = $msg;
-		
+
 		/* put it back into the view data */
 		$this->load->vars($this->errors_variable,$current_errors);
 
@@ -148,22 +148,22 @@ class Errors {
 	 */
 	public function as_html($prefix = null, $suffix = null) {
 		$html = '';
-		
+
 		/* do we have any errors? */
 		if ($this->has()) {
 			/* get them from the view data */
 			$errors = $this->load->get_var($this->errors_variable);
-			
+
 			/* if they didn't send in a default prefix then use ours */
 			if ($prefix === null) {
 				$prefix = $this->html_prefix;
 			}
-			
+
 			/* if they didn't send in a default suffix then use ours */
 			if ($suffix === null) {
 				$suffix = $this->html_suffix;
 			}
-			
+
 			/* format the output */
 			foreach ($errors as $val) {
 				if (!empty(trim($val))) {
@@ -207,7 +207,7 @@ class Errors {
 	public function as_data() {
 		/* get them from the view data */
 		$errors = $this->load->get_var($this->errors_variable);
-		
+
 		/* return as a array */
 		return [$this->data_records => array_values($errors)] + [$this->data_count => count($errors)];
 	}
@@ -269,14 +269,14 @@ class Errors {
 		if (is_numeric($view)) {
 			$status_code = (int)$view;
 		}
-		
+
 		/* setup the defaults */
 		$config = config('errors',[]);
 		$view = ($config['named'][$view]) ? $config['named'][$view] : $view;
 		$charset     = 'utf-8';
 		$mime_type   = 'text/html';
 		$view_folder = 'html';
-		
+
 		$data['heading'] = ($data['heading']) ? $data['heading'] : 'Fatal Error';
 		$data['message'] = ($data['message']) ? $data['message'] : 'Unknown Error';
 
