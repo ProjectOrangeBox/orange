@@ -185,7 +185,7 @@ class Page {
 		$_buffer = view($_view_file,array_merge($this->load->get_vars(),(array)$_data));
 
 		if (is_string($_return)) {
-			$this->load->vars([$_return => $_buffer]);
+			$this->data($_return,$_buffer);
 		}
 
 		return ($_return === true) ? $_buffer : $this;
@@ -202,11 +202,7 @@ class Page {
  *
  */
 	public function data($name = null, $value = null) {
-		if (is_array($name)) {
-			$this->load->vars($name);
-		} else {
-			$this->load->vars($name,$value);
-		}
+		$this->load->vars($name,$value);
 
 		return $this;
 	}
@@ -403,7 +399,7 @@ class Page {
 				$current_content .= $string;
 			}
 
-			$this->load->vars($page_variable,$current_content);
+			$this->data($page_variable,$current_content);
 		}
 
 		return $this;
