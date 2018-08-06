@@ -39,7 +39,19 @@ class Pear {
 	 * @var boolean
 	 */
 	protected static $fragment = null;
+
+	protected static $load;
+	protected static $page;
+
+
+	public static _construct() {
+		if (!self::$load) {
+			self::$load = &ci('load')->load;
+			self::$page = &ci('page')->load;
 	
+			self::$load->helper(['html','form','date','inflector','language','number','text']);
+		}
+	}
 
 	/**
 	 * __callStatic
@@ -55,6 +67,8 @@ class Pear {
 	public static function __callStatic($name,$arguments) {
 		log_message('debug', 'Pear::__callStatic::'.$name);
 
+		self::_construct();
+
 		/* Load as a class and save in attached classes for later use */
 		self::load_plugin($name);
 
@@ -63,13 +77,6 @@ class Pear {
 			if (method_exists(self::$loaded[$name],'render')) {
 				return call_user_func_array([self::$loaded[$name],'render'],$arguments);
 			}
-		}
-
-		/* Did we load the CodeIgniter helpers */
-		if (!self::$setup) {
-			ci('load')->helper(['html','form','date','inflector','language','number','text']);
-
-			self::$setup = true;
 		}
 
 		/* A CodeIgniter form_XXX function */
@@ -101,14 +108,16 @@ class Pear {
 	 * @example
 	 */
 	public static function section($name,$value=null) {
+		self::_construct();
+
 		if ($value) {
-			ci('load')->vars([$name => $value]);
+			self::$load->vars([$name => $value]);
 		} else {
 			self::$fragment[$name] = $name;
 			ob_start();
 		}
-		
-		return ci('load')->get_var($name);
+
+		return self::$load->get_var($name);
 	}
 
 	/**
@@ -121,9 +130,11 @@ class Pear {
 	 *
 	 */
 	public static function parent($name=null) {
+		self::_construct();
+
 		$name = ($name) ? $name : end(self::$fragment);
 
-		echo ci('load')->get_var($name);
+		echo self::$load->get_var($name);
 	}
 
 	/**
@@ -139,11 +150,13 @@ class Pear {
 			throw new Exception('Cannot end section because you are not in a section.');
 		}
 
+		self::_construct();
+
 		$name = array_pop(self::$fragment);
 		$buffer = ob_get_contents();
 		ob_end_clean();
 
-		ci('load')->vars([$name => $buffer]);
+		self::$load->vars([$name => $buffer]);
 	}
 
 	/**
@@ -156,9 +169,11 @@ class Pear {
 	 *
 	 */
 	public static function extends($name,$data=[]) {
-		ci('load')->vars($data);
+		self::_construct();
 
-		ci('page')->extend($name);
+		self::$load->vars($data);
+
+		self::$page->extend($name);
 	}
 
 	/**
@@ -173,10 +188,12 @@ class Pear {
 	 *
 	 */
 	public static function include($view = null, $data = [], $name = true) {
+		self::_construct();
+
 		if ($name === true) {
-			echo ci('page')->view($view, $data, $name);
+			echo self::$page->view($view, $data, $name);
 		} else {
-			ci('page')->view($view, $data, $name);
+			self::$page->view($view, $data, $name);
 		}
 	}
 
@@ -187,6 +204,10 @@ class Pear {
 	 *
 	 */
 	public static function plugins($name) {
+		self::plugin($name);
+	}
+
+	public static function plugin($name) {
 		/* convert this to a array */
 		$plugins = (strpos($name,',') !== false) ? explode(',',$name) : (array)$name;
 
@@ -194,10 +215,6 @@ class Pear {
 		foreach ($plugins as $plugin) {
 			self::load_plugin($plugin,true);
 		}
-	}
-
-	public static function plugin($name) {
-		self::load_plugin($name,true);
 	}
 
 	/**
