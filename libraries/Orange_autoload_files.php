@@ -128,8 +128,8 @@ class Orange_autoload_files {
 				self::search('/models/traits/','(.*)_model_trait.php','filename'),
 				self::search('/library/traits/','(.*)trait.php','filename'),
 				self::search('/models/entities/','(.*)_entity.php','filename'),
-				self::search('/core/','(.*).php'),
-				self::search('/libraries/','(.*).php','filename')
+				self::search('/core/','(.*).php')
+				/*self::search('/libraries/','(.*).php','filename')*/
 			),
 			'models' => self::search('/models/','(.*)_model.php'),
 			'libraries' => self::search('/libraries/','(.*).php',function($filepath) {
@@ -141,7 +141,7 @@ class Orange_autoload_files {
 			'controllers' => self::cache_controllers(),
 			/*'configs' => self::cache_config(),*/
 		];
-		
+
 		return array_replace_recursive($cache,$override);
 	}
 
