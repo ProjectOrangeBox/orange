@@ -40,19 +40,19 @@ class Auth {
 
 		$ci->load->model($this->config['required_models']);
 
-		$this->session =& $ci->session;
-		$this->event =& $ci->event;
-		$this->errors =& $ci->errors;
+		$this->session =& ci('session');
+		$this->event =& ci('event');
+		$this->errors =& ci('errors');
 		$this->controller =& $ci;
 
-		$this->user_model = &$ci->o_user_model;
+		$this->user_model =& ci('o_user_model');
 
 		/* define some global Constants */
 		define('ADMIN_ROLE_ID',$this->config['admin role id']);
 		define('NOBODY_USER_ID',$this->config['nobody user id']);
 
 		/* attach a empty one to super object */
-		$this->controller->user = &$this->user_model->get();
+		$this->controller->user = &$this->user_model->get(NOBODY_USER_ID);
 
 		/* Are we in GUI mode? */
 		if (!is_cli()) {

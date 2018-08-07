@@ -35,10 +35,10 @@ class Errors {
 	public function __construct(&$config,&$ci) {
 		$this->config = &$config;
 
-		$this->load = &$ci->load;
-		$this->input = &$ci->input;
-		$this->output = &$ci->output;
-		$this->event = &$ci->event;
+		$this->load =& ci('load');
+		$this->input =& ci('input');
+		$this->output =& ci('output');
+		$this->event =& ci('event');
 
 		$this->errors_variable = $this->config['errors_variable'] ?? 'ci_errors';
 

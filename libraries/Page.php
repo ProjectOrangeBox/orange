@@ -48,9 +48,9 @@ class Page {
 	public function __construct(&$config,&$ci) {
 		$this->config = &$config;
 
-		$this->load = &$ci->load;
-		$this->output = &$ci->output;
-		$this->event = &$ci->event;
+		$this->load =& ci('load');
+		$this->output =& ci('output');
+		$this->event =& ci('event');
 
 		define('PAGE_MIN',(env('SERVER_DEBUG') == 'development' ? '' : '.min'));
 

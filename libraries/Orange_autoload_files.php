@@ -115,20 +115,10 @@ class Orange_autoload_files {
 	 *
 	 */
 	protected static function build_cache($autoload = []) {
-		$classes = [
-			'model_entity'=>ORANGEPATH.'/models/Model_entity.php',
-			'cache_export'=>ORANGEPATH.'/libraries/Cache_export.php',
-			'cache_request'=>ORANGEPATH.'/libraries/Cache_request.php',
-			
-			'validate_base'=>ORANGEPATH.'/libraries/abstracts/Validate_base.php',
-			'filter_base'=>ORANGEPATH.'/libraries/abstracts/Filter_base.php',
-			'pear_plugin'=>ORANGEPATH.'/libraries/abstracts/Pear_plugin.php',
-			'middleware_base'=>ORANGEPATH.'/libraries/abstracts/Middleware_base.php',
-		];
+		$override = (is_array($autoload['override'])) ? $autoload['override'] : [];
 
-		return [
+		$cache = [
 			'classes' => array_merge(
-				$classes,
 				self::globr(BASEPATH,'(.*).php'),
 				self::search('/libraries/validations/','(.*)Validate_(.*).php'),
 				self::search('/libraries/pear_plugins/','(.*).php','filename'),
@@ -138,18 +128,21 @@ class Orange_autoload_files {
 				self::search('/models/traits/','(.*)_model_trait.php','filename'),
 				self::search('/library/traits/','(.*)trait.php','filename'),
 				self::search('/models/entities/','(.*)_entity.php','filename'),
-				self::search('/core/','(.*).php')
+				self::search('/core/','(.*).php'),
+				self::search('/libraries/','(.*).php','filename')
 			),
 			'models' => self::search('/models/','(.*)_model.php'),
-			'libraries' => array_diff_key(self::search('/libraries/','(.*).php',function($filepath) {
+			'libraries' => self::search('/libraries/','(.*).php',function($filepath) {
 				$count = 0;
 				str_replace(['/validations/','/pear_plugins/','/filters/','/traits/'],'',$filepath,$count);
 				return (!$count) ? strtolower(basename($filepath,'.php')) : null;
-			}),$classes),
+			}),
 			'views' => self::search('/views/','(.*).php',function($filepath) { return strtolower(substr($filepath,strpos($filepath,'/views/') + 7,-4)); 	}),
 			'controllers' => self::cache_controllers(),
 			/*'configs' => self::cache_config(),*/
 		];
+		
+		return array_replace_recursive($cache,$override);
 	}
 
 	/**

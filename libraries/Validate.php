@@ -62,10 +62,10 @@ class Validate {
 	public function __construct(&$config,&$ci) {
 		$this->config = &$config;
 
-		$this->input =& $ci->input;
-		$this->output =& $ci->output;
-		$this->errors =& $ci->errors;
-		$this->wallet =& $ci->wallet;
+		$this->input =& ci('input');
+		$this->output =& ci('output');
+		$this->errors =& ci('errors');
+		$this->wallet =& ci('wallet');
 
 		$this->clear();
 
