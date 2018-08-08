@@ -70,22 +70,26 @@ class Orange_autoload_files {
 		return self::$array;
 	}
 
-	public static function paths($section=null,$file=null) {
+	public static function paths($section=null,$file=null,$include=false) {
+		$file = ($file) ? strtolower($file) : null;
+
 		if ($section && $file) {
-			$responds = self::$array[$section][$file];
+			$responds = (isset(self::$array[$section][$file])) ? self::$array[$section][$file] : false;
+		} elseif (!$section && !$file) {
+			$responds = self::$array;
 		} else {
-			$responds = ($section) ? self::$array[$section] : self::$array;
+			$responds = (isset(self::$array[$section])) ? self::$array[$section] : false;
+		}
+
+		if ($include) {
+			if (file_exists($responds)) {
+				include_once $responds;
+			} else {
+				$responds = false;
+			}
 		}
 
 		return $responds;
-	}
-
-	public static function update($array,$permanent=true) {
-		if ($permanent) {
-			self::write_cache($array);
-		}
-
-		self::$array = $array;
 	}
 
 	/**
@@ -108,47 +112,35 @@ class Orange_autoload_files {
 	}
 
 	/**
-	 * get the autoload array of class files
+	 * Get the autoload array of class files
 	 *
-	 *
-	 * @return array array of classes
+	 * @return array
 	 *
 	 */
 	protected static function build_cache($autoload = []) {
 		$override = (is_array($autoload['override'])) ? $autoload['override'] : [];
 
 		$cache = [
-			'classes' => array_merge(
-				self::globr(BASEPATH,'(.*).php'),
-				self::search('/libraries/validations/','(.*)Validate_(.*).php'),
-				self::search('/libraries/pear_plugins/','(.*).php','filename'),
-				self::search('/libraries/filters/','(.*)filters/Filter_(.*).php'),
+			'classes' => array_replace(
+				self::search('/libraries/','(.*).php','filename'),
 				self::search('/middleware/','(.*)Middleware.php'),
 				self::search('/controllers/traits/','(.*)_controller_trait.php','filename'),
-				self::search('/models/traits/','(.*)_model_trait.php','filename'),
-				self::search('/library/traits/','(.*)trait.php','filename'),
-				self::search('/models/entities/','(.*)_entity.php','filename'),
-				self::search('/core/','(.*).php')
-				/*self::search('/libraries/','(.*).php','filename')*/
+				self::search('/models/','(.*).php','filename'),
+				self::search('/core/','(.*).php'),
+				self::globr(BASEPATH,'(.*).php') /* add the CodeIgniter system folder */
 			),
-			'models' => self::search('/models/','(.*)_model.php'),
-			'libraries' => self::search('/libraries/','(.*).php',function($filepath) {
-				$count = 0;
-				str_replace(['/validations/','/pear_plugins/','/filters/','/traits/'],'',$filepath,$count);
-				return (!$count) ? strtolower(basename($filepath,'.php')) : null;
-			}),
 			'views' => self::search('/views/','(.*).php',function($filepath) { return strtolower(substr($filepath,strpos($filepath,'/views/') + 7,-4)); 	}),
 			'controllers' => self::cache_controllers(),
-			/*'configs' => self::cache_config(),*/
+			/* 'config' => self::cache_config, */
 		];
 
-		return array_replace_recursive($cache,$override);
+		return (count($override)) ? array_replace_recursive($cache,$override) : $cache;
 	}
 
 	/**
-	 * Insert description here
+	 * Get the autoload array of controllers
 	 *
-	 * @return
+	 * @return array
 	 *
 	 */
 	protected static function cache_controllers() {
@@ -181,17 +173,44 @@ class Orange_autoload_files {
 			}
 		}
 
+		/* sort by size longer regular expressions first */
 		uksort($found,function($a,$b) {
 			return (strlen($a) < strlen($b));
 		});
+
+		/* capture everything else - 404 */
+
+		/*
+				'main(.*)' =>
+				array (
+					'package' => 'application/',
+					'directory' => '../../application/controllers/',
+					'controller' => $baseDir.'/application/controllers/MainController.php',
+					'clean_controller' => 'Main',
+				),
+		*/
+
+		$route = load_config('routes','route');
+
+		list($class404,$method404) = explode('/',$route['404_override']);
+
+		$found = $found + [
+			'(.*)'=> [
+				'package' => 'application/',
+				'directory' => '../../application/controllers/',
+				'controller' => $baseDir.'/application/controllers/'.$class404.'Controller.php',
+				'clean_controller' => ucfirst($class404),
+				'method'=>$method404,
+			]
+		];
 
 		return $found;
 	}
 
 	/**
-	 * Insert description here
+	 * Get the autoload array of config files
 	 *
-	 * @return
+	 * @return array
 	 *
 	 */
 	protected static function cache_config() {
@@ -215,13 +234,13 @@ class Orange_autoload_files {
 	}
 
 	/**
-	 * Insert description here
+	 * Do Search
 	 *
 	 * @param $folder
 	 * @param $match
 	 * @param $options
 	 *
-	 * @return
+	 * @return array
 	 *
 	 */
 	protected static function search($folder,$match,$options=true) {
@@ -235,13 +254,13 @@ class Orange_autoload_files {
 	}
 
 	/**
-	 * Insert description here
+	 * Do recusive file search
 	 *
 	 * @param $path
 	 * @param $match
 	 * @param $option
 	 *
-	 * @return
+	 * @return array
 	 *
 	 */
 	protected static function globr($path,$match='(.*)',$option=true) {
@@ -276,12 +295,12 @@ class Orange_autoload_files {
 	}
 
 	/**
-	 * Insert description here
+	 * Return class name as key
 	 *
 	 * @param $filepath
 	 * @param $lowercase
 	 *
-	 * @return
+	 * @return string
 	 *
 	 */
 	protected static function find_class_name($filepath,$lowercase=true) {

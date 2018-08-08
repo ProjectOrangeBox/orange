@@ -19,6 +19,7 @@
 if (!function_exists('ci')) {
 	function &ci($class=null) {
 		/* this function uses the "return on first match" */
+		$CI = get_instance();
 
 		/* did they include a class name? */
 		if ($class) {
@@ -27,40 +28,21 @@ if (!function_exists('ci')) {
 
 			/* is it load? that kind of special so handle that directly */
 			if ($class == 'load') {
-				return CI_Controller::get_instance()->load;
-
+				return $CI->load;
 			/* is the class loaded? */
-			} elseif (isset(CI_Controller::get_instance()->$class)) {
+			} elseif (isset($CI->$class)) {
 				/* yes - then just return that */
-				return CI_Controller::get_instance()->$class;
+				return $CI->$class;
 			} else {
-				/* ok let's see if it's a class we know about */
+				$CI->load->library($class);
 
-				/* get the autoloader array */
-				$orange_paths = orange_autoload_files::paths('classes');
-
-				/* is it a CI_ class or MY_ class? */
-				if (isset($orange_paths[config_item('subclass_prefix').$class]) || isset($orange_paths['ci_'.$class])) {
-					/* yes - then load it */
-					CI_Controller::get_instance()->load->library($class);
-
-					/* and return it */
-					return CI_Controller::get_instance()->$class;
-
-				/* did the codeigniter autoloader load it? */
-				} elseif (orange_autoload($class)) {
-
-					/* yes - then return it */
-					return CI_Controller::get_instance()->$class;
-				} else {
-					/* not sure what they are looking for */
-					throw new Exception('ci('.$class.') not found');
-				}
+				/* now attached or a error was thrown */
+				return $CI->$class;
 			}
 		}
 
 		/* default CodeIgniter get_instance() */
-		return CI_Controller::get_instance();
+		return $CI;
 	}
 }
 
@@ -86,15 +68,14 @@ if (!function_exists('load_class')) {
 
 		$name = false;
 		$subclass_prefix = config_item('subclass_prefix');
+		$ci_prefix = 'ci_';
 
-		/* this will use the Orange Autoloader */
-		if (class_exists('CI_'.$class)) {
-			$name = 'CI_'.$class;
-		}
-
-		/* this will use the Orange Autoloader */
-		if (class_exists($subclass_prefix.$class)) {
+		if ($path = Orange_autoload_files::paths('classes',$subclass_prefix.$class,true)) {
+			$class_name = basename(strtolower($path),'.php');
 			$name = $subclass_prefix.$class;
+		} elseif ($path = Orange_autoload_files::paths('classes',$ci_prefix.$class,true)) {
+			$class_name = $ci_prefix.basename(strtolower($path),'.php');
+			$name = $ci_prefix.$class;
 		}
 
 		if ($name === false) {
@@ -105,7 +86,7 @@ if (!function_exists('load_class')) {
 
 		is_loaded($class);
 
-		$_classes[$class] = isset($param) ? new $name($param) : new $name();
+		$_classes[$class] = isset($param) ? new $class_name($param) : new $class_name();
 
 		return $_classes[$class];
 	}
@@ -121,30 +102,8 @@ if (!function_exists('load_class')) {
  */
 if (!function_exists('orange_autoload')) {
 	function orange_autoload($class) {
-		/* load the autoload config array */
-		$orange_paths = orange_autoload_files::paths();
-
-		/* normalize the class name */
-		$class = strtolower($class);
-
-		/* is it in the class array? */
-		if (isset($orange_paths['classes'][$class])) {
-			require $orange_paths['classes'][$class];
-
-			return true;
-		}
-
-		/* is it in the models array? */
-		if (isset($orange_paths['models'][$class])) {
-			ci()->load->model($class);
-
-			return true;
-		}
-
-		/* is it in the libraries array? */
-		if (isset($orange_paths['libraries'][$class])) {
-			ci()->load->library($class);
-
+		/* search classes array in the autoload file class and load if exists returning false or path of found file */
+		if (orange_autoload_files::paths('classes',$class,true)) {
 			return true;
 		}
 
@@ -152,6 +111,7 @@ if (!function_exists('orange_autoload')) {
 		return false;
 	}
 }
+
 
 /**
  * site_url
@@ -369,15 +329,12 @@ if (!function_exists('console')) {
  */
 if (!function_exists('view')) {
 	function view($_view,$_data=[]) {
-		/* get a list of all the found views */
-		$_op = orange_autoload_files::paths('views');
-
 		/* clean up the view path */
 		$_file = trim(str_replace('.php','',$_view),'/');
 
-		/* is the view file found? */
-		if (!isset($_op[$_file])) {
-			/* nope! */
+		/* get a list of all the found views */
+		if (!$_op = orange_autoload_files::paths('views',$_file)) {
+			/* Not Found */
 			throw new Exception('Could not locate view "'.$_file.'"');
 		}
 
@@ -388,7 +345,7 @@ if (!function_exists('view')) {
 		ob_start();
 
 		/* bring in the view file */
-		include $_op[$_file];
+		include $_op;
 
 		/* return the current buffer contents and delete current output buffer */
 		return ob_get_clean();
