@@ -332,9 +332,9 @@ class O_user_entity extends model_entity {
 		$user_id = (int)$this->id;
 		$cache_key = 'database.user_entity.'.$user_id.'.acl.php';
 		if (!$this->lazy_loaded) {
-			if (!$roles_permissions = ci()->cache->get($cache_key)) {
+			if (!$roles_permissions = ci('cache')->get($cache_key)) {
 				$roles_permissions = $this->_internal_query($user_id);
-				ci()->cache->save($cache_key,$roles_permissions,cache_ttl());
+				ci('cache')->save($cache_key,$roles_permissions,cache_ttl());
 			}
 			$this->roles       = (array) $roles_permissions['roles'];
 			$this->permissions = (array) $roles_permissions['permissions'];
@@ -368,7 +368,9 @@ class O_user_entity extends model_entity {
 			left join ".config('auth.role permission table')." on ".config('auth.role permission table').".role_id = ".config('auth.role table').".id
 			left join ".config('auth.permission table')." on ".config('auth.permission table').".id = ".config('auth.role permission table').".permission_id
 			where ".config('auth.user role table').".user_id = ".$user_id;
-		$dbc = ci()->db->query($sql);
+
+		$dbc = ci('db')->query($sql);
+
 		foreach ($dbc->result() as $dbr) {
 			if ($dbr->orange_roles_name) {
 				$roles_permissions['roles'][(int) $dbr->orange_roles_id] = $dbr->orange_roles_name;

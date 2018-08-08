@@ -121,9 +121,9 @@ class Database_model extends MY_Model {
 			*/
 			$this->entity = ($this->entity === true) ? ucfirst(strtolower(substr(get_class($this),0,-5)).'entity') : $this->entity;
 
-			$this->base_entity = ci('load')->entity($this->entity);
+			ci('load')->entity($this->entity,$this->base_entity);
 
-			$this->default_return_on_single = $this->base_entity;
+			$this->default_return_on_single =& $this->base_entity;
 		} else {
 			/* on single record return a class */
 			$this->default_return_on_single = new stdClass();
@@ -448,9 +448,9 @@ class Database_model extends MY_Model {
  */
 	protected function add_rule_set_columns(&$data,$which_set) {
 		if (isset($this->rule_sets[$which_set])) {
-			
+
 			$required_fields = explode(',',$this->rule_sets[$which_set]);
-			
+
 			foreach ($required_fields as $required_field) {
 				if (!isset($data[$required_field])) {
 					$data[$required_field] = '';
@@ -1163,7 +1163,7 @@ class Database_model extends MY_Model {
  */
 	protected function _get_userid() {
 		$user_id = NOBODY_USER_ID;
-		
+
 		if (is_object(ci()->user)) {
 			if (ci()->user->id) {
 				$user_id = ci()->user->id;
@@ -1202,11 +1202,11 @@ class Database_model extends MY_Model {
 			if (!isset($data['read_role_id'])) {
 				$data['read_role_id'] = ($read_role_id > 0) ? $read_role_id : $admin_role_id;
 			}
-			
+
 			if (!isset($data['edit_role_id'])) {
 				$data['edit_role_id'] = ($edit_role_id > 0) ? $edit_role_id : $admin_role_id;
 			}
-			
+
 			if (!isset($data['delete_role_id'])) {
 				$data['delete_role_id'] = ($delete_role_id > 0) ? $delete_role_id : $admin_role_id;
 			}
@@ -1234,7 +1234,7 @@ class Database_model extends MY_Model {
 			$data['updated_on'] = date('Y-m-d H:i:s');
 			$data['updated_ip'] = ci()->input->ip_address();
 		}
-		
+
 		return $this;
 	}
 
