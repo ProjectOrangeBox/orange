@@ -33,9 +33,9 @@ class MY_Router extends CI_Router {
 	 * @var string
 	 */
 	protected $clean_method = null;
-	
+
 	protected $route = false;
-	
+
 	protected $requests = [];
 	protected $responds = [];
 
@@ -59,7 +59,7 @@ class MY_Router extends CI_Router {
 		foreach ($this->responds as $middleware) {
 			$output = (new $middleware($ci))->responds($output);
 		}
-		
+
 		return $output;
 	}
 
@@ -111,16 +111,25 @@ class MY_Router extends CI_Router {
 		foreach (orange_autoload_files::paths('controllers') as $key=>$rec) {
 			if (preg_match('#^'.$key.'$#', strtolower($uri), $matches)) {
 				$segs = explode('/',trim($matches[1],'/'));
-				
+
 				$this->directory = $rec['directory'];
 				$this->clean_class = $rec['clean_controller'];
-				$this->clean_method = (empty($segs[0])) ? 'index' : strtolower($segs[0]);
-				
+
+				/*
+				if the method is set on the controller array use that instead
+				this captures 404s
+				*/
+				if ($rec['method']) {
+					$this->clean_method = $rec['method'];
+				} else {
+					$this->clean_method = (empty($segs[0])) ? 'index' : strtolower($segs[0]);
+				}
+
 				$segments = [];
-				
+
 				$segments[0] = $this->clean_class.'Controller';
 				$segments[1] = $this->clean_method.$this->fetch_request_method(true).'Action';
-				
+
 				array_shift($segs);
 
 				foreach ($segs as $uu) {
@@ -130,12 +139,6 @@ class MY_Router extends CI_Router {
 				return $segments;
 			}
 		}
-
-		$this->directory = '';
-
-		log_message('debug', 'MY_Router::_validate_request::404');
-
-		return $this->controller_method($this->routes['404_override']);
 	}
 
 	/**
@@ -211,7 +214,7 @@ class MY_Router extends CI_Router {
 		if (!$this->route) {
 			$this->route = strtolower(trim($this->fetch_directory().$this->fetch_class(true).'/'.$this->fetch_method(true), '/'));
 		}
-	
+
 		return $this->route;
 	}
 
@@ -238,7 +241,7 @@ class MY_Router extends CI_Router {
 
 		$this->clean_class = ucfirst(strtolower($segments[0]));
 		$this->clean_method = strtolower($segments[1]);
-		
+
 		$segments[0] .= 'Controller';
 		$segments[1] .= 'Action';
 
@@ -260,7 +263,7 @@ class MY_Router extends CI_Router {
 		// Validate & get reserved routes
 		if (isset($route) && is_array($route)) {
 			isset($route['default_controller']) && $this->default_controller = $route['default_controller'];
-			
+
 			unset($route['default_controller']);
 
 			$this->routes = $route;
@@ -296,7 +299,7 @@ class MY_Router extends CI_Router {
 			// Check if route format is using HTTP verbs
 			if (is_array($val)) {
 				$val = array_change_key_case($val, CASE_LOWER);
-				
+
 				if (isset($val[$http_verb])) {
 					$val = $val[$http_verb];
 				} else {
@@ -326,7 +329,7 @@ class MY_Router extends CI_Router {
 				if (!$skip_set) {
 					$this->_set_request(explode('/', $val));
 				}
-				
+
 				return;
 			}
 		}
