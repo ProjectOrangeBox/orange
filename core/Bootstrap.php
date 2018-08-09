@@ -115,6 +115,7 @@ $CFG = load_class('Config');
 *
 */
 $charset = strtoupper(config_item('charset'));
+
 ini_set('default_charset', $charset);
 
 if (extension_loaded('mbstring')) {
@@ -201,32 +202,24 @@ $LANG =& load_class('Lang');
 require_once BASEPATH.'core/Controller.php';
 
 /*
-* ------------------------------------------------------
-*  Sanity checks
-* ------------------------------------------------------
+* Get the nessesary variables out of the router
+* Try to load the Controller
+* verify the method
+* and return true for 404 file (page) not found error
+* or false for everything checks out!
 *
-*  The Router class has already validated the request,
-*  leaving us with 3 options here:
+* Because we append the 404 route onto the
+* regular expression serch array as (.*)
+* it's a catch all if everything else fails
 *
-*	1) an empty class name, if we reached the default
-*	   controller, but it didn't exist;
-*	2) a query string which doesn't go through a
-*	   file_exists() check
-*	3) a regular request for a non-existing page
-*
-*  We handle all of these as a 404 error.
-*
-*  Furthermore, none of the methods in the app controller
-*  or the loader class can be called via the URI, nor can
-*  controller methods that begin with an underscore.
 */
-
 $directory = $RTR->directory;
 $class = $RTR->class;
 $method = $RTR->method;
 $params = [];
 
 if ($RTR->route($directory,$class,$method,$params)) {
+	/* the (.*) route didn't process right so fall back to generic 404 */
 	show_404('Could not route.');
 }
 
@@ -250,5 +243,6 @@ $CI = new $class();
 */
 call_user_func_array(array($CI, $method), $params);
 
+/* tell the output class to display it's content */
 $OUT->_display();
 
