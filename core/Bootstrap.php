@@ -4,12 +4,6 @@
 /* register the version */
 const ORANGE_VERSION = '2.3';
 
-$paths = load_config('paths');
-
-/* get out the 2 paths we need now and set them as constants these are pretty "necessary" paths used thought out the system */
-define('CACHEPATH',ROOTPATH.$paths['cache']);
-define('LOGPATH',ROOTPATH.$paths['logs']);
-
 /* load the orange autoloader library - this builds the "super" search array */
 require 'Orange_locator.php';
 
@@ -227,79 +221,16 @@ require_once BASEPATH.'core/Controller.php';
 *  controller methods that begin with an underscore.
 */
 
-$e404 = FALSE;
-$class = ucfirst($RTR->class);
+$directory = $RTR->directory;
+$class = $RTR->class;
 $method = $RTR->method;
+$params = [];
 
-if (empty($class) OR !file_exists(APPPATH.'controllers/'.$RTR->directory.$class.'.php')) {
-	$e404 = TRUE;
-} else {
-	require_once(APPPATH.'controllers/'.$RTR->directory.$class.'.php');
-
-	if (!class_exists($class, FALSE) OR $method[0] === '_' OR method_exists('CI_Controller', $method)) {
-		$e404 = TRUE;
-	} elseif (method_exists($class, '_remap')) {
-		$params = array($method, array_slice($URI->rsegments, 2));
-		$method = '_remap';
-	} elseif (!method_exists($class, $method)) {
-		$e404 = TRUE;
-	}	elseif (!is_callable(array($class, $method))) 	{
-	/**
-	 * DO NOT CHANGE THIS, NOTHING ELSE WORKS!
-	 *
-	 * - method_exists() returns true for non-public methods, which passes the previous elseif
-	 * - is_callable() returns false for PHP 4-style constructors, even if there's a __construct()
-	 * - method_exists($class, '__construct') won't work because CI_Controller::__construct() is inherited
-	 * - People will only complain if this doesn't work, even though it is documented that it shouldn't.
-	 *
-	 * ReflectionMethod::isConstructor() is the ONLY reliable check,
-	 * knowing which method will be executed as a constructor.
-	 */
-		$reflection = new ReflectionMethod($class, $method);
-
-		if (!$reflection->isPublic() OR $reflection->isConstructor()) {
-			$e404 = TRUE;
-		}
-	}
+if ($RTR->route($directory,$class,$method,$params)) {
+	show_404('Could not route.');
 }
 
-if ($e404) {
-	if (!empty($RTR->routes['404_override'])) 	{
-		if (sscanf($RTR->routes['404_override'], '%[^/]/%s', $error_class, $error_method) !== 2) {
-			$error_method = 'index';
-		}
-
-		$error_class = ucfirst($error_class);
-
-		if (!class_exists($error_class, FALSE)) 	{
-			if (file_exists(APPPATH.'controllers/'.$RTR->directory.$error_class.'.php')) {
-				require_once(APPPATH.'controllers/'.$RTR->directory.$error_class.'.php');
-
-				$e404 = !class_exists($error_class, FALSE);
-			}
-			// Were we in a directory? If so, check for a global override
-			elseif (!empty($RTR->directory) && file_exists(APPPATH.'controllers/'.$error_class.'.php')) 	{
-				require_once(APPPATH.'controllers/'.$error_class.'.php');
-
-				if (($e404 = !class_exists($error_class, FALSE)) === FALSE) {
-					$RTR->directory = '';
-				}
-			}
-		} else {
-			$e404 = FALSE;
-		}
-	}
-
-	// Did we reset the $e404 flag? If so, set the rsegments, starting from index 1
-	if (!$e404) {
-		$class = $error_class;
-		$method = $error_method;
-
-		$URI->rsegments = array(1=>$class,2=>$method);
-	} else {
-		show_404($RTR->directory.$class.'/'.$method);
-	}
-}
+$URI->rsegments = array(1=>$class,2=>$method);
 
 if ($method !== '_remap') {
 	$params = array_slice($URI->rsegments, 2);

@@ -202,7 +202,7 @@ class Orange_locator {
 			'(.*)'=> [
 				'package' => 'application/',
 				'directory' => '../../application/controllers/',
-				'controller' => $baseDir.'/application/controllers/'.$class404.'Controller.php',
+				'controller' => ROOTPATH.'/application/controllers/'.$class404.'Controller.php',
 				'clean_controller' => ucfirst($class404),
 				'method'=>$method404,
 			]

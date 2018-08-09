@@ -1,5 +1,21 @@
 <?php
-
+/**
+* Orange Framework Extension
+*
+* This content is released under the MIT License (MIT)
+*
+* @package	CodeIgniter / Orange
+* @author	Don Myers
+* @license http://opensource.org/licenses/MIT MIT License
+* @link	https://github.com/ProjectOrangeBox
+*
+* required
+* core:
+* libraries:
+* models:
+* helpers:
+*
+*/
 abstract class Middleware_base {
 	protected $ci;
 

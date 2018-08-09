@@ -19,7 +19,6 @@
  *
  */
 class MY_Router extends CI_Router {
-
 	/**
 	 * class without Controller suffix
 	 *
@@ -33,6 +32,7 @@ class MY_Router extends CI_Router {
 	 * @var string
 	 */
 	protected $clean_method = null;
+
 
 	protected $route = false;
 
@@ -63,7 +63,6 @@ class MY_Router extends CI_Router {
 		return $output;
 	}
 
-
 	/**
 	 * _set_default_controller
 	 * Insert description here
@@ -90,6 +89,7 @@ class MY_Router extends CI_Router {
 		$this->set_class($segments[0]);
 		$this->set_method($segments[1]);
 		$this->uri->rsegments = [1=>$segments[0],2=>$segments[1]];
+		$this->directory = '';
 	}
 
 	/**
@@ -109,6 +109,7 @@ class MY_Router extends CI_Router {
 		$uri = implode('/',str_replace('-','_',$segments));
 
 		foreach (orange_locator::controllers() as $key=>$rec) {
+
 			if (preg_match('#^'.$key.'$#', strtolower($uri), $matches)) {
 				$segs = explode('/',trim($matches[1],'/'));
 
@@ -337,6 +338,36 @@ class MY_Router extends CI_Router {
 		// If we got this far it means we didn't encounter a
 		// matching route so we'll set the site default route
 		$this->_set_request(array_values($this->uri->segments));
+	}
+
+	public function route(&$directory,&$class,&$method,&$params) {
+		$class = ucfirst($class);
+
+		$e404 = false;
+
+		if (empty($class) || !file_exists(APPPATH.'controllers/'.$directory.$class.'.php')) {
+			$e404 = true;
+		} else {
+			/* this brings in the controller file */
+			require_once(APPPATH.'controllers/'.$directory.$class.'.php');
+
+			if (!class_exists($class, FALSE) || $method[0] === '_' || method_exists('CI_Controller', $method)) {
+				$e404 = true;
+			} elseif (method_exists($class, '_remap')) {
+				$params = array($method, array_slice($URI->rsegments, 2));
+				$method = '_remap';
+			} elseif (!method_exists($class, $method)) {
+				$e404 = true;
+			}	elseif (!is_callable(array($class, $method))) 	{
+				$reflection = new ReflectionMethod($class, $method);
+
+				if (!$reflection->isPublic() || $reflection->isConstructor()) {
+					$e404 = true;
+				}
+			}
+		}
+
+		return $e404;
 	}
 
 } /* end class */
