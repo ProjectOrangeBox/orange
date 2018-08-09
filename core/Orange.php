@@ -59,7 +59,7 @@ if (!function_exists('ci')) {
  * @return	object
  */
 if (!function_exists('load_class')) {
-	function &load_class($class, $directory = 'libraries', $param = NULL) {
+	function &load_class($class) {
 		static $_classes = array();
 
 		if (isset($_classes[$class])) {
@@ -87,34 +87,11 @@ if (!function_exists('load_class')) {
 
 		is_loaded($class);
 
-		$_classes[$class] = isset($param) ? new $class_name($param) : new $class_name();
+		$_classes[$class] = new $class_name();
 
 		return $_classes[$class];
 	}
 }
-
-/**
- * CodeIgniter / Orange registered autoload function
- *
- * @param $class
- *
- * @return boolean
- *
- */
-if (!function_exists('orange_autoload')) {
-	function orange_autoload($class) {
-		/* search classes array in the autoload file class and load if exists returning false or path of found file */
-		if ($path = orange_locator::class($class)) {
-			include_once $path;
-
-			return true;
-		}
-
-		/* can't find this class file notify the autoload (return false) to let somebody else have a shot */
-		return false;
-	}
-}
-
 
 /**
  * site_url

@@ -11,7 +11,7 @@ require 'Orange_locator.php';
 orange_locator::load(CACHEPATH.'/autoload_files.php',2);
 
 /* register the Orange Autoloader */
-spl_autoload_register('orange_autoload');
+spl_autoload_register('orange_locator::autoload');
 
 /* setup a assertion handler HTML & CLI output supported */
 assert_options(ASSERT_CALLBACK,'_assert_handler');
@@ -98,7 +98,7 @@ require_once(config_item('composer_autoload'));
 * depending on another class that uses it.
 *
 */
-$CFG = load_class('Config', 'core');
+$CFG = load_class('Config');
 
 /*
 * ------------------------------------------------------
@@ -147,49 +147,49 @@ ini_set('php.internal_encoding', $charset);
 *  Instantiate the UTF-8 class
 * ------------------------------------------------------
 */
-$UNI =& load_class('Utf8', 'core');
+$UNI =& load_class('Utf8');
 
 /*
 * ------------------------------------------------------
 *  Instantiate the URI class
 * ------------------------------------------------------
 */
-$URI =& load_class('URI', 'core');
+$URI =& load_class('URI');
 
 /*
 * ------------------------------------------------------
 *  Instantiate the routing class and set the routing
 * ------------------------------------------------------
 */
-$RTR =& load_class('Router', 'core');
+$RTR =& load_class('Router');
 
 /*
 * ------------------------------------------------------
 *  Instantiate the output class
 * ------------------------------------------------------
 */
-$OUT =& load_class('Output', 'core');
+$OUT =& load_class('Output');
 
 /*
 * -----------------------------------------------------
 * Load the security class for xss and csrf support
 * -----------------------------------------------------
 */
-$SEC =& load_class('Security', 'core');
+$SEC =& load_class('Security');
 
 /*
 * ------------------------------------------------------
 *  Load the Input class and sanitize globals
 * ------------------------------------------------------
 */
-$IN =& load_class('Input', 'core');
+$IN =& load_class('Input');
 
 /*
 * ------------------------------------------------------
 *  Load the Language class
 * ------------------------------------------------------
 */
-$LANG =& load_class('Lang', 'core');
+$LANG =& load_class('Lang');
 
 /*
 * ------------------------------------------------------

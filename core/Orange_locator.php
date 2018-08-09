@@ -324,4 +324,16 @@ class Orange_locator {
 		return ($lowercase) ? strtolower($class) : $class;
 	}
 
+	public static function autoload($class) {
+		/* search classes array in the autoload file class and load if exists returning false or path of found file */
+		if ($path = self::class($class)) {
+			include_once $path;
+
+			return true;
+		}
+
+		/* can't find this class file notify the autoload (return false) to let somebody else have a shot */
+		return false;
+	}
+
 } /* end class */
