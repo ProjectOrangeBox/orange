@@ -59,13 +59,13 @@ class Validate {
 	 * @throws
 	 * @example
 	 */
-	public function __construct(&$config,&$ci) {
+	public function __construct(&$config) {
 		$this->config = &$config;
 
-		$this->input =& ci('input');
-		$this->output =& ci('output');
-		$this->errors =& ci('errors');
-		$this->wallet =& ci('wallet');
+		$this->input = &ci('input');
+		$this->output = &ci('output');
+		$this->errors = &ci('errors');
+		$this->wallet = &ci('wallet');
 
 		$this->clear();
 
@@ -74,7 +74,7 @@ class Validate {
 		if (is_array($attach)) {
 			foreach ($attach as $name=>$closure) {
 				log_message('debug', 'Application "validate_'.$name.'" attached to Validate library.');
-	
+
 				$this->attached['validate_'.$name] = $closure;
 			}
 		}
@@ -280,7 +280,7 @@ class Validate {
 	public function single($rules, &$field, $human = null) {
 		if (!is_array($rules)) {
 			$rules = (isset($this->config[$rules])) ? $this->config[$rules] : $rules;
-			
+
 			if (is_string($rules)) {
 				$rules = explode('|', $rules);
 			}

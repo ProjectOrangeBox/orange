@@ -2,7 +2,7 @@
 /* Orange */
 
 /* register the version */
-const ORANGE_VERSION = '2.2';
+const ORANGE_VERSION = '2.3';
 
 $paths = load_config('paths');
 
@@ -11,10 +11,10 @@ define('CACHEPATH',ROOTPATH.$paths['cache']);
 define('LOGPATH',ROOTPATH.$paths['logs']);
 
 /* load the orange autoloader library - this builds the "super" search array */
-require 'Orange_autoload_files.php';
+require 'Orange_locator.php';
 
 /* instantiate the orange autoloader static class */
-orange_autoload_files::load(CACHEPATH.'/autoload_files.php',2);
+orange_locator::load(CACHEPATH.'/autoload_files.php',2);
 
 /* register the Orange Autoloader */
 spl_autoload_register('orange_autoload');
@@ -319,5 +319,5 @@ $CI = new $class();
 */
 call_user_func_array(array($CI, $method), $params);
 
-
 $OUT->_display();
+

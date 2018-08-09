@@ -32,13 +32,13 @@ class Errors {
 	protected $data_records;
 	protected $data_count;
 
-	public function __construct(&$config,&$ci) {
+	public function __construct(&$config) {
 		$this->config = &$config;
 
-		$this->load =& ci('load');
-		$this->input =& ci('input');
-		$this->output =& ci('output');
-		$this->event =& ci('event');
+		$this->load = &ci('load');
+		$this->input = &ci('input');
+		$this->output = &ci('output');
+		$this->event = &ci('event');
 
 		$this->errors_variable = $this->config['errors_variable'] ?? 'ci_errors';
 

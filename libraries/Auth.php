@@ -35,15 +35,15 @@ class Auth {
 
 	protected $user_model;
 
-	public function __construct(&$config,&$ci) {
-		$this->config =& $config;
+	public function __construct(&$config) {
+		$this->config = &$config;
 
-		$ci->load->model($this->config['required_models']);
+		ci('load')->model($this->config['required_models']);
 
-		$this->session =& ci('session');
-		$this->event =& ci('event');
-		$this->errors =& ci('errors');
-		$this->controller =& $ci;
+		$this->session = &ci('session');
+		$this->event = &ci('event');
+		$this->errors = &ci('errors');
+		$this->controller = &ci();
 
 		$this->user_model =& ci('o_user_model');
 

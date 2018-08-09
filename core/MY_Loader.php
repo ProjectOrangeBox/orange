@@ -21,6 +21,12 @@
 class MY_Loader extends CI_Loader {
 	protected $finish_setup = false;
 
+	public function __construct() {
+		$this->_ci_classes =& is_loaded();
+
+		log_message('info', 'MY_Loader Class Initialized');
+	}
+
 	public function library($library, $params = NULL, $object_name = NULL) {
 		if (is_array($library)) {
 			foreach ($library as $l) {
@@ -95,15 +101,16 @@ class MY_Loader extends CI_Loader {
 	/* used by library, model and entity */
 	protected function instantiate($name,$prefix='',$attach=false,&$config=[],$object_name=null) {
 		$CI = get_instance();
-		$find = $name;
-		$autoload = load_config('autoload','autoload');
-
-		$success = false;
 
 		/* is it already setup? */
 		if (isset($CI->$name)) {
 			return $this;
 		}
+
+		$find = $name;
+		$autoload = load_config('autoload','autoload');
+
+		$success = false;
 
 		if (!$object_name) {
 			if (is_array($autoload['remap'])) {
@@ -117,18 +124,20 @@ class MY_Loader extends CI_Loader {
 			$find = $object_name;
 		}
 
-		if ($path = orange_autoload_files::paths('classes',$prefix.$find,true)) {
+		if (class_exists($prefix.$find)) {
+			$path = orange_locator::class($prefix.$find);
+
 			$this->loaded[$name] = $path;
 
 			$class_name = $prefix.basename(strtolower($path),'.php');
 
 			if ($attach) {
-				$CI->$name = new $class_name($config,$CI);
+				$CI->$name = new $class_name($config);
 
 				$success = true;
 			} else {
 				/* create and return */
-				return new $class_name($config,$CI);
+				return new $class_name($config);
 			}
 		}
 

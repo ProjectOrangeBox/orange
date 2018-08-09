@@ -45,12 +45,12 @@ class Page {
  * @throws
  * @example
  */
-	public function __construct(&$config,&$ci) {
+	public function __construct(&$config) {
 		$this->config = &$config;
 
-		$this->load =& ci('load');
-		$this->output =& ci('output');
-		$this->event =& ci('event');
+		$this->load = &ci('load');
+		$this->output = &ci('output');
+		$this->event = &ci('event');
 
 		define('PAGE_MIN',(env('SERVER_DEBUG') == 'development' ? '' : '.min'));
 

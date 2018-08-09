@@ -1,6 +1,6 @@
 <?php
 /**
- * Orange_autoload_files
+ * orange_locator
  * Insert description here
  *
  * @package CodeIgniter / Orange
@@ -13,7 +13,7 @@
  * required: none
  * constants: ENVIRONMENT, APPPATH, ORANGEPATH, ROOTPATH
  */
-class Orange_autoload_files {
+class Orange_locator {
 	/**
 	 * internal paths to search
 	 *
@@ -70,26 +70,30 @@ class Orange_autoload_files {
 		return self::$array;
 	}
 
-	public static function paths($section=null,$file=null,$include=false) {
-		$file = ($file) ? strtolower($file) : null;
+	public static function controllers() {
+		return self::$array['controllers'];
+	}
 
-		if ($section && $file) {
-			$success = (isset(self::$array[$section][$file])) ? self::$array[$section][$file] : false;
-		} elseif (!$section && !$file) {
-			$success = self::$array;
-		} else {
-			$success = (isset(self::$array[$section])) ? self::$array[$section] : false;
-		}
+	public static function views() {
+		return self::$array['views'];
+	}
 
-		if ($include) {
-			if (file_exists($success)) {
-				include_once $success;
-			} else {
-				$success = false;
-			}
-		}
+	public static function view($file) {
+		return self::paths('views',$file);
+	}
 
-		return $success;
+	public static function classes() {
+		return self::$array['classes'];
+	}
+
+	public static function class($file) {
+		return self::paths('classes',$file);
+	}
+
+	protected static function paths($section=null,$file=null) {
+		$file = strtolower($file);
+
+		return (isset(self::$array[$section][$file])) ? self::$array[$section][$file] : false;
 	}
 
 	/**
@@ -126,7 +130,7 @@ class Orange_autoload_files {
 				self::search('/middleware/','(.*)Middleware.php'),
 				self::search('/controllers/traits/','(.*)_controller_trait.php','filename'),
 				self::search('/models/','(.*).php','filename'),
-				self::search('/core/','(.*).php'),
+				self::search('/core/','(.*).php','filename'),
 				self::globr(BASEPATH,'(.*).php') /* add the CodeIgniter system folder */
 			),
 			'views' => self::search('/views/','(.*).php',function($filepath) { return strtolower(substr($filepath,strpos($filepath,'/views/') + 7,-4)); 	}),

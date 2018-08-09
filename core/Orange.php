@@ -70,18 +70,19 @@ if (!function_exists('load_class')) {
 		$subclass_prefix = config_item('subclass_prefix');
 		$ci_prefix = 'ci_';
 
-		if ($path = Orange_autoload_files::paths('classes',$subclass_prefix.$class,true)) {
+		if (class_exists($subclass_prefix.$class)) {
+			$path = orange_locator::class($subclass_prefix.$class);
 			$class_name = basename(strtolower($path),'.php');
 			$name = $subclass_prefix.$class;
-		} elseif ($path = Orange_autoload_files::paths('classes',$ci_prefix.$class,true)) {
+		} elseif (class_exists($ci_prefix.$class)) {
+			$path = orange_locator::class($ci_prefix.$class);
 			$class_name = $ci_prefix.basename(strtolower($path),'.php');
 			$name = $ci_prefix.$class;
 		}
 
 		if ($name === false) {
 			set_status_header(503);
-			echo 'Unable to locate the specified class: '.$class.'.php';
-			exit(1);
+			throw new Exception('Unable to locate the specified class: "'.$class.'.php"');
 		}
 
 		is_loaded($class);
@@ -103,7 +104,9 @@ if (!function_exists('load_class')) {
 if (!function_exists('orange_autoload')) {
 	function orange_autoload($class) {
 		/* search classes array in the autoload file class and load if exists returning false or path of found file */
-		if (orange_autoload_files::paths('classes',$class,true)) {
+		if ($path = orange_locator::class($class)) {
+			include_once $path;
+
 			return true;
 		}
 
@@ -333,7 +336,7 @@ if (!function_exists('view')) {
 		$_file = trim(str_replace('.php','',$_view),'/');
 
 		/* get a list of all the found views */
-		if (!$_op = orange_autoload_files::paths('views',$_file)) {
+		if (!$_op = orange_locator::view($_file)) {
 			/* Not Found */
 			throw new Exception('Could not locate view "'.$_file.'"');
 		}

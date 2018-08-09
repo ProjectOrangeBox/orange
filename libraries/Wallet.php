@@ -66,7 +66,7 @@ class Wallet {
 	protected $session;
 	protected $input;
 	protected $event;
-	
+
 	protected $initial_pause;
 	protected $pause_for_each;
 
@@ -82,17 +82,17 @@ class Wallet {
 	 * @throws
 	 * @example
 	 */
-	public function __construct(&$config,&$ci) {
-		$this->config =& $config;
+	public function __construct(&$config) {
+		$this->config = &$config;
 
-		$this->session =& ci('session');
-		$this->event =& ci('event');
-		$this->load =& ci('load');
-		$this->input =& ci('input');
-	
+		$this->session = &ci('session');
+		$this->event = &ci('event');
+		$this->load = &ci('load');
+		$this->input = &ci('input');
+
 		$this->pause_for_each = ($this->config['pause_for_each']) ?? 1000;
 		$this->initial_pause = ($this->config['initial_pause']) ?? 3;
-	
+
 		$this->load->vars(['wallet_messages' => [
 			'messages'       => $this->session->flashdata($this->msg_key),
 			'initial_pause'  => $this->initial_pause,
