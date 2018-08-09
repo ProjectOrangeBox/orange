@@ -11,7 +11,7 @@ define('CACHEPATH',ROOTPATH.$paths['cache']);
 define('LOGPATH',ROOTPATH.$paths['logs']);
 
 /* load the orange autoloader library - this builds the "super" search array */
-require ORANGEPATH.'/libraries/Orange_autoload_files.php';
+require 'Orange_autoload_files.php';
 
 /* instantiate the orange autoloader static class */
 orange_autoload_files::load(CACHEPATH.'/autoload_files.php',2);

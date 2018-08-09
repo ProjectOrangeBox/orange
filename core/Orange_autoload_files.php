@@ -74,22 +74,22 @@ class Orange_autoload_files {
 		$file = ($file) ? strtolower($file) : null;
 
 		if ($section && $file) {
-			$responds = (isset(self::$array[$section][$file])) ? self::$array[$section][$file] : false;
+			$success = (isset(self::$array[$section][$file])) ? self::$array[$section][$file] : false;
 		} elseif (!$section && !$file) {
-			$responds = self::$array;
+			$success = self::$array;
 		} else {
-			$responds = (isset(self::$array[$section])) ? self::$array[$section] : false;
+			$success = (isset(self::$array[$section])) ? self::$array[$section] : false;
 		}
 
 		if ($include) {
-			if (file_exists($responds)) {
-				include_once $responds;
+			if (file_exists($success)) {
+				include_once $success;
 			} else {
-				$responds = false;
+				$success = false;
 			}
 		}
 
-		return $responds;
+		return $success;
 	}
 
 	/**
