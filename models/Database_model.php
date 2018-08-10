@@ -689,7 +689,7 @@ class Database_model extends MY_Model {
  *
  */
 	protected function delete_cache_by_tags() {
-		delete_cache_by_tags($this->cache_prefix);
+		ci('cache')->delete_by_tags($this->cache_prefix);
 
 		return $this;
 	}

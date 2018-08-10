@@ -27,6 +27,9 @@ class Cache_export extends CI_Driver {
 	 */
 	protected $config = [];
 
+	protected $parent;
+	protected $input;
+
 	/**
 	 * __construct
 	 * Insert description here
@@ -40,8 +43,11 @@ class Cache_export extends CI_Driver {
 	 * @throws
 	 * @example
 	 */
-	public function __construct(&$config) {
+	public function __construct(&$config,&$parent) {
 		$this->config = &$config;
+		$this->parent = &$parent;
+
+		$this->input = &ci('input');
 	}
 
 	/**
@@ -85,7 +91,7 @@ class Cache_export extends CI_Driver {
 	 *
 	 */
 	public function save($id, $data, $ttl = null, $include = false) {
-		$ttl = ($ttl) ? $ttl : cache_ttl();
+		$ttl = ($ttl) ? $ttl : $this->parent->ttl();
 
 		if (is_array($data) || is_object($data)) {
 			$data = '<?php return '.str_replace('stdClass::__set_state', '(object)', var_export($data, true)).';';
@@ -205,7 +211,7 @@ class Cache_export extends CI_Driver {
 	 * @example ci('cache')->export->endpoint_delete($request);
 	 */
 	public function endpoint_delete($request) {
-		if (!in_array(ci()->input->ip_address(), $this->config['cache_allowed'])) {
+		if (!in_array($this->input->ip_address(), $this->config['cache_allowed'])) {
 			exit(13);
 		}
 

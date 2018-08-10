@@ -34,6 +34,8 @@ class Cache_request extends CI_Driver {
 	 */
 	protected $config;
 
+	protected $parent;
+
 /**
  * __construct
  * Insert description here
@@ -47,8 +49,9 @@ class Cache_request extends CI_Driver {
  * @throws
  * @example
  */
-	public function __construct(&$config) {
+	public function __construct(&$config,&$parent) {
 		$this->config = &$config;
+		$this->parent = &$parent;
 	}
 
 /**

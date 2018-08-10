@@ -127,11 +127,11 @@ class Orange_locator {
 		$cache = [
 			'classes' => array_replace(
 				self::search('/libraries/','(.*).php','filename'),
-				self::search('/middleware/','(.*)Middleware.php'),
+				self::search('/middleware/','(.*)Middleware.php','filename'),
 				self::search('/controllers/traits/','(.*)_controller_trait.php','filename'),
 				self::search('/models/','(.*).php','filename'),
 				self::search('/core/','(.*).php','filename'),
-				self::globr(BASEPATH,'(.*).php') /* add the CodeIgniter system folder */
+				self::globr(BASEPATH,'(.*).php','class_name') /* add the CodeIgniter system folder */
 			),
 			'views' => self::search('/views/','(.*).php',function($filepath) { return strtolower(substr($filepath,strpos($filepath,'/views/') + 7,-4)); 	}),
 			'controllers' => self::cache_controllers(),
@@ -267,7 +267,7 @@ class Orange_locator {
 	 * @return array
 	 *
 	 */
-	protected static function globr($path,$match='(.*)',$option=true) {
+	protected static function globr($path,$match='(.*)',$option='filename') {
 		$found = [];
 
 		if (file_exists($path)) {
@@ -279,7 +279,7 @@ class Orange_locator {
 					if (preg_match('#'.$match.'#', $filepath, $matches)) {
 						if ($option === 'filename') {
 							$found[strtolower(basename($filepath,'.php'))] = $filepath;
-						} elseif ($option === true) {
+						} elseif ($option === 'class_name') {
 							if ($class_name = self::find_class_name($filepath)) {
 								$found[$class_name] = $filepath;
 							}
@@ -308,22 +308,26 @@ class Orange_locator {
 	 *
 	 */
 	protected static function find_class_name($filepath,$lowercase=true) {
-		$class = '';
-		$tokens = token_get_all(file_get_contents($filepath));
+		$fp = fopen($filepath, 'r');
+		$class = $buffer = '';
+		$i = 0;
+		while (!$class) {
+			if (feof($fp)) {
+				break;
+			}
 
-		for ($i = 0;$i<count($tokens);$i++) {
-			if ($tokens[$i][0] === T_CLASS) {
-				for ($j=$i+1;$j<count($tokens);$j++) {
-					if ($tokens[$j] === '{') {
-						$class = $tokens[$i+2][1];
-					}
-				}
+			$buffer .= fread($fp, 512);
+
+			if (preg_match('/class\s+(\w+)(.*)?\{/', $buffer, $matches)) {
+				$class = $matches[1];
+				break;
 			}
 		}
 
 		return ($lowercase) ? strtolower($class) : $class;
 	}
-
+	
+	/* spl autoloader */
 	public static function autoload($class) {
 		/* search classes array in the autoload file class and load if exists returning false or path of found file */
 		if ($path = self::class($class)) {

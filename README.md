@@ -233,15 +233,6 @@ simplify_array(array,key,value)
 collapse a array with multiple values into a single key=>value pair
 this will collapse a array with multiple values into a single key=>value pair
 
-cache(key,closure,ttl)
-Wrapper function to sue the currently loaded cache library in a closure fashion 
-
-cache_ttl(use window)
-Get the current Cache Time to Live with optional "window" support to negate a cache stamped
-
-delete_cache_by_tags(tags)
-Delete cache records based on dot notation "tags" therefore if you have a cache keys of:
-
 acl.users.database.table
 acl.groups.database.table
 food.database.table

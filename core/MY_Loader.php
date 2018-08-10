@@ -19,7 +19,6 @@
  *
  */
 class MY_Loader extends CI_Loader {
-	protected $finish_setup = false;
 
 	public function __construct() {
 		$this->_ci_classes =& is_loaded();
@@ -34,10 +33,6 @@ class MY_Loader extends CI_Loader {
 			}
 
 			return $this;
-		}
-
-		if (!$this->finish_setup) {
-			$this->finish_setup();
 		}
 
 		return $this->_init_object($library,$params,$object_name);
@@ -142,23 +137,6 @@ class MY_Loader extends CI_Loader {
 		}
 
 		return $success;
-	}
-
-	protected function finish_setup() {
-		$CI = get_instance();
-
-		/* all of our caches are loaded */
-		$this->finish_setup = true;
-
-		/* load config.php configuration file contents */
-		$cache_config = get_config();
-
-		/* attach cache driver now */
-		$CI->load->driver('cache', ['adapter' => $cache_config['cache_default'], 'backup' => $cache_config['cache_backup']]);
-
-		/* attach page and export to CodeIgniter cache singleton loaded above */
-		$CI->cache->request = new Cache_request($cache_config);
-		$CI->cache->export = new Cache_export($cache_config);
 	}
 
 } /* end class */
