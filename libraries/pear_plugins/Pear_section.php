@@ -4,15 +4,9 @@
 
 class Pear_section extends Pear_plugin {
 
-	public function render($name=null,$value=null) {
-		if ($value) {
-			ci('page')->data($name,$value);
-		} else {
-			pear::$fragment[$name] = $name;
-			ob_start();
-		}
-
-		return ci('load')->get_var($name);
+	public function render($name=null) {
+		pear::$fragment[$name] = $name;
+		ob_start();
 	}
 
 } /* end plugin */
