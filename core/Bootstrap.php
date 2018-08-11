@@ -90,6 +90,15 @@ require_once(config_item('composer_autoload'));
 
 /*
 * ------------------------------------------------------
+*  Start the timer... tick tock tick tock...
+* ------------------------------------------------------
+*/
+$BM = load_class('Benchmark');
+$BM->mark('total_execution_time_start');
+$BM->mark('loading_time:_base_classes_start');
+
+/*
+* ------------------------------------------------------
 *  Instantiate the config class
 * ------------------------------------------------------
 *
@@ -192,6 +201,8 @@ $IN =& load_class('Input');
 */
 $LANG =& load_class('Lang');
 
+$BM->mark('loading_time:_base_classes_end');
+
 /*
 * ------------------------------------------------------
 *  Load the app controller and local controller
@@ -229,6 +240,8 @@ if ($method !== '_remap') {
 	$params = array_slice($URI->rsegments, 2);
 }
 
+$BM->mark('controller_execution_time_( '.$class.' / '.$method.' )_start');
+
 /*
 * ------------------------------------------------------
 *  Instantiate the requested controller
@@ -242,6 +255,8 @@ $CI = new $class();
 * ------------------------------------------------------
 */
 call_user_func_array(array($CI, $method), $params);
+
+$BM->mark('controller_execution_time_( '.$class.' / '.$method.' )_end');
 
 /* tell the output class to display it's content */
 $OUT->_display();
