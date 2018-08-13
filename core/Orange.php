@@ -580,3 +580,15 @@ if (!function_exists('load_config')) {
 		return $$variable;
 	}
 }
+
+if (!function_exists('quick_merge')) {
+	function quick_merge($template,$data=[]) {
+		if (preg_match_all('/{([^}]+)}/m',$template,$matches)) {
+			foreach ($matches[1] as $key) {
+				$template = str_replace('{'.$key.'}',$data[$key],$template);
+			}
+		}
+
+		return $template;
+	}
+}
