@@ -400,14 +400,22 @@ class Page {
  */
 	public function prepare_page_variables() {
 		foreach ($this->variables as $page_variable=>$priorityqueue) {
+			ksort($priorityqueue);
+
 			/* get the current content */
 			$current_content = $this->load->get_var($page_variable);
 
-			while (!$priorityqueue->isEmpty()) {
-				$current_content .= $priorityqueue->extract();
+			/* add the currently available entries */
+			foreach ($priorityqueue as $priority) {
+				foreach ($priority as $string) {
+					$current_content .= $string;
+				}
 			}
 
-			$this->data($page_variable,$current_content);
+			/* load back into the view variable */
+			$this->load->vars($page_variable,$current_content);
+
+			unset($this->variables[$page_variable]);
 		}
 
 		return $this;
@@ -429,11 +437,7 @@ class Page {
 		if (!isset($this->prevent_duplicate[$key])) {
 			$this->prevent_duplicate[$key] = true;
 
-			if (!isset($this->variables[$name])) {
-				$this->variables[$name] = new SplPriorityQueue();
-			}
-
-			$this->variables[$name]->insert($value,$priority);
+			$this->variables[$name][(int)$priority][] = $value;
 		}
 
 		return $this;
