@@ -10,7 +10,12 @@
  * @link https://github.com/ProjectOrangeBox
  * @version 2.0
  *
- * required Nothing!
+ * required
+ * core:
+ * libraries:
+ * models:
+ * helpers:
+ * functions: log_message
  *
  * @show Event handler
  */
@@ -45,18 +50,13 @@ class Event {
 		}
 
 		/* clean up the name */
-		$name = $this->_normalize_name($name);
+		$this->_normalize_name($name);
 
 		/* log a debug event */
-		log_message('debug','event::register::'.$name);
+		log_message('debug', 'event::register::'.$name);
 
 		/* save the listener */
-		if (!isset($this->listeners[$name])) {
-			$this->listeners[$name] = new SplPriorityQueue();
-		}
-		
-		/* flip the priority because we are using UNIX priority not SplPriorityQueue format */
-		$this->listeners[$name]->insert($closure,-$priority);
+		$this->listeners[$name][$priority][] = $closure;
 
 		/* allow chaining */
 		return $this;
@@ -75,17 +75,28 @@ class Event {
 	 */
 	public function trigger($name, &$a1 = null, &$a2 = null, &$a3 = null, &$a4 = null, &$a5 = null, &$a6 = null, &$a7 = null, &$a8 = null) {
 		/* clean up the name */
-		$name = $this->_normalize_name($name);
+		$this->_normalize_name($name);
 
 		/* log a debug event */
-		log_message('debug', 'event::trigger::'.$name);
+		log_message('debug','event::trigger::'.$name);
 
 		/* do we even have any events with this name? */
 		if ($this->has($name)) {
-			foreach(clone $this->listeners[$name] as $event) {
-				if ($event($a1, $a2, $a3, $a4, $a5, $a6, $a7, $a8) === false) {
-					/* jump out of foreach loops on return of false */
-					break;
+
+			/* let's get them all then */
+			$events = $this->listeners[$name];
+
+			/* sort the keys (priority) */
+			ksort($events);
+
+			/* call each event */
+			foreach ($events as $priority) {
+				foreach ($priority as $event) {
+					/* if false is returned from the event then do not process the rest of the events */
+					if ($event($a1, $a2, $a3, $a4, $a5, $a6, $a7, $a8) === false) {
+						/* jump out of both foreach loops */
+						break 2;
+					}
 				}
 			}
 		}
@@ -106,9 +117,9 @@ class Event {
 	 */
 	public function has($name) {
 		/* clean up the name */
-		$name = $this->_normalize_name($name);
+		$this->_normalize_name($name);
 
-		return (isset($this->listeners[$name]) && !$this->listeners[$name]->isEmpty());
+		return (isset($this->listeners[$name]) && count($this->listeners[$name]) > 0);
 	}
 
 	/**
@@ -132,7 +143,10 @@ class Event {
    * @access public
 	 */
 	public function count($name) {
-		return count($this->listeners[$this->_normalize_name($name)]);
+		/* clean up the name */
+		$this->_normalize_name($name);
+
+		return count($this->listeners[$name]);
 	}
 
 	/**
@@ -144,8 +158,8 @@ class Event {
 	 *
    * @access protected
 	 */
-	protected function _normalize_name($name) {
-		return str_replace('_','.',strtolower(trim(preg_replace('#\W+#', '_', $name), '_')));
+	protected function _normalize_name(&$name) {
+		$name = trim(preg_replace('/[^a-z0-9]+/','.',strtolower($name)),'.');
 	}
 
 } /* end class */
