@@ -203,43 +203,135 @@ $LANG =& load_class('Lang');
 
 $BM->mark('loading_time:_base_classes_end');
 
-/*
-* ------------------------------------------------------
-*  Load the app controller and local controller
-* ------------------------------------------------------
-*
-*/
-// Load the base controller class
-require_once BASEPATH.'core/Controller.php';
 
 /*
-* Get the nessesary variables out of the router
-* Try to load the Controller
-* verify the method
-* and return true for 404 file (page) not found error
-* or false for everything checks out!
-*
-* Because we append the 404 route onto the
-* regular expression serch array as (.*)
-* it's a catch all if everything else fails
-*
-*/
-$directory = $RTR->directory;
-$class = $RTR->class;
-$method = $RTR->method;
-$params = [];
+ * ------------------------------------------------------
+ *  Sanity checks
+ * ------------------------------------------------------
+ *
+ *  The Router class has already validated the request,
+ *  leaving us with 3 options here:
+ *
+ *	1) an empty class name, if we reached the default
+ *	   controller, but it didn't exist;
+ *	2) a query string which doesn't go through a
+ *	   file_exists() check
+ *	3) a regular request for a non-existing page
+ *
+ *  We handle all of these as a 404 error.
+ *
+ *  Furthermore, none of the methods in the app controller
+ *  or the loader class can be called via the URI, nor can
+ *  controller methods that begin with an underscore.
+ */
 
-if ($RTR->route($directory,$class,$method,$params)) {
-	/* the (.*) route didn't process right so fall back to generic 404 */
-	show_404('Could not route.');
-}
+	$e404 = FALSE;
+	$class = ucfirst($RTR->class);
+	$method = $RTR->method;
 
-$URI->rsegments = array(1=>$class,2=>$method);
+	if (empty($class) OR ! file_exists(APPPATH.'controllers/'.$RTR->directory.$class.'.php'))
+	{
+		$e404 = TRUE;
+	}
+	else
+	{
+		require_once(APPPATH.'controllers/'.$RTR->directory.$class.'.php');
 
-if ($method !== '_remap') {
-	$params = array_slice($URI->rsegments, 2);
-}
+		if ( ! class_exists($class, FALSE) OR $method[0] === '_' OR method_exists('CI_Controller', $method))
+		{
+			$e404 = TRUE;
+		}
+		elseif (method_exists($class, '_remap'))
+		{
+			$params = array($method, array_slice($URI->rsegments, 2));
+			$method = '_remap';
+		}
+		elseif ( ! method_exists($class, $method))
+		{
+			$e404 = TRUE;
+		}
+		/**
+		 * DO NOT CHANGE THIS, NOTHING ELSE WORKS!
+		 *
+		 * - method_exists() returns true for non-public methods, which passes the previous elseif
+		 * - is_callable() returns false for PHP 4-style constructors, even if there's a __construct()
+		 * - method_exists($class, '__construct') won't work because CI_Controller::__construct() is inherited
+		 * - People will only complain if this doesn't work, even though it is documented that it shouldn't.
+		 *
+		 * ReflectionMethod::isConstructor() is the ONLY reliable check,
+		 * knowing which method will be executed as a constructor.
+		 */
+		elseif ( ! is_callable(array($class, $method)))
+		{
+			$reflection = new ReflectionMethod($class, $method);
+			if ( ! $reflection->isPublic() OR $reflection->isConstructor())
+			{
+				$e404 = TRUE;
+			}
+		}
+	}
 
+	if ($e404)
+	{
+		if ( ! empty($RTR->routes['404_override']))
+		{
+			if (sscanf($RTR->routes['404_override'], '%[^/]/%s', $error_class, $error_method) !== 2)
+			{
+				$error_method = 'index';
+			}
+
+			$error_class = ucfirst($error_class);
+
+			if ( ! class_exists($error_class, FALSE))
+			{
+				if (file_exists(APPPATH.'controllers/'.$RTR->directory.$error_class.'.php'))
+				{
+					require_once(APPPATH.'controllers/'.$RTR->directory.$error_class.'.php');
+					$e404 = ! class_exists($error_class, FALSE);
+				}
+				// Were we in a directory? If so, check for a global override
+				elseif ( ! empty($RTR->directory) && file_exists(APPPATH.'controllers/'.$error_class.'.php'))
+				{
+					require_once(APPPATH.'controllers/'.$error_class.'.php');
+					if (($e404 = ! class_exists($error_class, FALSE)) === FALSE)
+					{
+						$RTR->directory = '';
+					}
+				}
+			}
+			else
+			{
+				$e404 = FALSE;
+			}
+		}
+
+		// Did we reset the $e404 flag? If so, set the rsegments, starting from index 1
+		if ( ! $e404)
+		{
+			$class = $error_class;
+			$method = $error_method;
+
+			$URI->rsegments = array(
+				1 => $class,
+				2 => $method
+			);
+		}
+		else
+		{
+			show_404($RTR->directory.$class.'/'.$method);
+		}
+	}
+
+	if ($method !== '_remap')
+	{
+		$params = array_slice($URI->rsegments, 2);
+	}
+
+/*
+ * ------------------------------------------------------
+ *  Is there a "pre_controller" hook?
+ * ------------------------------------------------------
+ */
 $BM->mark('controller_execution_time_( '.$class.' / '.$method.' )_start');
 
 /*
