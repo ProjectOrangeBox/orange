@@ -21,7 +21,7 @@
 class O_permission_model extends Database_model {
 	protected $table;
 	protected $additional_cache_tags = '.acl';
-	protected $entity = true;
+	protected $entity = 'o_permission_entity';
 	protected $rules = [
 		'id'          => ['field' => 'id', 'label' => 'Id', 'rules' => 'required|integer|max_length[10]|less_than[4294967295]|filter_int[10]'],
 		'key'         => ['field' => 'key', 'label' => 'Key', 'rules' => 'required|strtolower|max_length[255]|filter_input[255]|is_uniquem[o_permission_model.key.id]'],

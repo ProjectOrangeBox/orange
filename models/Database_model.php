@@ -30,7 +30,7 @@ class Database_model extends MY_Model {
 	protected $primary_key = 'id'; /* primary id used as default for many SQL commands */
 	protected $additional_cache_tags = ''; /* additional cache tags to add to cache prefix remember each tag is separated by . */
 	protected $entity = null; /* true or string name of the entity to use for records - if true it uses the class name and replaces _model with _entity */
-	protected $base_entity = null; /* empty entity */
+	protected $entity_class = null; /* empty entity */
 	protected $has_roles = false; /* does this table use the standard role columns? these are automatically added to index, insert query's */
 	protected $has_stamps = false; /* does this table use the standard timestamps columns? these are automatically added to insert, update, delete query's */
 	protected $has_soft_delete = false; /* does this table support soft delete? */
@@ -113,17 +113,9 @@ class Database_model extends MY_Model {
 
 		/* is there are record entity attached? */
 		if ($this->entity) {
-			/*
-			yes try to figure out the entity
+			$this->entity_class = ci('load')->entity($this->entity,true);
 
-			if the value is "true" then use the model name minus "model" and replace with "entity"
-			else use the string stored in entity
-			*/
-			$this->entity = ($this->entity === true) ? ucfirst(strtolower(substr(get_class($this),0,-5)).'entity') : $this->entity;
-
-			ci('load')->entity($this->entity,$this->base_entity);
-
-			$this->default_return_on_single =& $this->base_entity;
+			$this->default_return_on_single =& $this->entity_class;
 		} else {
 			/* on single record return a class */
 			$this->default_return_on_single = new stdClass();
@@ -373,7 +365,7 @@ class Database_model extends MY_Model {
 		$this->temporary_column_name = null;
 		$this->temporary_return_as_array = null;
 		$this->default_return_on_many = [];
-		$this->default_return_on_single = ($this->base_entity) ? $this->base_entity : new stdClass();
+		$this->default_return_on_single = ($this->entity_class) ? $this->entity_class : new stdClass();
 
 		return $this;
 	}

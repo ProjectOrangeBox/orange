@@ -24,7 +24,7 @@ class O_user_model extends Database_model {
 	protected $has_roles = true;
 	protected $has_stamps = true;
 	protected $has_soft_delete = true;
-	protected $entity = true;
+	protected $entity = 'o_user_entity';
 	protected $rules = [
 		'id' => ['field' => 'id', 'label' => 'Id', 'rules' => 'required|integer|max_length[10]|less_than[4294967295]|filter_int[10]'],
 		'username' => ['field' => 'username', 'label' => 'User Name', 'rules' => 'required|trim|is_uniquem[o_user_model.username.id]'],

@@ -58,14 +58,14 @@ class MY_Loader extends CI_Loader {
 		return $this->_init_object($model,null,$name);
 	}
 
-	public function entity($name,&$entity) {
+	public function entity($name) {
 		$name = basename(strtolower($name),'.php');
 
-		if (!$entity =& $this->instantiate($name)) {
+		if (!$object =& $this->instantiate($name,'',false)) {
 			throw new RuntimeException('Could not locate class entity '.$name);
 		}
 
-		return $this;
+		return $object;
 	}
 
 	/**

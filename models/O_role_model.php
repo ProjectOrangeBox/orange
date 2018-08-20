@@ -21,7 +21,7 @@
 class O_role_model extends Database_model {
 	protected $table;
 	protected $additional_cache_tags = '.acl';
-	protected $entity = true;
+	protected $entity = 'o_role_entity';
 	protected $rules = [
 		'id'          => ['field' => 'id', 'label' => 'Id', 'rules' => 'required|integer|max_length[10]|less_than[4294967295]|filter_int[10]'],
 		'name'        => ['field' => 'name', 'label' => 'Name', 'rules' => 'required|is_uniquem[o_role_model.name.id]|max_length[64]|filter_input[64]|is_uniquem[o_role_model.name.id]'],
