@@ -112,7 +112,7 @@ class Errors {
 	 */
 	public function has() {
 		/* do we have any errors? */
-		return (count($this->load->get_var( $this->errors_variable)) != 0);
+		return (count($this->load->get_var($this->errors_variable)) != 0);
 	}
 
 	/**

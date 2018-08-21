@@ -58,6 +58,7 @@ class MY_Loader extends CI_Loader {
 		return $this->_init_object($model,null,$name);
 	}
 
+	/* this returns the new entity */
 	public function entity($name) {
 		$name = basename(strtolower($name),'.php');
 
