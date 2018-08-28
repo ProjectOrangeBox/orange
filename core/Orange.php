@@ -17,20 +17,17 @@
  * @examples ci('page')->render()
  */
 if (!function_exists('ci')) {
-	function &ci($class=null) {
+	function &ci($class=null,&$object=null) {
 		/* this function uses the "return on first match" */
 		$CI = get_instance();
 
 		/* did they include a class name? */
-		if ($class) {
+		if ($class && $object == null) {
 			/* normalize it */
 			$class = strtolower($class);
 
 			/* is it load? that kind of special so handle that directly */
-			if ($class == 'load') {
-				return $CI->load;
-			/* is the class loaded? */
-			} elseif (isset($CI->$class)) {
+			if (isset($CI->$class)) {
 				/* yes - then just return that */
 				return $CI->$class;
 			} else {
@@ -39,6 +36,8 @@ if (!function_exists('ci')) {
 				/* now attached or a error was thrown */
 				return $CI->$class;
 			}
+		} elseif ($class && $object) {
+			$CI->$class = &$object;
 		}
 
 		/* default CodeIgniter get_instance() */
@@ -567,7 +566,7 @@ if (!function_exists('_assert_handler')) {
 
 if (!function_exists('load_config')) {
 	function load_config($name,$variable='config') {
-		$$variable = false;
+		$$variable = [];
 
 		if (file_exists(APPPATH.'config/'.$name.'.php')) {
 			require APPPATH.'config/'.$name.'.php';

@@ -107,6 +107,7 @@ class Cache_request extends CI_Driver {
  */
 	public function delete($id) {
 		unset($this->cache[$id]);
+		
 		return true;
 	}
 
@@ -125,7 +126,11 @@ class Cache_request extends CI_Driver {
  * @example
  */
 	public function increment($id, $offset = 1) {
-		return (int)$this->get($id) + (int)$offset;
+		$new_value = (int)$this->get($id) + (int)$offset;
+		
+		$this->save($id,$new_value);
+		
+		return $new_value;
 	}
 
 /**
@@ -143,7 +148,11 @@ class Cache_request extends CI_Driver {
  * @example
  */
 	public function decrement($id, $offset = 1) {
-		return (int)$this->get($id) - (int)$offset;
+		$new_value = (int)$this->get($id) - (int)$offset;
+		
+		$this->save($id,$new_value);
+		
+		return $new_value;
 	}
 
 /**
@@ -160,6 +169,7 @@ class Cache_request extends CI_Driver {
  */
 	public function clean() {
 		$this->cache = [];
+		
 		return true;
 	}
 
@@ -176,7 +186,17 @@ class Cache_request extends CI_Driver {
  * @example
  */
 	public function cache_info() {
-		return 'page cache v1.0';
+		$info = [];
+		
+		foreach ($this->cache as $key=>$value) {
+			$info[$key] = [
+				'value'=>$value,
+				'size'=>strlen($value),
+				'ttl'=>0,
+			];
+		}
+		
+		return $info;
 	}
 
 /**

@@ -12,14 +12,12 @@ class Cache extends CI_Cache {
 	public function __construct($config=[]) {
 		$this->event = &ci('event');
 
-		$config_file = load_config('config','config');
-
-		$this->config = array_replace($config_file,$config);
+		$this->config = &array_replace(load_config('config','config'),(array)$config);
 
 		parent::__construct([
-			'adapter'=>$config['cache_default'],
-			'backup'=>$config['cache_backup'],
-			'key_prefix'=>(isset($config['cache_key_prefix']) ? $config['cache_key_prefix'] : ''),
+			'adapter'=>$this->config['cache_default'],
+			'backup'=>$this->config['cache_backup'],
+			'key_prefix'=>$this->config['cache_key_prefix'],
 		]);
 
 		/* attach page and export to CodeIgniter cache singleton loaded above */
@@ -40,7 +38,7 @@ class Cache extends CI_Cache {
 	public function inline($key, $closure, $ttl = null) {
 		if (!$cache = $this->get($key)) {
 			$cache = $closure();
-			$ttl = ($ttl) ? (int) $ttl : $tihs->ttl();
+			$ttl = ($ttl) ? (int) $ttl : $this->ttl();
 			$this->save($key, $cache, $ttl);
 		}
 
@@ -67,7 +65,7 @@ class Cache extends CI_Cache {
 			$cache_ttl += mt_rand(-$window,$window);
 		}
 
-		return $cache_ttl;
+		return (int)$cache_ttl;
 	}
 
 	/**
@@ -95,7 +93,7 @@ class Cache extends CI_Cache {
 		log_message('debug', 'delete_cache_by_tags '.implode(', ', $tags));
 
 		/* trigger a event incase somebody else needs to know send in our array of tags by reference */
-		$this->event->trigger('delete-cache-by-tags',$tags);
+		$this->event->trigger('delete_cache_by_tags',$tags);
 
 		/* get all of the currently loaded cache driver cache keys */
 		$cached_keys = $this->cache_info();
@@ -108,6 +106,8 @@ class Cache extends CI_Cache {
 				}
 			}
 		}
+		
+		return $this;
 	}
 
 } /* end class */

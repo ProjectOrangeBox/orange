@@ -32,7 +32,7 @@ class Errors {
 	protected $data_records;
 	protected $data_count;
 
-	public function __construct(&$config) {
+	public function __construct(&$config=[]) {
 		$this->config = &$config;
 
 		$this->load = &ci('load');
@@ -271,8 +271,7 @@ class Errors {
 		}
 
 		/* setup the defaults */
-		$config = config('errors',[]);
-		$view = ($config['named'][$view]) ? $config['named'][$view] : $view;
+		$view = (isset($this->config['named'][$view])) ? $this->config['named'][$view] : $view;
 		$charset     = 'utf-8';
 		$mime_type   = 'text/html';
 		$view_folder = 'html';
@@ -322,8 +321,8 @@ class Errors {
 			->set_status_header($status_code)
 			->set_content_type($mime_type, $charset)
 			->set_output(view($view_path,$data))
-			->_display();
-		exit($exit_status);
+			->_display()
+			->exit($exit_status);
 	}
 
 } /* end class */

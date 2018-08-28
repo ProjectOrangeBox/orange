@@ -147,7 +147,7 @@ class MY_Controller extends CI_Controller {
 		}
 
 		/* trigger our start up event */
-		$this->event->trigger('ci.controller.startup', $this);
+		ci('event')->trigger('ci.controller.startup', $this);
 	}
 
 	public function _output($output) {

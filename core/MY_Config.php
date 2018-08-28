@@ -15,7 +15,7 @@
  * required
  * core: cache
  * libraries:
- * models:
+ * models: o_setting_model
  * helpers:
  * functions:
  *

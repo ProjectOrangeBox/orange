@@ -44,6 +44,12 @@ class MY_Input extends CI_Input {
 		log_message('info', 'MY_Input Class Initialized');
 	}
 
+	public function set_request($data=[]) {
+		$this->_request = $data;
+		
+		return $this;
+	}
+
 	/**
 	 * fetch post or put data
 	 *

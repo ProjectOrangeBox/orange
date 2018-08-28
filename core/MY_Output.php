@@ -123,5 +123,12 @@ class MY_Output extends CI_Output {
 
 		return $this;
 	}
+	
+	/*
+	provide this to allow mocking
+	*/
+	public function exit($code=1) {
+		exit($code);
+	}
 
 } /* end class */

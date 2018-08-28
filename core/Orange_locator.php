@@ -90,6 +90,10 @@ class Orange_locator {
 		return self::paths('classes',$file);
 	}
 
+	public static function append($section,$file,$value) {
+		self::$array[$section] = [$file=>$value] + self::$array[$section];
+	}
+
 	protected static function paths($section=null,$file=null) {
 		$file = strtolower($file);
 
@@ -326,7 +330,7 @@ class Orange_locator {
 
 		return ($lowercase) ? strtolower($class) : $class;
 	}
-	
+
 	/* spl autoloader */
 	public static function autoload($class) {
 		/* search classes array in the autoload file class and load if exists returning false or path of found file */

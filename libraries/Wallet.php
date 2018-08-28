@@ -82,7 +82,7 @@ class Wallet {
 	 * @throws
 	 * @example
 	 */
-	public function __construct(&$config) {
+	public function __construct(&$config=[]) {
 		$this->config = &$config;
 
 		$this->session = &ci('session');
@@ -184,6 +184,7 @@ class Wallet {
 
 		if (is_string($redirect) || $redirect === true) {
 			$redirect = (is_string($redirect)) ? $redirect : $this->input->server('HTTP_REFERER');
+
 			$this->redirect_messages[md5(trim($msg))] = ['msg' => trim($msg), 'type' => $type, 'sticky' => $sticky];
 
 			$this->session->set_flashdata($this->msg_key, $this->redirect_messages);
@@ -237,7 +238,9 @@ class Wallet {
 	public function unstash() {
 		$stashed = $this->get_snapdata($this->stash_key);
 
-		$_POST = (is_array($stashed)) ? $stashed : [];
+		if (is_array($stashed)) {
+			$this->input->set_request($stashed);
+		}
 
 		return $stashed;
 	}

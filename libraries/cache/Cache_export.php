@@ -64,9 +64,9 @@ class Cache_export extends CI_Driver {
 	 * @example
 	 */
 	public function get($id) {
-		$get = FALSE;
+		$get = false;
 
-		if (is_file($this->config['cache_path'].$id.'.meta.php') && is_file($this->config['cache_path'].$id.'.php')) {
+		if (file_exists($this->config['cache_path'].$id.'.meta.php') && file_exists($this->config['cache_path'].$id.'.php')) {
 			$meta = $this->get_metadata($id);
 			if (time() > $meta['expire']) {
 				$this->delete($id);
@@ -98,7 +98,8 @@ class Cache_export extends CI_Driver {
 		}
 
 		atomic_file_put_contents($this->config['cache_path'].$id.'.meta.php', '<?php return '.var_export(['strlen' => strlen($data), 'time' => time(), 'ttl' => (int) $ttl, 'expire' => (time() + $ttl)], true).';');
-		$save = atomic_file_put_contents($this->config['cache_path'].$id.'.php', $data);
+		
+		$save = (atomic_file_put_contents($this->config['cache_path'].$id.'.php', $data)) ? true : false;
 
 		if ($include) {
 			$save = include $this->config['cache_path'].$id.'.php';
@@ -152,7 +153,9 @@ class Cache_export extends CI_Driver {
 	 * @return boolean
 	 */
 	public function clean() {
-		return false;
+		array_map('unlink',glob($this->config['cache_path'].'*.php'));
+		
+		return true;
 	}
 
 	/**
@@ -163,16 +166,26 @@ class Cache_export extends CI_Driver {
 	 * @return array
 	 *
 	 */
-	public function cache_info($type = NULL) {
-		return [
-			'cache_path'=>$this->config['cache_path'],
-			'cache_allowed'=>$this->config['cache_allowed'],
-			'encryption_key'=>$this->config['encryption_key'],
-			'cache_servers'=>$this->config['cache_servers'],
-			'cache_server_secure'=>$this->config['cache_server_secure'],
-			'cache_url'=>$this->config['cache_url'],
-			'cache_multiple_servers'=>$this->config['cache_multiple_servers'],
-		];
+	public function cache_info() {
+		$info = [];
+		
+		foreach (glob($this->config['cache_path'].'*.meta.php') as $path) {
+			$id = basename($path,'.meta.php');
+			$metadata = $this->get_metadata($id);
+			
+			$info[$id] = [
+				'name'=>realpath($path),
+				'server_path'=>$path,
+				'size'=>filesize($path),
+				'expires'=>$metadata['expire'],
+				'created'=>$metadata['time'],
+				'ttl'=>$metadata['ttl'],
+				'meta'=>$id.'.meta.php',
+				'cache'=>$id.'.php',
+			];
+		}
+		
+		return $info;
 	}
 
 	/**
@@ -184,7 +197,7 @@ class Cache_export extends CI_Driver {
 	 *
 	 */
 	public function get_metadata($id) {
-		return (!is_file( $this->config['cache_path'].$id.'.meta.php') || !is_file( $this->config['cache_path'].$id.'.php')) ? FALSE : include  $this->config['cache_path'].$id.'.meta.php';
+		return (!is_file($this->config['cache_path'].$id.'.meta.php') || !is_file($this->config['cache_path'].$id.'.php')) ? FALSE : include $this->config['cache_path'].$id.'.meta.php';
 	}
 
 	/**
@@ -267,12 +280,18 @@ class Cache_export extends CI_Driver {
 	protected function single_delete($id) {
 		$php_file = $this->config['cache_path'].$id.'.php';
 		$meta_file = $this->config['cache_path'].$id.'.meta.php';
-
-		@unlink($php_file);
-		@unlink($meta_file);
-
-		remove_php_file_from_opcache($php_file);
-		remove_php_file_from_opcache($meta_file);
+		
+		if (file_exists($php_file)) {
+			$php_file_deleted = unlink($php_file);
+			remove_php_file_from_opcache($php_file);
+		}
+		
+		if (file_exists($meta_file)) {
+			$meta_file_deleted = unlink($meta_file);
+			remove_php_file_from_opcache($meta_file);
+		}
+		
+		return ($php_file_deleted || $meta_file_deleted);
 	}
 
 	/**

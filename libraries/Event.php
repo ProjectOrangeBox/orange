@@ -146,7 +146,7 @@ class Event {
 		/* clean up the name */
 		$this->_normalize_name($name);
 
-		return count($this->listeners[$name]);
+		return ($this->has($name)) ? array_sum(array_map('count',$this->listeners[$name])) : 0;
 	}
 
 	/**

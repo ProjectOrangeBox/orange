@@ -35,7 +35,7 @@ class Auth {
 
 	protected $user_model;
 
-	public function __construct(&$config) {
+	public function __construct(&$config=[]) {
 		$this->config = &$config;
 
 		$this->session = &ci('session');

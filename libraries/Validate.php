@@ -1,44 +1,44 @@
 <?php
 /**
- * Validate
- * Insert description here
- *
- * @package CodeIgniter / Orange
- * @author Don Myers
- * @copyright 2018
- * @license http://opensource.org/licenses/MIT MIT License
- * @link https://github.com/ProjectOrangeBox
- * @version 2.0
- *
- * required
- * core: input, output
- * libraries: errors, wallet
- * models:
- * helpers:
- * functions:
- *
- */
+* Validate
+* Insert description here
+*
+* @package CodeIgniter / Orange
+* @author Don Myers
+* @copyright 2018
+* @license http://opensource.org/licenses/MIT MIT License
+* @link https://github.com/ProjectOrangeBox
+* @version 2.0
+*
+* required
+* core: input, output
+* libraries: errors, wallet
+* models:
+* helpers:
+* functions:
+*
+*/
 class Validate {
 
 	/**
-	 * track if the combined cached configuration has been loaded
-	 *
-	 * @var array
-	 */
+	* track if the combined cached configuration has been loaded
+	*
+	* @var array
+	*/
 	protected $attached = [];
 
 	/**
-	 * track if the combined cached configuration has been loaded
-	 *
-	 * @var string
-	 */
+	* track if the combined cached configuration has been loaded
+	*
+	* @var string
+	*/
 	protected $error_string = '';
 
 	/**
-	 * track if the combined cached configuration has been loaded
-	 *
-	 * @var array
-	 */
+	* track if the combined cached configuration has been loaded
+	*
+	* @var array
+	*/
 	protected $field_data = [];
 
 	protected $config;
@@ -46,20 +46,22 @@ class Validate {
 	protected $output;
 	protected $errors;
 	protected $wallet;
+	
+	protected $loaded = [];
 
 	/**
-	 * __construct
-	 * Insert description here
-	 *
-	 *
-	 * @return
-	 *
-	 * @access
-	 * @static
-	 * @throws
-	 * @example
-	 */
-	public function __construct(&$config) {
+	* __construct
+	* Insert description here
+	*
+	*
+	* @return
+	*
+	* @access
+	* @static
+	* @throws
+	* @example
+	*/
+	public function __construct(&$config=[]) {
 		$this->config = &$config;
 
 		$this->input = &ci('input');
@@ -73,7 +75,7 @@ class Validate {
 
 		if (is_array($attach)) {
 			foreach ($attach as $name=>$closure) {
-				log_message('debug', 'Application "validate_'.$name.'" attached to Validate library.');
+				log_message('debug', 'Application "validate_'.$name.'" attached to validate library.');
 
 				$this->attached['validate_'.$name] = $closure;
 			}
@@ -83,17 +85,17 @@ class Validate {
 	}
 
 	/**
-	 * clear
-	 * Insert description here
-	 *
-	 *
-	 * @return
-	 *
-	 * @access
-	 * @static
-	 * @throws
-	 * @example
-	 */
+	* clear
+	* Insert description here
+	*
+	*
+	* @return
+	*
+	* @access
+	* @static
+	* @throws
+	* @example
+	*/
 	public function clear() {
 		$this->errors->clear();
 
@@ -101,39 +103,39 @@ class Validate {
 	}
 
 	/**
-	 * attach
-	 * Insert description here
-	 *
-	 * @param $name
-	 * @param closure
-	 * @param $closure
-	 *
-	 * @return
-	 *
-	 * @access
-	 * @static
-	 * @throws
-	 * @example
-	 */
+	* attach
+	* Insert description here
+	*
+	* @param $name
+	* @param closure
+	* @param $closure
+	*
+	* @return
+	*
+	* @access
+	* @static
+	* @throws
+	* @example
+	*/
 	public function attach($name, closure $closure) {
-		$this->attached['validate_'.$name] = $closure;
+		$this->attached[$this->_normalize_rule($name)] = $closure;
 
 		return $this;
 	}
 
 	/**
-	 * die_on_fail
-	 * Insert description here
-	 *
-	 * @param $view
-	 *
-	 * @return $this
-	 *
-	 * @access
-	 * @static
-	 * @throws
-	 * @example
-	 */
+	* die_on_fail
+	* Insert description here
+	*
+	* @param $view
+	*
+	* @return $this
+	*
+	* @access
+	* @static
+	* @throws
+	* @example
+	*/
 	public function die_on_fail($view = '400') {
 		if ($this->errors->has()) {
 			$this->errors->display($view, ['heading' => 'Validation Failed', 'message' => $this->errors->as_html()]);
@@ -143,18 +145,18 @@ class Validate {
 	}
 
 	/**
-	 * redirect_on_fail
-	 * Insert description here
-	 *
-	 * @param $url
-	 *
-	 * @return $this
-	 *
-	 * @access
-	 * @static
-	 * @throws
-	 * @example
-	 */
+	* redirect_on_fail
+	* Insert description here
+	*
+	* @param $url
+	*
+	* @return $this
+	*
+	* @access
+	* @static
+	* @throws
+	* @example
+	*/
 	public function redirect_on_fail($url = null) {
 		if ($this->errors->has()) {
 			$url = (is_string($url)) ? $url : true;
@@ -165,76 +167,75 @@ class Validate {
 	}
 
 	/**
-	 * json_on_fail
-	 * Insert description here
-	 *
-	 *
-	 * @return
-	 *
-	 * @access
-	 * @static
-	 * @throws
-	 * @example
-	 */
+	* json_on_fail
+	* Insert description here
+	*
+	*
+	* @return
+	*
+	* @access
+	* @static
+	* @throws
+	* @example
+	*/
 	public function json_on_fail() {
 		if ($this->errors->has()) {
-			$this->output->json(['ci_errors'=>$this->errors->as_data()])->_display();
-			exit(1);
+			$this->output->json(['ci_errors'=>$this->errors->as_data()])->_display()->exit(1);
 		}
 
 		return $this;
 	}
 
 	/**
-	 * success
-	 * Insert description here
-	 *
-	 *
-	 * @return
-	 *
-	 * @access
-	 * @static
-	 * @throws
-	 * @example
-	 */
+	* success
+	* Insert description here
+	*
+	*
+	* @return
+	*
+	* @access
+	* @static
+	* @throws
+	* @example
+	*/
 	public function success() {
-		return !$this->errors->has();
+		return (!$this->errors->has());
 	}
 
 	/**
-	 * variable
-	 * Insert description here
-	 *
-	 * @param $rules
-	 * @param $field
-	 * @param $human
-	 *
-	 * @return
-	 *
-	 * @access
-	 * @static
-	 * @throws
-	 * @example
-	 */
+	* variable
+	* Insert description here
+	*
+	* @param $rules
+	* @param $field
+	* @param $human
+	*
+	* @return
+	*
+	* @access
+	* @static
+	* @throws
+	* @example
+	*/
 	public function variable($rules = '',&$field, $human = null) {
 		return $this->single($rules, $field, $human);
 	}
 
 	/**
-	 * request
-	 * Insert description here
-	 *
-	 * @param $rules
-	 * @param $key
-	 * @param $human
-	 *
-	 * @return
-	 *
-	 * @access
-	 * @static
-	 * @throws
-	 * @example
-	 */
+	* request
+	* Insert description here
+	*
+	* @param $rules
+	* @param $key
+	* @param $human
+	*
+	* @return
+	*
+	* @access
+	* @static
+	* @throws
+	* @example
+	*/
 	public function request($rules = '', $key, $human = null) {
 		$field = $this->input->request($key);
 		$this->single($rules, $field, $human);
@@ -244,40 +245,41 @@ class Validate {
 	}
 
 	/**
-	 * run
-	 * Insert description here
-	 *
-	 * @param $rules
-	 * @param $fields
-	 * @param $human
-	 *
-	 * @return
-	 *
-	 * @access
-	 * @static
-	 * @throws
-	 * @example
-	 */
+	* run
+	* Insert description here
+	*
+	* @param $rules
+	* @param $fields
+	* @param $human
+	*
+	* @return
+	*
+	* @access
+	* @static
+	* @throws
+	* @example
+	*/
 	public function run($rules = '', &$fields, $human = null) {
 		return (is_array($fields)) ? $this->multiple($rules, $fields) : $this->single($rules, $fields, $human);
 	}
 
 	/**
-	 * single
-	 * Insert description here
-	 *
-	 * @param $rules
-	 * @param $field
-	 * @param $human
-	 *
-	 * @return
-	 *
-	 * @access
-	 * @static
-	 * @throws
-	 * @example
-	 */
+	* single
+	* Insert description here
+	*
+	* @param $rules
+	* @param $field
+	* @param $human
+	*
+	* @return
+	*
+	* @access
+	* @static
+	* @throws
+	* @example
+	*/
 	public function single($rules, &$field, $human = null) {
+		/* break apart the rules */
 		if (!is_array($rules)) {
 			$rules = (isset($this->config[$rules])) ? $this->config[$rules] : $rules;
 
@@ -285,87 +287,122 @@ class Validate {
 				$rules = explode('|', $rules);
 			}
 		}
-
+		
+		/* do we have any rules? */
 		if (count($rules)) {
+			/* yes */
 			foreach ($rules as $rule) {
+				/* no rules exit processing of the $rules array */
 				if (empty($rule)) {
 					$success = true;
 					break;
 				}
-
+				
+				/* do we have this special rule? */
 				if ($rule == 'allow_empty') {
 					if (empty($field)) {
+						/* end processing of the $rules array */
 						break;
 					} else {
+						/* skip the rest of the current foreach but don't stop processing the $rules array  */
 						continue;
 					}
 				}
-
+				
+				/* do we have parameters */
 				$param = null;
-
+				
+				/* split them out */
 				if (preg_match("/(.*?)\[(.*?)\]/", $rule, $match)) {
 					$rule  = $match[1];
 					$param = $match[2];
 				}
 
-				$success            = false;
-				$this->error_string = '%s is not valid.';
-				$lowercase = strtolower($rule);
-				$is_filter = (substr($lowercase,0,6) == 'filter');
-				$class_name = ($is_filter) ? ucfirst($lowercase) : 'Validate_'.$lowercase;
-
-				if ($plugin = $this->load_plugin($class_name,$is_filter)) {
-					if ($is_filter) {
-						$success = true;
-						$plugin->filter($field, $param);
-					} else {
-						$success = $plugin->validate($field, $param);
-					}
-				} elseif (function_exists($rule)) {
-					$success = ($param !== null) ? $rule($field,$param) : $rule($field);
-				} elseif (isset($this->attached['validate_'.$rule])) {
-					$success = $this->attached['validate_'.$rule]($field, $param, $this->error_string, $this->field_data, $this);
-				} else {
-					$this->error_string = 'Could not validate %s against '.$rule;
-				}
-
-				if (!$is_filter) {
-					if ($success !== false) {
-						if (!is_bool($success)) {
-							$field = $success;
-						}
-					} else {
-						$human = ($human) ? $human : strtolower(str_replace('_', ' ', $rule));
-						if (strpos($param, ',') !== false) {
-							$param = str_replace(',', ', ', $param);
-							if (($pos = strrpos($param, ', ')) !== false) {
-								$param = substr_replace($param, ' or ', $pos, 2);
-							}
-						}
-						$this->errors->add(sprintf($this->error_string, $human, $param));
-						break;
-					}
-				}
+				/* take action on a validation or filter - filters MUST always start with "filter_" */
+				$success = (substr($rule,0,7) == 'filter_') ? $this->_filter($field,$rule,$param) : $this->_validation($field,$rule,$param);
 			}
 		}
 
 		return $this;
 	}
+	
+	protected function _filter(&$field,$rule,$param) {
+		$class_name = $this->_normalize_rule($rule);
+		$short_rule = substr($class_name,7);
+		
+		if (isset($this->attached[$class_name])) {
+			$this->attached[$class_name]($field, $param);
+		} elseif ($this->loaded[$class_name]) {
+			$this->loaded[$class_name]->filter($field, $param);
+		} elseif (class_exists($class_name,true)) {
+			$this->loaded[$class_name] = new $class_name($field);
+			$this->loaded[$class_name]->filter($field, $param);
+		} elseif (function_exists($short_rule)) {
+			$field = $short_rule($field,$param);
+		} else {
+			$this->error_string = 'Could not filter %s against '.$rule;
+		}
+		
+		/* filters don't fail */
+		return true;
+	}
+	
+	protected function _validation(&$field,$rule,$param) {
+		$class_name = $this->_normalize_rule($rule);
+		$short_rule = substr($class_name,9);
+
+		/* default error */
+		$this->error_string = '%s is not valid.';
+
+		if (isset($this->attached[$class_name])) {
+			$success = $this->attached[$class_name]($field, $param, $this->error_string, $this->field_data, $this);
+		} elseif ($this->loaded[$class_name]) {
+			$success = $this->loaded[$class_name]->validate($field, $param);
+		} elseif (class_exists($class_name,true)) {
+			$this->loaded[$class_name] = new $class_name($this->field_data, $this->error_string);
+			$success = $this->loaded[$class_name]->validate($field, $param);
+		} elseif (function_exists($short_rule)) {
+			$success = $short_rule($field,$param);
+		} else {
+			$this->error_string = 'Could not validate %s against '.$rule;
+		}
+
+		if ($success !== false) {
+			if (!is_bool($success)) {
+				$field = $success;
+				$success = true;
+			}
+		} else {
+			$human = ($human) ? $human : strtolower(str_replace('_', ' ', $rule));
+			
+			if (strpos($param, ',') !== false) {
+				$param = str_replace(',', ', ', $param);
+				
+				if (($pos = strrpos($param, ', ')) !== false) {
+					$param = substr_replace($param, ' or ', $pos, 2);
+				}
+			}
+			
+			$this->errors->add(sprintf($this->error_string, $human, $param));
+		}
+		
+		return $success;
+	}
 
 	/**
-	 * multiple
-	 * Insert description here
-	 *
-	 * @param $rules
-	 * @param $fields
-	 *
-	 * @return
-	 *
-	 * @access
-	 * @static
-	 * @throws
-	 * @example
-	 */
+	* multiple
+	* Insert description here
+	*
+	* @param $rules
+	* @param $fields
+	*
+	* @return
+	*
+	* @access
+	* @static
+	* @throws
+	* @example
+	*/
 	public function multiple($rules, &$fields) {
 		$this->field_data = &$fields;
 
@@ -377,31 +414,15 @@ class Validate {
 
 		return $this;
 	}
-
-	/**
-	 * load_plugin
-	 * Insert description here
-	 *
-	 * @param $class_name
-	 * @param $is_filter
-	 *
-	 * @return
-	 *
-	 * @access
-	 * @static
-	 * @throws
-	 * @example
-	 */
-	protected function load_plugin($class_name,$is_filter) {
-		$plugin = false;
-
-		if (class_exists($class_name,true)) {
-			$plugin = ($is_filter) ? new $class_name($this->field_data) : new $class_name($this->field_data, $this->error_string);
-		}
-
-		/* if it's not there then it might be a built in function */
-
-		return $plugin;
+	
+	protected function _normalize_rule($name) {
+		/* normalize to lowercase */
+		$name = strtolower($name);
+		
+		/* if validate or filter is already prepended */
+		$prefix = (substr($name,0,9) != 'validate_' && (substr($name,0,7) != 'filter_')) ? 	'validate_' : '';
+		
+		return $prefix.$name;
 	}
 
 } /* end class */
