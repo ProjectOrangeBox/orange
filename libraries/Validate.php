@@ -33,6 +33,8 @@ class Validate {
 	* @var string
 	*/
 	protected $error_string = '';
+	protected $error_human = '';
+	protected $error_params = '';
 
 	/**
 	* track if the combined cached configuration has been loaded
@@ -318,6 +320,18 @@ class Validate {
 					$param = $match[2];
 				}
 
+				$this->error_human = ($human) ? $human : strtolower(str_replace('_', ' ', $rule));
+	
+				if (strpos($param, ',') !== false) {
+					$this->error_params = str_replace(',', ', ', $param);
+					
+					if (($pos = strrpos($this->error_params, ', ')) !== false) {
+						$this->error_params = substr_replace($this->error_params, ' or ', $pos, 2);
+					}
+				} else {
+					$this->error_params = $param;
+				}
+
 				/* take action on a validation or filter - filters MUST always start with "filter_" */
 				$success = (substr($rule,0,7) == 'filter_') ? $this->_filter($field,$rule,$param) : $this->_validation($field,$rule,$param);
 			}
@@ -329,7 +343,7 @@ class Validate {
 	protected function _filter(&$field,$rule,$param) {
 		$class_name = $this->_normalize_rule($rule);
 		$short_rule = substr($class_name,7);
-		
+
 		if (isset($this->attached[$class_name])) {
 			$this->attached[$class_name]($field, $param);
 		} elseif ($this->loaded[$class_name]) {
@@ -338,9 +352,9 @@ class Validate {
 			$this->loaded[$class_name] = new $class_name($field);
 			$this->loaded[$class_name]->filter($field, $param);
 		} elseif (function_exists($short_rule)) {
-			$field = $short_rule($field,$param);
+			$field = ($param) ? $short_rule($field,$param) : $short_rule($field);
 		} else {
-			$this->error_string = 'Could not filter %s against '.$rule;
+      throw new Exception('Could not filter '.$rule);
 		}
 		
 		/* filters don't fail */
@@ -362,9 +376,9 @@ class Validate {
 			$this->loaded[$class_name] = new $class_name($this->field_data, $this->error_string);
 			$success = $this->loaded[$class_name]->validate($field, $param);
 		} elseif (function_exists($short_rule)) {
-			$success = $short_rule($field,$param);
+			$success = ($param) ? $short_rule($field,$param) : $short_rule($field);
 		} else {
-			$this->error_string = 'Could not validate %s against '.$rule;
+      throw new Exception('Could not validate '.$rule);
 		}
 
 		if ($success !== false) {
@@ -373,20 +387,14 @@ class Validate {
 				$success = true;
 			}
 		} else {
-			$human = ($human) ? $human : strtolower(str_replace('_', ' ', $rule));
-			
-			if (strpos($param, ',') !== false) {
-				$param = str_replace(',', ', ', $param);
-				
-				if (($pos = strrpos($param, ', ')) !== false) {
-					$param = substr_replace($param, ' or ', $pos, 2);
-				}
-			}
-			
-			$this->errors->add(sprintf($this->error_string, $human, $param));
+			$this->add_error();
 		}
 		
 		return $success;
+	}
+
+	protected function add_error() {
+		$this->errors->add(sprintf($this->error_string, $this->error_human, $this->error_params));
 	}
 
 	/**

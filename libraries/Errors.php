@@ -321,8 +321,9 @@ class Errors {
 			->set_status_header($status_code)
 			->set_content_type($mime_type, $charset)
 			->set_output(view($view_path,$data))
-			->_display()
-			->exit($exit_status);
+			->_display();
+		
+		$this->output->exit($exit_status);
 	}
 
 } /* end class */
