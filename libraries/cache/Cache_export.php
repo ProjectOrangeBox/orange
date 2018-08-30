@@ -94,7 +94,7 @@ class Cache_export extends CI_Driver {
 		$ttl = ($ttl) ? $ttl : $this->parent->ttl();
 
 		if (is_array($data) || is_object($data)) {
-			$data = '<?php return '.str_replace('stdClass::__set_state', '(object)', var_export($data, true)).';';
+			$data = '<?php return '.str_replace('stdClass::__set_state','(object)',var_export($data, true)).';';
 		}
 
 		atomic_file_put_contents($this->config['cache_path'].$id.'.meta.php', '<?php return '.var_export(['strlen' => strlen($data), 'time' => time(), 'ttl' => (int) $ttl, 'expire' => (time() + $ttl)], true).';');

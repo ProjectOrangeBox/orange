@@ -462,7 +462,7 @@ if (!function_exists('convert_to_string')) {
 		/* return on first match multiple exists */
 
 		if (is_array($value)) {
-			return var_export($value, true);
+			return str_replace("stdClass::__set_state", "(object)",var_export($value, true));
 		}
 
 		if ($value === true) {
