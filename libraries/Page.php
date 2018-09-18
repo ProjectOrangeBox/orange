@@ -79,52 +79,10 @@ class Page {
 	*
 	*/
 	public function route($route='') {
+		/* convert to file system safe */
 		$this->route = str_replace('-', '_',$route);
 
 		return $this;
-	}
-
-	/**
-	* title
-	* Insert description here
-	*
-	* @param $title
-	*
-	* @return $this
-	*
-	*/
-	public function title($title = '',$priority = 50) {
-		return $this->add('title',$title,$priority);
-	}
-
-	/**
-	* meta
-	* Insert description here
-	*
-	* @param $attr
-	* @param $name
-	* @param $content
-	* @param $priority integer
-	*
-	* @return $this
-	*
-	*/
-	public function meta($attr, $name, $content = null,$priority = 50) {
-		return $this->add('meta','<meta '.$attr.'="'.$name.'"'.(($content) ? ' content="'.$content.'"' : '').'>'.PHP_EOL,$priority);
-	}
-
-	/**
-	* body_class
-	* Insert description here
-	*
-	* @param $class
-	* @param $priority integer
-	*
-	* @return $this
-	*
-	*/
-	public function body_class($class,$priority = 50) {
-		return (is_array($class)) ? $this->_body_class($class,$priority) : $this->_body_class(explode(' ',$class));
 	}
 
 	/**
@@ -222,29 +180,9 @@ class Page {
 	}
 
 	/**
-	* css
-	* Insert description here
-	*
-	* @param $file
-	* @param $priority integer
-	*
-	* @return $this
-	*
-	*/
-	public function css($file = '',$priority = 50) {
-		if (is_array($file)) {
-			foreach ($file as $f) {
-				$this->css($f,$priority);
-			}
-			return $this;
-		}
-
-		return $this->add('css',$this->link_html($file).PHP_EOL,$priority);
-	}
-
-	/**
 	* link_html
-	* Insert description here
+	* create and return html link
+	* <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
 	*
 	* @param $file
 	*
@@ -256,8 +194,80 @@ class Page {
 	}
 
 	/**
+	* script_html
+	* create and return html script
+	* <script src="//cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.11/handlebars.min.js"></script>
+	*
+	* @param $file
+	*
+	* @return string
+	*
+	*/
+	public function script_html($file) {
+		return $this->ary2element('script', array_merge($this->config['script_attributes'], ['src' => $file]),'');
+	}
+
+
+	/**
+	* meta
+	* <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+	*
+	* @param $attr
+	* @param $name
+	* @param $content
+	* @param $priority integer
+	*
+	* @return $this
+	*
+	*/
+	public function meta($attr, $name, $content = null,$priority = 50) {
+		return $this->add('meta','<meta '.$attr.'="'.$name.'"'.(($content) ? ' content="'.$content.'"' : '').'>'.PHP_EOL,$priority);
+	}
+
+	/**
+	* script
+	* <script>*</script>
+	*
+	* @param $script
+	* @param $priority integer
+	*
+	* @return $this
+	*
+	*/
+	public function script($script,$priority = 50) {
+		return $this->add('script',$script.PHP_EOL,$priority);
+	}
+
+	/**
+	* domready
+	* <script>%%*%%</script>
+	*
+	* @param $script
+	* @param $priority integer
+	*
+	* @return $this
+	*
+	*/
+	public function domready($script,$priority = 50) {
+		return $this->add('domready',$script.PHP_EOL,$priority);
+	}
+
+	/**
+	* title
+	* <title>SkyNet</title>
+	*
+	* @param $title
+	*
+	* @return $this
+	*
+	*/
+	public function title($title = '',$priority = 50) {
+		return $this->add('title',$title,$priority);
+	}
+
+	/**
 	* style
-	* Insert description here
+	* <style>*</style>
 	*
 	* @param $style
 	* @param $priority integer
@@ -271,7 +281,7 @@ class Page {
 
 	/**
 	* js
-	* Insert description here
+	* <script src="//ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
 	*
 	* @param $file
 	* @param $priority integer
@@ -291,82 +301,24 @@ class Page {
 	}
 
 	/**
-	* script_html
-	* Insert description here
+	* css
+	* <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
 	*
 	* @param $file
-	*
-	* @return string
-	*
-	*/
-	public function script_html($file) {
-		return $this->ary2element('script', array_merge($this->config['script_attributes'], ['src' => $file]),'');
-	}
-
-	/**
-	* js_variable
-	* Insert description here
-	*
-	* @param $key
-	* @param $value
 	* @param $priority integer
 	*
 	* @return $this
 	*
 	*/
-	public function js_variable($key,$value,$priority = 50,$raw=false) {
-		if ($raw) {
-			$value = 'var '.$key.'='.$value.';' ;
-		} else {
-			$value = ((is_scalar($value)) ? 'var '.$key.'="'.str_replace('"', '\"', $value).'";' : 'var '.$key.'='.json_encode($value, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE).';');
+	public function css($file = '',$priority = 50) {
+		if (is_array($file)) {
+			foreach ($file as $f) {
+				$this->css($f,$priority);
+			}
+			return $this;
 		}
 
-		return $this->add('js_variables',$value,$priority);
-	}
-
-	/**
-	* js_variables
-	* Insert description here
-	*
-	* @param $array
-	*
-	* @return $this
-	*
-	*/
-	public function js_variables($array) {
-		foreach ($array as $k => $v) {
-			$this->js_variable($k, $v);
-		}
-
-		return $this;
-	}
-
-	/**
-	* script
-	* Insert description here
-	*
-	* @param $script
-	* @param $priority integer
-	*
-	* @return $this
-	*
-	*/
-	public function script($script,$priority = 50) {
-		return $this->add('script',$script.PHP_EOL,$priority);
-	}
-
-	/**
-	* domready
-	* Insert description here
-	*
-	* @param $script
-	* @param $priority integer
-	*
-	* @return $this
-	*
-	*/
-	public function domready($script,$priority = 50) {
-		return $this->add('domready',$script.PHP_EOL,$priority);
+		return $this->add('css',$this->link_html($file).PHP_EOL,$priority);
 	}
 
 	/**
@@ -389,6 +341,58 @@ class Page {
 		}
 
 		return $this->add($name,$this->ary2element($name,$attributes,$content),$priority);
+	}
+
+	/**
+	* js_variable
+	* <script>*</script>
+	*
+	* @param $key
+	* @param $value
+	* @param $priority integer
+	*
+	* @return $this
+	*
+	*/
+	public function js_variable($key,$value,$priority = 50,$raw=false) {
+		if ($raw) {
+			$value = 'var '.$key.'='.$value.';' ;
+		} else {
+			$value = ((is_scalar($value)) ? 'var '.$key.'="'.str_replace('"', '\"', $value).'";' : 'var '.$key.'='.json_encode($value, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE).';');
+		}
+
+		return $this->add('js_variables',$value,$priority);
+	}
+
+	/**
+	* js_variables
+	* <script>*</script>
+	*
+	* @param $array
+	*
+	* @return $this
+	*
+	*/
+	public function js_variables($array) {
+		foreach ($array as $k => $v) {
+			$this->js_variable($k, $v);
+		}
+
+		return $this;
+	}
+
+	/**
+	* body_class
+	* class="*"
+	*
+	* @param $class
+	* @param $priority integer
+	*
+	* @return $this
+	*
+	*/
+	public function body_class($class,$priority = 50) {
+		return (is_array($class)) ? $this->_body_class($class,$priority) : $this->_body_class(explode(' ',$class));
 	}
 
 	/**
