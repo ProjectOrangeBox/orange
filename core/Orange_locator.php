@@ -110,7 +110,8 @@ class Orange_locator {
 	 */
 	protected static function write_cache($array) {
 		$php1 = $php2 = '';
-
+		
+		/* traverse "up" this many folder to create $baseDir */
 		for ($i = 0; $i < self::$folder_levels; $i++) {
 			$php1 .= 'dirname(';
 			$php2 .= ')';
