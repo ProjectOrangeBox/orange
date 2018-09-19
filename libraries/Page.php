@@ -15,15 +15,14 @@
 * libraries: event
 * models:
 * helpers:
-* functions:
+* functions: view
 * constants: PAGE_MIN
 *
-* @ used but not required
 */
 class Page {
 	protected $variables = [];
 	protected $prevent_duplicate = [];
-	protected $route;
+	protected $default_template = '';
 
 	protected $config;
 	protected $load;
@@ -35,14 +34,7 @@ class Page {
 
 	/**
 	* __construct
-	* Insert description here
 	*
-	* @return
-	*
-	* @access
-	* @static
-	* @throws
-	* @example
 	*/
 	public function __construct(&$config=[]) {
 		$this->config = &$config;
@@ -59,9 +51,13 @@ class Page {
 		$page_configs = $this->config[$this->page_variable_prefix];
 
 		if (is_array($page_configs)) {
-			foreach ($page_configs as $key=>$value) {
-				if (method_exists($this,$key)) {
-					$this->$key($value);
+			foreach ($page_configs as $method=>$parms) {
+				if (method_exists($this,$method)) {
+					if (is_array($parms)) {
+						call_user_func_array([$this,$method],$parms);
+					} else {
+						call_user_func([$this,$method],$parms);
+					}
 				}
 			}
 		}
@@ -70,24 +66,27 @@ class Page {
 	}
 
 	/**
-	* route
-	* Insert description here
+	* set_default_template
 	*
-	* @param $route
+	* @param $template
 	*
 	* @return $this
 	*
 	*/
-	public function route($route='') {
+	public function set_default_template($template='') {
 		/* convert to file system safe */
-		$this->route = str_replace('-', '_',$route);
+		$this->default_template = $template;
 
 		return $this;
 	}
 
 	/**
 	* render
-	* Insert description here
+	* basic view rendering
+	* with:
+	* default template if none included
+	* event triggering
+	* optionally extend another view
 	*
 	* @param $view string
 	* @param $data array
@@ -98,24 +97,25 @@ class Page {
 	public function render($view = null, $data = null) {
 		log_message('debug', 'page::render::'.$view);
 
-		$view = ($view) ?? $this->route;
+		$view = ($view) ?? $this->default_template;
 
+		/* called everytime - use with caution */
 		$this->event->trigger('page.render',$this,$view);
+
+		/* called only when a trigger matches the view */
 		$this->event->trigger('page.render.'.str_replace('/','.',$view),$this,$view);
 
-		if (is_array($data)) {
-			$this->data($data);
-		}
-
 		/* this is going to be the "main" section */
-		$view_content = $this->view($view);
+		$view_content = $this->view($view,$data);
 
 		if ($this->extending) {
 			$view_content = $this->view($this->extending);
 		}
 
+		/* called everytime - use with caution  */
 		$this->event->trigger('page.render.content',$view_content,$view,$data);
 
+		/* append to the output responds */
 		$this->output->append_output($view_content);
 
 		return $this;
@@ -123,7 +123,7 @@ class Page {
 
 	/**
 	* view
-	* Insert description here
+	* basic view rendering using oranges most basic view function
 	*
 	* @param $_view_file string
 	* @param $_data array
@@ -132,9 +132,11 @@ class Page {
 	* @return mixed
 	*
 	*/
-	public function view($_view_file = null, $_data = [], $_return = true) {
+	public function view($_view_file = null, $_data = null, $_return = true) {
+		$_data = (is_array($_data)) ? 	array_merge($this->load->get_vars(),$_data) : $this->load->get_vars();
+
 		/* call core orange function view() */
-		$_buffer = view($_view_file,array_merge($this->load->get_vars(),(array)$_data));
+		$_buffer = view($_view_file,$_data);
 
 		if (is_string($_return)) {
 			$this->data($_return,$_buffer);
@@ -207,6 +209,22 @@ class Page {
 		return $this->ary2element('script', array_merge($this->config['script_attributes'], ['src' => $file]),'');
 	}
 
+	/**
+	* ary2element
+	* Insert description here
+	*
+	* @param $element
+	* @param $attributes
+	* @param $wrapper
+	*
+	* @return string
+	*
+	*/
+	public function ary2element($element, $attributes, $wrapper = false) {
+		$output = '<'.$element._stringify_attributes($attributes);
+
+		return ($wrapper === false) ? $output.'/>' : $output.'>'.$wrapper.'</'.$element.'>';
+	}
 
 	/**
 	* meta
@@ -323,7 +341,7 @@ class Page {
 
 	/**
 	* tag
-	* Insert description here
+	* Add any html tag to and page variable
 	*
 	* Unpaired html tag
 	* tag('link',['rel'=>'icon','type'=>'image/x-icon','href'=>'/asset/image.jpg'],50)
@@ -396,34 +414,18 @@ class Page {
 	}
 
 	/**
-	* ary2element
-	* Insert description here
-	*
-	* @param $element
-	* @param $attributes
-	* @param $wrapper
-	*
-	* @return string
-	*
-	*/
-	public function ary2element($element, $attributes, $wrapper = false) {
-		$output = '<'.$element._stringify_attributes($attributes);
-
-		return ($wrapper === false) ? $output.'/>' : $output.'>'.$wrapper.'</'.$element.'>';
-	}
-
-	/**
-	* add element
-	* Insert description here
+	* add
+	* append to page variable with optional priority & duplicate prevention
 	*
 	* @param $name
 	* @param $value
-	* @param $priority (-100 to 100)
+	* @param $priority default 50 the LOWER the number the higher priority
+	* @param $prevent_duplicates (True/False)
 	*
 	* @return $this
 	*
 	*/
-	public function add($name,$value,$priority=50,$prevent_duplicates=true) {
+	public function add($name,$value,$priority = 50,$prevent_duplicates = true) {
 		$key = md5($value);
 
 		if (!isset($this->prevent_duplicate[$key]) || !$prevent_duplicates) {
@@ -437,8 +439,8 @@ class Page {
 
 	/**
 	* var
-	* retrieve a page variable (with "post" processing)
-	* title, meta, body_class, css, style, js, script, js_variables, script, domready
+	* retrieve a page variable (with "post" priority processing)
+	* included page variables: title, meta, body_class, css, style, js, script, js_variables, script, domready
 	* any additional "tags"
 	*
 	* @param $name
