@@ -125,24 +125,24 @@ class Page {
 	* view
 	* basic view rendering using oranges most basic view function
 	*
-	* @param $_view_file string
-	* @param $_data array
-	* @param $_return mixed
+	* @param $view_file string
+	* @param $data array
+	* @param $return mixed
 	*
 	* @return mixed
 	*
 	*/
-	public function view($_view_file = null, $_data = null, $_return = true) {
-		$_data = (is_array($_data)) ? 	array_merge($this->load->get_vars(),$_data) : $this->load->get_vars();
+	public function view($view_file = null, $data = null, $return = true) {
+		$data = (is_array($data)) ? array_merge($this->load->get_vars(),$data) : $this->load->get_vars();
 
 		/* call core orange function view() */
-		$_buffer = view($_view_file,$_data);
+		$buffer = view($view_file,$data);
 
-		if (is_string($_return)) {
-			$this->data($_return,$_buffer);
+		if (is_string($return)) {
+			$this->data($return,$buffer);
 		}
 
-		return ($_return === true) ? $_buffer : $this;
+		return ($return === true) ? $buffer : $this;
 	}
 
 	/**
@@ -171,7 +171,7 @@ class Page {
 	* @return $this
 	*
 	*/
-	public function extend($template=null) {
+	public function extend($template = null) {
 		if ($this->extending) {
 			throw new Exception('You are already extending "'.$this->extending.'" therefore we cannot extend "'.$name.'".');
 		}
@@ -372,7 +372,7 @@ class Page {
 	* @return $this
 	*
 	*/
-	public function js_variable($key,$value,$priority = 50,$raw=false) {
+	public function js_variable($key,$value,$priority = 50,$raw = false) {
 		if ($raw) {
 			$value = 'var '.$key.'='.$value.';' ;
 		} else {
@@ -466,7 +466,7 @@ class Page {
 			}
 		}
 
-		return $content;
+		return trim($content);
 	}
 
 	protected function _body_class($class,$priority = 50) {
