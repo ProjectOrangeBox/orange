@@ -37,7 +37,7 @@ class Event {
 	 *
 	 * @return $this
 	 *
-   * @access public
+	 * @access public
 	 * @example register('open.page',function(&$var1) { echo "hello $var1"; },-100);
 	 */
 	public function register($name, $closure, $priority = 0) {
@@ -50,7 +50,7 @@ class Event {
 		}
 
 		/* clean up the name */
-		$this->_normalize_name($name);
+		$name = $this->_normalize_name($name);
 
 		/* log a debug event */
 		log_message('debug', 'event::register::'.$name);
@@ -70,12 +70,12 @@ class Event {
 	 *
 	 * @return $this
 	 *
-   * @access public
+	 * @access public
 	 * @example trigger('open.page',$var1);
 	 */
 	public function trigger($name, &$a1 = null, &$a2 = null, &$a3 = null, &$a4 = null, &$a5 = null, &$a6 = null, &$a7 = null, &$a8 = null) {
 		/* clean up the name */
-		$this->_normalize_name($name);
+		$name = $this->_normalize_name($name);
 
 		/* log a debug event */
 		log_message('debug','event::trigger::'.$name);
@@ -112,12 +112,12 @@ class Event {
 	 *
 	 * @return boolean
 	 *
-   * @access public
+	 * @access public
 	 * @example has('page.load');
 	 */
 	public function has($name) {
 		/* clean up the name */
-		$this->_normalize_name($name);
+		$name = $this->_normalize_name($name);
 
 		return (isset($this->listeners[$name]) && count($this->listeners[$name]) > 0);
 	}
@@ -127,7 +127,7 @@ class Event {
 	 *
 	 * @return array
 	 *
-   * @access public
+	 * @access public
 	 */
 	public function events() {
 		return array_keys($this->listeners);
@@ -140,11 +140,11 @@ class Event {
 	 *
 	 * @return integer
 	 *
-   * @access public
+	 * @access public
 	 */
 	public function count($name) {
 		/* clean up the name */
-		$this->_normalize_name($name);
+		$name = $this->_normalize_name($name);
 
 		return ($this->has($name)) ? array_sum(array_map('count',$this->listeners[$name])) : 0;
 	}
@@ -156,10 +156,10 @@ class Event {
 	 *
 	 * @return string
 	 *
-   * @access protected
+	 * @access protected
 	 */
-	protected function _normalize_name(&$name) {
-		$name = trim(preg_replace('/[^a-z0-9]+/','.',strtolower($name)),'.');
+	protected function _normalize_name($name) {
+		return trim(preg_replace('/[^a-z0-9]+/','.',strtolower($name)),'.');
 	}
 
 } /* end class */

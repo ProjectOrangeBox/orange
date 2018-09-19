@@ -93,7 +93,7 @@ class Cache extends CI_Cache {
 		log_message('debug', 'delete_cache_by_tags '.implode(', ', $tags));
 
 		/* trigger a event incase somebody else needs to know send in our array of tags by reference */
-		$this->event->trigger('delete_cache_by_tags',$tags);
+		$this->event->trigger('delete.cache.by.tags',$tags);
 
 		/* get all of the currently loaded cache driver cache keys */
 		$cached_keys = $this->cache_info();

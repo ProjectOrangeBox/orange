@@ -103,7 +103,7 @@ class Page {
 		$this->event->trigger('page.render',$this,$view);
 
 		/* called only when a trigger matches the view */
-		$this->event->trigger('page.render.'.str_replace('/','.',$view),$this,$view);
+		$this->event->trigger('page.render.'.$view,$this,$view);
 
 		/* this is going to be the "main" section */
 		$view_content = $this->view($view,$data);
