@@ -94,7 +94,7 @@ class MY_Config extends CI_Config {
 	}
 
 	/**
-	 * flush the cached data
+	 * flush the cached data for the NEXT request
 	 *
 	 * @return boolean success or failure
 	 *

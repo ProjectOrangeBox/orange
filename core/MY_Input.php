@@ -238,9 +238,11 @@ class MY_Input extends CI_Input {
 	 * @examples cookies() - returns all COOKIE items without XSS filter
 	 */
 	public function cookie($index = null, $default = null, $xss_clean = false) {
-		$value = $this->_fetch_from_array($_COOKIE, $index, $xss_clean);
+		$value = $this->_fetch_from_array($_COOKIE, $index, false);
 
-		return ($value === null) ? $default : $value;
+		$value = ($value === null) ? $default : $value;
+		
+		return ($xss_clean) ? $this->security->xss_clean($value) : $value;
 	}
 
 } /* end class */
