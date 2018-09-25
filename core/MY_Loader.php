@@ -12,10 +12,10 @@
  *
  * required
  * core:
- * libraries:
+ * libraries: config, orange_locator
  * models:
  * helpers:
- * functions:
+ * functions: log_message, config, load_config
  *
  */
 class MY_Loader extends CI_Loader {
