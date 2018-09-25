@@ -45,9 +45,9 @@ class MY_Config extends CI_Config {
 		log_message('debug', 'MY_Config::item_dot::'.$setting);
 
 		$this->_load_config();
-		
+
 		$key = false;
-		
+
 		if (strpos($setting,'.')) {
 			list($file,$key) = explode('.', strtolower($setting), 2);
 		} else {
@@ -62,7 +62,7 @@ class MY_Config extends CI_Config {
 
 		return $value;
 	}
-	
+
 	/**
 	 * Change dot notation config value
 	 * NOT Saved between requests
@@ -78,7 +78,7 @@ class MY_Config extends CI_Config {
 	 */
 	public function set_dot_item($setting,$value=null) {
 		log_message('debug', 'MY_Config::set_item_dot::'.$setting);
-	
+
 		$this->_load_config();
 
 		list($file,$key) = explode('.', strtolower($setting), 2);
@@ -88,7 +88,7 @@ class MY_Config extends CI_Config {
 		} else {
 			$this->config[$file] = $value;
 		}
-		
+
 		/* allow chaining */
 		return $this;
 	}
@@ -111,12 +111,8 @@ class MY_Config extends CI_Config {
 
 	protected function _load_config() {
 		if (!$this->setup) {
-			if (class_exists('CI_Controller',false)) {
-				if (class_exists('Cache_export',false)) {
-					$this->setup = true;
-					$this->config = $this->_load_combined_config();
-				}
-			}
+			$this->setup = true;
+			$this->config = $this->_load_combined_config();
 		}
 	}
 
@@ -139,9 +135,9 @@ class MY_Config extends CI_Config {
 			/* load the application configs */
 			foreach (glob(APPPATH.'/config/*.php') as $filepath) {
 				$basename = basename($filepath,'.php');
-				
+
 				$config = load_config($basename);
-				
+
 				if (is_array($config)) {
 					foreach ($config as $key=>$value) {
 						$built_config[strtolower($basename)][strtolower($key)] = $value;
