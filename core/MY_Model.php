@@ -52,15 +52,9 @@ class MY_Model extends CI_Model {
 
 	/**
 	 * object
-	 * Insert description here
 	 *
+	 * @return object
 	 *
-	 * @return
-	 *
-	 * @access
-	 * @static
-	 * @throws
-	 * @example
 	 */
 	public function object() {
 		return $this->object;
@@ -68,15 +62,9 @@ class MY_Model extends CI_Model {
 
 	/**
 	 * rules
-	 * Insert description here
 	 *
+	 * @return models rules
 	 *
-	 * @return
-	 *
-	 * @access
-	 * @static
-	 * @throws
-	 * @example
 	 */
 	public function rules() {
 		return $this->rules;
@@ -84,33 +72,24 @@ class MY_Model extends CI_Model {
 
 	/**
 	 * rule
-	 * Insert description here
+	 * get a rule by column name or column name and section
 	 *
-	 * @param $name
-	 * @param $second
+	 * @param $column
+	 * @param $section
 	 *
-	 * @return
-	 *
-	 * @access
-	 * @static
-	 * @throws
-	 * @example
+	 * @return array
 	 */
-	public function rule($name, $second = null) {
-		return ($second) ? $this->rules[$name][$second] : $this->rules[$name];
+	public function rule($key, $section = null) {
+		return ($section) ? $this->rules[$key][$section] : $this->rules[$key];
 	}
 
 	/**
 	 * clear
-	 * Insert description here
+	 * wrapper to clear errors object
 	 *
 	 *
-	 * @return
+	 * @return $this
 	 *
-	 * @access
-	 * @static
-	 * @throws
-	 * @example
 	 */
 	public function clear() {
 		ci('errors')->clear();
@@ -157,17 +136,20 @@ class MY_Model extends CI_Model {
 		}
 
 		/* return if we got any errors */
-		return !ci('errors')->has();
+		return !(ci('errors')->has());
 	}
 
 	/**
 	 * remove_columns
-	 * Insert description here
+	 *
+	 * remove matching keys in the data array from input in columns
+	 * remove the matching keys in the data array from input in columns
+	 * columns can be a array ['firstname','lastname','age'] or comma sep string 'firstname,lastname,age'
 	 *
 	 * @param $data array
 	 * @param $columns string or array
 	 *
-	 * @return object
+	 * @return $this
 	 *
 	 */
 	public function remove_columns(&$data, $columns = []) {
@@ -182,12 +164,15 @@ class MY_Model extends CI_Model {
 
 	/**
 	 * only_columns
-	 * Insert description here
+	 *
+	 * only the matching keys in the data array from input in columns
+	 * columns can be a array ['firstname','lastname','age'] or comma sep string 'firstname,lastname,age'
 	 *
 	 * @param $data array
 	 * @param $columns string or array
 	 *
-	 * @return object
+	 * @return $this
+	 *
 	 */
 	public function only_columns(&$data, $columns = []) {
 		/* convert string with commas to array */
@@ -204,18 +189,28 @@ class MY_Model extends CI_Model {
 		return $this;
 	}
 
-	/*
-	remap the "fake" column name to real column names
-	this is when a rule key is password_not_empty but the field is password for example
-	*/
+	/**
+	 * remap_columns
+	 *
+	 * 'long_description' => ['field' => 'description', 'label' => 'Description', 'rules' => 'max_length[255]|filter_input[255]|is_uniquem[o_role_model.description.id]'],
+	 *
+	 * This remaps "long_description" into a new array where it's now "description"
+	 *
+	 * @param $data array passed by reference
+	 * @param $rules array
+	 *
+	 * @return $this
+	 */
 	public function remap_columns(&$data, $rules = []) {
 		if (!$this->skip_rules && count($rules)) {
 			$new_data = [];
+
 			foreach ($rules as $key=>$rule) {
 				if (isset($data[$key])) {
 					$new_data[$rule['field']] = $data[$key];
 				}
 			}
+
 			$data = $new_data;
 		}
 

@@ -23,17 +23,13 @@ class MY_Output extends CI_Output {
 
 /**
  * json
- * Insert description here
+ * Send a Json responds
  *
+ * @return $this
  *
- * @return
- *
- * @access
- * @static
- * @throws
- * @example
  */
 	public function json($data = null, $val = null, $raw = false) {
+		/* what the heck do we have here... */
 		if ($raw && $data === null) {
 			$json = $val;
 		} elseif ($raw && $data !== null) {
@@ -60,15 +56,10 @@ class MY_Output extends CI_Output {
 
 /**
  * nocache
- * Insert description here
+ * Send a nocache header
  *
+ * @return $this
  *
- * @return
- *
- * @access
- * @static
- * @throws
- * @example
  */
 	public function nocache() {
 		$this
@@ -82,7 +73,7 @@ class MY_Output extends CI_Output {
 
 /**
  * set_cookie
- * Insert description here
+ * Wrapper for input's set cookie because it more of a "output" function
  *
  * @param $name
  * @param $value
@@ -93,40 +84,33 @@ class MY_Output extends CI_Output {
  * @param $secure
  * @param $httponly
  *
- * @return
+ * @return $this
  *
- * @access
- * @static
- * @throws
- * @example
  */
 	public function set_cookie($name = '', $value = '', $expire = '', $domain = '', $path = '/', $prefix = '', $secure = FALSE, $httponly = FALSE) {
-		return ci()->input->set_cookie($name, $value, $expire, $domain, $path, $prefix, $secure, $httponly);
+		ci('input')->set_cookie($name, $value, $expire, $domain, $path, $prefix, $secure, $httponly);
+
+		return $this;
 	}
 
 /**
  * delete_all_cookies
- * Insert description here
+ * Delete all cookies (ie. set to a time in the past since which will make the browser ignore them
  *
+ * @return $this
  *
- * @return
- *
- * @access
- * @static
- * @throws
- * @example
  */
 	public function delete_all_cookies() {
-		foreach ($_COOKIE as $key=>$value) {
-			setcookie($key,$value,(time() - 3600),config('config.cookie_path','/'));
+		foreach (ci('input')->cookie() as $name=>$value) {
+			ci('input')->set_cookie($name, $value, (time() - 3600),config('config.base_url'));
 		}
 
 		return $this;
 	}
-	
-	/*
-	provide this to allow mocking
-	*/
+
+/**
+ * provide this to allow mocking
+ */
 	public function exit($code=1) {
 		exit($code);
 	}
