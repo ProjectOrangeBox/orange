@@ -51,12 +51,14 @@ class Page {
 		$page_configs = $this->config[$this->page_variable_prefix];
 
 		if (is_array($page_configs)) {
-			foreach ($page_configs as $method=>$parms) {
+			foreach ($page_configs as $method=>$parameters) {
 				if (method_exists($this,$method)) {
-					if (is_array($parms)) {
-						call_user_func_array([$this,$method],$parms);
+					if (is_array($parameters)) {
+						foreach ($parameters as $p) {
+							call_user_func([$this,$method],$p);
+						}
 					} else {
-						call_user_func([$this,$method],$parms);
+						call_user_func([$this,$method],$parameters);
 					}
 				}
 			}
@@ -239,6 +241,10 @@ class Page {
 	*
 	*/
 	public function meta($attr, $name, $content = null,$priority = 50) {
+		if (is_array($attr)) {
+			extract($attr);
+		}
+	
 		return $this->add('meta','<meta '.$attr.'="'.$name.'"'.(($content) ? ' content="'.$content.'"' : '').'>'.PHP_EOL,$priority);
 	}
 
