@@ -126,7 +126,7 @@ class Event {
 		log_message('debug','event::trigger::'.$name);
 
 		/* do we even have any events with this name? */
-		if ($this->has($name)) {
+		if (isset($this->listeners[$name])) {
 			foreach ($this->_listeners($name) as $listener) {
 				if ($listener(...$arguments) === false) {
 					break;
@@ -179,7 +179,7 @@ class Event {
 		/* clean up the name */
 		$name = $this->_normalize_name($name);
 
-		return ($this->has($name)) ? count($this->listeners[$name][1]) : 0;
+		return (isset($this->listeners[$name])) ? count($this->listeners[$name][1]) : 0;
 	}
 
 	/**
@@ -249,18 +249,27 @@ class Event {
 	protected function _normalize_name($name) {
 		return trim(preg_replace('/[^a-z0-9]+/','.',strtolower($name)),'.');
 	}
-
+	
+	/**
+	 * Do the actual sorting
+	 *
+	 * @param $name string
+	 *
+	 * @return array
+	 *
+	 * @access protected
+	 */
 	protected function _listeners($name) {
 		$name = $this->_normalize_name($name);
 		$listeners = [];
 
 		if (isset($this->listeners[$name])) {
-			// The list is not sorted
+			/* The list is not sorted */
 			if (!$this->listeners[$name][0]) {
-				// Sort it!
+				/* Sort it! */
 				array_multisort($this->listeners[$name][1], SORT_NUMERIC, $this->listeners[$name][2]);
 
-				// Mark it as sorted already!
+				/* Mark it as sorted already! */
 				$this->listeners[$name][0] = true;
 			}
 
