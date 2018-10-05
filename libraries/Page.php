@@ -461,6 +461,8 @@ class Page {
 	/* protected */
 
 	protected function _prepare_page_variable($priority_queue,$content) {
+		$content = '';
+		
 		if (is_array($priority_queue)) {
 			ksort($priority_queue);
 
