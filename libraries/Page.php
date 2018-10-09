@@ -19,9 +19,14 @@
 * constants: PAGE_MIN
 *
 */
+
+/* Follows Linux Priority negative values are higher priority and positive values are lower priority */
+define('EVENT_PRIORITY_LOW', 100);
+define('EVENT_PRIORITY_NORMAL', 0);
+define('EVENT_PRIORITY_HIGH', −100);
+
 class Page {
 	protected $variables = [];
-	protected $prevent_duplicate = [];
 	protected $default_template = '';
 
 	protected $config;
@@ -240,11 +245,11 @@ class Page {
 	* @return $this
 	*
 	*/
-	public function meta($attr, $name, $content = null,$priority = 50) {
+	public function meta($attr, $name, $content = null,$priority = EVENT_PRIORITY_NORMAL) {
 		if (is_array($attr)) {
 			extract($attr);
 		}
-	
+
 		return $this->add('meta','<meta '.$attr.'="'.$name.'"'.(($content) ? ' content="'.$content.'"' : '').'>'.PHP_EOL,$priority);
 	}
 
@@ -258,7 +263,7 @@ class Page {
 	* @return $this
 	*
 	*/
-	public function script($script,$priority = 50) {
+	public function script($script,$priority = EVENT_PRIORITY_NORMAL) {
 		return $this->add('script',$script.PHP_EOL,$priority);
 	}
 
@@ -272,20 +277,20 @@ class Page {
 	* @return $this
 	*
 	*/
-	public function domready($script,$priority = 50) {
+	public function domready($script,$priority = EVENT_PRIORITY_NORMAL) {
 		return $this->add('domready',$script.PHP_EOL,$priority);
 	}
 
 	/**
 	* title
-	* <title>SkyNet</title>
+	* <title>*</title>
 	*
 	* @param $title
 	*
 	* @return $this
 	*
 	*/
-	public function title($title = '',$priority = 50) {
+	public function title($title = '',$priority = EVENT_PRIORITY_NORMAL) {
 		return $this->add('title',$title,$priority);
 	}
 
@@ -299,13 +304,13 @@ class Page {
 	* @return $this
 	*
 	*/
-	public function style($style,$priority = 50) {
+	public function style($style,$priority = EVENT_PRIORITY_NORMAL) {
 		return $this->add('style',$style.PHP_EOL,$priority);
 	}
 
 	/**
 	* js
-	* <script src="//ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+	* <script src="*"></script>
 	*
 	* @param $file
 	* @param $priority integer
@@ -313,7 +318,7 @@ class Page {
 	* @return $this
 	*
 	*/
-	public function js($file = '',$priority = 50) {
+	public function js($file = '',$priority = EVENT_PRIORITY_NORMAL) {
 		if (is_array($file)) {
 			foreach ($file as $f) {
 				$this->js($f,$priority);
@@ -326,7 +331,7 @@ class Page {
 
 	/**
 	* css
-	* <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+	* <link href="*" rel="stylesheet">
 	*
 	* @param $file
 	* @param $priority integer
@@ -334,7 +339,7 @@ class Page {
 	* @return $this
 	*
 	*/
-	public function css($file = '',$priority = 50) {
+	public function css($file = '',$priority = EVENT_PRIORITY_NORMAL) {
 		if (is_array($file)) {
 			foreach ($file as $f) {
 				$this->css($f,$priority);
@@ -358,7 +363,7 @@ class Page {
 	* <p class="highlight" id="pid3">This is important!</p>
 	*
 	*/
-	public function tag($name,$attributes,$content = false,$priority = 50) {
+	public function tag($name,$attributes,$content = false,$priority = EVENT_PRIORITY_NORMAL) {
 		if (func_num_args() == 3 && is_integer($content)) {
 			$priority = $content;
 			$content = false;
@@ -378,7 +383,7 @@ class Page {
 	* @return $this
 	*
 	*/
-	public function js_variable($key,$value,$priority = 50,$raw = false) {
+	public function js_variable($key,$value,$priority = EVENT_PRIORITY_NORMAL,$raw = false) {
 		if ($raw) {
 			$value = 'var '.$key.'='.$value.';' ;
 		} else {
@@ -415,10 +420,10 @@ class Page {
 	* @return $this
 	*
 	*/
-	public function body_class($class,$priority = 50) {
-		return (is_array($class)) ? $this->_body_class($class,$priority) : $this->_body_class(explode(' ',$class));
+	public function body_class($class,$priority = EVENT_PRIORITY_NORMAL) {
+		return (is_array($class)) ? $this->_body_class($class,$priority) : $this->_body_class(explode(' ',$class),$priority);
 	}
-
+	
 	/**
 	* add
 	* append to page variable with optional priority & duplicate prevention
@@ -431,13 +436,14 @@ class Page {
 	* @return $this
 	*
 	*/
-	public function add($name,$value,$priority = 50,$prevent_duplicates = true) {
+	public function add($name,$value,$priority = EVENT_PRIORITY_NORMAL,$prevent_duplicates = true) {
 		$key = md5($value);
 
-		if (!isset($this->prevent_duplicate[$key]) || !$prevent_duplicates) {
-			$this->prevent_duplicate[$key] = true;
-
-			$this->variables[$name][(int)$priority][] = $value;
+		if (!isset($this->variables[$name][3][$key]) || !$prevent_duplicates) {
+			$this->variables[$name][0] = !isset($this->variables[$name]); /* sorted */
+			$this->variables[$name][1][] = (int)$priority; /* unix priority */
+			$this->variables[$name][2][] = $value; /* actual html content (string) */
+			$this->variables[$name][3][$key] = true; /* prevent duplicates */
 		}
 
 		return $this;
@@ -455,31 +461,29 @@ class Page {
 	*
 	*/
 	public function var($name) {
-		return $this->_prepare_page_variable($this->variables[$name],$this->load->get_var($this->page_variable_prefix.$name));
-	}
+		$html = $this->load->get_var($this->page_variable_prefix.$name);
 
-	/* protected */
+		if (isset($this->variables[$name])) {
+			/* The list is not sorted */
+			if (!$this->variables[$name][0]) {
+				/* sort it! */
+				array_multisort($this->variables[$name][1], SORT_NUMERIC, $this->variables[$name][2]);
 
-	protected function _prepare_page_variable($priority_queue,$content) {
-		$content = '';
-		
-		if (is_array($priority_queue)) {
-			ksort($priority_queue);
+				/* mark it as sorted */
+				$this->variables[$name][0] = true;
+			}
 
-			/* add the currently available entries */
-			foreach ($priority_queue as $priority) {
-				foreach ($priority as $string) {
-					$content .= $string;
-				}
+			foreach ($this->variables[$name][2] as $append) {
+				$html .= $append;
 			}
 		}
 
-		return trim($content);
+		return trim($html);
 	}
 
-	protected function _body_class($class,$priority = 50) {
+	protected function _body_class($class,$priority) {
 		foreach ($class as $c) {
-			$this->add('body_class',strtolower($c).' ',$priority);
+			$this->add('body_class',' '.strtolower(trim($c)).' ',$priority);
 		}
 
 		return $this;
