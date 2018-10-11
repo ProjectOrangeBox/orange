@@ -54,6 +54,8 @@ class MY_Config extends CI_Config {
 			$file = strtolower($setting);
 		}
 
+		$file = str_replace(' ','_',$file);
+
 		if ($key) {
 			$value = isset($this->config[$file], $this->config[$file][$key]) ? $this->config[$file][$key] : $default;
 		} else {
