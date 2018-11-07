@@ -223,7 +223,7 @@ class Event {
 	 *
 	 * @return $this
 	 */
-	public static function unregister_all($name='') 	{
+	public function unregister_all($name='') 	{
 		/* clean up the name */
 		$name = $this->_normalize_name($name);
 
