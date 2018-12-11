@@ -60,8 +60,8 @@
 
 /* Follows Linux Priority negative values are higher priority and positive values are lower priority */
 define('EVENT_PRIORITY_LOW', 100);
-define('EVENT_PRIORITY_NORMAL', 0);
-define('EVENT_PRIORITY_HIGH', −100);
+define('EVENT_PRIORITY_NORMAL', 50);
+define('EVENT_PRIORITY_HIGH', 1);
 
 class Event {
 	/**
