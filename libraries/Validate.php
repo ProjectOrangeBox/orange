@@ -158,24 +158,6 @@ class Validate {
 	}
 
 	/**
-	 * json_on_fail
-	 * Insert description here
-	 *
-	 *
-	 * @return
-	 *
-	 * @access
-	 * @static
-	 * @throws
-	 * @example
-	 */
-	public function json_on_fail() {
-		$this->errors->json_on_error();
-
-		return $this;
-	}
-
-	/**
 	 * success
 	 * Insert description here
 	 *

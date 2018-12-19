@@ -51,14 +51,9 @@ class Errors {
 		$this->data_count = $this->config['data_count'] ?? 'count';
 	}
 
-	public function json_on_error() {
-		if ($this->has()) {
-			$this->output->json(['ci_errors'=>$this->as_data()])->_display()->exit(1);
-		}
-
-		return $this;
-	}
-
+	/**
+	 * redirect to another page on error
+	 */
 	public function redirect_on_error($url = null) {
 		if ($this->has()) {
 			$url = (is_string($url)) ? $url : true;
@@ -68,9 +63,12 @@ class Errors {
 		return $this;
 	}
 
+	/**
+	 * show error view on error and die
+	 */
 	public function die_on_error($view = '400') {
 		if ($this->has()) {
-			$this->display($view, ['heading' => 'Validation Failed', 'message' => $this->as_html()]);
+			$this->display($view,[$this->errors_variable=>$this->as_data(),'heading'=>'Validation Failed','message'=>$this->as_html()]);
 		}
 
 		return $this;
@@ -278,7 +276,7 @@ class Errors {
 
 	/**
 	 * display
-	 * Insert description here
+	 * display error view and exit
 	 *
 	 * @param $view
 	 * @param $data
@@ -349,7 +347,7 @@ class Errors {
 			->set_content_type($mime_type, $charset)
 			->set_output(view($view_path,$data))
 			->_display();
-		
+
 		$this->output->exit($exit_status);
 	}
 
