@@ -25,6 +25,7 @@ class Errors {
 	protected $input;
 	protected $output;
 	protected $event;
+	protected $wallet;
 
 	protected $errors_variable;
 	protected $html_prefix;
@@ -39,6 +40,7 @@ class Errors {
 		$this->input = &ci('input');
 		$this->output = &ci('output');
 		$this->event = &ci('event');
+		$this->wallet = &ci('wallet');
 
 		$this->errors_variable = $this->config['errors_variable'] ?? 'ci_errors';
 
@@ -47,6 +49,31 @@ class Errors {
 
 		$this->data_records = $this->config['data_records'] ?? 'records';
 		$this->data_count = $this->config['data_count'] ?? 'count';
+	}
+
+	public function json_on_error() {
+		if ($this->has()) {
+			$this->output->json(['ci_errors'=>$this->as_data()])->_display()->exit(1);
+		}
+
+		return $this;
+	}
+
+	public function redirect_on_error($url = null) {
+		if ($this->has()) {
+			$url = (is_string($url)) ? $url : true;
+			$this->wallet->msg($this->as_html(), 'red', $url);
+		}
+
+		return $this;
+	}
+
+	public function die_on_error($view = '400') {
+		if ($this->has()) {
+			$this->display($view, ['heading' => 'Validation Failed', 'message' => $this->as_html()]);
+		}
+
+		return $this;
 	}
 
 	/**

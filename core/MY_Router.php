@@ -116,10 +116,10 @@ class MY_Router extends CI_Router {
 				$this->directory = $rec['directory'];
 				$this->clean_class = $rec['clean_controller'];
 
-				/*
-				if the method is set on the controller array use that instead
-				this captures 404s
-				*/
+				/**
+				 * if the method is set on the controller array use that instead
+				 * this captures 404s
+				 */
 				if ($rec['method']) {
 					$this->clean_method = $rec['method'];
 				} else {

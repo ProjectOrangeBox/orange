@@ -44,12 +44,6 @@ class MY_Input extends CI_Input {
 		log_message('info', 'MY_Input Class Initialized');
 	}
 
-	public function set_request($data=[]) {
-		$this->_request = $data;
-		
-		return $this;
-	}
-
 	/**
 	 * fetch post or put data
 	 *
@@ -74,7 +68,7 @@ class MY_Input extends CI_Input {
 	}
 
 	/**
-	 * request_replace
+	 * set_request
 	 * replace or add input data
 	 *
 	 * @param string $index input parameter name
@@ -82,9 +76,9 @@ class MY_Input extends CI_Input {
 	 *
 	 * @return $this
 	 *
-	 * @examples request_replace('name','Dr Pepper')
+	 * @examples set_request('name','Dr Pepper')
 	 */
-	public function request_replace($index = null, $replace_value = null) {
+	public function set_request($index = null, $replace_value = null) {
 		if ($replace_value) {
 			$this->_request[$index] = $replace_value;
 		} elseif(is_array($index)) {
@@ -92,6 +86,70 @@ class MY_Input extends CI_Input {
 		}
 
 		return $this;
+	}
+
+	/* return boolean success */
+	public function valid($key,$rules='',$human=null)
+	{
+		if (is_array($key)) {
+			foreach ($key as $k=>$r) {
+				if (is_array($r)) {
+					$this->validate($r[0],$r[1]);
+				} else {
+					$this->validate($k,$r);
+				}
+			}
+
+			return ci('validate')->success();
+		}
+
+		$field = $this->request($key);
+
+		ci('validate')->single($rules, $field, $human);
+
+		/* return the value or allow chain-ing */
+		return ci('validate')->success();
+	}
+
+	/* filter and replace */
+	public function filter($key=null,$rules='')
+	{
+		if (is_array($key)) {
+			foreach ($key as $r=>$k) {
+				$this->filter($k,$r);
+			}
+
+			return $this;
+		}
+
+		$field = $this->request($key);
+
+		ci('validate')->single($rules, $field);
+
+		$this->_request[$key] = $field;
+
+		return $this;
+	}
+
+	/* return filtered value but do not replace */
+	public function filtered($key=null,$rules='')
+	{
+		if (is_array($key)) {
+			$return = [];
+
+			foreach ($key as $r=>$k) {
+				$return[$k] = $this->filtered($k,$r);
+			}
+
+			return $return;
+		}
+
+		$field = $this->request($key);
+
+		ci('validate')->single($rules, $field);
+
+		/* return the value or allow chain-ing */
+		return $field;
 	}
 
 	/**
@@ -241,7 +299,7 @@ class MY_Input extends CI_Input {
 		$value = $this->_fetch_from_array($_COOKIE, $index, false);
 
 		$value = ($value === null) ? $default : $value;
-		
+
 		return ($xss_clean) ? $this->security->xss_clean($value) : $value;
 	}
 

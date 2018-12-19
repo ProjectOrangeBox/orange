@@ -1,75 +1,69 @@
 <?php
 /**
-* Validate
-* Insert description here
-*
-* @package CodeIgniter / Orange
-* @author Don Myers
-* @copyright 2018
-* @license http://opensource.org/licenses/MIT MIT License
-* @link https://github.com/ProjectOrangeBox
-* @version 2.0
-*
-* required
-* core: input, output
-* libraries: errors, wallet
-* models:
-* helpers:
-* functions:
-*
-*/
+ * Validate
+ * Insert description here
+ *
+ * @package CodeIgniter / Orange
+ * @author Don Myers
+ * @copyright 2018
+ * @license http://opensource.org/licenses/MIT MIT License
+ * @link https://github.com/ProjectOrangeBox
+ * @version 2.0
+ *
+ * required
+ * core:
+ * libraries: errors
+ * models:
+ * helpers:
+ * functions:
+ *
+ */
 class Validate {
 
 	/**
-	* track if the combined cached configuration has been loaded
-	*
-	* @var array
-	*/
+	 * track if the combined cached configuration has been loaded
+	 *
+	 * @var array
+	 */
 	protected $attached = [];
 
 	/**
-	* track if the combined cached configuration has been loaded
-	*
-	* @var string
-	*/
+	 * track if the combined cached configuration has been loaded
+	 *
+	 * @var string
+	 */
 	protected $error_string = '';
 	protected $error_human = '';
 	protected $error_params = '';
 
 	/**
-	* track if the combined cached configuration has been loaded
-	*
-	* @var array
-	*/
+	 * track if the combined cached configuration has been loaded
+	 *
+	 * @var array
+	 */
 	protected $field_data = [];
 
 	protected $config;
-	protected $input;
-	protected $output;
 	protected $errors;
-	protected $wallet;
-	
+
 	protected $loaded = [];
 
 	/**
-	* __construct
-	* Insert description here
-	*
-	*
-	* @return
-	*
-	* @access
-	* @static
-	* @throws
-	* @example
-	*/
+	 * __construct
+	 * Insert description here
+	 *
+	 *
+	 * @return
+	 *
+	 * @access
+	 * @static
+	 * @throws
+	 * @example
+	 */
 	public function __construct(&$config=[]) {
 		$this->config = &$config;
 
-		$this->input = &ci('input');
-		$this->output = &ci('output');
 		$this->errors = &ci('errors');
-		$this->wallet = &ci('wallet');
 
 		$this->clear();
 
@@ -87,17 +81,17 @@ class Validate {
 	}
 
 	/**
-	* clear
-	* Insert description here
-	*
-	*
-	* @return
-	*
-	* @access
-	* @static
-	* @throws
-	* @example
-	*/
+	 * clear
+	 * Insert description here
+	 *
+	 *
+	 * @return
+	 *
+	 * @access
+	 * @static
+	 * @throws
+	 * @example
+	 */
 	public function clear() {
 		$this->errors->clear();
 
@@ -105,20 +99,20 @@ class Validate {
 	}
 
 	/**
-	* attach
-	* Insert description here
-	*
-	* @param $name
-	* @param closure
-	* @param $closure
-	*
-	* @return
-	*
-	* @access
-	* @static
-	* @throws
-	* @example
-	*/
+	 * attach
+	 * Insert description here
+	 *
+	 * @param $name
+	 * @param closure
+	 * @param $closure
+	 *
+	 * @return
+	 *
+	 * @access
+	 * @static
+	 * @throws
+	 * @example
+	 */
 	public function attach($name, closure $closure) {
 		$this->attached[$this->_normalize_rule($name)] = $closure;
 
@@ -126,160 +120,155 @@ class Validate {
 	}
 
 	/**
-	* die_on_fail
-	* Insert description here
-	*
-	* @param $view
-	*
-	* @return $this
-	*
-	* @access
-	* @static
-	* @throws
-	* @example
-	*/
+	 * die_on_fail
+	 * Insert description here
+	 *
+	 * @param $view
+	 *
+	 * @return $this
+	 *
+	 * @access
+	 * @static
+	 * @throws
+	 * @example
+	 */
 	public function die_on_fail($view = '400') {
-		if ($this->errors->has()) {
-			$this->errors->display($view, ['heading' => 'Validation Failed', 'message' => $this->errors->as_html()]);
-		}
+		$this->errors->die_on_error($view);
 
 		return $this;
 	}
 
 	/**
-	* redirect_on_fail
-	* Insert description here
-	*
-	* @param $url
-	*
-	* @return $this
-	*
-	* @access
-	* @static
-	* @throws
-	* @example
-	*/
+	 * redirect_on_fail
+	 * Insert description here
+	 *
+	 * @param $url
+	 *
+	 * @return $this
+	 *
+	 * @access
+	 * @static
+	 * @throws
+	 * @example
+	 */
 	public function redirect_on_fail($url = null) {
-		if ($this->errors->has()) {
-			$url = (is_string($url)) ? $url : true;
-			$this->wallet->msg($this->errors->as_html(), 'red', $url);
-		}
+		$this->errors->redirect_on_error($url);
 
 		return $this;
 	}
 
 	/**
-	* json_on_fail
-	* Insert description here
-	*
-	*
-	* @return
-	*
-	* @access
-	* @static
-	* @throws
-	* @example
-	*/
+	 * json_on_fail
+	 * Insert description here
+	 *
+	 *
+	 * @return
+	 *
+	 * @access
+	 * @static
+	 * @throws
+	 * @example
+	 */
 	public function json_on_fail() {
-		if ($this->errors->has()) {
-			$this->output->json(['ci_errors'=>$this->errors->as_data()])->_display()->exit(1);
-		}
+		$this->errors->json_on_error();
 
 		return $this;
 	}
 
 	/**
-	* success
-	* Insert description here
-	*
-	*
-	* @return
-	*
-	* @access
-	* @static
-	* @throws
-	* @example
-	*/
+	 * success
+	 * Insert description here
+	 *
+	 *
+	 * @return
+	 *
+	 * @access
+	 * @static
+	 * @throws
+	 * @example
+	 */
 	public function success() {
 		return (!$this->errors->has());
 	}
 
 	/**
-	* variable
-	* Insert description here
-	*
-	* @param $rules
-	* @param $field
-	* @param $human
-	*
-	* @return
-	*
-	* @access
-	* @static
-	* @throws
-	* @example
-	*/
+	 * variable
+	 * Insert description here
+	 *
+	 * @param $rules
+	 * @param $field
+	 * @param $human
+	 *
+	 * @return
+	 *
+	 * @access
+	 * @static
+	 * @throws
+	 * @example
+	 */
 	public function variable($rules = '',&$field, $human = null) {
 		return $this->single($rules, $field, $human);
 	}
 
 	/**
-	* request
-	* Insert description here
-	*
-	* @param $rules
-	* @param $key
-	* @param $human
-	*
-	* @return
-	*
-	* @access
-	* @static
-	* @throws
-	* @example
-	*/
+	 * request
+	 * Insert description here
+	 *
+	 * @param $rules
+	 * @param $key
+	 * @param $human
+	 *
+	 * @return
+	 *
+	 * @access
+	 * @static
+	 * @throws
+	 * @example
+	 */
 	public function request($rules = '', $key, $human = null) {
 		$field = $this->input->request($key);
+
 		$this->single($rules, $field, $human);
-		$this->input->request_replace($key,$field);
+
+		$this->input->set_request($key,$field);
 
 		return ($human === true) ? $field : $this;
 	}
 
 	/**
-	* run
-	* Insert description here
-	*
-	* @param $rules
-	* @param $fields
-	* @param $human
-	*
-	* @return
-	*
-	* @access
-	* @static
-	* @throws
-	* @example
-	*/
+	 * run
+	 * Insert description here
+	 *
+	 * @param $rules
+	 * @param $fields
+	 * @param $human
+	 *
+	 * @return
+	 *
+	 * @access
+	 * @static
+	 * @throws
+	 * @example
+	 */
 	public function run($rules = '', &$fields, $human = null) {
 		return (is_array($fields)) ? $this->multiple($rules, $fields) : $this->single($rules, $fields, $human);
 	}
 
 	/**
-	* single
-	* Insert description here
-	*
-	* @param $rules
-	* @param $field
-	* @param $human
-	*
-	* @return
-	*
-	* @access
-	* @static
-	* @throws
-	* @example
-	*/
+	 * single
+	 * Insert description here
+	 *
+	 * @param $rules
+	 * @param $field
+	 * @param $human
+	 *
+	 * @return
+	 *
+	 * @access
+	 * @static
+	 * @throws
+	 * @example
+	 */
 	public function single($rules, &$field, $human = null) {
 		/* break apart the rules */
 		if (!is_array($rules)) {
@@ -289,7 +278,7 @@ class Validate {
 				$rules = explode('|', $rules);
 			}
 		}
-		
+
 		/* do we have any rules? */
 		if (count($rules)) {
 			/* yes */
@@ -299,7 +288,7 @@ class Validate {
 					$success = true;
 					break;
 				}
-				
+
 				/* do we have this special rule? */
 				if ($rule == 'allow_empty') {
 					if (empty($field)) {
@@ -310,10 +299,10 @@ class Validate {
 						continue;
 					}
 				}
-				
+
 				/* do we have parameters */
 				$param = null;
-				
+
 				/* split them out */
 				if (preg_match("/(.*?)\[(.*?)\]/", $rule, $match)) {
 					$rule  = $match[1];
@@ -321,10 +310,10 @@ class Validate {
 				}
 
 				$this->error_human = ($human) ? $human : strtolower(str_replace('_', ' ', $rule));
-	
+
 				if (strpos($param, ',') !== false) {
 					$this->error_params = str_replace(',', ', ', $param);
-					
+
 					if (($pos = strrpos($this->error_params, ', ')) !== false) {
 						$this->error_params = substr_replace($this->error_params, ' or ', $pos, 2);
 					}
@@ -339,7 +328,7 @@ class Validate {
 
 		return $this;
 	}
-	
+
 	protected function _filter(&$field,$rule,$param) {
 		$class_name = $this->_normalize_rule($rule);
 		$short_rule = substr($class_name,7);
@@ -354,13 +343,13 @@ class Validate {
 		} elseif (function_exists($short_rule)) {
 			$field = ($param) ? $short_rule($field,$param) : $short_rule($field);
 		} else {
-      throw new Exception('Could not filter '.$rule);
+			throw new Exception('Could not filter '.$rule);
 		}
-		
+
 		/* filters don't fail */
 		return true;
 	}
-	
+
 	protected function _validation(&$field,$rule,$param) {
 		$class_name = $this->_normalize_rule($rule);
 		$short_rule = substr($class_name,9);
@@ -378,7 +367,7 @@ class Validate {
 		} elseif (function_exists($short_rule)) {
 			$success = ($param) ? $short_rule($field,$param) : $short_rule($field);
 		} else {
-      throw new Exception('Could not validate '.$rule);
+			throw new Exception('Could not validate '.$rule);
 		}
 
 		if ($success !== false) {
@@ -389,7 +378,7 @@ class Validate {
 		} else {
 			$this->add_error();
 		}
-		
+
 		return $success;
 	}
 
@@ -398,19 +387,19 @@ class Validate {
 	}
 
 	/**
-	* multiple
-	* Insert description here
-	*
-	* @param $rules
-	* @param $fields
-	*
-	* @return
-	*
-	* @access
-	* @static
-	* @throws
-	* @example
-	*/
+	 * multiple
+	 * Insert description here
+	 *
+	 * @param $rules
+	 * @param $fields
+	 *
+	 * @return
+	 *
+	 * @access
+	 * @static
+	 * @throws
+	 * @example
+	 */
 	public function multiple($rules, &$fields) {
 		$this->field_data = &$fields;
 
@@ -422,14 +411,14 @@ class Validate {
 
 		return $this;
 	}
-	
+
 	protected function _normalize_rule($name) {
 		/* normalize to lowercase */
 		$name = strtolower($name);
-		
+
 		/* if validate or filter is already prepended */
 		$prefix = (substr($name,0,9) != 'validate_' && (substr($name,0,7) != 'filter_')) ? 	'validate_' : '';
-		
+
 		return $prefix.$name;
 	}
 
