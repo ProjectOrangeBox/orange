@@ -25,6 +25,7 @@ class MY_Input extends CI_Input {
 	 * @var array
 	 */
 	protected $_request = [];
+	protected $_input = null;
 
 	public function __construct() {
 		/* grab raw input for patch and such */
@@ -94,9 +95,17 @@ class MY_Input extends CI_Input {
 		if (is_array($key)) {
 			foreach ($key as $k=>$r) {
 				if (is_array($r)) {
-					$this->validate($r[0],$r[1]);
+					/**
+					 * Key, Rule (1), Human (0)
+					 * 'field_age'=>['Age','int|md5']]
+					 * 'name'=>'int'
+					 */
+					$this->valid($k,$r[1],$r[0]);
 				} else {
-					$this->validate($k,$r);
+					/**
+					 * Key, Rule
+					 */
+					$this->valid($k,$r);
 				}
 			}
 
@@ -115,7 +124,7 @@ class MY_Input extends CI_Input {
 	public function filter($key=null,$rules='')
 	{
 		if (is_array($key)) {
-			foreach ($key as $r=>$k) {
+			foreach ($key as $k=>$r) {
 				$this->filter($k,$r);
 			}
 
@@ -137,7 +146,7 @@ class MY_Input extends CI_Input {
 		if (is_array($key)) {
 			$return = [];
 
-			foreach ($key as $r=>$k) {
+			foreach ($key as $k=>$r) {
 				$return[$k] = $this->filtered($k,$r);
 			}
 
@@ -302,5 +311,34 @@ class MY_Input extends CI_Input {
 
 		return ($xss_clean) ? $this->security->xss_clean($value) : $value;
 	}
+
+	public function is_ajax_request($boolean=null)
+	{
+		if (is_bool($boolean)) {
+			$this->_input = ($boolean) ? 'ajax' : null;
+		}
+		
+		return ($this->_input == 'ajax') ? true : (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest');
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Is CLI request?
+	 *
+	 * Test to see if a request was made from the command line.
+	 *
+	 * @deprecated	3.0.0	Use is_cli() instead
+	 * @return	bool
+	 */
+	public function is_cli_request($boolean=null)
+	{
+		if (is_bool($boolean)) {
+			$this->_input = ($boolean) ? 'cli' : null;
+		}
+
+		return ($this->_input == 'cli') ? true : is_cli();
+	}
+
 
 } /* end class */
