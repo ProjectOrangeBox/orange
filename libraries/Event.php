@@ -59,9 +59,11 @@
  */
 
 /* Follows Linux Priority negative values are higher priority and positive values are lower priority */
-define('EVENT_PRIORITY_LOW', 100);
+define('EVENT_PRIORITY_LOWEST', 1);
+define('EVENT_PRIORITY_LOW', 20);
 define('EVENT_PRIORITY_NORMAL', 50);
-define('EVENT_PRIORITY_HIGH', 1);
+define('EVENT_PRIORITY_HIGH', 80);
+define('EVENT_PRIORITY_HIGHEST', 100);
 
 class Event {
 	/**
@@ -194,7 +196,7 @@ class Event {
 	public function unregister($name, $listener) {
 		/* clean up the name */
 		$name = $this->_normalize_name($name);
-		
+
 		$removed = false;
 
 		if (!($listener instanceof Closure)) {
@@ -203,7 +205,7 @@ class Event {
 					if ($check === $listener) {
 						unset($this->listeners[$name][1][$index]);
 						unset($this->listeners[$name][2][$index]);
-	
+
 						$removed = true;
 					}
 				}
@@ -249,7 +251,7 @@ class Event {
 	protected function _normalize_name($name) {
 		return trim(preg_replace('/[^a-z0-9]+/','.',strtolower($name)),'.');
 	}
-	
+
 	/**
 	 * Do the actual sorting
 	 *
@@ -267,7 +269,7 @@ class Event {
 			/* The list is not sorted */
 			if (!$this->listeners[$name][0]) {
 				/* Sort it! */
-				array_multisort($this->listeners[$name][1], SORT_NUMERIC, $this->listeners[$name][2]);
+				array_multisort($this->listeners[$name][1],SORT_DESC,SORT_NUMERIC,$this->listeners[$name][2]);
 
 				/* Mark it as sorted already! */
 				$this->listeners[$name][0] = true;

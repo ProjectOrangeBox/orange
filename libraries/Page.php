@@ -1,29 +1,31 @@
 <?php
 /**
-* Page
-* Insert description here
-*
-* @package CodeIgniter / Orange
-* @author Don Myers
-* @copyright 2018
-* @license http://opensource.org/licenses/MIT MIT License
-* @link https://github.com/ProjectOrangeBox
-* @version 2.0
-*
-* required
-* core: load, output
-* libraries: event
-* models:
-* helpers:
-* functions: view
-* constants: PAGE_MIN
-*
-*/
+ * Page
+ * Insert description here
+ *
+ * @package CodeIgniter / Orange
+ * @author Don Myers
+ * @copyright 2018
+ * @license http://opensource.org/licenses/MIT MIT License
+ * @link https://github.com/ProjectOrangeBox
+ * @version 2.0
+ *
+ * required
+ * core: load, output
+ * libraries: event
+ * models:
+ * helpers:
+ * functions: view
+ * constants: PAGE_MIN
+ *
+ */
 
 /* Follows Linux Priority negative values are higher priority and positive values are lower priority */
-define('EVENT_PRIORITY_LOW', 100);
-define('EVENT_PRIORITY_NORMAL', 0);
-define('EVENT_PRIORITY_HIGH', −100);
+define('EVENT_PRIORITY_LOWEST', 1);
+define('EVENT_PRIORITY_LOW', 20);
+define('EVENT_PRIORITY_NORMAL', 50);
+define('EVENT_PRIORITY_HIGH', 80);
+define('EVENT_PRIORITY_HIGHEST', 100);
 
 class Page {
 	protected $variables = [];
@@ -38,9 +40,9 @@ class Page {
 	protected $extending = false;
 
 	/**
-	* __construct
-	*
-	*/
+	 * __construct
+	 *
+	 */
 	public function __construct(&$config=[]) {
 		$this->config = &$config;
 
@@ -73,13 +75,13 @@ class Page {
 	}
 
 	/**
-	* set_default_template
-	*
-	* @param $template
-	*
-	* @return $this
-	*
-	*/
+	 * set_default_template
+	 *
+	 * @param $template
+	 *
+	 * @return $this
+	 *
+	 */
 	public function set_default_template($template='') {
 		/* convert to file system safe */
 		$this->default_template = $template;
@@ -88,19 +90,19 @@ class Page {
 	}
 
 	/**
-	* render
-	* basic view rendering
-	* with:
-	* default template if none included
-	* event triggering
-	* optionally extend another view
-	*
-	* @param $view string
-	* @param $data array
-	*
-	* @return $this
-	*
-	*/
+	 * render
+	 * basic view rendering
+	 * with:
+	 * default template if none included
+	 * event triggering
+	 * optionally extend another view
+	 *
+	 * @param $view string
+	 * @param $data array
+	 *
+	 * @return $this
+	 *
+	 */
 	public function render($view = null, $data = null) {
 		log_message('debug', 'page::render::'.$view);
 
@@ -129,16 +131,16 @@ class Page {
 	}
 
 	/**
-	* view
-	* basic view rendering using oranges most basic view function
-	*
-	* @param $view_file string
-	* @param $data array
-	* @param $return mixed
-	*
-	* @return mixed
-	*
-	*/
+	 * view
+	 * basic view rendering using oranges most basic view function
+	 *
+	 * @param $view_file string
+	 * @param $data array
+	 * @param $return mixed
+	 *
+	 * @return mixed
+	 *
+	 */
 	public function view($view_file = null, $data = null, $return = true) {
 		$data = (is_array($data)) ? array_merge($this->load->get_vars(),$data) : $this->load->get_vars();
 
@@ -153,15 +155,15 @@ class Page {
 	}
 
 	/**
-	* data
-	* wrapper
-	*
-	* @param $name
-	* @param $value
-	*
-	* @return $this
-	*
-	*/
+	 * data
+	 * wrapper
+	 *
+	 * @param $name
+	 * @param $value
+	 *
+	 * @return $this
+	 *
+	 */
 	public function data($name = null, $value = null) {
 		$this->load->vars($name,$value);
 
@@ -170,14 +172,14 @@ class Page {
 
 
 	/**
-	* extended
-	* Insert description here
-	*
-	* @param $template
-	*
-	* @return $this
-	*
-	*/
+	 * extended
+	 * Insert description here
+	 *
+	 * @param $template
+	 *
+	 * @return $this
+	 *
+	 */
 	public function extend($template = null) {
 		if ($this->extending) {
 			throw new Exception('You are already extending "'.$this->extending.'" therefore we cannot extend "'.$name.'".');
@@ -189,44 +191,44 @@ class Page {
 	}
 
 	/**
-	* link_html
-	* create and return html link
-	* <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
-	*
-	* @param $file
-	*
-	* @return string
-	*
-	*/
+	 * link_html
+	 * create and return html link
+	 * <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+	 *
+	 * @param $file
+	 *
+	 * @return string
+	 *
+	 */
 	public function link_html($file) {
 		return $this->ary2element('link', array_merge($this->config['link_attributes'],['href' => $file]));
 	}
 
 	/**
-	* script_html
-	* create and return html script
-	* <script src="//cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.11/handlebars.min.js"></script>
-	*
-	* @param $file
-	*
-	* @return string
-	*
-	*/
+	 * script_html
+	 * create and return html script
+	 * <script src="//cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.11/handlebars.min.js"></script>
+	 *
+	 * @param $file
+	 *
+	 * @return string
+	 *
+	 */
 	public function script_html($file) {
 		return $this->ary2element('script', array_merge($this->config['script_attributes'], ['src' => $file]),'');
 	}
 
 	/**
-	* ary2element
-	* Insert description here
-	*
-	* @param $element
-	* @param $attributes
-	* @param $wrapper
-	*
-	* @return string
-	*
-	*/
+	 * ary2element
+	 * Insert description here
+	 *
+	 * @param $element
+	 * @param $attributes
+	 * @param $wrapper
+	 *
+	 * @return string
+	 *
+	 */
 	public function ary2element($element, $attributes, $wrapper = false) {
 		$output = '<'.$element._stringify_attributes($attributes);
 
@@ -234,17 +236,17 @@ class Page {
 	}
 
 	/**
-	* meta
-	* <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
-	*
-	* @param $attr
-	* @param $name
-	* @param $content
-	* @param $priority integer
-	*
-	* @return $this
-	*
-	*/
+	 * meta
+	 * <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+	 *
+	 * @param $attr
+	 * @param $name
+	 * @param $content
+	 * @param $priority integer
+	 *
+	 * @return $this
+	 *
+	 */
 	public function meta($attr, $name, $content = null,$priority = EVENT_PRIORITY_NORMAL) {
 		if (is_array($attr)) {
 			extract($attr);
@@ -254,70 +256,70 @@ class Page {
 	}
 
 	/**
-	* script
-	* <script>*</script>
-	*
-	* @param $script
-	* @param $priority integer
-	*
-	* @return $this
-	*
-	*/
+	 * script
+	 * <script>*</script>
+	 *
+	 * @param $script
+	 * @param $priority integer
+	 *
+	 * @return $this
+	 *
+	 */
 	public function script($script,$priority = EVENT_PRIORITY_NORMAL) {
 		return $this->add('script',$script.PHP_EOL,$priority);
 	}
 
 	/**
-	* domready
-	* <script>%%*%%</script>
-	*
-	* @param $script
-	* @param $priority integer
-	*
-	* @return $this
-	*
-	*/
+	 * domready
+	 * <script>%%*%%</script>
+	 *
+	 * @param $script
+	 * @param $priority integer
+	 *
+	 * @return $this
+	 *
+	 */
 	public function domready($script,$priority = EVENT_PRIORITY_NORMAL) {
 		return $this->add('domready',$script.PHP_EOL,$priority);
 	}
 
 	/**
-	* title
-	* <title>*</title>
-	*
-	* @param $title
-	*
-	* @return $this
-	*
-	*/
+	 * title
+	 * <title>*</title>
+	 *
+	 * @param $title
+	 *
+	 * @return $this
+	 *
+	 */
 	public function title($title = '',$priority = EVENT_PRIORITY_NORMAL) {
 		return $this->add('title',$title,$priority);
 	}
 
 	/**
-	* style
-	* <style>*</style>
-	*
-	* @param $style
-	* @param $priority integer
-	*
-	* @return $this
-	*
-	*/
+	 * style
+	 * <style>*</style>
+	 *
+	 * @param $style
+	 * @param $priority integer
+	 *
+	 * @return $this
+	 *
+	 */
 	public function style($style,$priority = EVENT_PRIORITY_NORMAL) {
 		return $this->add('style',$style.PHP_EOL,$priority);
 	}
 
 	/**
-	* js
-	* <script src="*"></script>
-	*
-	* @param $file
-	* @param $priority integer
-	*
-	* @return $this
-	*
-	*/
+	 * js
+	 * <script src="*"></script>
+	 *
+	 * @param $file
+	 * @param $priority integer
+	 *
+	 * @return $this
+	 *
+	 */
 	public function js($file = '',$priority = EVENT_PRIORITY_NORMAL) {
 		if (is_array($file)) {
 			foreach ($file as $f) {
@@ -330,15 +332,15 @@ class Page {
 	}
 
 	/**
-	* css
-	* <link href="*" rel="stylesheet">
-	*
-	* @param $file
-	* @param $priority integer
-	*
-	* @return $this
-	*
-	*/
+	 * css
+	 * <link href="*" rel="stylesheet">
+	 *
+	 * @param $file
+	 * @param $priority integer
+	 *
+	 * @return $this
+	 *
+	 */
 	public function css($file = '',$priority = EVENT_PRIORITY_NORMAL) {
 		if (is_array($file)) {
 			foreach ($file as $f) {
@@ -351,18 +353,18 @@ class Page {
 	}
 
 	/**
-	* tag
-	* Add any html tag to and page variable
-	*
-	* Unpaired html tag
-	* tag('link',['rel'=>'icon','type'=>'image/x-icon','href'=>'/asset/image.jpg'],50)
-	* <link rel="icon" type="image/x-icon" href="/asset/image.jpg"/>
-	*
-	* Paired html tag w/content
-	* element('p',['class'=>'highlight','id'=>'pid3'],'This is important!',50)
-	* <p class="highlight" id="pid3">This is important!</p>
-	*
-	*/
+	 * tag
+	 * Add any html tag to and page variable
+	 *
+	 * Unpaired html tag
+	 * tag('link',['rel'=>'icon','type'=>'image/x-icon','href'=>'/asset/image.jpg'],50)
+	 * <link rel="icon" type="image/x-icon" href="/asset/image.jpg"/>
+	 *
+	 * Paired html tag w/content
+	 * element('p',['class'=>'highlight','id'=>'pid3'],'This is important!',50)
+	 * <p class="highlight" id="pid3">This is important!</p>
+	 *
+	 */
 	public function tag($name,$attributes,$content = false,$priority = EVENT_PRIORITY_NORMAL) {
 		if (func_num_args() == 3 && is_integer($content)) {
 			$priority = $content;
@@ -373,16 +375,16 @@ class Page {
 	}
 
 	/**
-	* js_variable
-	* <script>*</script>
-	*
-	* @param $key
-	* @param $value
-	* @param $priority integer
-	*
-	* @return $this
-	*
-	*/
+	 * js_variable
+	 * <script>*</script>
+	 *
+	 * @param $key
+	 * @param $value
+	 * @param $priority integer
+	 *
+	 * @return $this
+	 *
+	 */
 	public function js_variable($key,$value,$priority = EVENT_PRIORITY_NORMAL,$raw = false) {
 		if ($raw) {
 			$value = 'var '.$key.'='.$value.';' ;
@@ -394,14 +396,14 @@ class Page {
 	}
 
 	/**
-	* js_variables
-	* <script>*</script>
-	*
-	* @param $array
-	*
-	* @return $this
-	*
-	*/
+	 * js_variables
+	 * <script>*</script>
+	 *
+	 * @param $array
+	 *
+	 * @return $this
+	 *
+	 */
 	public function js_variables($array) {
 		foreach ($array as $k => $v) {
 			$this->js_variable($k, $v);
@@ -411,31 +413,31 @@ class Page {
 	}
 
 	/**
-	* body_class
-	* class="*"
-	*
-	* @param $class
-	* @param $priority integer
-	*
-	* @return $this
-	*
-	*/
+	 * body_class
+	 * class="*"
+	 *
+	 * @param $class
+	 * @param $priority integer
+	 *
+	 * @return $this
+	 *
+	 */
 	public function body_class($class,$priority = EVENT_PRIORITY_NORMAL) {
 		return (is_array($class)) ? $this->_body_class($class,$priority) : $this->_body_class(explode(' ',$class),$priority);
 	}
-	
+
 	/**
-	* add
-	* append to page variable with optional priority & duplicate prevention
-	*
-	* @param $name
-	* @param $value
-	* @param $priority default 50 the LOWER the number the higher priority
-	* @param $prevent_duplicates (True/False)
-	*
-	* @return $this
-	*
-	*/
+	 * add
+	 * append to page variable with optional priority & duplicate prevention
+	 *
+	 * @param $name
+	 * @param $value
+	 * @param $priority default 50 the LOWER the number the higher priority
+	 * @param $prevent_duplicates (True/False)
+	 *
+	 * @return $this
+	 *
+	 */
 	public function add($name,$value,$priority = EVENT_PRIORITY_NORMAL,$prevent_duplicates = true) {
 		$key = md5($value);
 
@@ -450,24 +452,25 @@ class Page {
 	}
 
 	/**
-	* var
-	* retrieve a page variable (with "post" priority processing)
-	* included page variables: title, meta, body_class, css, style, js, script, js_variables, script, domready
-	* any additional "tags"
-	*
-	* @param $name
-	*
-	* @return string
-	*
-	*/
+	 * var
+	 * retrieve a page variable (with "post" priority processing)
+	 * included page variables: title, meta, body_class, css, style, js, script, js_variables, script, domready
+	 * any additional "tags"
+	 *
+	 * @param $name
+	 *
+	 * @return string
+	 *
+	 */
 	public function var($name) {
 		$html = $this->load->get_var($this->page_variable_prefix.$name);
 
+		/* does this variable key exist */
 		if (isset($this->variables[$name])) {
-			/* The list is not sorted */
+			/* has it already been sorted */
 			if (!$this->variables[$name][0]) {
-				/* sort it! */
-				array_multisort($this->variables[$name][1], SORT_NUMERIC, $this->variables[$name][2]);
+				/* no we must sort it */
+				array_multisort($this->variables[$name][1],SORT_DESC,SORT_NUMERIC,$this->variables[$name][2]);
 
 				/* mark it as sorted */
 				$this->variables[$name][0] = true;
