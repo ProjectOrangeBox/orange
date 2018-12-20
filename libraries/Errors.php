@@ -21,11 +21,9 @@
  */
 class Errors {
 	protected $config;
-	protected $load;
 	protected $input;
 	protected $output;
 	protected $event;
-	protected $wallet;
 
 	protected $errors_variable;
 	protected $html_prefix;
@@ -33,14 +31,14 @@ class Errors {
 	protected $data_records;
 	protected $data_count;
 
+	protected $errors = [];
+
 	public function __construct(&$config=[]) {
 		$this->config = &$config;
 
-		$this->load = &ci('load');
 		$this->input = &ci('input');
 		$this->output = &ci('output');
 		$this->event = &ci('event');
-		$this->wallet = &ci('wallet');
 
 		$this->errors_variable = $this->config['errors_variable'] ?? 'ci_errors';
 
@@ -54,10 +52,15 @@ class Errors {
 	/**
 	 * redirect to another page on error
 	 */
-	public function redirect_on_error($url = null) {
+	public function redirect_on_error($url = null,$wallet_status='red') {
 		if ($this->has()) {
-			$url = (is_string($url)) ? $url : true;
-			$this->wallet->msg($this->as_html(), 'red', $url);
+			if ($wallet_status) {
+				ci('wallet')->msg($this->as_html(),$wallet_status,((is_string($url)) ? $url : true));
+			} else {
+				ci('session')->set_flashdata($this->errors_variable,$this->as_array());
+
+				redirect((is_string($url) ? $url : $this->input->server('HTTP_REFERER')));
+			}
 		}
 
 		return $this;
@@ -66,9 +69,9 @@ class Errors {
 	/**
 	 * show error view on error and die
 	 */
-	public function die_on_error($view = '400') {
+	public function die_on_error($view = 400) {
 		if ($this->has()) {
-			$this->display($view,[$this->errors_variable=>$this->as_data(),'heading'=>'Validation Failed','message'=>$this->as_html()]);
+			$this->display($view);
 		}
 
 		return $this;
@@ -87,17 +90,15 @@ class Errors {
 	 * @throws
 	 * @example
 	 */
-	public function add($msg) {
+	public function add($msg,$index=null) {
 		log_message('debug', 'Errors::add::'.$msg);
 
-		/* get the current errors from the view data */
-		$current_errors = $this->load->get_var($this->errors_variable);
-
-		/* add this error */
-		$current_errors[$msg] = $msg;
-
-		/* put it back into the view data */
-		$this->load->vars($this->errors_variable,$current_errors);
+		if ($index) {
+			$this->errors[$index] = $msg;
+		} else {
+			$this->errors[$this->data_records][] = $msg;
+			$this->errors[$this->data_count] = count($this->errors[$this->data_records]);
+		}
 
 		/* chain-able */
 		return $this;
@@ -117,7 +118,7 @@ class Errors {
 	 */
 	public function clear() {
 		/* empty out the view data */
-		$this->load->vars($this->errors_variable,[]);
+		$this->errors = [];
 
 		/* chain-able */
 		return $this;
@@ -137,7 +138,7 @@ class Errors {
 	 */
 	public function has() {
 		/* do we have any errors? */
-		return (count($this->load->get_var($this->errors_variable)) != 0);
+		return (count($this->errors[$this->data_count]) != 0);
 	}
 
 	/**
@@ -154,7 +155,7 @@ class Errors {
 	 */
 	public function as_array() {
 		/* return the errors as an array */
-		return $this->load->get_var($this->errors_variable);
+		return $this->errors;
 	}
 
 	/**
@@ -176,8 +177,7 @@ class Errors {
 
 		/* do we have any errors? */
 		if ($this->has()) {
-			/* get them from the view data */
-			$errors = $this->load->get_var($this->errors_variable);
+			$errors = $this->as_array();
 
 			/* if they didn't send in a default prefix then use ours */
 			if ($prefix === null) {
@@ -190,7 +190,7 @@ class Errors {
 			}
 
 			/* format the output */
-			foreach ($errors as $val) {
+			foreach ($errors[$this->data_records] as $val) {
 				if (!empty(trim($val))) {
 					$html .= $prefix.trim($val).$suffix;
 				}
@@ -214,27 +214,7 @@ class Errors {
 	 */
 	public function as_cli() {
 		/* return as string with tabs and line-feeds */
-		return $this->as_html(chr(9),chr(10));
-	}
-
-	/**
-	 * as_data
-	 * Insert description here
-	 *
-	 *
-	 * @return
-	 *
-	 * @access
-	 * @static
-	 * @throws
-	 * @example
-	 */
-	public function as_data() {
-		/* get them from the view data */
-		$errors = $this->load->get_var($this->errors_variable);
-
-		/* return as a array */
-		return [$this->data_records => array_values($errors)] + [$this->data_count => count($errors)];
+		return trim(str_replace('Array'.PHP_EOL,PHP_EOL,print_r($this->as_array(),true))).PHP_EOL;
 	}
 
 	/**
@@ -250,8 +230,7 @@ class Errors {
 	 * @example
 	 */
 	public function as_json() {
-		/* get the as data array and convert to json */
-		return json_encode($this->as_data(), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE | JSON_FORCE_OBJECT);
+		return json_encode($this->as_array(), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE | JSON_FORCE_OBJECT);
 	}
 
 	/**
@@ -269,7 +248,8 @@ class Errors {
 	 * @throws
 	 * @example
 	 */
-	public function show($message, $status_code, $heading = 'An Error Was Encountered') {
+	public function show($message, $status_code, $heading = 'An Error Was Encountered')
+	{
 		/* show the errors */
 		$this->display('general',['heading'=>$heading,'message'=>$message],$status_code);
 	}
@@ -290,44 +270,52 @@ class Errors {
 	 * @throws
 	 * @example
 	 */
-	public function display($view, $data = [], $status_code = 500, $override = []) {
+	public function display($view, $data = [], $status_code = 500, $override = [])
+	{
 		if (is_numeric($view)) {
 			$status_code = (int)$view;
 		}
 
 		/* setup the defaults */
 		$view = (isset($this->config['named'][$view])) ? $this->config['named'][$view] : $view;
-		$charset     = 'utf-8';
-		$mime_type   = 'text/html';
-		$view_folder = 'html';
 
-		$data['heading'] = ($data['heading']) ? $data['heading'] : 'Fatal Error';
-		$data['message'] = ($data['message']) ? $data['message'] : 'Unknown Error';
+		$data['heading'] = ($data['heading']) ?? 'Fatal Error '.$status_code;
+		$data['message'] = ($data['message']) ?? 'Unknown Error';
 
-		if ($this->input->is_cli_request()) {
-			/* if it's a cli request then output for cli */
+		if ($this->input->is_cli_request() || $override['input'] == 'cli') {
 			$view_folder = 'cli';
-			$message     = '';
-
-			foreach ($data as $key => $val) {
-				$message .= '  '.$key.': '.strip_tags($val).chr(10);
-			}
-
-			$data['message'] = $message;
-		} elseif ($this->input->is_ajax_request()) {
-			/* if it's a ajax request then format for ajax (json) */
+		} elseif ($this->input->is_ajax_request() || $override['input'] == 'ajax') {
 			$view_folder = 'ajax';
-			$mime_type   = 'application/json';
 		} else {
-			/* else prepare for html */
-			$data['message'] = $this->html_prefix.(is_array($data['message']) ? implode($this->html_suffix.$this->html_prefix, $data['message']) : $data['message']).$this->html_suffix;
-			$view_folder     = 'html';
+			$view_folder = 'html';
 		}
 
-		$charset     = ($override['charset']) ? $override['charset'] : $charset;
-		$mime_type   = ($override['mime_type']) ? $override['mime_type'] : $mime_type;
+		$charset     = 'utf-8';
+		$mime_type   = 'text/html';
+
 		$view_folder = ($override['view_folder']) ? $override['view_folder'] : $view_folder;
-		$view_path = 'errors/'.$view_folder.'/error_'.str_replace('.php', '', $view);
+		$view_path = $view_folder.'/error_'.str_replace('.php', '', $view);
+
+		switch ($view_folder) {
+			case 'cli':
+				$this->add($view_path,'_template');
+
+				$data['message'] = $this->as_cli();
+			break;
+			case 'ajax':
+				$mime_type   = 'application/json';
+
+				$this->add($view_path,'_template');
+
+				$data['message'] = $this->as_json();
+			break;
+			default:
+				$data['message'] = $this->as_html();
+		}
+
+		$charset     = ($override['charset']) ?? $charset;
+		$mime_type   = ($override['mime_type']) ?? $mime_type;
+
 		$status_code = abs($status_code);
 
 		if ($status_code < 100) {
@@ -339,16 +327,46 @@ class Errors {
 
 		log_message('error', 'Error: '.$view_path.' '.$status_code.' '.print_r($data,true));
 
-		$this->event->trigger('death.show');
+		$this->event->trigger('death.show',$view_path,$data);
+
+		$complete_output = $this->error_view($view_path,$data);
+
+		if (strpos($complete_output,'</html>') !== false) {
+			$complete_output = str_replace('</html>','<!--APPPATH/views/errors/'.$view_path.'--></html>',$complete_output);
+		}
 
 		$this->output
 			->enable_profiler(false)
 			->set_status_header($status_code)
 			->set_content_type($mime_type, $charset)
-			->set_output(view($view_path,$data))
+			->set_output($complete_output)
 			->_display();
 
 		$this->output->exit($exit_status);
+	}
+
+	protected function error_view($_view,$_data=[])
+	{
+		/* clean up the view path */
+		$_file = APPPATH.'views/errors/'.$_view.'.php';
+
+		/* get a list of all the found views */
+		if (!file_exists($_file)) {
+			/* Not Found */
+			die('Could not locate error view "'.$_file.'"');
+		}
+
+		/* import variables into the current symbol table from an only prefix invalid/numeric variable names with _ 	*/
+		extract($_data, EXTR_PREFIX_INVALID, '_');
+
+		/* turn on output buffering */
+		ob_start();
+
+		/* bring in the view file */
+		include $_file;
+
+		/* return the current buffer contents and delete current output buffer */
+		return ob_get_clean();
 	}
 
 } /* end class */
