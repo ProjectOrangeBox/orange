@@ -33,7 +33,8 @@ class Errors {
 
 	protected $errors = [];
 
-	public function __construct(&$config=[]) {
+	public function __construct(&$config=[])
+	{
 		$this->config = &$config;
 
 		$this->input = &ci('input');
@@ -52,7 +53,8 @@ class Errors {
 	/**
 	 * redirect to another page on error
 	 */
-	public function redirect_on_error($url = null,$wallet_status='red') {
+	public function redirect_on_error($url = null,$wallet_status='red')
+	{
 		if ($this->has()) {
 			if ($wallet_status) {
 				ci('wallet')->msg($this->as_html(),$wallet_status,((is_string($url)) ? $url : true));
@@ -69,7 +71,8 @@ class Errors {
 	/**
 	 * show error view on error and die
 	 */
-	public function die_on_error($view = 400) {
+	public function die_on_error($view = 400)
+	{
 		if ($this->has()) {
 			$this->display($view);
 		}
@@ -90,12 +93,15 @@ class Errors {
 	 * @throws
 	 * @example
 	 */
-	public function add($msg,$index=null) {
+	public function add($msg,$index=null)
+	{
 		log_message('debug', 'Errors::add::'.$msg);
 
+		/* if they include a index then use that as the key */
 		if ($index) {
 			$this->errors[$index] = $msg;
 		} else {
+			/* if they do not include a index it's a "standard" error */
 			$this->errors[$this->data_records][] = $msg;
 			$this->errors[$this->data_count] = count($this->errors[$this->data_records]);
 		}
@@ -116,10 +122,12 @@ class Errors {
 	 * @throws
 	 * @example
 	 */
-	public function clear() {
+	public function clear()
+	{
 		/* empty out the view data */
-		$this->errors = [];
-
+		$this->errors[$this->data_records] = [];
+		$this->errors[$this->data_count] = 0;
+		
 		/* chain-able */
 		return $this;
 	}
@@ -136,9 +144,10 @@ class Errors {
 	 * @throws
 	 * @example
 	 */
-	public function has() {
+	public function has()
+	{
 		/* do we have any errors? */
-		return (count($this->errors[$this->data_count]) != 0);
+		return (bool)$this->errors[$this->data_count];
 	}
 
 	/**
@@ -153,7 +162,8 @@ class Errors {
 	 * @throws
 	 * @example
 	 */
-	public function as_array() {
+	public function as_array()
+	{
 		/* return the errors as an array */
 		return $this->errors;
 	}
@@ -172,7 +182,8 @@ class Errors {
 	 * @throws
 	 * @example
 	 */
-	public function as_html($prefix = null, $suffix = null) {
+	public function as_html($prefix = null, $suffix = null)
+	{
 		$html = '';
 
 		/* do we have any errors? */
@@ -212,7 +223,8 @@ class Errors {
 	 * @throws
 	 * @example
 	 */
-	public function as_cli() {
+	public function as_cli()
+	{
 		/* return as string with tabs and line-feeds */
 		return trim(str_replace('Array'.PHP_EOL,PHP_EOL,print_r($this->as_array(),true))).PHP_EOL;
 	}
@@ -229,7 +241,8 @@ class Errors {
 	 * @throws
 	 * @example
 	 */
-	public function as_json() {
+	public function as_json()
+	{
 		return json_encode($this->as_array(), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE | JSON_FORCE_OBJECT);
 	}
 
@@ -345,6 +358,7 @@ class Errors {
 		$this->output->exit($exit_status);
 	}
 
+	/* add this here to cut down on external functions */
 	protected function error_view($_view,$_data=[])
 	{
 		/* clean up the view path */
