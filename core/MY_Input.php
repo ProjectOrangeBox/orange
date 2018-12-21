@@ -26,6 +26,8 @@ class MY_Input extends CI_Input {
 	 */
 	protected $_request = [];
 	protected $_input = null;
+	protected $stash_key = '_input_stash_';
+	protected $stash_hash_key = '_stash_hash_key_';
 
 	public function __construct() {
 		/* grab raw input for patch and such */
@@ -317,7 +319,7 @@ class MY_Input extends CI_Input {
 		if (is_bool($boolean)) {
 			$this->_input = ($boolean) ? 'ajax' : null;
 		}
-		
+
 		return ($this->_input == 'ajax') ? true : (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest');
 	}
 
@@ -340,5 +342,55 @@ class MY_Input extends CI_Input {
 		return ($this->_input == 'cli') ? true : is_cli();
 	}
 
+	/**
+	 * stash
+	 * stash the request data
+	 *
+	 * @return
+	 *
+	 */
+	public function stash() {
+		$stash = $this->_request;
+
+		/* is this even an array to store? */
+		if (is_array($stash)) {
+			/* put a simple checksum on this */
+			$stash[$this->stash_hash_key] = md5(json_encode($stash).config('config.encryption_key'));
+
+			ci('session')->set_tempdata($this->stash_key,$stash,3600); /* defaults to 10 minutes */
+		}
+
+		return $this;
+	}
+
+	/**
+	 * unstash
+	 * load the request from the stashed data
+	 *
+	 * @return
+	 *
+	 */
+	public function unstash() {
+		$success = false;
+
+		$stashed = ci('session')->tempdata($this->stash_key);
+
+		ci('session')->unset_tempdata($this->stash_key);
+
+		if (is_array($stashed)) {
+			$stored_key = $stashed[$this->stash_hash_key];
+
+			unset($stashed[$this->stash_hash_key]);
+
+			$check_key = md5(json_encode($stashed).config('config.encryption_key'));
+
+			if ($check_key == $stored_key) {
+				$success = true;
+				$this->_request = $stashed;
+			}
+		}
+
+		return $success;
+	}
 
 } /* end class */

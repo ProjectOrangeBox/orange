@@ -103,66 +103,6 @@ class Wallet {
 	}
 
 	/**
-	 * snapdata
-	 * Insert description here
-	 *
-	 * @param $newdata
-	 * @param $newval
-	 *
-	 * @return
-	 *
-	 * @access
-	 * @static
-	 * @throws
-	 * @example
-	 */
-	public function snapdata($newdata = null, $newval = null) {
-		$newdata = (is_array($newdata)) ? $newdata : [$newdata => $newval];
-
-		$this->session->set_tempdata($newdata, null, 3600);
-
-		return $this;
-	}
-
-	/**
-	 * get_snapdata
-	 * Insert description here
-	 *
-	 * @param $key
-	 *
-	 * @return
-	 *
-	 * @access
-	 * @static
-	 * @throws
-	 * @example
-	 */
-	public function get_snapdata($key) {
-		$data = $this->session->tempdata($key);
-
-		$this->session->unset_tempdata($key);
-
-		return $data;
-	}
-
-	/**
-	 * keep_snapdata
-	 * Insert description here
-	 *
-	 * @param $key
-	 *
-	 * @return
-	 *
-	 * @access
-	 * @static
-	 * @throws
-	 * @example
-	 */
-	public function keep_snapdata($key) {
-		return $this->session->tempdata($key);
-	}
-
-	/**
 	 * msg
 	 * Insert description here
 	 *
@@ -203,46 +143,6 @@ class Wallet {
 		}
 
 		return $this;
-	}
-
-	/**
-	 * stash
-	 * Insert description here
-	 *
-	 *
-	 * @return
-	 *
-	 * @access
-	 * @static
-	 * @throws
-	 * @example
-	 */
-	public function stash() {
-		$this->snapdata($this->stash_key, $this->input->request());
-
-		return $this;
-	}
-
-	/**
-	 * unstash
-	 * Insert description here
-	 *
-	 *
-	 * @return
-	 *
-	 * @access
-	 * @static
-	 * @throws
-	 * @example
-	 */
-	public function unstash() {
-		$stashed = $this->get_snapdata($this->stash_key);
-
-		if (is_array($stashed)) {
-			$this->input->set_request($stashed);
-		}
-
-		return $stashed;
 	}
 
 } /* end class */
