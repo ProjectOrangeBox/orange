@@ -352,7 +352,7 @@ class MY_Input extends CI_Input {
 	public function stash() {
 		$stash = $this->_request;
 
-		/* is this even an array to store? */
+		/* is there even an array to store? */
 		if (is_array($stash)) {
 			/* put a simple checksum on this */
 			$stash[$this->stash_hash_key] = md5(json_encode($stash).config('config.encryption_key'));
