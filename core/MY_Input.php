@@ -172,7 +172,7 @@ class MY_Input extends CI_Input {
 	 * @param array $move associated array new index=>old index (move) - preformed second
 	 * @param array $remove array indexes - preformed last
 	 * @param string $default_model the name of the default model (where separator isn't present)
-	 * @param string $only_index only return this model
+	 * @param string $only_index only return the model provided
 	 * @param string $separator if this is present then treat each array index as a parent + child pair
 	 * @param boolean $append_model should "_model" be append to the array indexes
 	 * @param mixed $_request associated array index=>value - or - TRUE to use servers passed form data
@@ -187,6 +187,43 @@ class MY_Input extends CI_Input {
 	 * copy or move array in order to copy or move the value to the output of a array if needed
 	 * $copy = ['roles|parent_id[]'=>'id'];
 	 * This would copy the id to each role index
+	 *
+	 *
+	 * <input type="hidden" name="repeatable|id[]" value="<?=$id ?>">
+	 * <input type="hidden" name="repeatable|parent_id[]" value="<?=$parent_id ?>">
+	 * <input type="text" class="form-control" name="repeatable|firstname][]" value="<?=$firstname ?>">
+	 * <input type="text" class="form-control" name="repeatable|lastname][]" value="<?=$lastname ?>">
+	 *
+	 *
+	 * $post = [
+	 *   'id' => 89,
+	 *   'name' => 'Johnny Appleseed',
+	 *   'number' => 21,
+	 *   'remove' => 'foobar',
+	 *   'repeatable' => [
+	 *     0 => [
+	 *       'id' => 45,
+	 *       'firstname' => 'Johnny',
+	 *       'lastname' => 'Appleseed',
+	 *       'checkers' => 0,
+	 *     ],
+	 *     1 => [
+	 *       'id' => 78,
+	 *       'firstname' => 'Don',
+	 *       'lastname' => 'Jones',
+	 *       'checkers' => 1,
+	 *     ],
+	 *     2 => [
+	 *       'id' => 83,
+	 *       'firstname' => 'Frank',
+	 *       'lastname' => 'Peters',
+	 *       'checkers' => 1,
+	 *     ],
+	 *   ],
+	 * ];
+	 *
+	 * $copy, $move, $remove, $default_model, $only_index, $separator, $append_model, $_request
+	 * $formatted = $this->input->request_remap(['fullname'=>'name'],['age'=>'number'],['remove'],'name',false,'|',true,$post);
 	 *
 	 */
 	public function request_remap($copy=[],$move=[],$remove=[],$default_model='#',$only_index=null,$separator='|',$append_model=false,$_request=[]) {

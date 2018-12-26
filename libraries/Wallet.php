@@ -19,33 +19,9 @@
  *
  */
 class Wallet {
-	/**
-	 * track if the combined cached configuration has been loaded
-	 *
-	 * @var boolean
-	 */
 	protected $redirect_messages = [];
-
-		/**
-	 * track if the combined cached configuration has been loaded
-	 *
-	 * @var boolean
-	 */
-	protected $request = [];
-
-	/**
-	 * track if the combined cached configuration has been loaded
-	 *
-	 * @var boolean
-	 */
 	protected $msg_key = 'internal::wallet::msg';
-
-	/**
-	 * track if the combined cached configuration has been loaded
-	 *
-	 * @var boolean
-	 */
-	protected $stash_key = 'internal::wallet::stash';
+	protected $view_variable = 'wallet_messages';
 
 	/**
 	 * track if the combined cached configuration has been loaded
@@ -64,11 +40,8 @@ class Wallet {
 	protected $config;
 	protected $load;
 	protected $session;
-	protected $input;
+	protected $http_referer;
 	protected $event;
-
-	protected $initial_pause;
-	protected $pause_for_each;
 
 	/**
 	 * __construct
@@ -88,61 +61,89 @@ class Wallet {
 		$this->session = &ci('session');
 		$this->event = &ci('event');
 		$this->load = &ci('load');
-		$this->input = &ci('input');
 
-		$this->pause_for_each = ($this->config['pause_for_each']) ?? 1000;
-		$this->initial_pause = ($this->config['initial_pause']) ?? 3;
+		$this->http_referer = ci('input')->server('HTTP_REFERER');
+		$this->sticky_types = ($this->config['sticky_types']) ?? ['red','danger','warning','yellow'];
 
-		$this->load->vars(['wallet_messages' => [
-			'messages'       => $this->session->flashdata($this->msg_key),
-			'initial_pause'  => $this->initial_pause,
-			'pause_for_each' => $this->pause_for_each,
-		]]);
+		/* set the view variable if any messages are available */
+		$this->set_view_variable($this->session->flashdata($this->msg_key));
 
 		log_message('info', 'Wallet Class Initialized');
 	}
 
 	/**
 	 * msg
-	 * Insert description here
+	 * Add a msg to the current page variable
+	 * - or -
+	 * Add a msg as a session flash message and redirect
 	 *
 	 * @param $msg
 	 * @param $type
 	 * @param $redirect
 	 *
-	 * @return
+	 * @return $this
 	 *
-	 * @access
-	 * @static
-	 * @throws
-	 * @example
 	 */
-	public function msg($msg = '', $type = 'yellow', $redirect = null) {
-		$sticky = ($type == 'red' || $type == 'danger' || $type == 'warning' || $type == 'yellow');
+	public function msg($msg = '', $type = 'yellow', $redirect = null)
+	{
+		/* is this type sticky? - use names not colors - colors support for legacy code */
+		$sticky = in_array($type,$this->sticky_types);
 
+		/* trigger a event incase they need to do something */
 		$this->event->trigger('wallet.msg', $msg, $type, $sticky, $redirect);
 
-		if (is_string($redirect) || $redirect === true) {
-			$redirect = (is_string($redirect)) ? $redirect : $this->input->server('HTTP_REFERER');
-
-			$this->redirect_messages[md5(trim($msg))] = ['msg' => trim($msg), 'type' => $type, 'sticky' => $sticky];
-
-			$this->session->set_flashdata($this->msg_key, $this->redirect_messages);
-
-			redirect($redirect);
+		/* is this a redirect */
+		if (is_string($redirect)) {
+			$this->redirect($msg,$type,$sticky,$redirect);
+		} elseif ($redirect === true) {
+			$this->redirect($msg,$type,$sticky,$this->http_referer);
 		} else {
-			$wallet_messages = $this->load->get_var('wallet_messages');
-			$current_msgs = (array) $wallet_messages['messages'];
-			$current_msgs[md5(trim($msg))] = ['msg' => trim($msg), 'type' => $type, 'sticky' => $sticky];
-
-			$this->load->vars(['wallet_messages' => [
-				'messages'       => $current_msgs,
-				'initial_pause'  => $this->initial_pause,
-				'pause_for_each' => $this->pause_for_each,
-			]]);
+			$this->add2page($msg,$type,$sticky);
 		}
 
 		return $this;
+	}
+
+	protected function redirect($msg,$type,$sticky,$redirect)
+	{
+		/* add another message to any that might already be on there */
+		$this->redirect_messages[md5(trim($msg))] = ['msg' => trim($msg), 'type' => $type, 'sticky' => $sticky];
+
+		/* store this in a session variable */
+		$this->session->set_flashdata($this->msg_key, $this->redirect_messages);
+
+		redirect($redirect);
+	}
+
+	protected function add2page($msg,$type,$sticky)
+	{
+		/* add to the current wallet messages */
+		$current_msgs = $this->get_view_variable();
+
+		/* add messages */
+		$current_msgs[md5(trim($msg))] = ['msg' => trim($msg), 'type' => $type, 'sticky' => $sticky];
+
+		/* put back in view variable */
+		$this->set_view_variable($current_msgs);
+	}
+
+	protected function set_view_variable($messages)
+	{
+		/* get any flash messages in the session and add them to the view data */
+		$this->load->vars([$this->view_variable => [
+			'messages'       => $messages,
+			'initial_pause'  => (($this->config['initial_pause']) ?? 3),
+			'pause_for_each' => (($this->config['pause_for_each']) ?? 1000),
+		]]);
+	}
+
+	protected function get_view_variable()
+	{
+		/* get the current messages */
+		$wallet_messages = $this->load->get_var($this->view_variable);
+
+		/* we only need the messages */
+		return (array)$wallet_messages['messages'];
 	}
 
 } /* end class */

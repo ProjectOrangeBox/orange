@@ -53,10 +53,14 @@ Whoops - php error handling for cool kids
 File Structure
 
 .env
+.env.local
+
 Used to storing configuration in the environment separate from code.
 http://php.net/manual/en/configuration.file.php
 http://php.net/manual/en/function.parse-ini-file.php
 It is common practice to not committing your .env file to version control.
+
+*.env.local is mereged over .env*
 
 /application
 As the name indicates the Application folder contains the application specific code.
