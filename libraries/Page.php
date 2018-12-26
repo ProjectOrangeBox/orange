@@ -463,7 +463,12 @@ class Page {
 	 *
 	 */
 	public function var($name) {
-		$html = $this->load->get_var($this->page_variable_prefix.$name);
+		$html = $this->load->get_var($name);
+		
+		/* if it's empty than maybe is it a page variable? */
+		if (empty($html)) {
+			$html = $this->load->get_var($this->page_variable_prefix.$name);
+		}
 
 		/* does this variable key exist */
 		if (isset($this->variables[$name])) {
