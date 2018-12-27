@@ -17,7 +17,7 @@
  * helpers:
  * functions:
  *
- * @show Unified Error collecting class
+ * @help Unified Error collecting class
  */
 class Errors {
 	protected $config;

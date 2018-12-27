@@ -1,6 +1,6 @@
 <?php
 
-// @show end a section.
+// @help end a section.
 
 class Pear_end extends Pear_plugin {
 

@@ -1,6 +1,6 @@
 <?php 
 
-// @show load the parent view variable.
+// @help load the parent view variable.
 
 class Pear_parent extends Pear_plugin {
 

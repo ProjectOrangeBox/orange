@@ -18,7 +18,7 @@
  * functions:
  * constants: NOBODY_USER_ID, ADMIN_ROLE_ID
  *
- * @show Authorization class
+ * @help Authorization class
  */
 class Auth {
 	/**

@@ -1,6 +1,6 @@
 <?php 
 
-// @show Include another view file with optional data and the ability to capture into a variable.
+// @help Include another view file with optional data and the ability to capture into a variable.
 
 class Pear_include extends Pear_plugin {
 

@@ -55,7 +55,7 @@
  * helpers:
  * functions: log_message
  *
- * @show Event handler
+ * @help Event handler
  */
 
 /* Follows Linux Priority negative values are higher priority and positive values are lower priority */

@@ -16,7 +16,7 @@
  * models:
  * helpers:
  * functions:
- * @show may only contain alpha characters, underscores, and dashes.
+ * @help may only contain alpha characters, underscores, and dashes.
  *
  */
 class Validate_alpha_dash extends Validate_base {

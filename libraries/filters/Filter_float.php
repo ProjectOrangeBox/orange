@@ -17,7 +17,7 @@
  * helpers:
  * functions:
  *
- * @show clean for use as a float
+ * @help clean for use as a float
  */
 class Filter_float extends Filter_base {
 	public function filter(&$field, $options) {

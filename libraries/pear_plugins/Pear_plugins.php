@@ -1,6 +1,6 @@
 <?php 
 
-// @show load pear plugin(s).
+// @help load pear plugin(s).
 
 class Pear_plugins extends Pear_plugin {
 

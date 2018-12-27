@@ -17,7 +17,7 @@
  * helpers:
  * functions:
  *
- * @show Cache as file using var_export
+ * @help Cache as file using var_export
  */
 class Cache_export extends CI_Driver {
 	/**

@@ -1,6 +1,6 @@
 <?php
 
-// @show get page variable. This allows for further processing before display.
+// @help get page variable. This allows for further processing before display.
 
 class Pear_page extends Pear_plugin {
 

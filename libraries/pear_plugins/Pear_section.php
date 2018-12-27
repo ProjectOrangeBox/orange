@@ -1,6 +1,6 @@
 <?php 
 
-// @show start a page section.
+// @help start a page section.
 
 class Pear_section extends Pear_plugin {
 

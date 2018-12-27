@@ -16,7 +16,7 @@
  * models:
  * helpers:
  * functions:
- * @show convert string to time formatted using date
+ * @help convert string to time formatted using date
  *
  */
 class Filter_convert_date extends Filter_base {

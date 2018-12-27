@@ -1,6 +1,6 @@
 <?php 
 
-// @show Extend a base template.
+// @help Extend a base template.
 
 class Pear_extends extends Pear_plugin {
 
