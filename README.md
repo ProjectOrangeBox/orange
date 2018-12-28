@@ -1,185 +1,226 @@
-```
-Orange Framework
+# Orange Framework
 
-URL:
-https://www.codeigniter.com/
+[URL] (https://www.codeigniter.com/)
 
-Manual:
-https://www.codeigniter.com/user_guide/index.html
+[Manual] (https://www.codeigniter.com/user_guide/index.html)
 
-Terms
-Catalog
+## Terms
+
+### Catalog
 a view variable which contains a array of model records.
 
-Filters
+### Filters
 functions used to “Filter” some type of input. ie. like PHPs trim for example.
 
-Validations
-functions used to “validate” some type of input. Failures are registered with the Errors object 
+### Validations
+functions used to “validate” some type of input. Failures are registered with the Errors object
 
-Middleware
-functions which can be called based on the url 
+### Middleware
+functions which can be called based on the url
 
-Pear
+### Pear
 view specific functions. These are called using PHP static syntax
 
-Trigger
+### Trigger
 Event package for your app and domain
 
-Packages
-As the name indicates the packages folder contains HMVC or composer like packages
-each independent package is like a mini application folder with a few exceptions
+### Packages
+As the name indicates the packages folder contains HMVC or composer like packages each independent package is like a mini application folder with a few exceptions
 
-Required Composer Packages:
-CodeIgntier Loaded as Composer Package
-	https://packagist.org/packages/codeigniter/framework
+## Required Composer Packages:
 
-CLImate allows you to easily output colored text, special formatting, and more. It makes output to the terminal clearer and debugging a lot simpler.	
-	https://packagist.org/packages/league/climate
-	http://climate.thephpleague.com/
-	
-KRUMO - version 2.0 of print_r(); and var_dump(); (with new updates)
-	https://packagist.org/packages/mmucklo/krumo
-	https://github.com/mmucklo/krumo
-	
-lightncandy - An extremely fast PHP implementation of handlebars ( http://handlebarsjs.com/ ) and mustache ( http://mustache.github.io/ ).
-	https://packagist.org/packages/zordius/lightncandy
-	https://github.com/zordius/lightncandy
+[CodeIgntier Loaded as Composer Package] (https://packagist.org/packages/codeigniter/framework)
 
-Whoops - php error handling for cool kids
-	https://packagist.org/packages/filp/whoops
-	https://github.com/filp/whoops
+CLImate allows you to easily output colored text, special formatting, and more. It makes output to the terminal clearer and debugging a lot simpler.   
+[packagist] (https://packagist.org/packages/league/climate)
+[climate] (http://climate.thephpleague.com/)
 
-File Structure
+KRUMO - version 2.0 of print\_r(); and var\_dump(); (with new updates).  
+[packagist] (https://packagist.org/packages/mmucklo/krumo)
+[krumo] (https://github.com/mmucklo/krumo)
 
+lightncandy - An extremely fast PHP implementation of [handlebars] (http://handlebarsjs.com/) and [mustache] (http://mustache.github.io/).  
+[packagist] (https://packagist.org/packages/zordius/lightncandy)
+[lightncandy] (https://github.com/zordius/lightncandy)
+
+Whoops - php error handling for cool kids. 
+[packagist] (https://packagist.org/packages/filp/whoops)
+[whoops] (https://github.com/filp/whoops)
+
+## File Structure
+
+```
 .env
 .env.local
+```
 
 Used to storing configuration in the environment separate from code.
-http://php.net/manual/en/configuration.file.php
-http://php.net/manual/en/function.parse-ini-file.php
-It is common practice to not committing your .env file to version control.
 
-*.env.local is mereged over .env*
+[The configuration file] (http://php.net/manual/en/configuration.file.php)
 
+[parse\_ini\_file] (http://php.net/manual/en/function.parse-ini-file.php)
+
+It is common practice to **not** committing your .env files to version control.
+
+> NOTE: the .env.local configurations are merged over .env configurations
+
+``
 /application
-As the name indicates the Application folder contains the application specific code.
-When using CodeIgniter / Orange thou you should put as much code in packages as possible this makes code reuse a lot easier.	
+``
+As the name indicates the Application folder contains the application specific code. When using CodeIgniter / Orange thou you should put as much code in packages as possible this makes code reuse a lot easier.
 
+```
 /bin
-Storage for misc shell scripts which pertain to your application
-for example special deployment scripts, a script to start the PHP built in server
+```
+Storage for misc shell scripts which pertain to your application for example special deployment scripts, a script to start the PHP built in server
 
+```
 composer.json
+```
 PHP composer file see
-https://getcomposer.org/doc/
+[composer] (https://getcomposer.org/doc/)
 
+```
 deploy.json
+```
 PHP Deploy file see
-https://github.com/dmyers2004/deploy
+[deploy] (https://github.com/dmyers2004/deploy)
 
+```
 /packages
-As the name indicates the packages folder contains HMVC or composer like packages
-each independent package is like a mini application folder with a few exceptions
-These are usually individual GIT repositories to simplify package reuse.
+```
+As the name indicates the packages folder contains HMVC or composer like packages each independent package is like a mini application folder with a few exceptions These are usually individual GIT repositories to simplify package reuse.
 
+```
 /public
+```
 This is the publicly accessible folder apache “servers” files from.
 
+```
 /public/index.php
+```
 The index.php serves as the front controller or router.
-https://www.codeigniter.com/user_guide/overview/appflow.html?highlight=index%20php
+[Application Flow Chart] (https://www.codeigniter.com/user_guide/overview/appflow.html?highlight=index%20php)
 
+```
 /support
+```
 In order to keep a project organized, This folder contain things such as database backups, import files, migrations, SSL keys, etc…
 
+```
 /var
-This folder much like the Linux equivalent contains things like caches, downloads, emails, logs, sessions, uploads.
-This folder should NOT be managed in your GIT repository and should be ignored.
+```
+This folder much like the Linux equivalent contains things like caches, downloads, emails, logs, sessions, uploads. This folder should NOT be managed in your GIT repository and should be ignored.
 
+```
 /vendor
-This folder is created and managed by PHP Composer.
-This folder is NOT managed in your GIT repositories and should be ignored.
+```
+This folder is created and managed by PHP Composer. This folder is NOT managed in your GIT repositories and should be ignored.
 
-Core Classes
+## Core Classes
 
+```
 core/MY_Config.php
+```
 provides extensions to CodeIgniter config such as getting configuration using dot notation with a default, flushing of cached config data, loading configuration if needed from a database, etc…
 
+```
 core/MY_Controller.php
+```
 provides extensions to CodeIgniter Controller for automatically handling if site is down for maintenance. Calling middleware if needed, auto loading libraries, models, helpers for this controller (not needed to much anymore using the new extended ci() function) auto loading “catalogs”. attaching a “controller” specific model
 
+```
 core/MY_Input.php
+```
 provides extensions to CodeIgniter Input for grouping PUT and POST into a single function (no need for the dev to switch between them). Advanced auto “remapping” of request data. Updated wrapper for reading cookies with default.
 
+```
 core/MY_Loader.php
+```
 provides extensions to CodeIgniter loader to making loading and “overloading” classes faster (since it uses a array to locate classes and not a file system “scan”)
 
+```
 core/MY_Log.php
+```
 provides extensions to CodeIgniter Log to provide support for PSR3 bitwise levels as well as monolog if necessary.
 
+```
 core/MY_Model.php
+```
 provides extensions to CodeIgniter Model with validation. Not specific to Databases because not all models are modeling database tables.
 
+```
 core/MY_Output.php
+```
 provides extensions to CodeIgniter Output with json, nocache, wrapper for inputs “set cookie” since setting cookies are more of a output function and simple function to delete all cookies
 
+```
 core/MY_Router.php
+```
 provides extensions to CodeIgniter Router to automatically handle controllers in Packages. This also added the “Action” suffix and HTTP method (Post, Put, Delete, Cli (command line), Get (none)). This uses a advanced caching technique to make this lighting fast (no filesystem scanning etc.)…
 
-Orange.php File
+### Orange.php File
 
+```
 core/Orange.php
+```
 Provides additional functions to CodeIgniter.
 methods include but are not limited to:
 
+```
 ci(class)
+```
 a much smarter get_instance()
-To get a reference to the CodeIgniter “Super Object” you simple use get_instance()
+To get a reference to the CodeIgniter “Super Object” you simple use [get_instance] (https://www.codeigniter.com/user_guide/general/ancillary_classes.html?highlight=get_instance#get_instance) But I’ve made it smarter by making it a little more like a dependency injection contain. You can autoload a library or model simply by entering it’s name in the function ie.
 
-https://www.codeigniter.com/user_guide/general/ancillary_classes.html?highlight=get_instance#get_instance
-
-But I’ve made it smarter by making it a little more like a dependency injection contain. 
-You can autoload a library or model simply by entering it’s name in the function ie.
-
+```
 ci('email')->send();
+```
 
-this will auto load the email library if it’s not already loaded and then call the send method. 
+this will auto load the email library if it’s not already loaded and then call the send method.
 Then you don’t need to call
+
+```
 ci()->load->library(‘email’);
 ci()->email->send();
+```
 
 This also becomes a dependency injection contain because the ‘email’ library can be something other than a class named ‘email’ (the default CI way of loading classes)
 
 This “remapping” is handled by the remap entry in /config/autoload.php
 
+```
 $autoload['remap'] = [
 	'auth'=>'ldap_auth',
 	'o_user_entity'=>'O_ldap_user_entity',
 ];
+```
 
 in this example ldap_auth is loaded instead of auth when ci(‘auth’) is called. or a mock_auth for testing etc…
 
+```
 site_url(uri,protocol)
-smarter site_url
-This does everything the CodeIgniter site_url() does
+```
+Smarter site\_url This does everything the CodeIgniter [site_url] (https://www.codeigniter.com/user_guide/helpers/url_helper.html?highlight=site_url#site_url) except this version of the function added a simple find and replace for {} tags. These tags are loaded from /config/paths.php. This then makes it easier to have any reused path in paths.php and by using site_url() load them.
 
-https://www.codeigniter.com/user_guide/helpers/url_helper.html?highlight=site_url#site_url
-
-except this version of the function added a simple find and replace for {} tags. These tags are loaded from /config/paths.php. This then makes it easier to have any reused path in paths.php and by using site_url() load them.
-
+```
 $path = site_url('/{www theme}/assets/css')
+```
 
+```
 config(setting,default)
+```
 wrapper for config’s dot_item calls
+```
 ci('config')->dot_item()
-This makes loaded configuration values a lot easier and it's fully cached. 
+```
+This makes loaded configuration values a lot easier and it's fully cached.
 config('auth.login h2')
 will return the value for /config/auto.php array key 'login h2'.
 
 Just like
 $html = ci('config')->dot_item('auth.login h2','Login');
-you can also provided a default value. 
+you can also provided a default value.
 $html = config('auth.login h2','Login');
 
 filter(rules,field)
@@ -193,7 +234,7 @@ and returns value of
 !ci('errors')->has();
 
 esc(string)
-escape " with \" 
+escape " with \"
 
 e(html)
 performs a html encoding of special characters
@@ -205,7 +246,7 @@ view(view,data)
 most basic wrapper for loading views
 https://www.codeigniter.com/user_guide/general/views.html?highlight=view#adding-dynamic-data-to-the-view
 
-NOTE this ALWAYS returns the rendered view. This does not echo anything.
+> NOTE: this ALWAYS returns the rendered view. This does not echo anything.
 
 unlock_session()
 more english wrapper for PHP session_write_close() function
@@ -215,9 +256,9 @@ simple browser level debugger shows up in the javascript console wrapper for
 echo '<script type="text/javascript">console.'.$type.'('.json_encode($var).')</script>';
 
 l(...)
-"raw" logging function 
+"raw" logging function
 Simple Logging function for debugging purposes
-ALWAYS writes to 
+ALWAYS writes to
 LOGPATH.'/orange_debug.log'
 
 atomic_file_put_contents(file path,content)
@@ -275,7 +316,7 @@ provides a unified library to register errors for further processing
 Event
 libraries/Event.php
 provides the library to provides events in your app
-methods include 
+methods include
 register(name, closure, priority)
 trigger(name, a#...)
 count(name)
@@ -339,7 +380,7 @@ reset_priority()
 reset element priority to default 50
 Pear View Plugins
 libraries/Pear_plugin.php
-base class for pear plugins. 
+base class for pear plugins.
 
 libraries/Pear.php
 provides the HTML View Pear “plugin” functions (to be used in view only)
@@ -348,6 +389,7 @@ it’s class constructor __construct and render()
 the constructor is called when the plugin is loaded for the first time
 if a plugin just adds for example css or js to a page you can include it with the plugins() & plugin() methods
 if your plugin is used in a view to “do” something you simple call pear::foobar($foo,23) which will automatically load the “foobar” plugin (which of course called the constructor if it’s present) and then sends $foo and 23 to the render method. the render method can then return something which can be echoed. Plugins should “echo” directly but instead return a value which can be echoed.
+
 <?=pear::foobar($foo,23) ?>
 
 Built in Pear methods include but are not limited to:
@@ -536,7 +578,7 @@ for the private administrator view create a folder admin inside the controllers 
 
 This should give you something like this:
 
-We will work on the administrator controller first so inside 
+We will work on the administrator controller first so inside
 
 /cookies/controllers/admin/CookiesController.php
 
@@ -565,7 +607,7 @@ First create the database table
 This can be anything you want including secondary keys to additional tables.
 In this example we are going to keep it simple.
 
- 
+
 Then for the model
 /models/Cookies_model.php
 you can enter the following:
@@ -819,7 +861,7 @@ $autoload['packages'] = array(
 
 Now your probably saying! All that “searching” must take forever and slow down the Framework!
 Fear Not!
-Every time the application is loaded it looks for a cache file at 
+Every time the application is loaded it looks for a cache file at
 
 /var/cache/autoload_files.php
 
@@ -841,11 +883,11 @@ Using a editor like Espresso or Sublime.
 You simply search for the file you are looking for:
 You can see all of the index.php files matching our criteria.
 
-In this case you can see: 
+In this case you can see:
 
 application/views/admin/users/index.php
 
-Which as I mentioned earlier is higher in the Hierarchy over the original which is at 
+Which as I mentioned earlier is higher in the Hierarchy over the original which is at
 
 packages/projectorangebox/…ws/admin/users/index.php
 
@@ -1085,4 +1127,3 @@ O_permission_model
 O_role_model
 O_setting_model
 O_nav_model (included with orange-theme)
-```
