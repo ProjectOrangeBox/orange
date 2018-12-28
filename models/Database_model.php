@@ -31,20 +31,37 @@ class Database_model extends MY_Model {
 	protected $additional_cache_tags = ''; /* additional cache tags to add to cache prefix remember each tag is separated by . */
 	protected $entity = null; /* true or string name of the entity to use for records - if true it uses the class name and replaces _model with _entity */
 	protected $entity_class = null; /* empty entity */
-	protected $has_roles = false; /* does this table use the standard role columns? these are automatically added to index, insert query's */
-	protected $has_stamps = false; /* does this table use the standard timestamps columns? these are automatically added to insert, update, delete query's */
-	protected $has_soft_delete = false; /* does this table support soft delete? */
-
-	protected $cache_prefix; /* calculated in construct - internal */
-	protected $auto_generated_primary = true; /* if the primary key is auto generated then remove it from insert commands */
-
+	
 	/*
 	these can be set in the model using the constants ADMIN_ROLE_ID or NOBODY_USER_ID
 	or by using set_role_ids($read_id=null,$edit_id=null,$delete_id=null)
-	*/
+	 */
 	protected $read_role_id = null;
 	protected $edit_role_id = null;
 	protected $delete_role_id = null;
+	
+	protected $has_roles = false; /* does this table use the standard role columns? these are automatically added to index, insert query's */
+	protected $has_stamps = false; /* does this table use the standard timestamps columns? these are automatically added to insert, update, delete query's */
+	protected $has_soft_delete = false; /* does this table support soft delete? */
+	
+	protected $has = [
+		'read_role'=>false,
+		'edit_role'=>false,
+		'delete_role'=>false,
+		'created_by'=>false,
+		'created_on'=>false,
+		'created_ip'=>false,
+		'updated_by'=>false,
+		'updated_on'=>false,
+		'updated_ip'=>false,
+		'deleted_by'=>false,
+		'deleted_on'=>false,
+		'deleted_ip'=>false,
+		'is_deleted'=>false,
+	];
+
+	protected $cache_prefix; /* calculated in construct - internal */
+	protected $auto_generated_primary = true; /* if the primary key is auto generated then remove it from insert commands */
 
 	/* internal */
 	protected $_database; /* local instance of database connection */
@@ -99,13 +116,37 @@ class Database_model extends MY_Model {
 			$this->_database = $this->db;
 		}
 
-		/* does this model have rules? if so add the role validation rules */
+		/*
+		does this model have rules? if so add the role validation rules
+		*/
 		if ($this->has_roles) {
-			$this->rules = $this->rules + [
-				'read_role_id' => ['field' => 'read_role_id', 'label' => 'Read Role', 	'rules' => 'required|integer|max_length[10]|less_than[4294967295]|filter_int[10]'],
-				'edit_role_id' => ['field' => 'edit_role_id', 'label' => 'Edit Role', 	'rules' => 'required|integer|max_length[10]|less_than[4294967295]|filter_int[10]'],
-				'delete_role_id' => ['field' => 'delete_role_id', 'label' => 'Delete Role', 'rules' => 'required|integer|max_length[10]|less_than[4294967295]|filter_int[10]'],
-			];
+			$this->has['read_role'] = true;
+			$this->has['edit_role'] = true;
+			$this->has['delete_role'] = true;
+		}
+
+		if ($this->has_stamps) {
+			$this->has['created_by'] = true;
+			$this->has['created_on'] = true;
+			$this->has['created_ip'] = true;
+			$this->has['updated_by'] = true;
+			$this->has['updated_on'] = true;
+			$this->has['updated_ip'] = true;
+			$this->has['deleted_by'] = true;
+			$this->has['deleted_on'] = true;
+			$this->has['deleted_ip'] = true;
+		}
+		
+		if ($this->has['read_role']) {
+			$this->rules = $this->rules + ['read_role_id' => ['field' => 'read_role_id', 'label' => 'Read Role', 	'rules' => 'required|integer|max_length[10]|less_than[4294967295]|filter_int[10]']];
+		}
+
+		if ($this->has['edit_role']) {
+			$this->rules = $this->rules + ['edit_role_id' => ['field' => 'edit_role_id', 'label' => 'Edit Role', 	'rules' => 'required|integer|max_length[10]|less_than[4294967295]|filter_int[10]']];
+		}
+
+		if ($this->has['delete_role']) {
+			$this->rules = $this->rules + ['delete_role_id' => ['field' => 'delete_role_id', 'label' => 'Delete Role', 'rules' => 'required|integer|max_length[10]|less_than[4294967295]|filter_int[10]']];
 		}
 
 		/* what is the default on return many */
@@ -401,7 +442,7 @@ class Database_model extends MY_Model {
 			remove the protected columns
 			call the add field on insert method which can be overridden on the extended class
 			call the add where on insert method which can be overridden on the extended class
-			*/
+			 */
 			$this->remap_columns($data, $this->rules)->remove_columns($data, $this->protected)->add_fields_on_insert($data)->add_where_on_insert($data);
 
 			/* are there any columns left? */
@@ -416,7 +457,7 @@ class Database_model extends MY_Model {
 			/*
 			set success to the insert id - if there is no auto generated primary if 0 is
 			returned so exact (===) should be used on the results to determine if it's "really" a error (false)
-			*/
+			 */
 			$success = (int) $this->_database->insert_id();
 		}
 
@@ -504,7 +545,7 @@ class Database_model extends MY_Model {
 			remove the protected columns
 			call the add field on update method which can be overridden on the extended class
 			call the add where on update method which can be overridden on the extended class
-			*/
+			 */
 			$this->remap_columns($data, $this->rules)->remove_columns($data, $this->protected)->add_fields_on_update($data)->add_where_on_update($data);
 
 			/* are there any columns left? */
@@ -1249,6 +1290,7 @@ class Database_model extends MY_Model {
 			$data['deleted_on'] = date('Y-m-d H:i:s');
 			$data['deleted_ip'] = ci()->input->ip_address();
 		}
+
 		return $this;
 	}
 
