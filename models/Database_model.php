@@ -33,15 +33,20 @@ class Database_model extends MY_Model {
 	protected $entity_class = null; /* empty entity */
 
 	/**
-	 * these can be set in the model using the constants ADMIN_ROLE_ID or NOBODY_USER_ID
+	 * These can be set in the model using the constants ADMIN_ROLE_ID or NOBODY_USER_ID
 	 * or by using set_role_ids($read_id=null,$edit_id=null,$delete_id=null)
 	 */
 	protected $read_role_id = null;
 	protected $edit_role_id = null;
 	protected $delete_role_id = null;
 
+	/* deprecated - use $has for each role column name */
 	protected $has_roles = false; /* does this table use the standard role columns? these are automatically added to index, insert query's */
+
+	/* deprecated - use $has for each created, updated, deleted column name */
 	protected $has_stamps = false; /* does this table use the standard timestamps columns? these are automatically added to insert, update, delete query's */
+
+	/* deprecated - use $has */
 	protected $soft_delete = false; /* does this table support soft delete? */
 
 	/* add the name of the column to "enable" */
@@ -77,9 +82,9 @@ class Database_model extends MY_Model {
 	protected $default_return_on_many; /* return this on "no records found" */
 	protected $default_return_on_single; /* return this on "no record found" */
 
-/**
- * __construct
- */
+	/**
+	 * __construct
+	 */
 	public function __construct() {
 		/* setup MY_Model */
 		parent::__construct();
@@ -140,6 +145,10 @@ class Database_model extends MY_Model {
 			$this->rules = $this->rules + [$this->has['delete_role'] => ['field' => $this->has['delete_role'], 'label' => 'Delete Role', 'rules' => 'required|integer|max_length[10]|less_than[4294967295]|filter_int[10]']];
 		}
 
+		if ($this->has['is_deleted']) {
+			$this->soft_delete = true;
+		}
+
 		if ($this->soft_delete) {
 			/* what is the name of the column? */
 			$this->has['is_deleted'] = (is_string($this->has['is_deleted'])) ? $this->has['is_deleted'] : 'is_deleted';
@@ -155,7 +164,9 @@ class Database_model extends MY_Model {
 			$this->has['updated_by'] = 'updated_by';
 			$this->has['updated_on'] = 'updated_on';
 			$this->has['updated_ip'] = 'updated_ip';
+		}
 
+		if ($this->has_stamps && $this->soft_delete) {
 			$this->has['deleted_by'] = 'deleted_by';
 			$this->has['deleted_on'] = 'deleted_on';
 			$this->has['deleted_ip'] = 'deleted_ip';
@@ -182,15 +193,15 @@ class Database_model extends MY_Model {
 		log_message('info', 'Database_model Class Initialized');
 	}
 
-/**
- * Try to call built in CodeIgniter Database methods on the CodeIgniter _database object
- *
- * @param $name string
- * @param $arguments mixed
- *
- * @return $this
- *
- */
+	/**
+	 * Try to call built in CodeIgniter Database methods on the CodeIgniter _database object
+	 *
+	 * @param $name string
+	 * @param $arguments mixed
+	 *
+	 * @return $this
+	 *
+	 */
 	public function __call($name, $arguments) {
 		if (method_exists($this->_database,$name)) {
 			call_user_func_array([$this->_database,$name],$arguments);
@@ -199,16 +210,16 @@ class Database_model extends MY_Model {
 		return $this;
 	}
 
-/**
- * set the default role id for insert actions where it's not supplied in $data
- *
- * @param $read_id integer
- * @param $edit_id integer
- * @param $delete_id integer
- *
- * @return $this
- *
- */
+	/**
+	 * set the default role id for insert actions where it's not supplied in $data
+	 *
+	 * @param $read_id integer
+	 * @param $edit_id integer
+	 * @param $delete_id integer
+	 *
+	 * @return $this
+	 *
+	 */
 	public function set_role_ids($read_id=null,$edit_id=null,$delete_id=null) {
 		if ($read_id) {
 			$this->read_role_id = (int)$read_id;
@@ -225,80 +236,80 @@ class Database_model extends MY_Model {
 		return $this;
 	}
 
-/**
- * Return the current cache prefix
- *
- * @return string
- *
- */
+	/**
+	 * Return the current cache prefix
+	 *
+	 * @return string
+	 *
+	 */
 	public function get_cache_prefix() {
 		return (string)$this->cache_prefix;
 	}
 
-/**
- * Return the current table name
- *
- * @return string
- *
- */
+	/**
+	 * Return the current table name
+	 *
+	 * @return string
+	 *
+	 */
 	public function get_tablename() {
 		return (string)$this->table;
 	}
 
-/**
- * Return the current primary key
- *
- * @return
- *
- */
+	/**
+	 * Return the current primary key
+	 *
+	 * @return
+	 *
+	 */
 	public function get_primary_key() {
 		return (string)$this->primary_key;
 	}
 
-/**
- * Return if this table uses soft deletes
- *
- * @return boolean
- *
- */
+	/**
+	 * Return if this table uses soft deletes
+	 *
+	 * @return boolean
+	 *
+	 */
 	public function get_soft_delete() {
 		return (bool)$this->soft_delete;
 	}
 
-/**
- * Return the current query as an array overriding what ever is currently set as default
- *
- * @return $this
- *
- */
+	/**
+	 * Return the current query as an array overriding what ever is currently set as default
+	 *
+	 * @return $this
+	 *
+	 */
 	public function as_array() {
 		$this->temporary_return_as_array = true;
 
 		return $this;
 	}
 
-/**
- * Return only this single column
- *
- * @param $name string
- *
- * @return
- *
- */
+	/**
+	 * Return only this single column
+	 *
+	 * @param $name string
+	 *
+	 * @return
+	 *
+	 */
 	public function column($name) {
 		$this->temporary_column_name = (string)$name;
 
 		return $this;
 	}
 
-/**
- * If no records / record are found return this
- *
- * @param $return mixed
- *
- * @return $this
- *
- */
+	/**
+	 * If no records / record are found return this
+	 *
+	 * @param $return mixed
+	 *
+	 * @return $this
+	 *
+	 */
 	public function on_empty_return($return) {
 		$this->default_return_on_single	= $return;
 		$this->default_return_on_many	= $return;
@@ -306,26 +317,26 @@ class Database_model extends MY_Model {
 		return $this;
 	}
 
-/**
- * Get a single record
- *
- * @param $primary_value
- *
- * @return mixed
- *
- */
+	/**
+	 * Get a single record
+	 *
+	 * @param $primary_value
+	 *
+	 * @return mixed
+	 *
+	 */
 	public function get($primary_value = null) {
 		return ($primary_value === null) ? $this->default_return_on_single : $this->get_by([$this->primary_key => $primary_value]);
 	}
 
-/**
- * Get a single using a where clause
- *
- * @param $where array
- *
- * @return mixed
- *
- */
+	/**
+	 * Get a single using a where clause
+	 *
+	 * @param $where array
+	 *
+	 * @return mixed
+	 *
+	 */
 	public function get_by($where = null) {
 		if ($where) {
 			$this->_database->where($where);
@@ -334,24 +345,24 @@ class Database_model extends MY_Model {
 		return $this->_get(false);
 	}
 
-/**
- * Get multiple records
- *
- * @return mixed
- *
- */
+	/**
+	 * Get multiple records
+	 *
+	 * @return mixed
+	 *
+	 */
 	public function get_many() {
 		return $this->get_many_by();
 	}
 
-/**
- * Get multiple records using a where clause
- *
- * @param $where array
- *
- * @return mixed
- *
- */
+	/**
+	 * Get multiple records using a where clause
+	 *
+	 * @param $where array
+	 *
+	 * @return mixed
+	 *
+	 */
 	public function get_many_by($where = null) {
 		if ($where) {
 			$this->_database->where($where);
@@ -360,15 +371,15 @@ class Database_model extends MY_Model {
 		return $this->_get(true);
 	}
 
-/**
- * Preform the actual SQL select
- *
- * @param $as_array boolean return as a array
- * @param $table string optional
- *
- * @return mixed
- *
- */
+	/**
+	 * Preform the actual SQL select
+	 *
+	 * @param $as_array boolean return as a array
+	 * @param $table string optional
+	 *
+	 * @return mixed
+	 *
+	 */
 	protected function _get($as_array = true, $table = null) {
 		/* switch to the read database if we are using 2 different connections */
 		$this->switch_database('read');
@@ -428,14 +439,14 @@ class Database_model extends MY_Model {
 		return $this;
 	}
 
-/**
- * Insert a database record based on the name value associated array pairs
- *
- * @param $data array
- *
- * @return mixed - false on fail or the insert id
- *
- */
+	/**
+	 * Insert a database record based on the name value associated array pairs
+	 *
+	 * @param $data array
+	 *
+	 * @return mixed - false on fail or the insert id
+	 *
+	 */
 	public function insert($data) {
 		/* switch to the write database if we are using 2 different connections */
 		$this->switch_database('write');
@@ -460,7 +471,11 @@ class Database_model extends MY_Model {
 			call the add field on insert method which can be overridden on the extended class
 			call the add where on insert method which can be overridden on the extended class
 			 */
-			$this->remap_columns($data, $this->rules)->remove_columns($data, $this->protected)->add_fields_on_insert($data)->add_where_on_insert($data);
+			$this
+				->remap_columns($data, $this->rules)
+				->remove_columns($data, $this->protected)
+				->add_fields_on_insert($data)
+				->add_where_on_insert($data);
 
 			/* are there any columns left? */
 			if (count($data)) {
@@ -485,17 +500,17 @@ class Database_model extends MY_Model {
 		return $success;
 	}
 
-/**
- * Make sure each column is added to data even if empty
- * this makes sure each validation rule can work on something if necessary
- * if data didn't include the column then the rules would be skipped
- *
- * @param $data
- * @param $which_set
- *
- * @return $this
- *
- */
+	/**
+	 * Make sure each column is added to data even if empty
+	 * this makes sure each validation rule can work on something if necessary
+	 * if data didn't include the column then the rules would be skipped
+	 *
+	 * @param $data
+	 * @param $which_set
+	 *
+	 * @return $this
+	 *
+	 */
 	protected function add_rule_set_columns(&$data,$which_set) {
 		if (isset($this->rule_sets[$which_set])) {
 
@@ -511,14 +526,14 @@ class Database_model extends MY_Model {
 		return $this;
 	}
 
-/**
- * Update a database record based on the name value associated array pairs
- *
- * @param $data array
- *
- * @return mixed - false on fail or the affected rows
- *
- */
+	/**
+	 * Update a database record based on the name value associated array pairs
+	 *
+	 * @param $data array
+	 *
+	 * @return mixed - false on fail or the affected rows
+	 *
+	 */
 	public function update($data) {
 		/* convert the input to any array if it's not already */
 		$data = (array)$data;
@@ -533,15 +548,15 @@ class Database_model extends MY_Model {
 		return $this->update_by($data, [$this->primary_key => $data[$this->primary_key]]);
 	}
 
-/**
- * Update a database record based on the name value associated array pairs using a where clause
- *
- * @param $data array
- * @param $where array
- *
- * @return mixed - false on fail or the affected rows
- *
- */
+	/**
+	 * Update a database record based on the name value associated array pairs using a where clause
+	 *
+	 * @param $data array
+	 * @param $where array
+	 *
+	 * @return mixed - false on fail or the affected rows
+	 *
+	 */
 	public function update_by($data, $where = []) {
 		/* switch to the write database if we are using 2 different connections */
 		$this->switch_database('write');
@@ -563,7 +578,11 @@ class Database_model extends MY_Model {
 			call the add field on update method which can be overridden on the extended class
 			call the add where on update method which can be overridden on the extended class
 			 */
-			$this->remap_columns($data, $this->rules)->remove_columns($data, $this->protected)->add_fields_on_update($data)->add_where_on_update($data);
+			$this
+				->remap_columns($data, $this->rules)
+				->remove_columns($data, $this->protected)
+				->add_fields_on_update($data)
+				->add_where_on_update($data);
 
 			/* are there any columns left? */
 			if (count($data)) {
@@ -585,27 +604,27 @@ class Database_model extends MY_Model {
 		return $success;
 	}
 
-/**
- * Delete based on primary key
- *
- * @param $arg
- *
- * @return mixed - false on fail or the affected rows
- *
- */
+	/**
+	 * Delete based on primary key
+	 *
+	 * @param $arg
+	 *
+	 * @return mixed - false on fail or the affected rows
+	 *
+	 */
 	public function delete($arg) {
 		return $this->delete_by($this->create_where($arg,true));
 	}
 
-/**
- * delete_by
- * Insert description here
- *
- * @param $data
- *
- * @return mixed - false on fail or the affected rows
- *
- */
+	/**
+	 * delete_by
+	 * Insert description here
+	 *
+	 * @param $data
+	 *
+	 * @return mixed - false on fail or the affected rows
+	 *
+	 */
 	public function delete_by($data) {
 		/* switch to the write database if we are using 2 different connections */
 		$this->switch_database('write');
@@ -626,16 +645,15 @@ class Database_model extends MY_Model {
 				/* save a copy of data */
 				$where = $data;
 
-				/* add is_delete column to data passed in */
-				$data = $data + [$this->has['is_deleted']=>1];
-
 				/* call the add field on delete method which can be overridden on the extended class */
-				$this->add_fields_on_delete($data);
+				$this->add_fields_on_delete($data)->add_where_on_delete($data);
 
 				/* preform the actual CodeIgniter Database soft delete */
 				$this->_database->where($where)->set($data)->update($this->table);
 			} else {
 				/* preform the actual CodeIgniter Database Delete */
+				$this->add_where_on_delete($data);
+
 				$this->_database->where($data)->delete($this->table);
 			}
 
@@ -653,14 +671,14 @@ class Database_model extends MY_Model {
 		return $success;
 	}
 
-/**
- * Convert Database Cursor into something useable
- *
- * @param $dbc database cursor object
- *
- * @return mixed
- *
- */
+	/**
+	 * Convert Database Cursor into something useable
+	 *
+	 * @param $dbc database cursor object
+	 *
+	 * @return mixed
+	 *
+	 */
 	protected function _as_array($dbc) {
 		/* setup default if empty */
 		$result = $this->default_return_on_many;
@@ -683,14 +701,14 @@ class Database_model extends MY_Model {
 		return $result;
 	}
 
-/**
- * Convert Database Cursor into a useable record
- *
- * @param $dbc database cursor object
- *
- * @return $mixed
- *
- */
+	/**
+	 * Convert Database Cursor into a useable record
+	 *
+	 * @param $dbc database cursor object
+	 *
+	 * @return $mixed
+	 *
+	 */
 	protected function _as_row($dbc) {
 		/* setup default if empty */
 		$result = $this->default_return_on_single;
@@ -713,14 +731,14 @@ class Database_model extends MY_Model {
 		return $result;
 	}
 
-/**
- * if debug save the last query into a log file
- * this is mostly for development and should really be used on a live system
- * as this file can grow very quickly!
- *
- * @return $this
- *
- */
+	/**
+	 * if debug save the last query into a log file
+	 * this is mostly for development and should really be used on a live system
+	 * as this file can grow very quickly!
+	 *
+	 * @return $this
+	 *
+	 */
 	protected function log_last_query() {
 		if ($this->debug) {
 			$query  = $this->_database->last_query();
@@ -731,73 +749,73 @@ class Database_model extends MY_Model {
 		return $this;
 	}
 
-/**
- * Delete cache entries by tag
- * This can be extended to provide additional features
- *
- * @return $this
- *
- */
+	/**
+	 * Delete cache entries by tag
+	 * This can be extended to provide additional features
+	 *
+	 * @return $this
+	 *
+	 */
 	protected function delete_cache_by_tags() {
 		ci('cache')->delete_by_tags($this->cache_prefix);
 
 		return $this;
 	}
 
-/**
- * Catalog provides a simple way and interface to make a simple query
- *
- * @param $array_key
- * @param $select_columns
- * @param $where
- * @param $order_by
- *
- * @return array
- *
-	ci('status_model')->catalog()
-		array (
-			1 =>
-			Status_entity::__set_state(array(
-				'id' => '1',
-				'human' => 'Error',
-				'color' => 'ff0000',
-				'icon' => 'asterisk',
+	/**
+	 * Catalog provides a simple way and interface to make a simple query
+	 *
+	 * @param $array_key
+	 * @param $select_columns
+	 * @param $where
+	 * @param $order_by
+	 *
+	 * @return array
+	 *
+		ci('status_model')->catalog()
+			array (
+				1 =>
+				Status_entity::__set_state(array(
+					'id' => '1',
+					'human' => 'Error',
+					'color' => 'ff0000',
+					'icon' => 'asterisk',
 
-	ci('status_model')->catalog('human','*')
-		array (
-			'Error' => 'ff0000',
-			'Ok' => '38cfbd',
+		ci('status_model')->catalog('human','*')
+			array (
+				'Error' => 'ff0000',
+				'Ok' => '38cfbd',
 
-	ci('status_model')->catalog('human','color')
-		array (
-			'Error' =>
-			Status_entity::__set_state(array(
-				'id' => '1',
-				'human' => 'Error',
-				'color' => 'ff0000',
-				'icon' => 'asterisk',
+		ci('status_model')->catalog('human','color')
+			array (
+				'Error' =>
+				Status_entity::__set_state(array(
+					'id' => '1',
+					'human' => 'Error',
+					'color' => 'ff0000',
+					'icon' => 'asterisk',
 
-	ci('status_model')->catalog('human','*',['is_deleted'=>0])
-		array (
-			'Error' =>
-			Status_entity::__set_state(array(
-				'id' => '1',
-				'human' => 'Error',
-				'color' => 'ff0000',
-				'icon' => 'asterisk',
+		ci('status_model')->catalog('human','*',['is_deleted'=>0])
+			array (
+				'Error' =>
+				Status_entity::__set_state(array(
+					'id' => '1',
+					'human' => 'Error',
+					'color' => 'ff0000',
+					'icon' => 'asterisk',
 
-	ci('status_model')->catalog('human','*',['is_deleted'=>0],'name') defaults to asc
-	ci('status_model')->catalog('human','*',['is_deleted'=>0],'name desc')
-		array (
-			'SkyBlue' =>
-			Status_entity::__set_state(array(
-				'id' => '3',
-				'human' => 'SkyBlue',
-				'color' => '215eb8',
-				'icon' => 'dribbble',
+		ci('status_model')->catalog('human','*',['is_deleted'=>0],'name') defaults to asc
+		ci('status_model')->catalog('human','*',['is_deleted'=>0],'name desc')
+			array (
+				'SkyBlue' =>
+				Status_entity::__set_state(array(
+					'id' => '3',
+					'human' => 'SkyBlue',
+					'color' => '215eb8',
+					'icon' => 'dribbble',
 
- *
- */
+	 *
+	 */
 	public function catalog($array_key = null, $select_columns = null, $where = null, $order_by = null, $cache_key = null, $with_deleted = false) {
 		/* setup the default return value */
 		$is_cached = false;
@@ -878,18 +896,18 @@ class Database_model extends MY_Model {
 		return $results;
 	}
 
-/**
- * is unique model based
- *
- * @param $field string - value we are testing
- * @param $column string - database column name
- * @param $form_key string - form input key
- *
- * @return
- *
- * $success = ci('foo_model')->is_uniquem('Johnny Appleseed','name','id');
- *
- */
+	/**
+	 * is unique model based
+	 *
+	 * @param $field string - value we are testing
+	 * @param $column string - database column name
+	 * @param $form_key string - form input key
+	 *
+	 * @return
+	 *
+	 * $success = ci('foo_model')->is_uniquem('Johnny Appleseed','name','id');
+	 *
+	 */
 	public function is_uniquem($field, $column, $form_key) {
 		/* run the query return a maximum of 3 */
 		$dbc = $this->_database->select($column.','.$this->primary_key)->where([$column=>$field])->get($this->table, 3);
@@ -911,20 +929,9 @@ class Database_model extends MY_Model {
 		return ($dbc->row()->{$this->primary_key} == get_instance()->input->request($form_key));
 	}
 
-/**
- * update_if_exists
- * Insert description here
- *
- * @param $data
- * @param $where
- *
- * @return
- *
- * @access
- * @static
- * @throws
- * @example
- */
+	/**
+	 * update_if_exists
+	 */
 	public function update_if_exists($data,$where=false) {
 		$where = ($where) ? $where : [$this->primary_key=>$data[$this->primary_key]];
 		$record = $this->exists($where);
@@ -932,53 +939,24 @@ class Database_model extends MY_Model {
 		return (isset($record->{$this->primary_key})) ? $this->update_by($data,[$this->primary_key=>$record->{$this->primary_key}]) : $this->insert($data);
 	}
 
-/**
- * exists
- * Insert description here
- *
- * @param $arg
- *
- * @return
- *
- * @access
- * @static
- * @throws
- * @example
- */
+	/**
+	 * exists
+	 */
 	public function exists($arg) {
 		/* did we get one or more columns */
 		return $this->on_empty_return(false)->get_by($this->create_where($arg));
 	}
 
-/**
- * count
- * Insert description here
- *
- *
- * @return
- *
- * @access
- * @static
- * @throws
- * @example
- */
+	/**
+	 * count
+	 */
 	public function count() {
 		return $this->count_by();
 	}
 
-/**
- * count_by
- * Insert description here
- *
- * @param $where
- *
- * @return
- *
- * @access
- * @static
- * @throws
- * @example
- */
+	/**
+	 * count_by
+	 */
 	public function count_by($where = null) {
 		$this->_database->select("count('".$this->primary_key."') as codeigniter_column_count");
 
@@ -991,22 +969,9 @@ class Database_model extends MY_Model {
 		return (int)$results->codeigniter_column_count;
 	}
 
-/**
- * index
- * Insert description here
- *
- * @param $order_by
- * @param $limit
- * @param $where
- * @param $select
- *
- * @return
- *
- * @access
- * @static
- * @throws
- * @example
- */
+	/**
+	 * index
+	 */
 	public function index($order_by = null, $limit = null, $where = null, $select = null) {
 		if ($order_by) {
 			$this->_database->order_by($order_by);
@@ -1024,26 +989,14 @@ class Database_model extends MY_Model {
 			$this->_database->where($where);
 		}
 
-		if ($this->has_roles) {
-			$this->where_can_read();
-		}
+		$this->add_where_on_select();
 
 		return $this->_get(true);
 	}
 
-/**
- * switch_database
- * Insert description here
- *
- * @param $which
- *
- * @return
- *
- * @access
- * @static
- * @throws
- * @example
- */
+	/**
+	 * switch_database
+	 */
 	protected function switch_database($which) {
 		if ($which == 'read' && $this->read_database) {
 			$this->_database = $this->read_database;
@@ -1054,55 +1007,27 @@ class Database_model extends MY_Model {
 		return $this;
 	}
 
-/**
- * with_deleted
- * Insert description here
- *
- *
- * @return
- *
- * @access
- * @static
- * @throws
- * @example
- */
+	/**
+	 * do query with soft deleted
+	 */
 	public function with_deleted() {
 		$this->temporary_with_deleted = true;
 
 		return $this;
 	}
 
-/**
- * only_deleted
- * Insert description here
- *
- *
- * @return
- *
- * @access
- * @static
- * @throws
- * @example
- */
+	/**
+	 * only soft deleted records
+	 */
 	public function only_deleted() {
 		$this->temporary_only_deleted = true;
 
 		return $this;
 	}
 
-/**
- * restore
- * Insert description here
- *
- * @param $id
- *
- * @return
- *
- * @access
- * @static
- * @throws
- * @example
- */
+	/**
+	 * restore soft deleted record
+	 */
 	public function restore($id) {
 		$data[$this->has['is_deleted']] = 0;
 
@@ -1113,20 +1038,9 @@ class Database_model extends MY_Model {
 		return (int) $this->_database->affected_rows();
 	}
 
-/**
- * create_where
- * Insert description here
- *
- * @param $arg
- * @param $primary_id_required
- *
- * @return
- *
- * @access
- * @static
- * @throws
- * @example
- */
+	/**
+	 * create where
+	 */
 	protected function create_where($arg,$primary_id_required=false) {
 		if (is_scalar($arg)) {
 			$where = [$this->primary_key=>$arg];
@@ -1145,97 +1059,36 @@ class Database_model extends MY_Model {
 		return $where;
 	}
 
-/**
- * where_can_read
- * Insert description here
- *
- *
- * @return
- *
- * @access
- * @static
- * @throws
- * @example
- */
+	/**
+	 * Add to the where clause to test if this user read, edit, delete
+	 */
 	protected function where_can_read() {
-		$this->_database->where_in($this->has['read_role'],array_keys(ci('user')->roles()));
-
-		return $this;
-	}
-
-/**
- * where_can_edit
- * Insert description here
- *
- *
- * @return
- *
- * @access
- * @static
- * @throws
- * @example
- */
-	protected function where_can_edit() {
-		$this->_database->where_in($this->has['edit_role'],array_keys(ci('user')->roles()));
-
-		return $this;
-	}
-
-/**
- * where_can_delete
- * Insert description here
- *
- *
- * @return
- *
- * @access
- * @static
- * @throws
- * @example
- */
-	protected function where_can_delete() {
-		$this->_database->where_in($this->has['delete_role'],array_keys(ci('user')->roles()));
-
-		return $this;
-	}
-
-/**
- * _get_userid
- * Insert description here
- *
- *
- * @return
- *
- * @access
- * @static
- * @throws
- * @example
- */
-	protected function _get_userid() {
-		$user_id = NOBODY_USER_ID;
-
-		if (is_object(ci()->user)) {
-			if (ci()->user->id) {
-				$user_id = ci()->user->id;
-			}
+		if ($roles = $this->_get_user_roles()) {
+			$this->_database->where_in($this->has['read_role'],$roles);
 		}
 
-		return $user_id;
+		return $this;
 	}
 
-/**
- * add_fields_on_insert
- * Insert description here
- *
- * @param $data
- *
- * @return
- *
- * @access
- * @static
- * @throws
- * @example
- */
+	protected function where_can_edit() {
+		if ($roles = $this->_get_user_roles()) {
+			$this->_database->where_in($this->has['edit_role'],$roles);
+		}
+
+		return $this;
+	}
+
+	protected function where_can_delete() {
+		if ($roles = $this->_get_user_roles()) {
+			$this->_database->where_in($this->has['delete_role'],$roles);
+		}
+
+		return $this;
+	}
+
+	/**
+	 * Add to data field on insert, update, delete
+	 */
 	protected function add_fields_on_insert(&$data) {
 		if ($this->has['created_by']) {
 			$data[$this->has['created_by']] = $this->_get_userid();
@@ -1276,19 +1129,6 @@ class Database_model extends MY_Model {
 		return $this;
 	}
 
-/**
- * add_fields_on_update
- * Insert description here
- *
- * @param $data
- *
- * @return
- *
- * @access
- * @static
- * @throws
- * @example
- */
 	protected function add_fields_on_update(&$data) {
 		if ($this->has['updated_by']) {
 			$data[$this->has['updated_by']] = $this->_get_userid();
@@ -1305,19 +1145,6 @@ class Database_model extends MY_Model {
 		return $this;
 	}
 
-/**
- * add_fields_on_delete
- * Insert description here
- *
- * @param $data
- *
- * @return
- *
- * @access
- * @static
- * @throws
- * @example
- */
 	protected function add_fields_on_delete(&$data) {
 		if ($this->has['deleted_by']) {
 			$data[$this->has['deleted_by']] = $this->_get_userid();
@@ -1338,18 +1165,9 @@ class Database_model extends MY_Model {
 		return $this;
 	}
 
-/**
- * add_where_on_select
- * Insert description here
- *
- *
- * @return
- *
- * @access
- * @static
- * @throws
- * @example
- */
+	/**
+	 * Add to where on select, update, insert, delete
+	 */
 	protected function add_where_on_select() {
 		if ($this->soft_delete) {
 			if ($this->temporary_with_deleted !== true) {
@@ -1357,22 +1175,13 @@ class Database_model extends MY_Model {
 			}
 		}
 
+		if ($this->has['read_role']) {
+			$this->where_can_read();
+		}
+
 		return $this;
 	}
 
-/**
- * add_where_on_update
- * Insert description here
- *
- * @param $data
- *
- * @return
- *
- * @access
- * @static
- * @throws
- * @example
- */
 	protected function add_where_on_update(&$data) {
 		if ($this->has['edit_role']) {
 			$this->where_can_edit();
@@ -1381,21 +1190,43 @@ class Database_model extends MY_Model {
 		return $this;
 	}
 
-/**
- * add_where_on_insert
- * Insert description here
- *
- * @param $data
- *
- * @return
- *
- * @access
- * @static
- * @throws
- * @example
- */
 	protected function add_where_on_insert(&$data) {
 		return $this;
+	}
+
+	protected function add_where_on_delete(&$data) {
+		if ($this->has['delete_role']) {
+			$this->where_can_delete();
+		}
+
+		return $this;
+	}
+
+	/**
+	 * _get_userid
+	 */
+	protected function _get_userid() {
+		$user_id = NOBODY_USER_ID;
+
+		if (is_object(ci()->user)) {
+			if (ci()->user->id) {
+				$user_id = ci()->user->id;
+			}
+		}
+
+		return $user_id;
+	}
+
+	protected function _get_user_roles() {
+		$role_ids = false;
+		
+		if (is_object(ci()->user)) {
+			if (ci()->user->roles()) {
+				$role_ids = array_keys(ci('user')->roles());
+			}
+		}
+		
+		return $role_ids;
 	}
 
 } /* end class */
