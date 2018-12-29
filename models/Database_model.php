@@ -125,57 +125,62 @@ class Database_model extends MY_Model {
 		/* old way - deprecated */
 		if ($this->has_roles) {
 			/* put in the default column names - the old way */
-			#$this->has['read_role'] = 'read_role_id';
-			#$this->has['edit_role'] = 'edit_role_id';
-			#$this->has['delete_role'] = 'delete_role_id';
+			$this->has['read_role'] = 'read_role_id';
+			$this->has['edit_role'] = 'edit_role_id';
+			$this->has['delete_role'] = 'delete_role_id';
+		
+			$this->has_roles = false;
 		}
 
 		/**
 		 * does this model have rules? if so add the role validation rules
 		 */
 		if ($this->has['read_role']) {
-			#$this->rules = $this->rules + [$this->has['read_role'] => ['field' => $this->has['read_role'], 'label' => 'Read Role', 	'rules' => 'required|integer|max_length[10]|less_than[4294967295]|filter_int[10]']];
+			$this->rules = $this->rules + [$this->has['read_role'] => ['field' => $this->has['read_role'], 'label' => 'Read Role', 	'rules' => 'required|integer|max_length[10]|less_than[4294967295]|filter_int[10]']];
 		}
 
 		if ($this->has['edit_role']) {
-			#$this->rules = $this->rules + [$this->has['edit_role'] => ['field' => $this->has['edit_role'], 'label' => 'Edit Role', 	'rules' => 'required|integer|max_length[10]|less_than[4294967295]|filter_int[10]']];
+			$this->rules = $this->rules + [$this->has['edit_role'] => ['field' => $this->has['edit_role'], 'label' => 'Edit Role', 	'rules' => 'required|integer|max_length[10]|less_than[4294967295]|filter_int[10]']];
 		}
 
 		if ($this->has['delete_role']) {
-			#$this->rules = $this->rules + [$this->has['delete_role'] => ['field' => $this->has['delete_role'], 'label' => 'Delete Role', 'rules' => 'required|integer|max_length[10]|less_than[4294967295]|filter_int[10]']];
+			$this->rules = $this->rules + [$this->has['delete_role'] => ['field' => $this->has['delete_role'], 'label' => 'Delete Role', 'rules' => 'required|integer|max_length[10]|less_than[4294967295]|filter_int[10]']];
 		}
 
 		if ($this->has['is_deleted']) {
-			#$this->soft_delete = true;
+			$this->soft_delete = true;
 		}
 
 		if ($this->soft_delete) {
 			/* what is the name of the column? */
-			#$this->has['is_deleted'] = (is_string($this->has['is_deleted'])) ? $this->has['is_deleted'] : 'is_deleted';
+			$this->has['is_deleted'] = (is_string($this->has['is_deleted'])) ? $this->has['is_deleted'] : 'is_deleted';
 		}
 
 		/* old way - deprecated */
 		if ($this->has_stamps) {
 			/* put in the default column names - the old way */
-			#$this->has['created_by'] = 'created_by';
-			#$this->has['created_on'] = 'created_on';
-			#$this->has['created_ip'] = 'created_ip';
+			$this->has['created_by'] = 'created_by';
+			$this->has['created_on'] = 'created_on';
+			$this->has['created_ip'] = 'created_ip';
 
-			#$this->has['updated_by'] = 'updated_by';
-			#$this->has['updated_on'] = 'updated_on';
-			#$this->has['updated_ip'] = 'updated_ip';
+			$this->has['updated_by'] = 'updated_by';
+			$this->has['updated_on'] = 'updated_on';
+			$this->has['updated_ip'] = 'updated_ip';
+			
+			if ($this->soft_delete) {
+				$this->has['deleted_by'] = 'deleted_by';
+				$this->has['deleted_on'] = 'deleted_on';
+				$this->has['deleted_ip'] = 'deleted_ip';
+	
+				/* actual tracker for if a column is "deleted" (soft delete) */
+				$this->has['is_deleted'] = 'is_deleted';
+	
+				$this->soft_delete = true;
+			}
+			
+			$this->has_stamps = false;
 		}
 
-		if ($this->has_stamps && $this->soft_delete) {
-			#$this->has['deleted_by'] = 'deleted_by';
-			#$this->has['deleted_on'] = 'deleted_on';
-			#$this->has['deleted_ip'] = 'deleted_ip';
-
-			/* actual tracker for if a column is "deleted" (soft delete) */
-			#$this->has['is_deleted'] = 'is_deleted';
-
-			#$this->soft_delete = true;
-		}
 
 		/* what is the default on return many */
 		$this->default_return_on_many = [];
@@ -327,7 +332,7 @@ class Database_model extends MY_Model {
 	 */
 	public function get($primary_value = null) {
 		return ($primary_value === null)
-		 	? $this->default_return_on_single
+			? $this->default_return_on_single
 			: $this->get_by([$this->primary_key => $primary_value]);
 	}
 
@@ -1065,24 +1070,30 @@ class Database_model extends MY_Model {
 	 * Add to the where clause to test if this user read, edit, delete
 	 */
 	protected function where_can_read() {
-		if ($roles = $this->_get_user_roles()) {
-			#$this->_database->where_in($this->has['read_role'],$roles);
+		if ($this->has['read_role']) {
+			if ($roles = $this->_get_user_roles()) {
+				$this->_database->where_in($this->has['read_role'],$roles);
+			}
 		}
 
 		return $this;
 	}
 
 	protected function where_can_edit() {
-		if ($roles = $this->_get_user_roles()) {
-			#$this->_database->where_in($this->has['edit_role'],$roles);
+		if ($this->has['edit_role']) {
+			if ($roles = $this->_get_user_roles()) {
+				$this->_database->where_in($this->has['edit_role'],$roles);
+			}
 		}
 
 		return $this;
 	}
 
 	protected function where_can_delete() {
-		if ($roles = $this->_get_user_roles()) {
-			#$this->_database->where_in($this->has['delete_role'],$roles);
+		if ($this->has['delete_role']) {
+			if ($roles = $this->_get_user_roles()) {
+				$this->_database->where_in($this->has['delete_role'],$roles);
+			}
 		}
 
 		return $this;
@@ -1222,12 +1233,11 @@ class Database_model extends MY_Model {
 	protected function _get_user_roles() {
 		$role_ids = false;
 		
-		if (is_object(ci()->user)) {
-			if (ci()->user->roles()) {
-				$role_ids = array_keys(ci('user')->roles());
-			}
+		/* is anyone logged in that would have even have a role? */
+		if ($this->_get_userid() != NOBODY_USER_ID) {
+			$role_ids = array_keys(ci()->user->roles());
 		}
-		
+
 		return $role_ids;
 	}
 
