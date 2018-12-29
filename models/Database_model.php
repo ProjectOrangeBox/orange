@@ -31,7 +31,7 @@ class Database_model extends MY_Model {
 	protected $additional_cache_tags = ''; /* additional cache tags to add to cache prefix remember each tag is separated by . */
 	protected $entity = null; /* true or string name of the entity to use for records - if true it uses the class name and replaces _model with _entity */
 	protected $entity_class = null; /* empty entity */
-
+	protected $soft_delete = false; /* internal tracking of soft delete use $has['is_deleted'] to enable */
 	/**
 	 * These can be set in the model using the constants ADMIN_ROLE_ID or NOBODY_USER_ID
 	 * or by using set_role_ids($read_id=null,$edit_id=null,$delete_id=null)
@@ -40,16 +40,7 @@ class Database_model extends MY_Model {
 	protected $edit_role_id = null;
 	protected $delete_role_id = null;
 
-	/* deprecated - use $has for each role column name */
-	protected $has_roles = false; /* does this table use the standard role columns? these are automatically added to index, insert query's */
-
-	/* deprecated - use $has for each created, updated, deleted column name */
-	protected $has_stamps = false; /* does this table use the standard timestamps columns? these are automatically added to insert, update, delete query's */
-
-	/* deprecated - use $has */
-	protected $soft_delete = false; /* does this table support soft delete? */
-
-	/* add the name of the column to "enable" */
+	/* add the name of the column to "enable" on model */
 	protected $has = [
 		'read_role'=>false,
 		'edit_role'=>false,
@@ -63,7 +54,7 @@ class Database_model extends MY_Model {
 		'deleted_by'=>false,
 		'deleted_on'=>false,
 		'deleted_ip'=>false,
-		'is_deleted'=>false,
+		'is_deleted'=>false, /* add the column name here to turning on soft delete */
 	];
 
 	protected $cache_prefix; /* calculated in construct - internal */
@@ -122,16 +113,6 @@ class Database_model extends MY_Model {
 			$this->_database = $this->db;
 		}
 
-		/* old way - deprecated */
-		if ($this->has_roles) {
-			/* put in the default column names - the old way */
-			$this->has['read_role'] = 'read_role_id';
-			$this->has['edit_role'] = 'edit_role_id';
-			$this->has['delete_role'] = 'delete_role_id';
-		
-			$this->has_roles = false;
-		}
-
 		/**
 		 * does this model have rules? if so add the role validation rules
 		 */
@@ -150,37 +131,6 @@ class Database_model extends MY_Model {
 		if ($this->has['is_deleted']) {
 			$this->soft_delete = true;
 		}
-
-		if ($this->soft_delete) {
-			/* what is the name of the column? */
-			$this->has['is_deleted'] = (is_string($this->has['is_deleted'])) ? $this->has['is_deleted'] : 'is_deleted';
-		}
-
-		/* old way - deprecated */
-		if ($this->has_stamps) {
-			/* put in the default column names - the old way */
-			$this->has['created_by'] = 'created_by';
-			$this->has['created_on'] = 'created_on';
-			$this->has['created_ip'] = 'created_ip';
-
-			$this->has['updated_by'] = 'updated_by';
-			$this->has['updated_on'] = 'updated_on';
-			$this->has['updated_ip'] = 'updated_ip';
-			
-			if ($this->soft_delete) {
-				$this->has['deleted_by'] = 'deleted_by';
-				$this->has['deleted_on'] = 'deleted_on';
-				$this->has['deleted_ip'] = 'deleted_ip';
-	
-				/* actual tracker for if a column is "deleted" (soft delete) */
-				$this->has['is_deleted'] = 'is_deleted';
-	
-				$this->soft_delete = true;
-			}
-			
-			$this->has_stamps = false;
-		}
-
 
 		/* what is the default on return many */
 		$this->default_return_on_many = [];
@@ -1038,8 +988,8 @@ class Database_model extends MY_Model {
 	public function restore($id) {
 		$data[$this->has['is_deleted']] = 0;
 
-		$this->_add_fields_on_update($data);
-		$this->_database->update($this->table, $data, $this->create_where($id,true));
+		$this->add_fields_on_update($data)->_database->update($this->table, $data, $this->create_where($id,true));
+		
 		$this->delete_cache_by_tags()->log_last_query();
 
 		return (int) $this->_database->affected_rows();
@@ -1188,17 +1138,13 @@ class Database_model extends MY_Model {
 			}
 		}
 
-		if ($this->has['read_role']) {
-			$this->where_can_read();
-		}
+		$this->where_can_read();
 
 		return $this;
 	}
 
 	protected function add_where_on_update(&$data) {
-		if ($this->has['edit_role']) {
-			$this->where_can_edit();
-		}
+		$this->where_can_edit();
 
 		return $this;
 	}
@@ -1208,9 +1154,7 @@ class Database_model extends MY_Model {
 	}
 
 	protected function add_where_on_delete(&$data) {
-		if ($this->has['delete_role']) {
-			$this->where_can_delete();
-		}
+		$this->where_can_delete();
 
 		return $this;
 	}

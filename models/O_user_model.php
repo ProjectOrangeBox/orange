@@ -21,9 +21,21 @@
 class O_user_model extends Database_model {
 	protected $table;
 	protected $additional_cache_tags = '.acl';
-	protected $has_roles = true;
-	protected $has_stamps = true;
-	protected $has_soft_delete = true;
+	protected $has = [
+		'read_role'=>'read_role_id',
+		'edit_role'=>'edit_role_id',
+		'delete_role'=>'delete_role_id',
+		'created_by'=>'created_by',
+		'created_on'=>'created_on',
+		'created_ip'=>'created_ip',
+		'updated_by'=>'updated_by',
+		'updated_on'=>'updated_on',
+		'updated_ip'=>'updated_ip',
+		'deleted_by'=>'deleted_by',
+		'deleted_on'=>'deleted_on',
+		'deleted_ip'=>'deleted_ip',
+		'is_deleted'=>'is_deleted',
+	];
 	protected $entity = 'o_user_entity';
 	protected $rules = [
 		'id' => ['field' => 'id', 'label' => 'Id', 'rules' => 'required|integer|max_length[10]|less_than[4294967295]|filter_int[10]'],

@@ -20,8 +20,17 @@
  */
 class O_setting_model extends Database_model {
 	protected $table = 'orange_settings';
-	protected $has_roles = true;
-	protected $has_stamps = true;
+	protected $has = [
+		'read_role'=>'read_role_id',
+		'edit_role'=>'edit_role_id',
+		'delete_role'=>'delete_role_id',
+		'created_by'=>'created_by',
+		'created_on'=>'created_on',
+		'created_ip'=>'created_ip',
+		'updated_by'=>'updated_by',
+		'updated_on'=>'updated_on',
+		'updated_ip'=>'updated_ip',
+	];
 	protected $rules = [
 		'id'             => ['field' => 'id', 'label' => 'Id', 'rules' => 'required|integer|max_length[10]|less_than[4294967295]|filter_int[10]'],
 		'group'          => ['field' => 'group', 'label' => 'Group', 'rules' => 'required|max_length[64]|filter_input[64]|trim'],
