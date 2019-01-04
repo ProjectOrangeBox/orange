@@ -25,13 +25,20 @@ class Errors {
 	protected $output;
 	protected $event;
 
-	protected $errors_variable;
+	protected $flashdata_session_variable;
 	protected $html_prefix;
 	protected $html_suffix;
+
 	protected $data_records;
 	protected $data_count;
 
 	protected $errors = [];
+	protected $current_index;
+	protected $default_index;
+	protected $duplicates = [];
+	protected $tostring = 'array';
+	protected $only = false;
+	protected $forced_output = false;
 
 	public function __construct(&$config=[])
 	{
@@ -41,27 +48,95 @@ class Errors {
 		$this->output = &ci('output');
 		$this->event = &ci('event');
 
-		$this->errors_variable = $this->config['errors_variable'] ?? 'ci_errors';
+		$this->flashdata_session_variable = $this->config['flashdata session variable'] ?? 'ci_errors';
 
 		$this->html_prefix = $this->config['html_prefix'] ?? '<p class="orange error">';
 		$this->html_suffix = $this->config['html_suffix'] ?? '</p>';
 
-		$this->data_records = $this->config['data_records'] ?? 'records';
-		$this->data_count = $this->config['data_count'] ?? 'count';
+		$this->default_index = $this->config['default error group'] ?? 'records';
+		$this->current_index = $this->default_index;
+	}
+
+	public function group($index = null)
+	{
+		if ($index === true) {
+			$this->current_index = $this->default_index;
+
+			log_message('debug', 'Errors::group::'.$this->current_index);
+
+			return $this;
+		} elseif ($index) {
+			$this->current_index = $index;
+
+			log_message('debug', 'Errors::group::'.$this->current_index);
+
+			return $this;
+		}
+
+		/* null */
+		return $this->current_index;
+	}
+
+	public function only($index = null)
+	{
+		$this->only = ($index) ? $index : false;
+
+		log_message('debug', 'Errors::only::'.(string)$this->only);
+
+		return $this;
+	}
+
+	public function as($tostring,$only=null)
+	{
+		log_message('debug', 'Errors::as::'.$tostring);
+
+		$this->tostring = $tostring;
+
+		if ($only) {
+			$this->only($only);
+		}
+
+		return $this;
+	}
+
+	public function __toString()
+	{
+		log_message('debug', 'Errors::__toString');
+
+		switch($this->tostring) {
+			case 'html':
+				$string = $this->as_html();
+			break;
+			case 'cli':
+				$string = $this->as_cli();
+			break;
+			case 'json':
+				$string = $this->as_json();
+			break;
+			default:
+				$string = $this->as_array();
+		}
+
+		return $string;
 	}
 
 	/**
 	 * redirect to another page on error
 	 */
-	public function redirect_on_error($url = null,$wallet_status='red')
+	public function redirect_on_error($url = null,$wallet_status = 'red',$index = null)
 	{
-		if ($this->has()) {
-			if ($wallet_status) {
-				ci('wallet')->msg($this->as_html(),$wallet_status,((is_string($url)) ? $url : true));
-			} else {
-				ci('session')->set_flashdata($this->errors_variable,$this->as_array());
+		log_message('debug', 'Errors::redirect_on_error '.$url.' '.$wallet_status.' '.$index);
 
-				redirect((is_string($url) ? $url : $this->input->server('HTTP_REFERER')));
+		if ($this->has($index)) {
+			if ($wallet_status) {
+				ci('wallet')->msg($this->as_html(null,null,$index),$wallet_status,((is_string($url)) ? $url : true));
+			} else {
+				ci('session')->set_flashdata($this->flashdata_session_variable,$this->as_array($index));
+				
+				/* did they send in a URL? if not use the referrer page */
+				$redirect_url = (is_string($url) ? $url : $this->input->server('HTTP_REFERER'));
+
+				redirect($redirect_url);
 			}
 		}
 
@@ -71,9 +146,11 @@ class Errors {
 	/**
 	 * show error view on error and die
 	 */
-	public function die_on_error($view = 400)
+	public function die_on_error($view = 400, $index = null)
 	{
-		if ($this->has()) {
+		log_message('debug', 'Errors::die_on_error::'.$view.' '.$index);
+
+		if ($this->has($index)) {
 			$this->display($view);
 		}
 
@@ -82,28 +159,19 @@ class Errors {
 
 	/**
 	 * add
-	 * Insert description here
-	 *
-	 * @param $msg
-	 *
-	 * @return
-	 *
-	 * @access
-	 * @static
-	 * @throws
-	 * @example
 	 */
 	public function add($msg,$index=null)
 	{
-		log_message('debug', 'Errors::add::'.$msg);
+		log_message('debug', 'Errors::add::'.$msg.' '.$index);
 
-		/* if they include a index then use that as the key */
-		if ($index) {
-			$this->errors[$index] = $msg;
-		} else {
-			/* if they do not include a index it's a "standard" error */
-			$this->errors[$this->data_records][] = $msg;
-			$this->errors[$this->data_count] = count($this->errors[$this->data_records]);
+		$index = ($index) ?? $this->current_index;
+
+		$dup_key = md5($index.$msg);
+
+		if (!isset($this->duplicates[$dup_key])) {
+			$this->errors[$index][] = $msg;
+
+			$this->duplicates[$dup_key] = true;
 		}
 
 		/* chain-able */
@@ -112,84 +180,58 @@ class Errors {
 
 	/**
 	 * clear
-	 * Insert description here
-	 *
-	 *
-	 * @return
-	 *
-	 * @access
-	 * @static
-	 * @throws
-	 * @example
 	 */
-	public function clear()
+	public function clear($index=null)
 	{
-		/* empty out the view data */
-		$this->errors[$this->data_records] = [];
-		$this->errors[$this->data_count] = 0;
-		
+		log_message('debug', 'Errors::clear::'.$index);
+
+		$index = ($index) ?? $this->current_index;
+
+		$this->errors[$index] = [];
+
 		/* chain-able */
 		return $this;
 	}
 
 	/**
 	 * has
-	 * Insert description here
-	 *
-	 *
-	 * @return
-	 *
-	 * @access
-	 * @static
-	 * @throws
-	 * @example
 	 */
-	public function has()
+	public function has($index=null)
 	{
+		log_message('debug', 'Errors::has::'.$index);
+
+		$index = ($index) ?? $this->current_index;
+
 		/* do we have any errors? */
-		return (bool)$this->errors[$this->data_count];
+		return (bool)count($this->errors[$index]);
 	}
 
 	/**
 	 * as_array
-	 * Insert description here
-	 *
-	 *
-	 * @return
-	 *
-	 * @access
-	 * @static
-	 * @throws
-	 * @example
 	 */
-	public function as_array()
+	public function as_array($index=null)
 	{
+		log_message('debug', 'Errors::as_array::'.$index);
+
+		if ($this->only) {
+			$index = $this->only;
+		}
+
 		/* return the errors as an array */
-		return $this->errors;
+		return ($index) ? $this->errors[$index] : $this->errors;
 	}
 
 	/**
 	 * as_html
-	 * Insert description here
-	 *
-	 * @param $prefix
-	 * @param $suffix
-	 *
-	 * @return
-	 *
-	 * @access
-	 * @static
-	 * @throws
-	 * @example
 	 */
-	public function as_html($prefix = null, $suffix = null)
+	public function as_html($prefix = null, $suffix = null, $index = null)
 	{
+		log_message('debug', 'Errors::as_html::'.$index);
+
 		$html = '';
 
 		/* do we have any errors? */
-		if ($this->has()) {
-			$errors = $this->as_array();
-
+		if ($this->has($index)) {
 			/* if they didn't send in a default prefix then use ours */
 			if ($prefix === null) {
 				$prefix = $this->html_prefix;
@@ -201,9 +243,17 @@ class Errors {
 			}
 
 			/* format the output */
-			foreach ($errors[$this->data_records] as $val) {
-				if (!empty(trim($val))) {
-					$html .= $prefix.trim($val).$suffix;
+			foreach ($this->as_array($index) as $grouping=>$errors) {
+				if (is_array($errors)) {
+					foreach ($errors as $val) {
+						if (!empty(trim($val))) {
+							$html .= $this->insert_into_first_class($prefix,$grouping).trim($val).$suffix;
+						}
+					}
+				} else {
+					if (!empty(trim($errors))) {
+						$html .= $prefix.trim($errors).$suffix;
+					}
 				}
 			}
 		}
@@ -213,53 +263,27 @@ class Errors {
 
 	/**
 	 * as_cli
-	 * Insert description here
-	 *
-	 *
-	 * @return
-	 *
-	 * @access
-	 * @static
-	 * @throws
-	 * @example
 	 */
-	public function as_cli()
+	public function as_cli($index = null)
 	{
+		log_message('debug', 'Errors::as_cli::'.$index);
+
 		/* return as string with tabs and line-feeds */
-		return trim(str_replace('Array'.PHP_EOL,PHP_EOL,print_r($this->as_array(),true))).PHP_EOL;
+		return json_encode($this->as_array($index),JSON_PRETTY_PRINT).PHP_EOL;
 	}
 
 	/**
 	 * as_json
-	 * Insert description here
-	 *
-	 *
-	 * @return
-	 *
-	 * @access
-	 * @static
-	 * @throws
-	 * @example
 	 */
-	public function as_json()
+	public function as_json($index = null)
 	{
-		return json_encode($this->as_array(), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE | JSON_FORCE_OBJECT);
+		log_message('debug', 'Errors::as_json::'.$index);
+
+		return json_encode($this->as_array($index), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE | JSON_FORCE_OBJECT);
 	}
 
 	/**
 	 * show
-	 * Insert description here
-	 *
-	 * @param $message
-	 * @param $status_code
-	 * @param $heading
-	 *
-	 * @return
-	 *
-	 * @access
-	 * @static
-	 * @throws
-	 * @example
 	 */
 	public function show($message, $status_code, $heading = 'An Error Was Encountered')
 	{
@@ -267,69 +291,73 @@ class Errors {
 		$this->display('general',['heading'=>$heading,'message'=>$message],$status_code);
 	}
 
+	public function input($type)
+	{
+		log_message('debug', 'Errors::input::'.$type);
+
+		$this->forced_output = $type;
+
+		return $this;
+	}
+
 	/**
 	 * display
 	 * display error view and exit
 	 *
-	 * @param $view
-	 * @param $data
-	 * @param $status_code
-	 * @param $override
-	 *
-	 * @return
-	 *
-	 * @access
-	 * @static
-	 * @throws
-	 * @example
 	 */
 	public function display($view, $data = [], $status_code = 500, $override = [])
 	{
+		log_message('debug', 'Errors::view::'.$view.' '.$status_code);
+
 		if (is_numeric($view)) {
 			$status_code = (int)$view;
 		}
 
-		/* setup the defaults */
+		if ($this->forced_output) {
+			$output_format = $this->forced_output;
+		} else {
+			if ($this->input->is_cli_request()) {
+				$output_format = 'cli';
+			} elseif ($this->input->is_ajax_request()) {
+				$output_format = $this->input->is_ajax_request();
+			}
+		}
+
+		/* remap the view to another based on it's name */
 		$view = (isset($this->config['named'][$view])) ? $this->config['named'][$view] : $view;
 
 		$data['heading'] = ($data['heading']) ?? 'Fatal Error '.$status_code;
 		$data['message'] = ($data['message']) ?? 'Unknown Error';
 
-		if ($this->input->is_cli_request() || $override['input'] == 'cli') {
-			$view_folder = 'cli';
-		} elseif ($this->input->is_ajax_request() || $override['input'] == 'ajax') {
-			$view_folder = 'ajax';
-		} else {
-			$view_folder = 'html';
+		switch ($output_format) {
+			case 'cli':
+				$this->as('cli');
+				$view_folder = 'cli';
+			break;
+			case 'ajax':
+				$this->as('json');
+				$view_folder = 'ajax';
+				$mime_type   = 'application/json';
+			break;
+			default:
+				$this->as('html');
+				$view_folder = 'html';
+				$mime_type = 'text/html';
+				$charset = 'utf-8';
 		}
-
-		$charset     = 'utf-8';
-		$mime_type   = 'text/html';
 
 		$view_folder = ($override['view_folder']) ? $override['view_folder'] : $view_folder;
 		$view_path = $view_folder.'/error_'.str_replace('.php', '', $view);
 
-		switch ($view_folder) {
-			case 'cli':
-				$this->add($view_path,'_template');
-
-				$data['message'] = $this->as_cli();
-			break;
-			case 'ajax':
-				$mime_type   = 'application/json';
-
-				$this->add($view_path,'_template');
-
-				$data['message'] = $this->as_json();
-			break;
-			default:
-				$data['message'] = $this->as_html();
-		}
+		/* get "as" using __toString */
+		$data['message'] = (string)$this;
 
 		$charset     = ($override['charset']) ?? $charset;
 		$mime_type   = ($override['mime_type']) ?? $mime_type;
 
 		$status_code = abs($status_code);
+
+		log_message('debug', 'Errors::display '.$status_code.' '.$mime_type.' '.$charset.' '.$view_path);
 
 		if ($status_code < 100) {
 			$exit_status = $status_code + 9;
@@ -338,21 +366,15 @@ class Errors {
 			$exit_status = 1;
 		}
 
-		log_message('error', 'Error: '.$view_path.' '.$status_code.' '.print_r($data,true));
+		log_message('error', 'Error: '.$view_path.' '.$status_code.' '.json_encode($data));
 
 		$this->event->trigger('death.show',$view_path,$data);
-
-		$complete_output = $this->error_view($view_path,$data);
-
-		if (strpos($complete_output,'</html>') !== false) {
-			$complete_output = str_replace('</html>','<!--APPPATH/views/errors/'.$view_path.'--></html>',$complete_output);
-		}
 
 		$this->output
 			->enable_profiler(false)
 			->set_status_header($status_code)
 			->set_content_type($mime_type, $charset)
-			->set_output($complete_output)
+			->set_output($this->error_view($view_path,$data))
 			->_display();
 
 		$this->output->exit($exit_status);
@@ -361,6 +383,8 @@ class Errors {
 	/* add this here to cut down on external functions */
 	protected function error_view($_view,$_data=[])
 	{
+		log_message('debug', 'Errors::error_view::'.$_view);
+
 		/* clean up the view path */
 		$_file = APPPATH.'views/errors/'.$_view.'.php';
 
@@ -381,6 +405,15 @@ class Errors {
 
 		/* return the current buffer contents and delete current output buffer */
 		return ob_get_clean();
+	}
+	
+	protected function insert_into_first_class($html,$class)
+	{
+		if (preg_match('/class="([^=]*)"/',$html, $matches, PREG_OFFSET_CAPTURE, 0)) {
+			$html = substr_replace($html,$class.' ',$matches[1][1], 0);
+		}
+
+		return $html;
 	}
 
 } /* end class */
