@@ -216,9 +216,26 @@ class Errors {
 		if ($this->only) {
 			$index = $this->only;
 		}
+		
+		/* multiple groups? */
+		if (is_string($index)) {
+			if (strpos($index,',') !== false) {
+				/* multiple */
+				$multiple = [];
+	
+				foreach(explode(',',$index) as $m) {
+					$m = trim($m);
+				
+					$multiple[$m] = $this->errors[$m];
+				}
+	
+				return $multiple;
+			} else {
+				return $this->errors[$index];
+			}
+		}
 
-		/* return the errors as an array */
-		return ($index) ? $this->errors[$index] : $this->errors;
+		return $this->errors;
 	}
 
 	/**
