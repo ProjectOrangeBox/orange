@@ -80,6 +80,13 @@ class Validate {
 		log_message('info', 'Validate Class Initialized');
 	}
 
+	public function group($index = null)
+	{
+		$this->errors->group($index);
+		
+		return $this;
+	}
+
 	/**
 	 * clear
 	 * Insert description here
@@ -92,7 +99,8 @@ class Validate {
 	 * @throws
 	 * @example
 	 */
-	public function clear($index=null) {
+	public function clear($index=null)
+	{
 		$this->errors->clear($index);
 
 		return $this;

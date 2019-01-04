@@ -12,7 +12,7 @@
  *
  * required
  * core:
- * libraries: errors, validate
+ * libraries: validate
  * models:
  * helpers:
  * functions:
@@ -85,14 +85,12 @@ class MY_Model extends CI_Model {
 
 	/**
 	 * clear
-	 * wrapper to clear errors object
-	 *
 	 *
 	 * @return $this
 	 *
 	 */
 	public function clear() {
-		ci('errors')->clear();
+		ci('validate')->clear($this->object);
 
 		return $this;
 	}
@@ -132,11 +130,11 @@ class MY_Model extends CI_Model {
 		/* did we actually get any rules? */
 		if (count($rules)) {
 			/* run the rules on the data array */
-			ci('validate')->multiple($rules, $data);
+			ci('validate')->group($this->object)->multiple($rules, $data);
 		}
 
 		/* return if we got any errors */
-		return !(ci('errors')->has());
+		return ci('validate')->success($this->object);
 	}
 
 	/**
