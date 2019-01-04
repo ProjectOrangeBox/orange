@@ -364,8 +364,8 @@ class Validate {
 		return $success;
 	}
 
-	protected function add_error() {
-		$this->errors->add(sprintf($this->error_string, $this->error_human, $this->error_params));
+	protected function add_error($index = null) {
+		$this->errors->add(sprintf($this->error_string, $this->error_human, $this->error_params),$index);
 	}
 
 	/**
