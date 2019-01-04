@@ -92,8 +92,8 @@ class Validate {
 	 * @throws
 	 * @example
 	 */
-	public function clear() {
-		$this->errors->clear();
+	public function clear($index=null) {
+		$this->errors->clear($index);
 
 		return $this;
 	}
@@ -169,8 +169,8 @@ class Validate {
 	 * @throws
 	 * @example
 	 */
-	public function success() {
-		return (!$this->errors->has());
+	public function success($index = null) {
+		return (!$this->errors->has($index));
 	}
 
 	/**
