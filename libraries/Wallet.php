@@ -104,6 +104,15 @@ class Wallet {
 		return $this;
 	}
 
+	public function msgs($array,$type='blue')
+	{
+		foreach ($array as $text) {
+			$this->msg($text,$type);
+		}
+		
+		return $this;
+	}
+
 	protected function redirect($msg,$type,$sticky,$redirect)
 	{
 		/* add another message to any that might already be on there */
