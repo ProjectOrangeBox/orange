@@ -48,6 +48,7 @@ class Auth {
 		/* define some global Constants */
 		define('ADMIN_ROLE_ID',$this->config['admin role id']);
 		define('NOBODY_USER_ID',$this->config['nobody user id']);
+		define('EVERYONE_ROLE_ID',$this->config['everyone role id']);
 
 		/* attach a empty one to super object */
 		$this->controller->user = &$this->user_model->get(NOBODY_USER_ID);

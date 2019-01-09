@@ -334,6 +334,7 @@ class O_user_entity extends model_entity {
 		if (!$this->lazy_loaded) {
 			if (!$roles_permissions = ci('cache')->get($cache_key)) {
 				$roles_permissions = $this->_internal_query($user_id);
+				$roles_permissions['roles'][EVERYONE_ROLE_ID] = 'Everyone';
 				ci('cache')->save($cache_key,$roles_permissions,ci('cache')->ttl());
 			}
 			$this->roles       = (array) $roles_permissions['roles'];
