@@ -374,12 +374,19 @@ class O_user_entity extends model_entity {
 
 		foreach ($dbc->result() as $dbr) {
 			if ($dbr->orange_roles_name) {
-				$roles_permissions['roles'][(int) $dbr->orange_roles_id] = $dbr->orange_roles_name;
+				if (!empty($dbr->orange_roles_name)) {
+					$roles_permissions['roles'][(int) $dbr->orange_roles_id] = $dbr->orange_roles_name;
+				}
 			}
 			if ($dbr->key) {
-				$roles_permissions['permissions'][(int) $dbr->permission_id] = $dbr->key;
+				if (!empty($dbr->key)) {
+					$roles_permissions['permissions'][(int) $dbr->permission_id] = $dbr->key;
+				}
 			}
 		}
+		
+		var_dump($roles_permissions);
+		
 		return $roles_permissions;
 	}
 }
