@@ -102,22 +102,31 @@ class Errors {
 	public function __toString()
 	{
 		log_message('debug', 'Errors::__toString');
+		
+		return $this->get();
+	}
+	
+	public function get($override=null)
+	{
+		log_message('debug', 'Errors::get');
 
-		switch($this->tostring) {
+		$as = ($override) ?? $this->tostring;
+
+		switch($as) {
 			case 'html':
-				$string = $this->as_html();
+				$output = $this->as_html();
 			break;
 			case 'cli':
-				$string = $this->as_cli();
+				$output = $this->as_cli();
 			break;
 			case 'json':
-				$string = $this->as_json();
+				$output = $this->as_json();
 			break;
 			default:
-				$string = $this->as_array();
+				$output = $this->as_array();
 		}
 
-		return $string;
+		return $output;
 	}
 
 	/**
