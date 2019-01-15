@@ -91,22 +91,21 @@ class O_setting_model extends Database_model {
 			'updated_ip'=>'0.0.0.0',
 		];
 
+		$columns = array_merge($defaults,['name'=>$name,'group'=>$group,'value'=>$value,'help'=>$help,'options'=>$options,'migration'=>$migration]);
+		
+		/* these override everything */
 		foreach ($optional as $key=>$val) {
 			$columns[$key] = $val;
 		}
 
 		/* we already verified the key that's the "real" primary key */
-		return (!$this->exists(['name'=>$name,'group'=>$group])) ? $this->insert($defaults + ['name'=>$name,'group'=>$group,'value'=>$value,'help'=>$help,'options'=>$options,'migration'=>$migration]) : false;
+		return (!$this->exists(['name'=>$name,'group'=>$group])) ? $this->insert($columns) : false;
 	}
 
-	public function migration_remove($where=null) {
+	public function migration_remove($migration=null) {
 		$this->skip_rules = true;
 
-		if (!is_array($where)) {
-			$where = ['migration'=>$where];
-		}
-
-		return $this->delete_by($where);
+		return $this->delete_by(['migration'=>$migration]);
 	}
 	
 }

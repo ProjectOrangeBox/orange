@@ -385,8 +385,6 @@ class O_user_entity extends model_entity {
 			}
 		}
 		
-		var_dump($roles_permissions);
-		
 		return $roles_permissions;
 	}
 }
