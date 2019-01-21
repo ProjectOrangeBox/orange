@@ -313,6 +313,12 @@ class Validate {
 
 				/* take action on a validation or filter - filters MUST always start with "filter_" */
 				$success = (substr($rule,0,7) == 'filter_') ? $this->_filter($field,$rule,$param) : $this->_validation($field,$rule,$param);
+				
+				/* bail on first failure */
+				if ($success === false) {
+					/* end processing of the $rules array */
+					break;
+				}
 			}
 		}
 
