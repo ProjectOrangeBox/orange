@@ -65,8 +65,6 @@ class Validate {
 
 		$this->errors = &ci('errors');
 
-		$this->clear();
-
 		$attach = load_config('validate','attach');
 
 		if (is_array($attach)) {
@@ -273,14 +271,20 @@ class Validate {
 		if (count($rules)) {
 			/* yes */
 			foreach ($rules as $rule) {
+				log_message('debug', 'Validate Rule '.$rule.' "'.$field.'" '.$human);
+			
 				/* no rules exit processing of the $rules array */
 				if (empty($rule)) {
+					log_message('debug', 'Validate no validation rule.');
+
 					$success = true;
 					break;
 				}
 
 				/* do we have this special rule? */
 				if ($rule == 'allow_empty') {
+					log_message('debug', 'Validate allow_empy skipping the rest if empty.');
+					
 					if (empty($field)) {
 						/* end processing of the $rules array */
 						break;
@@ -301,6 +305,8 @@ class Validate {
 
 				$this->error_human = ($human) ? $human : strtolower(str_replace('_', ' ', $rule));
 
+				log_message('debug', 'Validate '.$rule.'['.$param.'] > '.$this->error_human);
+
 				if (strpos($param, ',') !== false) {
 					$this->error_params = str_replace(',', ', ', $param);
 
@@ -313,11 +319,13 @@ class Validate {
 
 				/* take action on a validation or filter - filters MUST always start with "filter_" */
 				$success = (substr($rule,0,7) == 'filter_') ? $this->_filter($field,$rule,$param) : $this->_validation($field,$rule,$param);
+
+				log_message('debug', 'Validate Success '.$success);
 				
 				/* bail on first failure */
 				if ($success === false) {
 					/* end processing of the $rules array */
-					break;
+					return $this;
 				}
 			}
 		}
