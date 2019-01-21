@@ -80,6 +80,8 @@ class MY_Model extends CI_Model {
 	 * @return array
 	 */
 	public function rule($key, $section = null) {
+		log_message('debug', 'MY_Model::rule '.$key.' '.$section);
+
 		return ($section) ? $this->rules[$key][$section] : $this->rules[$key];
 	}
 
@@ -90,6 +92,9 @@ class MY_Model extends CI_Model {
 	 *
 	 */
 	public function clear() {
+		log_message('debug', 'MY_Model::clear '.$this->object);
+
+		/* clear this group */
 		ci('validate')->clear($this->object);
 
 		return $this;
@@ -107,6 +112,8 @@ class MY_Model extends CI_Model {
 	 *
 	 */
 	public function validate(&$data, $rules = true) {
+		log_message('debug', 'MY_Model::validate');
+
 		/* if it's already a array then it's already in the format we need */
 		if (!is_array($rules)) {
 			/* if rules is true then just use the data array keys as the fields to validate to */
@@ -151,6 +158,8 @@ class MY_Model extends CI_Model {
 	 *
 	 */
 	public function remove_columns(&$data, $columns = []) {
+		log_message('debug', 'MY_Model::remove_columns');
+
 		/* convert string with commas to array */
 		$columns = (!is_array($columns)) ? explode(',', $columns) : $columns;
 
@@ -173,6 +182,8 @@ class MY_Model extends CI_Model {
 	 *
 	 */
 	public function only_columns(&$data, $columns = []) {
+		log_message('debug', 'MY_Model::only_columns');
+
 		/* convert string with commas to array */
 		$columns = (!is_array($columns)) ? explode(',', $columns) : $columns;
 
@@ -200,6 +211,8 @@ class MY_Model extends CI_Model {
 	 * @return $this
 	 */
 	public function remap_columns(&$data, $rules = []) {
+		log_message('debug', 'MY_Model::remap_columns');
+
 		if (!$this->skip_rules && count($rules)) {
 			$new_data = [];
 
