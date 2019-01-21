@@ -469,6 +469,8 @@ class Database_model extends MY_Model {
 	 *
 	 */
 	protected function add_rule_set_columns(&$data,$which_set) {
+		/* $this->rule_sets['update'] = 'id,name,phone,address,city,state,zip' */
+		
 		if (isset($this->rule_sets[$which_set])) {
 
 			$required_fields = explode(',',$this->rule_sets[$which_set]);
