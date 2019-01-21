@@ -251,7 +251,7 @@ class Errors {
 				if (is_array($errors)) {
 					foreach ($errors as $val) {
 						if (!empty(trim($val))) {
-							$html .= $this->insert_into_first_class($prefix,$grouping).trim($val).$suffix;
+							$html .= $this->insert_into_first_class($prefix,'error-group-'.$grouping).trim($val).$suffix;
 						}
 					}
 				} else {
