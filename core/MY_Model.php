@@ -134,6 +134,9 @@ class MY_Model extends CI_Model {
 		/* let's make sure the data "keys" have rules */
 		$this->only_columns($data, $rules);
 
+		/* save the current group in validate so we can put it back after this model is done validating */
+		$previous_error_group = ci('validate')->get_group();
+
 		/* did we actually get any rules? */
 		if (count($rules)) {
 			/* run the rules on the data array */
@@ -141,7 +144,12 @@ class MY_Model extends CI_Model {
 		}
 
 		/* return if we got any errors */
-		return ci('validate')->success($this->object);
+		$success = ci('validate')->success($this->object);
+		
+		/* we are done put back the previous error group */
+		ci('validate')->group($previous_error_group);
+		
+		return $success;
 	}
 
 	/**
