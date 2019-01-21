@@ -85,6 +85,12 @@ class Validate {
 		return $this;
 	}
 
+	public function get_group()
+	{
+		return $this->errors->get_group();
+	}
+
+
 	/**
 	 * clear
 	 * Insert description here

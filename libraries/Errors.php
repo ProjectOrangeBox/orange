@@ -37,7 +37,6 @@ class Errors {
 	protected $default_index;
 	protected $duplicates = [];
 	protected $to_string = 'array';
-	protected $only = false;
 	protected $forced_output = false;
 
 	public function __construct(&$config=[])
@@ -57,48 +56,6 @@ class Errors {
 		$this->current_index = $this->default_index;
 	}
 
-	public function group($index = null)
-	{
-		if ($index === true) {
-			$this->current_index = $this->default_index;
-
-			log_message('debug', 'Errors::group::'.$this->current_index);
-
-			return $this;
-		} elseif ($index) {
-			$this->current_index = $index;
-
-			log_message('debug', 'Errors::group::'.$this->current_index);
-
-			return $this;
-		}
-
-		/* null */
-		return $this->current_index;
-	}
-
-	public function only($index = null)
-	{
-		$this->only = ($index) ? $index : false;
-
-		log_message('debug', 'Errors::only::'.(string)$this->only);
-
-		return $this;
-	}
-
-	public function as($to_string,$only = null)
-	{
-		log_message('debug', 'Errors::as::'.$to_string);
-
-		$this->to_string = $to_string;
-
-		if ($only) {
-			$this->only($only);
-		}
-
-		return $this;
-	}
-
 	public function __toString()
 	{
 		log_message('debug', 'Errors::__toString');
@@ -106,13 +63,36 @@ class Errors {
 		return $this->get();
 	}
 	
-	public function get($override=null)
+	public function get_group()
+	{
+		return $this->current_index;
+	}
+
+	public function group($index = null)
+	{
+		$index = ($index) ? $index : $this->default_index;
+
+		$this->current_index = $index;
+
+		log_message('debug', 'Errors::group::'.$this->current_index);
+
+		return $this;
+	}
+
+	public function as($to_string)
+	{
+		log_message('debug', 'Errors::as::'.$to_string);
+
+		$this->to_string = $to_string;
+
+		return $this;
+	}
+
+	public function get()
 	{
 		log_message('debug', 'Errors::get');
 
-		$as = ($override) ?? $this->to_string;
-
-		switch($as) {
+		switch($this->to_string) {
 			case 'html':
 				$output = $this->as_html();
 			break;
@@ -127,43 +107,6 @@ class Errors {
 		}
 
 		return $output;
-	}
-
-	/**
-	 * redirect to another page on error
-	 */
-	public function redirect_on_error($url = null,$wallet_status = 'red',$index = null)
-	{
-		log_message('debug', 'Errors::redirect_on_error '.$url.' '.$wallet_status.' '.$index);
-
-		if ($this->has($index)) {
-			if ($wallet_status) {
-				ci('wallet')->msg($this->as_html(null,null,$index),$wallet_status,((is_string($url)) ? $url : true));
-			} else {
-				ci('session')->set_flashdata($this->flashdata_session_variable,$this->as_array($index));
-				
-				/* did they send in a URL? if not use the referrer page */
-				$redirect_url = (is_string($url) ? $url : $this->input->server('HTTP_REFERER'));
-
-				redirect($redirect_url);
-			}
-		}
-
-		return $this;
-	}
-
-	/**
-	 * show error view on error and die
-	 */
-	public function die_on_error($view = 400, $index = null)
-	{
-		log_message('debug', 'Errors::die_on_error::'.$view.' '.$index);
-
-		if ($this->has($index)) {
-			$this->display($view);
-		}
-
-		return $this;
 	}
 
 	/**
@@ -218,15 +161,48 @@ class Errors {
 	}
 
 	/**
+	 * redirect to another page on error
+	 */
+	public function redirect_on_error($url = null,$wallet_status = 'red',$index = null)
+	{
+		log_message('debug', 'Errors::redirect_on_error '.$url.' '.$wallet_status.' '.$index);
+
+		if ($this->has($index)) {
+			if ($wallet_status) {
+				ci('wallet')->msg($this->as_html(null,null,$index),$wallet_status,((is_string($url)) ? $url : true));
+			} else {
+				ci('session')->set_flashdata($this->flashdata_session_variable,$this->as_array($index));
+				
+				/* did they send in a URL? if not use the referrer page */
+				$redirect_url = (is_string($url) ? $url : $this->input->server('HTTP_REFERER'));
+
+				redirect($redirect_url);
+			}
+		}
+
+		return $this;
+	}
+
+	/**
+	 * show error view on error and die
+	 */
+	public function die_on_error($view = 400, $index = null)
+	{
+		log_message('debug', 'Errors::die_on_error::'.$view.' '.$index);
+
+		if ($this->has($index)) {
+			$this->display($view);
+		}
+
+		return $this;
+	}
+
+	/**
 	 * as_array
 	 */
 	public function as_array($index=null)
 	{
 		log_message('debug', 'Errors::as_array::'.$index);
-
-		if ($this->only) {
-			$index = $this->only;
-		}
 		
 		/* multiple groups? */
 		if (is_string($index)) {
