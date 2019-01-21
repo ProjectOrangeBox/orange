@@ -212,4 +212,20 @@ abstract class Validate_base {
 	public function is_bol($field) {
 		return (in_array(strtolower($field), array_merge($this->true_array, $this->false_array), true)) ? true : false;
 	}
+	
+	public function locate_file($file) {
+		$file = trim($file,'/');
+		
+		if (file_exists(WWW.'/'.$file)) {
+			return WWW.'/'.$file;
+		}
+		
+		if (file_exists(ROOTPATH.'/'.$file)) {
+			return ROOTPATH.'/'.$file;
+		}
+		
+		$this->error_string = 'File Not Found.';
+
+		return false;
+	}
 } /* end class */
