@@ -36,7 +36,7 @@ class Errors {
 	protected $current_index;
 	protected $default_index;
 	protected $duplicates = [];
-	protected $tostring = 'array';
+	protected $to_string = 'array';
 	protected $only = false;
 	protected $forced_output = false;
 
@@ -86,11 +86,11 @@ class Errors {
 		return $this;
 	}
 
-	public function as($tostring,$only=null)
+	public function as($to_string,$only = null)
 	{
-		log_message('debug', 'Errors::as::'.$tostring);
+		log_message('debug', 'Errors::as::'.$to_string);
 
-		$this->tostring = $tostring;
+		$this->to_string = $to_string;
 
 		if ($only) {
 			$this->only($only);
@@ -110,7 +110,7 @@ class Errors {
 	{
 		log_message('debug', 'Errors::get');
 
-		$as = ($override) ?? $this->tostring;
+		$as = ($override) ?? $this->to_string;
 
 		switch($as) {
 			case 'html':
@@ -171,9 +171,9 @@ class Errors {
 	 */
 	public function add($msg,$index=null)
 	{
-		log_message('debug', 'Errors::add::'.$msg.' '.$index);
+		$index = ($index) ? $index : $this->current_index;
 
-		$index = ($index) ?? $this->current_index;
+		log_message('debug', 'Errors::add::'.$msg.' '.$index);
 
 		$dup_key = md5($index.$msg);
 
@@ -192,9 +192,9 @@ class Errors {
 	 */
 	public function clear($index=null)
 	{
-		log_message('debug', 'Errors::clear::'.$index);
+		$index = ($index) ? $index : $this->current_index;
 
-		$index = ($index) ?? $this->current_index;
+		log_message('debug', 'Errors::clear::'.$index);
 
 		$this->errors[$index] = [];
 
@@ -207,12 +207,14 @@ class Errors {
 	 */
 	public function has($index=null)
 	{
-		log_message('debug', 'Errors::has::'.$index);
+		$index = ($index) ? $index : $this->current_index;
+	
+		$has = (bool)count($this->errors[$index]);
 
-		$index = ($index) ?? $this->current_index;
+		log_message('debug', 'Errors::has::'.$index.' '.$has);
 
 		/* do we have any errors? */
-		return (bool)count($this->errors[$index]);
+		return $has;
 	}
 
 	/**
