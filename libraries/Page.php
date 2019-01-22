@@ -491,7 +491,7 @@ class Page {
 
 	protected function _body_class($class,$priority) {
 		foreach ($class as $c) {
-			$this->add('body_class',' '.strtolower(trim($c)).' ',$priority);
+			$this->add('body_class',' '.strtolower(trim($c)),$priority);
 		}
 
 		return $this;

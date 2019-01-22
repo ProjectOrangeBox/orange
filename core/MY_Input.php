@@ -82,10 +82,14 @@ class MY_Input extends CI_Input {
 	 * @examples set_request('name','Dr Pepper')
 	 */
 	public function set_request($index = null, $replace_value = null) {
-		if ($replace_value) {
-			$this->_request[$index] = $replace_value;
-		} elseif(is_array($index)) {
+		if (is_array($index) && $replace_value === true) {
 			$this->_request = $index;
+		} elseif (is_array($index)) {
+			foreach ($index as $i=>$v) {
+				$this->set_request($i,$v);
+			}
+		} else {
+			$this->_request[$index] = $replace_value;
 		}
 
 		return $this;
@@ -351,12 +355,21 @@ class MY_Input extends CI_Input {
 		return ($xss_clean) ? $this->security->xss_clean($value) : $value;
 	}
 
-	public function is_ajax_request($boolean=null)
+	public function set_request_type($as)
 	{
-		if (is_bool($boolean)) {
-			$this->_input = ($boolean) ? 'ajax' : null;
-		}
+		/* options include cli, ajax */
 
+		if (!in_array($as,['cli','ajax'])) {
+			throw new Exception(__METHOD__.' unknown type '.$as.'.');
+		}
+		
+		$this->_input = $as;
+		
+		return $this;
+	}
+
+	public function is_ajax_request()
+	{
 		return ($this->_input == 'ajax') ? true : (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest');
 	}
 
@@ -370,12 +383,8 @@ class MY_Input extends CI_Input {
 	 * @deprecated	3.0.0	Use is_cli() instead
 	 * @return	bool
 	 */
-	public function is_cli_request($boolean=null)
+	public function is_cli_request()
 	{
-		if (is_bool($boolean)) {
-			$this->_input = ($boolean) ? 'cli' : null;
-		}
-
 		return ($this->_input == 'cli') ? true : is_cli();
 	}
 

@@ -220,11 +220,11 @@ class Validate {
 	 * @example
 	 */
 	public function request($rules = '', $key, $human = null) {
-		$field = $this->input->request($key);
+		$field = ci('input')->request($key);
 
 		$this->single($rules, $field, $human);
 
-		$this->input->set_request($key,$field);
+		ci('input')->set_request($key,$field);
 
 		return ($human === true) ? $field : $this;
 	}
