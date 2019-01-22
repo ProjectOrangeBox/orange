@@ -81,7 +81,7 @@ class Validate {
 	public function group($index = null)
 	{
 		$this->errors->group($index);
-		
+
 		return $this;
 	}
 
@@ -144,8 +144,8 @@ class Validate {
 	 * @throws
 	 * @example
 	 */
-	public function die_on_fail($view = '400') {
-		$this->errors->die_on_error($view);
+	public function die_on_fail($view = '400',$index=null) {
+		$this->errors->die_on_error($view,$index);
 
 		return $this;
 	}
@@ -163,8 +163,8 @@ class Validate {
 	 * @throws
 	 * @example
 	 */
-	public function redirect_on_fail($url = null) {
-		$this->errors->redirect_on_error($url);
+	public function redirect_on_fail($url = null,$index=null,$wallet_status='red') {
+		$this->errors->redirect_on_error($url,$wallet_status,$index);
 
 		return $this;
 	}
@@ -278,7 +278,7 @@ class Validate {
 			/* yes */
 			foreach ($rules as $rule) {
 				log_message('debug', 'Validate Rule '.$rule.' "'.$field.'" '.$human);
-			
+
 				/* no rules exit processing of the $rules array */
 				if (empty($rule)) {
 					log_message('debug', 'Validate no validation rule.');
@@ -290,7 +290,7 @@ class Validate {
 				/* do we have this special rule? */
 				if ($rule == 'allow_empty') {
 					log_message('debug', 'Validate allow_empy skipping the rest if empty.');
-					
+
 					if (empty($field)) {
 						/* end processing of the $rules array */
 						break;
@@ -327,7 +327,7 @@ class Validate {
 				$success = (substr($rule,0,7) == 'filter_') ? $this->_filter($field,$rule,$param) : $this->_validation($field,$rule,$param);
 
 				log_message('debug', 'Validate Success '.$success);
-				
+
 				/* bail on first failure */
 				if ($success === false) {
 					/* end processing of the $rules array */
@@ -386,14 +386,14 @@ class Validate {
 				$success = true;
 			}
 		} else {
-			$this->add_error();
+			$this->add_error(null,$this->error_human);
 		}
 
 		return $success;
 	}
 
-	protected function add_error($index = null) {
-		$this->errors->add(sprintf($this->error_string, $this->error_human, $this->error_params),$index);
+	protected function add_error($index=null,$fieldname=null) {
+		$this->errors->add(sprintf($this->error_string, $this->error_human, $this->error_params),$index,$fieldname);
 	}
 
 	/**

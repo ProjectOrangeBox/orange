@@ -33,8 +33,8 @@ class Errors {
 	protected $data_count;
 
 	protected $errors = [];
-	protected $current_index;
-	protected $default_index;
+	protected $current_group;
+	protected $default_group;
 	protected $duplicates = [];
 	protected $to_string = 'array';
 	protected $forced_output = false;
@@ -52,29 +52,32 @@ class Errors {
 		$this->html_prefix = $this->config['html_prefix'] ?? '<p class="orange error">';
 		$this->html_suffix = $this->config['html_suffix'] ?? '</p>';
 
-		$this->default_index = $this->config['default error group'] ?? 'records';
-		$this->current_index = $this->default_index;
+		$this->default_group = $this->config['default error group'] ?? 'records';
+		$this->current_group = $this->default_group;
 	}
 
 	public function __toString()
 	{
 		log_message('debug', 'Errors::__toString');
-		
+
 		return $this->get();
 	}
-	
-	public function get_group()
+
+	public function get_default_group()
 	{
-		return $this->current_index;
+		return $this->default_group;
 	}
 
-	public function group($index = null)
+	public function get_group()
 	{
-		$index = ($index) ? $index : $this->default_index;
+		return $this->current_group;
+	}
 
-		$this->current_index = $index;
+	public function group($group)
+	{
+		$this->current_group = $group;
 
-		log_message('debug', 'Errors::group::'.$this->current_index);
+		log_message('debug', 'Errors::group::'.$this->current_group);
 
 		return $this;
 	}
@@ -112,16 +115,20 @@ class Errors {
 	/**
 	 * add
 	 */
-	public function add($msg,$index=null)
+	public function add($msg,$index=null,$fieldname=null)
 	{
-		$index = ($index) ? $index : $this->current_index;
+		$index = ($index) ? $index : $this->current_group;
 
 		log_message('debug', 'Errors::add::'.$msg.' '.$index);
 
-		$dup_key = md5($index.$msg);
+		$dup_key = md5($index.$msg.$fieldname);
 
 		if (!isset($this->duplicates[$dup_key])) {
-			$this->errors[$index][] = $msg;
+			if ($fieldname) {
+				$this->errors[$index][$fieldname] = $msg; /* field based keys */
+			} else {
+				$this->errors[$index][] = $msg; /* number based keys auto incremented */
+			}
 
 			$this->duplicates[$dup_key] = true;
 		}
@@ -135,7 +142,7 @@ class Errors {
 	 */
 	public function clear($index=null)
 	{
-		$index = ($index) ? $index : $this->current_index;
+		$index = ($index) ? $index : $this->current_group;
 
 		log_message('debug', 'Errors::clear::'.$index);
 
@@ -150,8 +157,8 @@ class Errors {
 	 */
 	public function has($index=null)
 	{
-		$index = ($index) ? $index : $this->current_index;
-	
+		$index = ($index) ? $index : $this->current_group;
+
 		$has = (bool)count($this->errors[$index]);
 
 		log_message('debug', 'Errors::has::'.$index.' '.$has);
@@ -172,7 +179,7 @@ class Errors {
 				ci('wallet')->msg($this->as_html(null,null,$index),$wallet_status,((is_string($url)) ? $url : true));
 			} else {
 				ci('session')->set_flashdata($this->flashdata_session_variable,$this->as_array($index));
-				
+
 				/* did they send in a URL? if not use the referrer page */
 				$redirect_url = (is_string($url) ? $url : $this->input->server('HTTP_REFERER'));
 
@@ -203,19 +210,19 @@ class Errors {
 	public function as_array($index=null)
 	{
 		log_message('debug', 'Errors::as_array::'.$index);
-		
+
 		/* multiple groups? */
 		if (is_string($index)) {
 			if (strpos($index,',') !== false) {
 				/* multiple */
 				$multiple = [];
-	
+
 				foreach(explode(',',$index) as $m) {
 					$m = trim($m);
-				
+
 					$multiple[$m] = $this->errors[$m];
 				}
-	
+
 				return $multiple;
 			} else {
 				return $this->errors[$index];
@@ -384,7 +391,11 @@ class Errors {
 		$this->output->exit($exit_status);
 	}
 
-	/* add this here to cut down on external functions */
+	/**
+	 *
+	 * add this here to cut down on external functions
+	 *
+	 */
 	protected function error_view($_view,$_data=[])
 	{
 		log_message('debug', 'Errors::error_view::'.$_view);
@@ -410,7 +421,7 @@ class Errors {
 		/* return the current buffer contents and delete current output buffer */
 		return ob_get_clean();
 	}
-	
+
 	protected function insert_into_first_class($html,$class)
 	{
 		if (preg_match('/class="([^=]*)"/',$html, $matches, PREG_OFFSET_CAPTURE, 0)) {
