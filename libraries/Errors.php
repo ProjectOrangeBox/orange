@@ -28,6 +28,7 @@ class Errors {
 	protected $flashdata_session_variable;
 	protected $html_prefix;
 	protected $html_suffix;
+	protected $html_group_class;
 
 	protected $data_records;
 	protected $data_count;
@@ -36,8 +37,7 @@ class Errors {
 	protected $current_group;
 	protected $default_group;
 	protected $duplicates = [];
-	protected $to_string = 'array';
-	protected $forced_output = false;
+	protected $request_type = 'array';
 
 	public function __construct(&$config=[])
 	{
@@ -49,13 +49,29 @@ class Errors {
 
 		$this->flashdata_session_variable = $this->config['flashdata session variable'] ?? 'ci_errors';
 
-		$this->html_prefix = $this->config['html_prefix'] ?? '<p class="orange error">';
+		$this->html_prefix = $this->config['html_prefix'] ?? '<p class="{group class} orange-errors">';
 		$this->html_suffix = $this->config['html_suffix'] ?? '</p>';
+		$this->html_group_class = $this->config['html_group_class'] ?? '{group class}';
 
 		$this->default_group = $this->config['default error group'] ?? 'records';
 		$this->current_group = $this->default_group;
+
+		if ($this->config['auto detect']) {
+			if ($this->input->is_cli_request()) {
+				$this->set_request_type('cli');
+			} elseif ($this->input->is_ajax_request()) {
+				$this->set_request_type('ajax');
+			} else {
+				$this->set_request_type('html');
+			}
+		}
 	}
 
+	/**
+	 *
+	 * For when you cast the object to a string
+	 *
+	 */
 	public function __toString()
 	{
 		log_message('debug', 'Errors::__toString');
@@ -82,11 +98,22 @@ class Errors {
 		return $this;
 	}
 
-	public function as($to_string)
+	/* wrapper for as */
+	public function set_request_type($request_type)
 	{
-		log_message('debug', 'Errors::as::'.$to_string);
+		return $this->as($request_type);
+	}
 
-		$this->to_string = $to_string;
+	public function as($request_type)
+	{
+		log_message('debug', 'Errors::as::'.$request_type);
+
+		/* options include cli, ajax, html */
+		if (!in_array($request_type,['cli','ajax','json','html','array'])) {
+			throw new Exception(__METHOD__.' unknown type '.$request_type.'.');
+		}
+
+		$this->request_type = $request_type;
 
 		return $this;
 	}
@@ -95,13 +122,14 @@ class Errors {
 	{
 		log_message('debug', 'Errors::get');
 
-		switch($this->to_string) {
+		switch($this->request_type) {
 			case 'html':
 				$output = $this->as_html();
 			break;
 			case 'cli':
 				$output = $this->as_cli();
 			break;
+			case 'ajax':
 			case 'json':
 				$output = $this->as_json();
 			break;
@@ -115,19 +143,17 @@ class Errors {
 	/**
 	 * add
 	 */
-	public function add($msg,$index=null,$fieldname=null)
+	public function add($msg,$fieldname=null)
 	{
-		$index = ($index) ? $index : $this->current_group;
+		log_message('debug', 'Errors::add::'.$msg.' '.$this->current_group);
 
-		log_message('debug', 'Errors::add::'.$msg.' '.$index);
-
-		$dup_key = md5($index.$msg.$fieldname);
+		$dup_key = md5($this->current_group.$msg.$fieldname);
 
 		if (!isset($this->duplicates[$dup_key])) {
 			if ($fieldname) {
-				$this->errors[$index][$fieldname] = $msg; /* field based keys */
+				$this->errors[$this->current_group][$fieldname] = $msg; /* field based keys */
 			} else {
-				$this->errors[$index][] = $msg; /* number based keys auto incremented */
+				$this->errors[$this->current_group][] = $msg; /* number based keys auto incremented */
 			}
 
 			$this->duplicates[$dup_key] = true;
@@ -140,13 +166,13 @@ class Errors {
 	/**
 	 * clear
 	 */
-	public function clear($index=null)
+	public function clear($group=null)
 	{
-		$index = ($index) ? $index : $this->current_group;
+		$group = ($group) ? $group : $this->current_group;
 
-		log_message('debug', 'Errors::clear::'.$index);
+		log_message('debug', 'Errors::clear::'.$group);
 
-		$this->errors[$index] = [];
+		$this->errors[$group] = [];
 
 		/* chain-able */
 		return $this;
@@ -155,49 +181,29 @@ class Errors {
 	/**
 	 * has
 	 */
-	public function has($index=null)
+	public function has($group=null)
 	{
-		$index = ($index) ? $index : $this->current_group;
+		$group = ($group) ? $group : $this->current_group;
 
-		$has = (bool)count($this->errors[$index]);
+		$has = (bool)count($this->errors[$group]);
 
-		log_message('debug', 'Errors::has::'.$index.' '.$has);
+		log_message('debug', 'Errors::has::'.$group.' '.$has);
 
 		/* do we have any errors? */
 		return $has;
 	}
 
-	/**
-	 * redirect to another page on error
-	 */
-	public function redirect_on_error($url = null,$wallet_status = 'red',$index = null)
-	{
-		log_message('debug', 'Errors::redirect_on_error '.$url.' '.$wallet_status.' '.$index);
-
-		if ($this->has($index)) {
-			if ($wallet_status) {
-				ci('wallet')->msg($this->as_html(null,null,$index),$wallet_status,((is_string($url)) ? $url : true));
-			} else {
-				ci('session')->set_flashdata($this->flashdata_session_variable,$this->as_array($index));
-
-				/* did they send in a URL? if not use the referrer page */
-				$redirect_url = (is_string($url) ? $url : $this->input->server('HTTP_REFERER'));
-
-				redirect($redirect_url);
-			}
-		}
-
-		return $this;
-	}
 
 	/**
 	 * show error view on error and die
 	 */
-	public function die_on_error($view = 400, $index = null)
+	public function die_on_error($view = 400, $group = null)
 	{
-		log_message('debug', 'Errors::die_on_error::'.$view.' '.$index);
+		$group = ($group) ? $group : $this->current_group;
 
-		if ($this->has($index)) {
+		log_message('debug', 'Errors::die_on_error::'.$view.' '.$group);
+
+		if ($this->has($group)) {
 			$this->display($view);
 		}
 
@@ -207,42 +213,52 @@ class Errors {
 	/**
 	 * as_array
 	 */
-	public function as_array($index=null)
+	public function as_array($group=null)
 	{
-		log_message('debug', 'Errors::as_array::'.$index);
+		log_message('debug', 'Errors::as_array::'.$group);
 
-		/* multiple groups? */
-		if (is_string($index)) {
-			if (strpos($index,',') !== false) {
-				/* multiple */
+		$array = $this->errors;
+
+		if ($group) {
+			if (is_array($group)) {
+				$groups = $group;
+			} else {
+				$groups = explode(',',$group);
+			}
+
+			if (count($groups) > 1) {
+				/* multi leveled */
 				$multiple = [];
 
-				foreach(explode(',',$index) as $m) {
+				foreach($groups as $m) {
 					$m = trim($m);
 
 					$multiple[$m] = $this->errors[$m];
 				}
 
-				return $multiple;
+				$array = $multiple;
 			} else {
-				return $this->errors[$index];
+				/* not multi leveled */
+				$array = [$groups[0]=>$this->errors[$groups[0]]];
 			}
 		}
 
-		return $this->errors;
+		return $array;
 	}
 
 	/**
 	 * as_html
 	 */
-	public function as_html($prefix = null, $suffix = null, $index = null)
+	public function as_html($prefix = null, $suffix = null, $group = null)
 	{
-		log_message('debug', 'Errors::as_html::'.$index);
+		log_message('debug', 'Errors::as_html::'.$group);
+
+		$errors = $this->as_array($group);
 
 		$html = '';
 
 		/* do we have any errors? */
-		if ($this->has($index)) {
+		if (count($errors)) {
 			/* if they didn't send in a default prefix then use ours */
 			if ($prefix === null) {
 				$prefix = $this->html_prefix;
@@ -254,16 +270,16 @@ class Errors {
 			}
 
 			/* format the output */
-			foreach ($this->as_array($index) as $grouping=>$errors) {
+			foreach ($this->as_array($group) as $grouping=>$errors) {
 				if (is_array($errors)) {
 					foreach ($errors as $val) {
 						if (!empty(trim($val))) {
-							$html .= $this->insert_into_first_class($prefix,'error-group-'.$grouping).trim($val).$suffix;
+							$html .= str_replace($this->html_group_class,'error-group-'.$grouping,$prefix.trim($val).$suffix);
 						}
 					}
 				} else {
 					if (!empty(trim($errors))) {
-						$html .= $prefix.trim($errors).$suffix;
+						$html .= str_replace($this->html_group_class,'error-group-'.$grouping,$prefix.trim($errors).$suffix);
 					}
 				}
 			}
@@ -275,22 +291,22 @@ class Errors {
 	/**
 	 * as_cli
 	 */
-	public function as_cli($index = null)
+	public function as_cli($group = null)
 	{
-		log_message('debug', 'Errors::as_cli::'.$index);
+		log_message('debug', 'Errors::as_cli::'.$group);
 
 		/* return as string with tabs and line-feeds */
-		return json_encode($this->as_array($index),JSON_PRETTY_PRINT).PHP_EOL;
+		return json_encode($this->as_array($group),JSON_PRETTY_PRINT).PHP_EOL;
 	}
 
 	/**
 	 * as_json
 	 */
-	public function as_json($index = null)
+	public function as_json($group = null)
 	{
-		log_message('debug', 'Errors::as_json::'.$index);
+		log_message('debug', 'Errors::as_json::'.$group);
 
-		return json_encode($this->as_array($index), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE | JSON_FORCE_OBJECT);
+		return json_encode($this->as_array($group), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE | JSON_FORCE_OBJECT);
 	}
 
 	/**
@@ -300,15 +316,6 @@ class Errors {
 	{
 		/* show the errors */
 		$this->display('general',['heading'=>$heading,'message'=>$message],$status_code);
-	}
-
-	public function input($type)
-	{
-		log_message('debug', 'Errors::input::'.$type);
-
-		$this->forced_output = $type;
-
-		return $this;
 	}
 
 	/**
@@ -324,13 +331,13 @@ class Errors {
 			$status_code = (int)$view;
 		}
 
-		if ($this->forced_output) {
-			$output_format = $this->forced_output;
+		if ($this->request_type) {
+			$output_format = $this->request_type;
 		} else {
 			if ($this->input->is_cli_request()) {
 				$output_format = 'cli';
 			} elseif ($this->input->is_ajax_request()) {
-				$output_format = $this->input->is_ajax_request();
+				$output_format = 'ajax';
 			}
 		}
 
@@ -345,8 +352,9 @@ class Errors {
 				$this->as('cli');
 				$view_folder = 'cli';
 			break;
+			case 'json':
 			case 'ajax':
-				$this->as('json');
+				$this->as('ajax');
 				$view_folder = 'ajax';
 				$mime_type   = 'application/json';
 			break;
@@ -420,15 +428,6 @@ class Errors {
 
 		/* return the current buffer contents and delete current output buffer */
 		return ob_get_clean();
-	}
-
-	protected function insert_into_first_class($html,$class)
-	{
-		if (preg_match('/class="([^=]*)"/',$html, $matches, PREG_OFFSET_CAPTURE, 0)) {
-			$html = substr_replace($html,$class.' ',$matches[1][1], 0);
-		}
-
-		return $html;
 	}
 
 } /* end class */

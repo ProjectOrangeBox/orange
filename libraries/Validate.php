@@ -151,25 +151,6 @@ class Validate {
 	}
 
 	/**
-	 * redirect_on_fail
-	 * Insert description here
-	 *
-	 * @param $url
-	 *
-	 * @return $this
-	 *
-	 * @access
-	 * @static
-	 * @throws
-	 * @example
-	 */
-	public function redirect_on_fail($url = null,$index=null,$wallet_status='red') {
-		$this->errors->redirect_on_error($url,$wallet_status,$index);
-
-		return $this;
-	}
-
-	/**
 	 * success
 	 * Insert description here
 	 *
@@ -393,7 +374,7 @@ class Validate {
 	}
 
 	protected function add_error($index=null,$fieldname=null) {
-		$this->errors->add(sprintf($this->error_string, $this->error_human, $this->error_params),$index,$fieldname);
+		$this->errors->group($index)->add(sprintf($this->error_string, $this->error_human, $this->error_params),$fieldname);
 	}
 
 	/**

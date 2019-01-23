@@ -25,7 +25,7 @@ class MY_Input extends CI_Input {
 	 * @var array
 	 */
 	protected $_request = [];
-	protected $_input = null;
+	protected $request_type = 'html';
 	protected $stash_key = '_input_stash_';
 	protected $stash_hash_key = '_stash_hash_key_';
 
@@ -355,22 +355,21 @@ class MY_Input extends CI_Input {
 		return ($xss_clean) ? $this->security->xss_clean($value) : $value;
 	}
 
-	public function set_request_type($as)
+	public function set_request_type($request_type)
 	{
-		/* options include cli, ajax */
-
-		if (!in_array($as,['cli','ajax'])) {
-			throw new Exception(__METHOD__.' unknown type '.$as.'.');
+		/* options include cli, ajax, html */
+		if (!in_array($request_type,['cli','ajax','html'])) {
+			throw new Exception(__METHOD__.' unknown type '.$request_type.'.');
 		}
 		
-		$this->_input = $as;
+		$this->request_type = $request_type;
 		
 		return $this;
 	}
 
 	public function is_ajax_request()
 	{
-		return ($this->_input == 'ajax') ? true : (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest');
+		return ($this->request_type == 'ajax') ? true : (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest');
 	}
 
 	// --------------------------------------------------------------------
@@ -385,7 +384,7 @@ class MY_Input extends CI_Input {
 	 */
 	public function is_cli_request()
 	{
-		return ($this->_input == 'cli') ? true : is_cli();
+		return ($this->request_type == 'cli') ? true : is_cli();
 	}
 
 	/**
