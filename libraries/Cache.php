@@ -1,15 +1,74 @@
 <?php
+/**
+ * Orange
+ *
+ * An open source extensions for CodeIgniter 3.x
+ *
+ * This content is released under the MIT License (MIT)
+ * Copyright (c) 2014 - 2019, Project Orange Box
+ */
 
+/**
+ * Extension to the CodeIgniter Cache Library
+ *
+ * Adds additional request & export cache libraries
+ *
+ * @package CodeIgniter / Orange
+ * @author Don Myers
+ * @copyright 2019
+ * @license http://opensource.org/licenses/MIT MIT License
+ * @link https://github.com/ProjectOrangeBox
+ * @version v2.0.0
+ *
+ * @uses event Event
+ *
+ * @config cache_path `ROOTPATH.'/var/cache/'`
+ * @config cache_default `dummy`
+ * @config cache_backup `dummy`
+ * @config cache_ttl `60`
+ * @config key_prefix `cache.`
+ *
+ */
 class Cache extends CI_Cache {
+	/**
+	 * errors configuration array
+	 *
+	 * @var \Cache_request
+	 */
 	public $request;
-	public $export;
-	public $application;
 
+	/**
+	 * errors configuration array
+	 *
+	 * @var \Cache_export
+	 */
+	public $export;
+
+	/**
+	 * Orange Event Object
+	 *
+	 * @var \Event
+	 */
 	protected $event;
 
+	/**
+	 * configuration storage
+	 *
+	 * @var array
+	 */
 	protected $config = [];
 
-	public function __construct($config=[]) {
+	/**
+	 *
+	 * Constructor
+	 *
+	 * @access public
+	 *
+	 * @param array $config []
+	 *
+	 */
+	public function __construct(array &$config=[])
+	{
 		$this->event = &ci('event');
 
 		$this->config = &array_replace(load_config('config','config'),(array)$config);
@@ -35,7 +94,25 @@ class Cache extends CI_Cache {
 	 * @return mixed cached data
 	 *
 	 */
-	public function inline($key, $closure, $ttl = null) {
+	/**
+	 *
+	 * Wrapper function to use the currently loaded cache library in a closure fashion
+	 *
+	 * @access public
+	 *
+	 * @param string $key
+	 * @param callable $closure
+	 * @param int $ttl null
+	 *
+	 * @return mixed
+	 *
+	 * #### Example
+	 * ```
+	 * $cached = ci('cache')->inline('foobar',function(){ return 'cache me for 60 seconds!' },60);
+	 * ```
+	 */
+	public function inline(string $key,callable $closure,int $ttl = null)
+	{
 		if (!$cache = $this->get($key)) {
 			$cache = $closure();
 			$ttl = ($ttl) ? (int) $ttl : $this->ttl();
@@ -46,14 +123,18 @@ class Cache extends CI_Cache {
 	}
 
 	/**
+	 *
 	 * Get the current Cache Time to Live with optional "window" support to negate a cache stamped
 	 *
-	 * @param $use_window boolean
+	 * @access public
 	 *
-	 * @return integer
+	 * @param bool $use_window true
+	 *
+	 * @return int
 	 *
 	 */
-	public function ttl($use_window=true) {
+	public function ttl(bool $use_window = true) : int
+	{
 		/* get the cache ttl from the config file */
 		$cache_ttl = (int)$this->config['cache_ttl'];
 
@@ -69,17 +150,24 @@ class Cache extends CI_Cache {
 	}
 
 	/**
+	 *
 	 * Delete cache records based on dot notation "tags"
 	 *
-	 * @param $args mixed array, period separated list of tags or multiple arguments
+	 * @access public
 	 *
-	 * @return
+	 * @param mixed $args array, period separated list of tags or multiple arguments
 	 *
-	 * @example delete_cache_by_tags('acl','user','roles');
-	 * @example delete_cache_by_tags('acl.user.roles');
-	 * @example delete_cache_by_tags(['acl','user','roles']);
+	 * @return $this
+	 *
+	 * #### Example
+	 * ```
+	 * delete_cache_by_tags('acl','user','roles');
+	 * delete_cache_by_tags('acl.user.roles');
+	 * delete_cache_by_tags(['acl','user','roles']);
+	 * ```
 	 */
-	public function delete_by_tags($args) {
+	public function delete_by_tags($args) : Cache
+	{
 		/* determine if it's a array, period separated list of tags or multiple arguments */
 		if (is_array($args)) {
 			$tags = $args;

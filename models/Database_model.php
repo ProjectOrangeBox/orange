@@ -423,10 +423,10 @@ class Database_model extends MY_Model {
 		/* if the validation was successful then proceed */
 		if ($success) {
 			/*
-			remap any data field columns to actual data base columns
-			remove the protected columns
-			call the add field on insert method which can be overridden on the extended class
-			call the add where on insert method which can be overridden on the extended class
+			remap any data field columns to actual database columns - this way form name can be different than actual database column names
+			remove the protected columns - remove any columns which are never inserted into the database (perhaps database generated columns) 
+			call the add field on insert method which can be overridden on the extended model class
+			call the add where on insert method which can be overridden on the extended model class
 			 */
 			$this
 				->remap_columns($data, $this->rules)
@@ -1021,6 +1021,19 @@ class Database_model extends MY_Model {
 	/**
 	 * Add to the where clause to test if this user read, edit, delete
 	 */
+	/**
+	 *
+	 * Description Here
+	 *
+	 * @access protected
+	 *
+	 * @param  
+	 *
+	 * @return
+	 *
+	 * @example
+	 *
+	 */
 	protected function where_can_read() {
 		if ($this->has['read_role']) {
 			if ($roles = $this->_get_user_roles()) {
@@ -1031,6 +1044,19 @@ class Database_model extends MY_Model {
 		return $this;
 	}
 
+	/**
+	 *
+	 * Description Here
+	 *
+	 * @access protected
+	 *
+	 * @param  
+	 *
+	 * @return
+	 *
+	 * @example
+	 *
+	 */
 	protected function where_can_edit() {
 		if ($this->has['edit_role']) {
 			if ($roles = $this->_get_user_roles()) {
@@ -1041,6 +1067,19 @@ class Database_model extends MY_Model {
 		return $this;
 	}
 
+	/**
+	 *
+	 * Description Here
+	 *
+	 * @access protected
+	 *
+	 * @param  
+	 *
+	 * @return
+	 *
+	 * @example
+	 *
+	 */
 	protected function where_can_delete() {
 		if ($this->has['delete_role']) {
 			if ($roles = $this->_get_user_roles()) {
@@ -1052,7 +1091,16 @@ class Database_model extends MY_Model {
 	}
 
 	/**
-	 * Add to data field on insert, update, delete
+	 *
+	 * Add field on insert
+	 * child classes can extend
+	 *
+	 * @access protected
+	 *
+	 * @param &$data 
+	 *
+	 * @return $this
+	 *
 	 */
 	protected function add_fields_on_insert(&$data) {
 		if ($this->has['created_by']) {
@@ -1094,6 +1142,18 @@ class Database_model extends MY_Model {
 		return $this;
 	}
 
+	/**
+	 *
+	 * Add field on update
+	 * child classes can extend
+	 *
+	 * @access protected
+	 *
+	 * @param &$data 
+	 *
+	 * @return $this
+	 *
+	 */
 	protected function add_fields_on_update(&$data) {
 		if ($this->has['updated_by']) {
 			$data[$this->has['updated_by']] = $this->_get_userid();
@@ -1110,6 +1170,18 @@ class Database_model extends MY_Model {
 		return $this;
 	}
 
+	/**
+	 *
+	 * Add field on delete
+	 * child classes can extend
+	 *
+	 * @access protected
+	 *
+	 * @param &$data 
+	 *
+	 * @return $this
+	 *
+	 */
 	protected function add_fields_on_delete(&$data) {
 		if ($this->has['deleted_by']) {
 			$data[$this->has['deleted_by']] = $this->_get_userid();
@@ -1131,7 +1203,17 @@ class Database_model extends MY_Model {
 	}
 
 	/**
-	 * Add to where on select, update, insert, delete
+	 *
+	 * Add to where on select
+	 *
+	 * @access protected
+	 *
+	 * @param  
+	 *
+	 * @return $this
+	 *
+	 * @example 
+	 *
 	 */
 	protected function add_where_on_select() {
 		if ($this->soft_delete) {
@@ -1145,16 +1227,49 @@ class Database_model extends MY_Model {
 		return $this;
 	}
 
+	/**
+	 *
+	 * Used by children classes to add additional where on update
+	 *
+	 * @access protected
+	 *
+	 * @param &$data 
+	 *
+	 * @return $this
+	 *
+	 */
 	protected function add_where_on_update(&$data) {
 		$this->where_can_edit();
 
 		return $this;
 	}
 
+	/**
+	 *
+	 * Used by children classes to add additional where on insert
+	 *
+	 * @access protected
+	 *
+	 * @param &$data 
+	 *
+	 * @return $this
+	 *
+	 */
 	protected function add_where_on_insert(&$data) {
 		return $this;
 	}
 
+	/**
+	 *
+	 * Used by children classes to add additional where on delete
+	 *
+	 * @access protected
+	 *
+	 * @param &$data 
+	 *
+	 * @return $this
+	 *
+	 */
 	protected function add_where_on_delete(&$data) {
 		$this->where_can_delete();
 
@@ -1162,7 +1277,18 @@ class Database_model extends MY_Model {
 	}
 
 	/**
-	 * _get_userid
+	 *
+	 * Used by children classes to retrieve the current user id.
+	 * returns nobody user id if no user is loaded
+	 *
+	 * @access protected
+	 *
+	 * @param  
+	 *
+	 * @return integer
+	 *
+	 * @example $this->_get_userid();
+	 *
 	 */
 	protected function _get_userid() {
 		$user_id = NOBODY_USER_ID;
@@ -1176,6 +1302,20 @@ class Database_model extends MY_Model {
 		return $user_id;
 	}
 
+	/**
+	 *
+	 * Used by children classes to retrieve the current user roles.
+	 * returns false if no user is loaded
+	 *
+	 * @access protected
+	 *
+	 * @param  
+	 *
+	 * @return [false|array]
+	 *
+	 * @example $this->_get_user_roles();
+	 *
+	 */
 	protected function _get_user_roles() {
 		$role_ids = false;
 		

@@ -17,10 +17,13 @@
  * helpers:
  * functions:
  *
+ * @help contains anything other than alphabetical characters.
+ *
  */
 class Validate_alpha extends Validate_base {
-	public function validate(&$field, $options) {
+	public function validate(&$field, string $options = '') : bool
+	{
 		$this->error_string = '%s may only contain alphabetical characters.';
-		return ctype_alpha($field);
+		return (bool) ctype_alpha($field);
 	}
 }

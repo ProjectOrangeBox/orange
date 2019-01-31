@@ -17,13 +17,18 @@
  * helpers:
  * functions:
  *
+ * @help is greater than the parameter value or not numeric.
+ *
  */
 class Validate_greater_than extends Validate_base {
-	public function validate(&$field, $options) {
+	public function validate(&$field, string $options = '') : bool
+	{
 		$this->error_string = '%s must contain a number greater than %s.';
+
 		if (!is_numeric($field)) {
 			return false;
 		}
+
 		return is_numeric($field) ? ($field > $options) : false;
 	}
 }

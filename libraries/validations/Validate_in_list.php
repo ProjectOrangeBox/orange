@@ -17,11 +17,16 @@
  * helpers:
  * functions:
  *
+ * @help is within a predetermined list.
+ *
  */
 class Validate_in_list extends Validate_base {
-	public function validate(&$field, $options) {
+	public function validate(&$field, string $options = '') : bool
+	{
 		$this->error_string = '%s must contain one of the available selections.';
+
 		$types = ($options) ? $options : '';
-		return (in_array($field, explode(',', $types)));
+
+		return (bool)(in_array($field, explode(',', $types)));
 	}
 }

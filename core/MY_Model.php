@@ -145,10 +145,10 @@ class MY_Model extends CI_Model {
 
 		/* return if we got any errors */
 		$success = ci('validate')->success($this->object);
-		
+
 		/* we are done put back the previous error group */
 		ci('validate')->group($previous_error_group);
-		
+
 		return $success;
 	}
 

@@ -1,44 +1,42 @@
 <?php
 /**
- * Filter_base
- * Insert description here
+ * Orange
+ *
+ * An open source extensions for CodeIgniter 3.x
+ *
+ * This content is released under the MIT License (MIT)
+ * Copyright (c) 2014 - 2019, Project Orange Box
+ */
+
+/**
+ * Filter Base Class
+ *
+ * All other filters should extend this class
  *
  * @package CodeIgniter / Orange
  * @author Don Myers
- * @copyright 2018
+ * @copyright 2019
  * @license http://opensource.org/licenses/MIT MIT License
  * @link https://github.com/ProjectOrangeBox
- * @version 2.0
- *
- * required
- * core:
- * libraries:
- * models:
- * helpers:
- * functions:
+ * @version v2.0.0
  *
  */
-abstract class Filter_base extends Validate_base {
-	public function __construct(&$field_data=null) {
-		$this->field_data = &$field_data;
-
-		log_message('info', 'Filter_base Class Initialized');
-	}
-
+abstract class Filter_base extends Validate_base
+{
 	/**
-	 * filter
-	 * Insert description here
 	 *
-	 * @param $field
-	 * @param $options
+	 * Abstract for filter method
 	 *
-	 * @return
+	 * @access public
 	 *
-	 * @access
-	 * @static
-	 * @throws
-	 * @example
+	 * @param &$field data to be filtered
+	 * @param string $options
+	 *
+	 * @return void always returns true in the calling class
+	 *
 	 */
-	public function filter(&$field, $options) {}
+	public function filter(&$field,string $options = '') : void
+	{
+	}
 
 } /* end class */

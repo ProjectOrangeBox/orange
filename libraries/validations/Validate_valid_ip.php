@@ -17,11 +17,16 @@
  * helpers:
  * functions:
  *
+ * @help if the supplied IP address is valid. Accepts an optional parameter of ‘ipv4’ or ‘ipv6’ to specify an IP format.
+ *
  */
 class Validate_valid_ip extends Validate_base {
-	public function validate(&$field, $options) {
+	public function validate(&$field, string $options = '') : bool
+	{
 		$this->error_string = '%s must contain a valid IP.';
+
 		$options = (!empty($options)) ? $options : 'ipv4';
-		return ci()->input->valid_ip($field, $options);
+
+		return (bool)ci()->input->valid_ip($field, $options);
 	}
 }

@@ -16,12 +16,15 @@
  * models:
  * helpers:
  * functions:
- * @help may only contain alpha-numeric characters.
+ *
+ * @help contains anything other than alpha-numeric characters.
  *
  */
 class Validate_alpha_numeric extends Validate_base {
-	public function validate(&$field, $options) {
+	public function validate(&$field, string $options = '') : bool
+	{
 		$this->error_string = '%s may only contain alpha-numeric characters.';
-		return ctype_alnum((string) $field);
+
+		return (bool) ctype_alnum((string) $field);
 	}
 }

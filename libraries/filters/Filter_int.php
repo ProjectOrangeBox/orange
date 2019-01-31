@@ -1,32 +1,41 @@
 <?php
 /**
- * Filter_int
- * Insert description here
+ * Orange
+ *
+ * An open source extensions for CodeIgniter 3.x
+ *
+ * This content is released under the MIT License (MIT)
+ * Copyright (c) 2014 - 2019, Project Orange Box
+ */
+
+/**
+ * Validation Filter
+ *
+ * @help filter for integer optional length
  *
  * @package CodeIgniter / Orange
  * @author Don Myers
- * @copyright 2018
+ * @copyright 2019
  * @license http://opensource.org/licenses/MIT MIT License
  * @link https://github.com/ProjectOrangeBox
- * @version 2.0
- *
- * required
- * core:
- * libraries:
- * models:
- * helpers:
- * functions:
+ * @version v2.0.0
  *
  */
+
 class Filter_int extends Filter_base {
-	public function filter(&$field, $options) {
+	
+	public function filter(&$field,string $options = '') : void
+	{
 		$pos = strpos($field, '.');
+		
 		if ($pos !== FALSE) {
 			$field = substr($field, 0, $pos);
 		}
+		
 		$field  = preg_replace('/[^\-\+0-9]+/', '', $field);
 		$prefix = ($field[0] == '-' || $field[0] == '+') ? $field[0] : '';
 		$field  = $prefix.preg_replace('/[^0-9]+/', '', $field);
 		$this->field($field)->length($options);
 	}
+
 }

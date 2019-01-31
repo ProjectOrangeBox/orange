@@ -17,10 +17,13 @@
  * helpers:
  * functions:
  *
+ * @help Does not match the field in the parameter.
+ *
  */
 class Validate_differs extends Validate_base {
-	public function validate(&$field, $options) {
+	public function validate(&$field, string $options = '') : bool
+	{
 		$this->error_string = '%s must differ from %s.';
-		return !($this->field_data[$field] === $this->field_data[$options]);
+		return !(isset($this->field_data[$options]) && $this->field_data[$options] === $field);
 	}
 }

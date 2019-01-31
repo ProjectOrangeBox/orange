@@ -1,18 +1,29 @@
 <?php
 /**
- * Orange Framework validation rule
+ * Orange
+ *
+ * An open source extensions for CodeIgniter 3.x
  *
  * This content is released under the MIT License (MIT)
+ * Copyright (c) 2014 - 2019, Project Orange Box
+ */
+
+/**
+ * Validation Filter
  *
- * @package	CodeIgniter / Orange
- * @author	Don Myers
+ * @help clean for use as human text optional length
+ *
+ * @package CodeIgniter / Orange
+ * @author Don Myers
+ * @copyright 2019
  * @license http://opensource.org/licenses/MIT MIT License
- * @link	https://github.com/ProjectOrangeBox
+ * @link https://github.com/ProjectOrangeBox
+ * @version v2.0.0
  *
- * @help clean for use as human text
  */
 class Filter_human extends Filter_base {
-	public function filter(&$field, $options) {
+	public function filter(&$field,string $options = '') : void
+	{
 		/*
 		only word characters - from a-z, A-Z, 0-9, including the _ (underscore) character
 		then trim any _ (underscore) characters from the beginning and end of the string

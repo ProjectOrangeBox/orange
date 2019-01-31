@@ -1,59 +1,128 @@
 <?php
 /**
- * Page
- * Insert description here
+ * Orange
+ *
+ * An open source extensions for CodeIgniter 3.x
+ *
+ * This content is released under the MIT License (MIT)
+ * Copyright (c) 2014 - 2019, Project Orange Box
+ */
+
+/**
+ * HTML Page Building
  *
  * @package CodeIgniter / Orange
  * @author Don Myers
- * @copyright 2018
+ * @copyright 2019
  * @license http://opensource.org/licenses/MIT MIT License
  * @link https://github.com/ProjectOrangeBox
- * @version 2.0
+ * @version v2.0.0
  *
- * required
- * core: load, output
- * libraries: event
- * models:
- * helpers:
- * functions: view
- * constants: PAGE_MIN
+ * @uses # load - CodeIgniter Loader
+ * @uses # output - CodeIgniter Output
+ * @uses # event - Orange Event
+ * @uses # Orange view(...)
+ *
+ * @config script_attributes `['src' => '', 'type' => 'text/javascript', 'charset' => 'utf-8']`
+ * @config link_attributes `['href' => '', 'type' => 'text/css', 'rel' => 'stylesheet']`
+ * @config domready_javascript `document.addEventListener("DOMContentLoaded",function(e){%%});`
+ * @config page_prefix `page_`
+ * @config page_ array of additional
+ * @config page_min boolean
+ *
+ * @define PAGE_MIN
  *
  */
-
-/* Follows Linux Priority negative values are higher priority and positive values are lower priority */
-define('EVENT_PRIORITY_LOWEST', 1);
-define('EVENT_PRIORITY_LOW', 20);
-define('EVENT_PRIORITY_NORMAL', 50);
-define('EVENT_PRIORITY_HIGH', 80);
-define('EVENT_PRIORITY_HIGHEST', 100);
-
 class Page {
-	protected $variables = [];
-	protected $default_template = '';
+	const PRIORITY_LOWEST = 10;
+	const PRIORITY_LOW = 20;
+	const PRIORITY_NORMAL = 50;
+	const PRIORITY_HIGH = 80;
+	const PRIORITY_HIGHEST = 90;
 
+	/**
+	 * storage for the page variables
+	 *
+	 * @var array
+	 */
+	protected $variables = [];
+
+	/**
+	 * the view path & name of the default template
+	 *
+	 * @var string
+	 */
+	protected $default_view = '';
+
+	/**
+	 * local storage of page's configuration
+	 *
+	 * @var array
+	 */
 	protected $config;
+
+	/**
+	 * CodeIgniter Loader Object
+	 *
+	 * @var object
+	 */
 	protected $load;
+
+	/**
+	 * CodeIgniter Output Object
+	 *
+	 * @var object
+	 */
 	protected $output;
+
+	/**
+	 * Orange Event Object
+	 *
+	 * @var object
+	 */
 	protected $event;
 
-	protected $page_variable_prefix;
+	/**
+	 * View variable prefix for all page variables
+	 *
+	 * @var string
+	 */
+	protected $page_variable_prefix = '';
+
+	/**
+	 * Storage for if the current view is extending another view?
+	 *
+	 * @var boolean | string
+	 */
 	protected $extending = false;
 
 	/**
-	 * __construct
+	 *
+	 * Constructor
+	 *
+	 * @access public
+	 *
+	 * @param array $config []
 	 *
 	 */
-	public function __construct(&$config=[]) {
+	public function __construct(array &$config=[])
+	{
 		$this->config = &$config;
 
 		$this->load = &ci('load');
 		$this->output = &ci('output');
 		$this->event = &ci('event');
 
-		/* if it's true then use the default else use what's in page_min config */
-		define('PAGE_MIN',(($this->config['page_min'] === true) ? '.min' : $this->config['page_min']));
+		$page_min = $this->config['page_min'];
 
-		$this->page_variable_prefix = ($this->config['page_prefix']) ?? 'page_';
+		if (is_bool($page_min)) {
+			$page_min = ($page_min == true) ? '.min' : '';
+		}
+
+		/* if it's true then use the default else use what's in page_min config */
+		define('PAGE_MIN',$page_min);
+
+		$this->page_variable_prefix = $this->config['page_prefix'] ?? 'page_';
 
 		$page_configs = $this->config[$this->page_variable_prefix];
 
@@ -75,38 +144,46 @@ class Page {
 	}
 
 	/**
-	 * set_default_template
 	 *
-	 * @param $template
+	 * Set the default view if a view is not provided in render
 	 *
-	 * @return $this
+	 * @access public
+	 *
+	 * @param string $template
+	 *
+	 * @return Page
 	 *
 	 */
-	public function set_default_template($template='') {
-		/* convert to file system safe */
-		$this->default_template = $template;
+	public function set_default_view(string $view = '') : Page
+	{
+		$this->default_view = $view;
 
 		return $this;
 	}
 
 	/**
-	 * render
-	 * basic view rendering
-	 * with:
-	 * default template if none included
-	 * event triggering
-	 * optionally extend another view
 	 *
-	 * @param $view string
-	 * @param $data array
+	 * Render view content string
+	 * optionally "extending" another "parent" template
 	 *
-	 * @return $this
+	 * @access public
+	 *
+	 * @param string $view null
+	 * @param array $data null
+	 *
+	 * @throws \Exception
+	 * @return Page
 	 *
 	 */
-	public function render($view = null, $data = null) {
+	public function render(string $view = null,array $data = null) : Page
+	{
 		log_message('debug', 'page::render::'.$view);
 
-		$view = ($view) ?? $this->default_template;
+		$view = ($view) ?? $this->default_view;
+
+		if ($view == null) {
+			throw new Exception('No View provided for page render.');
+		}
 
 		/* called everytime - use with caution */
 		$this->event->trigger('page.render',$this,$view);
@@ -141,10 +218,35 @@ class Page {
 	 * @return mixed
 	 *
 	 */
-	public function view($view_file = null, $data = null, $return = true) {
+	/**
+	 *
+	 * Pages View Rendering
+	 * using oranges most basic view function
+	 *
+	 * @access public
+	 *
+	 * @param string $view_file null
+	 * @param array $data null
+	 * @param $return true optionally a string which then inserts this into the view data array with this as it's variable name
+	 *
+	 * @throws \Exception
+	 * @return mixed
+	 *
+	 * #### Example
+	 * ```
+	 * ci('page')->view('folder/my_view',['name'=>'Johnny']);
+	 * ci('page')->view('folder/my_block',['name'=>'Johnny Appleseed'],'name_block');
+	 * ```
+	 */
+	public function view(string $view_file = null,array $data = null,$return = true)
+	{
 		$data = (is_array($data)) ? array_merge($this->load->get_vars(),$data) : $this->load->get_vars();
 
-		/* call core orange function view() */
+		/**
+		 * call core orange function view()
+		 *
+		 * Throws Exception if view not found.
+		 */
 		$buffer = view($view_file,$data);
 
 		if (is_string($return)) {
@@ -155,21 +257,29 @@ class Page {
 	}
 
 	/**
-	 * data
-	 * wrapper
 	 *
-	 * @param $name
-	 * @param $value
+	 * Insert view data
+	 * wrapper for CodeIgniters Loader
 	 *
-	 * @return $this
+	 * @access public
 	 *
+	 * @param $name string or array
+	 * @param $value null
+	 *
+	 * @return Page
+	 *
+	 * #### Example
+	 * ```
+	 * ci('page')->data('name','Johnny');
+	 * ci('page')->data(['name'=>'Johnny','age'=>23]);
+	 * ```
 	 */
-	public function data($name = null, $value = null) {
+	public function data($name,$value = null) : Page
+	{
 		$this->load->vars($name,$value);
 
 		return $this;
 	}
-
 
 	/**
 	 * extended
@@ -180,7 +290,26 @@ class Page {
 	 * @return $this
 	 *
 	 */
-	public function extend($template = null) {
+	/**
+	 *
+	 * Specify a additional template which will be loaded after the view template
+	 * this allows you to use a "base" template and extend it with your view
+	 * you may only extend 1 template.
+	 *
+	 * @access public
+	 *
+	 * @param string $template null
+	 *
+	 * @throws \Exception
+	 * @return Page
+	 *
+	 * #### Example
+	 * ```
+	 * ci('page')->extend('_templates/default');
+	 * ```
+	 */
+	public function extend(string $template = null) : Page
+	{
 		if ($this->extending) {
 			throw new Exception('You are already extending "'.$this->extending.'" therefore we cannot extend "'.$name.'".');
 		}
@@ -191,63 +320,97 @@ class Page {
 	}
 
 	/**
-	 * link_html
-	 * create and return html link
+	 *
+	 * Create the html for a link tag
 	 * <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
 	 *
-	 * @param $file
+	 * @access public
+	 *
+	 * @param string $file
 	 *
 	 * @return string
 	 *
+	 * #### Example
+	 * ```
+	 * $html = ci('page')->link_html('/assets/css/style.css');
+	 * ```
 	 */
-	public function link_html($file) {
+	public function link_html(string $file) : string
+	{
 		return $this->ary2element('link', array_merge($this->config['link_attributes'],['href' => $file]));
 	}
 
 	/**
-	 * script_html
-	 * create and return html script
+	 *
+	 * Create the html for a script tag
 	 * <script src="//cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.11/handlebars.min.js"></script>
 	 *
-	 * @param $file
+	 * @access public
 	 *
+	 * @param string $file
+	 *
+	 * @throws
 	 * @return string
 	 *
+	 * #### Example
+	 * ```
+	 *
+	 * ```
 	 */
-	public function script_html($file) {
-		return $this->ary2element('script', array_merge($this->config['script_attributes'], ['src' => $file]),'');
+	public function script_html(string $file) : string
+	{
+		return $this->ary2element('script',array_merge($this->config['script_attributes'],['src' => $file]));
 	}
 
 	/**
-	 * ary2element
-	 * Insert description here
 	 *
-	 * @param $element
-	 * @param $attributes
-	 * @param $wrapper
+	 * Convert a key value pair array into html attributes
 	 *
+	 * @access public
+	 *
+	 * @param string $element
+	 * @param array $attributes
+	 * @param $content false
+	 *
+	 * @throws
 	 * @return string
 	 *
+	 * #### Example
+	 * ```
+	 * $html = ci('page')->ary2element('a',['class'=>'bold','id'=>'id3'],'link!');
+	 * ```
 	 */
-	public function ary2element($element, $attributes, $wrapper = false) {
-		$output = '<'.$element._stringify_attributes($attributes);
+	public function ary2element(string $element,array $attributes,string $content = '') : string
+	{
+		/* uses CodeIgniter Common.php _stringify_attributes function */
 
-		return ($wrapper === false) ? $output.'/>' : $output.'>'.$wrapper.'</'.$element.'>';
+		return (in_array($element,['area','base','br','col','embed','hr','img','input','link','meta','param','source','track','wbr'])) ?
+			'<'.$element._stringify_attributes($attributes).'/>' :
+			'<'.$element._stringify_attributes($attributes).'>'.$content.'</'.$element.'>';
 	}
 
 	/**
-	 * meta
+	 *
+	 * Add a meta tag to the view variable
 	 * <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
 	 *
+	 * @access public
+	 *
 	 * @param $attr
-	 * @param $name
-	 * @param $content
-	 * @param $priority integer
+	 * @param string $name null
+	 * @param string $content null
+	 * @param int $priority PAGE::PRIORITY_NORMAL
 	 *
-	 * @return $this
+	 * @throws
+	 * @return Page
 	 *
+	 * #### Example
+	 * ```
+	 * ci('page')->meta('charset','UTF-8');
+	 * ```
 	 */
-	public function meta($attr, $name, $content = null,$priority = EVENT_PRIORITY_NORMAL) {
+	public function meta($attr,string $name = null,string $content = null,int $priority = PAGE::PRIORITY_NORMAL) : Page
+	{
 		if (is_array($attr)) {
 			extract($attr);
 		}
@@ -256,71 +419,109 @@ class Page {
 	}
 
 	/**
-	 * script
-	 * <script>*</script>
 	 *
-	 * @param $script
-	 * @param $priority integer
+	 * Add javascript to the page script view variable
 	 *
-	 * @return $this
+	 * @access public
 	 *
+	 * @param string $script
+	 * @param int $priority PAGE::PRIORITY_NORMAL
+	 *
+	 * @return Page
+	 *
+	 * #### Example
+	 * ```
+	 * ci('page')->script('alert("Page Ready!");');
+	 * ```
 	 */
-	public function script($script,$priority = EVENT_PRIORITY_NORMAL) {
+	public function script(string $script,int $priority = PAGE::PRIORITY_NORMAL) : Page
+	{
 		return $this->add('script',$script.PHP_EOL,$priority);
 	}
 
 	/**
-	 * domready
-	 * <script>%%*%%</script>
 	 *
-	 * @param $script
-	 * @param $priority integer
+	 * Add domready javascript to the page domready view variable
 	 *
-	 * @return $this
+	 * @access public
 	 *
+	 * @param string $script
+	 * @param int $priority PAGE::PRIORITY_NORMAL
+	 *
+	 * @return Page
+	 *
+	 * #### Example
+	 * ```
+	 * ci('page')->domready('alert("Page Ready!");');
+	 * ```
 	 */
-	public function domready($script,$priority = EVENT_PRIORITY_NORMAL) {
+	public function domready(string $script,int $priority = PAGE::PRIORITY_NORMAL) : Page
+	{
 		return $this->add('domready',$script.PHP_EOL,$priority);
 	}
 
 	/**
-	 * title
-	 * <title>*</title>
 	 *
-	 * @param $title
+	 * Add Title to the page title view variable
 	 *
-	 * @return $this
+	 * @access public
 	 *
+	 * @param string $title
+	 * @param int $priority PAGE::PRIORITY_NORMAL
+	 *
+	 * @return Page
+	 *
+	 * #### Example
+	 * ```
+	 * ci('page')->title('My Web Page');
+	 * ```
 	 */
-	public function title($title = '',$priority = EVENT_PRIORITY_NORMAL) {
+	public function title(string $title = '',int $priority = PAGE::PRIORITY_NORMAL) : Page
+	{
 		return $this->add('title',$title,$priority);
 	}
 
 	/**
-	 * style
-	 * <style>*</style>
 	 *
-	 * @param $style
-	 * @param $priority integer
+	 * Add css to the page style view variable
 	 *
-	 * @return $this
+	 * @access public
 	 *
+	 * @param string $style
+	 * @param int $priority PAGE::PRIORITY_NORMAL
+	 *
+	 * @return Page
+	 *
+	 * #### Example
+	 * ```
+	 * ci('page')->style('. { font-size: 9px }');
+	 * ```
 	 */
-	public function style($style,$priority = EVENT_PRIORITY_NORMAL) {
+	public function style(string $style,int $priority = PAGE::PRIORITY_NORMAL) : Page
+	{
 		return $this->add('style',$style.PHP_EOL,$priority);
 	}
 
 	/**
-	 * js
-	 * <script src="*"></script>
 	 *
-	 * @param $file
-	 * @param $priority integer
+	 * Add a script tag to the view variable
+	 * <script ...></script>
 	 *
-	 * @return $this
+	 * @access public
 	 *
+	 * @param string $script
+	 * @param int $priority PAGE::PRIORITY_NORMAL
+	 *
+	 * @return Page
+	 *
+	 * #### Example
+	 * ```
+	 * ci('page')->script('/assets/javascript.js');
+	 * ci('page')->script('/assets/javascript.js',PAGE::PRIORITY_HIGHEST);
+	 * ```
 	 */
-	public function js($file = '',$priority = EVENT_PRIORITY_NORMAL) {
+	public function js($file = '',int $priority = PAGE::PRIORITY_NORMAL) : Page
+	{
 		if (is_array($file)) {
 			foreach ($file as $f) {
 				$this->js($f,$priority);
@@ -332,16 +533,24 @@ class Page {
 	}
 
 	/**
-	 * css
-	 * <link href="*" rel="stylesheet">
+	 *
+	 * Add a link tag to the view variable
+	 * <link ... />
+	 *
+	 * @access public
 	 *
 	 * @param $file
-	 * @param $priority integer
+	 * @param int $priority PAGE::PRIORITY_NORMAL
 	 *
-	 * @return $this
+	 * @return Page
 	 *
+	 * #### Example
+	 * ```
+	 * ci('page')->css('/assets/application.cs');
+	 * ```
 	 */
-	public function css($file = '',$priority = EVENT_PRIORITY_NORMAL) {
+	public function css($file = '',int $priority = PAGE::PRIORITY_NORMAL) : Page
+	{
 		if (is_array($file)) {
 			foreach ($file as $f) {
 				$this->css($f,$priority);
@@ -353,39 +562,26 @@ class Page {
 	}
 
 	/**
-	 * tag
-	 * Add any html tag to and page variable
 	 *
-	 * Unpaired html tag
-	 * tag('link',['rel'=>'icon','type'=>'image/x-icon','href'=>'/asset/image.jpg'],50)
-	 * <link rel="icon" type="image/x-icon" href="/asset/image.jpg"/>
+	 * Add a Javascript variable to the view variable
 	 *
-	 * Paired html tag w/content
-	 * element('p',['class'=>'highlight','id'=>'pid3'],'This is important!',50)
-	 * <p class="highlight" id="pid3">This is important!</p>
+	 * @access public
 	 *
-	 */
-	public function tag($name,$attributes,$content = false,$priority = EVENT_PRIORITY_NORMAL) {
-		if (func_num_args() == 3 && is_integer($content)) {
-			$priority = $content;
-			$content = false;
-		}
-
-		return $this->add($name,$this->ary2element($name,$attributes,$content),$priority);
-	}
-
-	/**
-	 * js_variable
-	 * <script>*</script>
-	 *
-	 * @param $key
+	 * @param string $key
 	 * @param $value
-	 * @param $priority integer
+	 * @param int $priority PAGE::PRIORITY_NORMAL
+	 * @param bool $raw false
 	 *
-	 * @return $this
+	 * @return Page
 	 *
+	 * #### Example
+	 * ```
+	 * ci('page')->js_variable('name','Johnny Appleseed');
+	 * ci('page')->js_variable('name','{name: "Johnny Appleseed"}',PAGE::PRIORITY_NORMAL,true);
+	 * ```
 	 */
-	public function js_variable($key,$value,$priority = EVENT_PRIORITY_NORMAL,$raw = false) {
+	public function js_variable(string $key,$value,int $priority = PAGE::PRIORITY_NORMAL,bool $raw = false) : Page
+	{
 		if ($raw) {
 			$value = 'var '.$key.'='.$value.';' ;
 		} else {
@@ -396,15 +592,23 @@ class Page {
 	}
 
 	/**
-	 * js_variables
-	 * <script>*</script>
 	 *
-	 * @param $array
+	 * Add a Javascript variables to the view variable
 	 *
-	 * @return $this
+	 * @access public
 	 *
+	 * @param array $array
+	 *
+	 * @throws
+	 * @return Page
+	 *
+	 * #### Example
+	 * ```
+	 * ci('page')->js_variables(['name'=>'Johnny','age'=>23]);
+	 * ```
 	 */
-	public function js_variables($array) {
+	public function js_variables(array $array) : Page
+	{
 		foreach ($array as $k => $v) {
 			$this->js_variable($k, $v);
 		}
@@ -413,32 +617,48 @@ class Page {
 	}
 
 	/**
-	 * body_class
-	 * class="*"
+	 *
+	 * Add a class variable to the body class view variable
+	 *
+	 * @access public
 	 *
 	 * @param $class
-	 * @param $priority integer
+	 * @param int $priority PAGE::PRIORITY_NORMAL
 	 *
-	 * @return $this
+	 * @return Page
 	 *
+	 * #### Example
+	 * ```
+	 * ci('page')->body_class('body-wrapper');
+	 * ci('page')->body_class('body-wrapper o-theme');
+	 * ci('page')->body_class(['body-wrapper','o-theme']);
+	 * ```
 	 */
-	public function body_class($class,$priority = EVENT_PRIORITY_NORMAL) {
+	public function body_class($class,int $priority = PAGE::PRIORITY_NORMAL) : Page
+	{
 		return (is_array($class)) ? $this->_body_class($class,$priority) : $this->_body_class(explode(' ',$class),$priority);
 	}
 
 	/**
-	 * add
-	 * append to page variable with optional priority & duplicate prevention
 	 *
-	 * @param $name
-	 * @param $value
-	 * @param $priority default 50 the LOWER the number the higher priority
-	 * @param $prevent_duplicates (True/False)
+	 * Add a variable to the view variables
 	 *
-	 * @return $this
+	 * @access public
 	 *
+	 * @param string $name
+	 * @param string $value
+	 * @param int $priority PAGE::PRIORITY_NORMAL
+	 * @param bool $prevent_duplicates true
+	 *
+	 * @return Page
+	 *
+	 * #### Example
+	 * ```
+	 * ci('page')->add('custom_var','<p>Custom Stuff!</p>');
+	 * ```
 	 */
-	public function add($name,$value,$priority = EVENT_PRIORITY_NORMAL,$prevent_duplicates = true) {
+	public function add(string $name,string $value,int $priority = PAGE::PRIORITY_NORMAL,bool $prevent_duplicates = true) : Page
+	{
 		$key = md5($value);
 
 		if (!isset($this->variables[$name][3][$key]) || !$prevent_duplicates) {
@@ -452,19 +672,51 @@ class Page {
 	}
 
 	/**
-	 * var
-	 * retrieve a page variable (with "post" priority processing)
-	 * included page variables: title, meta, body_class, css, style, js, script, js_variables, script, domready
-	 * any additional "tags"
 	 *
-	 * @param $name
+	 * Wrapper for var because that is a Reserved Word and throws errors with some PHP analyzers
+	 *
+	 * @access public
+	 *
+	 * @param string $name
+	 * @param array $arguments []
+	 *
+	 * @throws \Exception
+	 * @return mixed
+	 *
+	 * #### Example
+	 * ```
+	 * ci('page')->var('script');
+	 * ```
+	 */
+	public function __call(string $name,array $arguments = [])
+	{
+		if ($name == 'var') {
+			return $this->_var($arguments[0]);
+		}
+
+		throw new Exception('Page Method '.$name.' unsupported.');
+	}
+
+	/**
+	 *
+	 * Retrieve a page variable (with "post" priority processing)
+	 * included page variables: title, meta, body_class, css, style, js, script, js_variables, script, domready
+	 *
+	 * @access public
+	 *
+	 * @param string $name
 	 *
 	 * @return string
 	 *
+	 * #### Example
+	 * ```
+	 * $script_html = ci('page')->var('script');
+	 * ```
 	 */
-	public function var($name) {
+	public function _var(string $name) : string
+	{
 		$html = $this->load->get_var($name);
-		
+
 		/* if it's empty than maybe is it a page variable? */
 		if (empty($html)) {
 			$html = $this->load->get_var($this->page_variable_prefix.$name);
@@ -489,7 +741,20 @@ class Page {
 		return trim($html);
 	}
 
-	protected function _body_class($class,$priority) {
+	/**
+	 *
+	 * Internal body class handler
+	 *
+	 * @access protected
+	 *
+	 * @param array $class
+	 * @param int $priority
+	 *
+	 * @return Page
+	 *
+	 */
+	protected function _body_class(array $class,int $priority) : Page
+	{
 		foreach ($class as $c) {
 			$this->add('body_class',' '.strtolower(trim($c)),$priority);
 		}

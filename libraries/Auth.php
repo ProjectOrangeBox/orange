@@ -1,24 +1,55 @@
 <?php
 /**
- * Auth
- * Insert description here
+ * Orange
+ *
+ * An open source extensions for CodeIgniter 3.x
+ *
+ * This content is released under the MIT License (MIT)
+ * Copyright (c) 2014 - 2019, Project Orange Box
+ */
+
+/**
+ * Authorization class.
+ *
+ * Handles login, logout, refresh user data
  *
  * @package CodeIgniter / Orange
  * @author Don Myers
- * @copyright 2018
+ * @copyright 2019
  * @license http://opensource.org/licenses/MIT MIT License
  * @link https://github.com/ProjectOrangeBox
- * @version 2.0
+ * @version v2.0.0
  *
- * required
- * core: load, session
- * libraries: event, errors
- * models: o_user_model
- * helpers:
- * functions:
- * constants: NOBODY_USER_ID, ADMIN_ROLE_ID
+ * @uses # \o_user_model - Orange User Model 
+ * @uses # \session - CodeIgniter Session 
+ * @uses # \event - Orange event
+ * @uses # \errors - Orange errors
+ * @uses # \controller - CodeIgniter Controller
+ * @uses # \output - CodeIgniter Output
  *
- * @help Authorization class
+ * @config username min length `8` 
+ * @config username max length `32` 
+ * @config password regex `/((?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,32})/` 
+ * @config password copy `Password must be at least: 8 characters, 1 upper, 1 lower case letter, 1 number, Less than 32 characters.` 
+ * @config admin user id `1` 
+ * @config admin role id `1` 
+ * @config nobody user id `2` 
+ * @config nobody role id `2` 
+ * @config everyone role id `3` 
+ * @config login h2 `Please Sign in<h4>Using your Windows Login</h4>` 
+ * @config username field `Login` 
+ * @config empty fields error `Please enter your login credentials.` 
+ * @config general failure error `Incorrect Login and/or Password.` 
+ * @config account not active error `Your account is not active.` 
+ * @config user table `orange_users` 
+ * @config user role table `orange_user_role` 
+ * @config role table `orange_roles` 
+ * @config role permission table `orange_role_permission` 
+ * @config permission table `orange_permissions` 
+ *
+ * @define NOBODY_USER_ID
+ * @define ADMIN_ROLE_ID
+ *
  */
 class Auth {
 	/**
@@ -27,15 +58,60 @@ class Auth {
 	 * @var string
 	 */
 	protected $session_key = 'user::data';
+	
+	/**
+	 * Auth configuration array
+	 *
+	 * @var array
+	 */
 	protected $config;
+	
+	/**
+	 * CodeIgniter Session Object
+	 *
+	 * @var array
+	 */
 	protected $session;
+
+	/**
+	 * CodeIgniter Event Object
+	 *
+	 * @var array
+	 */	
 	protected $event;
+
+	/**
+	 * Orange Errors Object
+	 *
+	 * @var array
+	 */	
 	protected $errors;
+
+	/**
+	 * CodeIgniter Controller (active)
+	 *
+	 * @var array
+	 */	
 	protected $controller;
 
+	/**
+	 * Orange User Model
+	 *
+	 * @var array
+	 */
 	protected $user_model;
 
-	public function __construct(&$config=[]) {
+	/**
+	 *
+	 * Constructor
+	 *
+	 * @access public
+	 *
+	 * @param array $config []
+	 *
+	 */
+	public function __construct(array &$config=[])
+	{
 		$this->config = &$config;
 
 		$this->session = &ci('session');
@@ -74,18 +150,20 @@ class Auth {
 		log_message('info', 'Auth Class Initialized');
 	}
 
-/**
- * Perform a login using email and password
- *
- * @param $email string
- * @param $password string
- *
- * @return boolean
- *
- * @access public
- *
- */
-	public function login($user_identifier, $password) {
+	/**
+	 *
+	 * Perform a login using email and password
+	 *
+	 * @access public
+	 *
+	 * @param string $user_identifier
+	 * @param string $password
+	 *
+	 * @return Bool
+	 *
+	 */
+	public function login(string $user_identifier,string $password) : Bool
+	{
 		$success = $this->_login($user_identifier, $password);
 
 		$this->event->trigger('auth.login', $user_identifier, $success);
@@ -95,37 +173,46 @@ class Auth {
 		return $success; /* boolean */
 	}
 
-/**
- * Perform a logout
- *
- * @return boolean
- *
- * @access public
- *
- */
-	public function logout() {
-		$this->event->trigger('auth.logout');
-
-		$this->refresh_userdata(NOBODY_USER_ID);
-
+	/**
+	 *
+	 * Perform a logout
+	 *
+	 * @access public
+	 *
+	 * @return Bool
+	 *
+	 */
+	public function logout() : Bool
+	{
 		log_message('info', 'Auth Class logout');
 
-		return true;
+		$success = true;
+		$switch_to = NOBODY_USER_ID;
+		
+		$this->event->trigger('auth.logout',$success,$switch_to);
+
+		if ($success) {
+			$this->refresh_userdata($switch_to);
+		}
+
+		return $success;
 	}
 
-/**
- * Refresh the current user profile based on a user id
- * you can optionally save it to the current session
- *
- * @param $user_identifier integer
- * @param $save_session boolean
- *
- * @return integer
- *
- * @access public
- *
- */
-	public function refresh_userdata($user_identifier,$save_session=true) {
+	/**
+	 *
+	 * Refresh the current user profile based on a user id
+	 * you can optionally save it to the current session
+	 *
+	 * @access public
+	 *
+	 * @param String $user_identifier
+	 * @param Bool $save_session true
+	 *
+	 * @return String
+	 *
+	 */
+	public function refresh_userdata(String $user_identifier,Bool $save_session = true) : String
+	{
 		log_message('debug', 'Auth::refresh_userdata::'.$user_identifier);
 
 		$user_identifier = (!empty($user_identifier)) ? $user_identifier : NOBODY_USER_ID;
@@ -151,20 +238,23 @@ class Auth {
 
 		log_message('info', 'Auth Class Refreshed');
 
-		return $user_identifier; /* integer */
+		return (string)$user_identifier;
 	}
 
-/**
- * Do actual login with multiple levels of validation
- *
- * @param $login string
- * @param $password string
- *
- * @return boolean
- *
- * @access protected
- */
-	protected function _login($login, $password) {
+	/**
+	 *
+	 * Do actual login with multiple levels of validation
+	 *
+	 * @access protected
+	 *
+	 * @param String $login
+	 * @param String $password
+	 *
+	 * @return Bool
+	 *
+	 */
+	protected function _login(String $login,String $password) : Bool
+	{
 		/* Does login and password contain anything empty values are NOT permitted for any reason */
 		if ((strlen(trim($login)) == 0) or (strlen(trim($password)) == 0)) {
 			$this->errors->add($this->config['empty fields error']);
@@ -217,4 +307,5 @@ class Auth {
 
 		return true;
 	}
-}
+
+} /* end class */

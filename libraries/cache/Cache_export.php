@@ -1,49 +1,78 @@
 <?php
 /**
+ * Orange
+ *
+ * An open source extensions for CodeIgniter 3.x
+ *
+ * This content is released under the MIT License (MIT)
+ * Copyright (c) 2014 - 2019, Project Orange Box
+ */
+
+/**
  * Cache_export
- * Insert description here
+ *
+ * File based cached which stores in a very extremely fast loadable way.
  *
  * @package CodeIgniter / Orange
  * @author Don Myers
- * @copyright 2018
+ * @copyright 2019
  * @license http://opensource.org/licenses/MIT MIT License
  * @link https://github.com/ProjectOrangeBox
- * @version 2.0
+ * @version v2.0.0
  *
- * required
- * core:
- * libraries:
- * models:
- * helpers:
- * functions:
+ * @uses input Input
+ * @uses # remove_php_file_from_opcache(...)
  *
- * @help Cache as file using var_export
+ * @config cache_path `ROOTPATH.'/var/cache/'`
+ * @config cache_default `dummy`
+ * @config cache_backup `dummy`
+ * @config cache_ttl `60`
+ * @config key_prefix `cache.`
+ * @config cache_allowed `['192.168.2.123','192.168.2.124']` array of except-able IPs
+ * @config encryption_key `30193e8de97f49de586d740f93403dea`
+ * @config cache_servers `['192.168.2.123','192.168.2.124']` array of other servers
+ * @config cache_server_secure `true`
+ * @config cache_url `http://www.example.com/api/cache/`
+ *
  */
 class Cache_export extends CI_Driver {
 	/**
-	 * track if the combined cached configuration has been loaded
+	 * Configuration array
 	 *
-	 * @var boolean
+	 * @var array
 	 */
 	protected $config = [];
 
+	/**
+	 * Parent Cache Class
+	 *
+	 * @var \Cache
+	 */
 	protected $parent;
-	protected $input;
 
 	/**
-	 * __construct
-	 * Insert description here
+	 * CodeIgniter Input
 	 *
-	 * @param $cache_config
-	 *
-	 * @return
-	 *
-	 * @access
-	 * @static
-	 * @throws
-	 * @example
+	 * @var \Input
 	 */
-	public function __construct(&$config,&$parent) {
+	protected $input;
+	
+	/**
+	 * suffix all export cache file have
+	 *
+	 * @var array
+	 */
+	protected $suffix = '.export.php';
+
+	/**
+	 *
+	 * Constructor
+	 *
+	 * @param array &$config
+	 * @param Cache &$parent
+	 *
+	 */
+	public function __construct(array &$config,Cache &$parent) {
 		$this->config = &$config;
 		$this->parent = &$parent;
 
@@ -51,27 +80,27 @@ class Cache_export extends CI_Driver {
 	}
 
 	/**
-	 * get
-	 * Insert description here
 	 *
-	 * @param $id
+	 * fetch an item from the cache store.
+	 * If the item does not exist, the method will return FALSE.
 	 *
-	 * @return
+	 * @access public
 	 *
-	 * @access
-	 * @static
-	 * @throws
-	 * @example
+	 * @param string $id
+	 *
+	 * @return mixed
+	 *
 	 */
-	public function get($id) {
+	public function get(string $id)
+	{
 		$get = false;
 
-		if (file_exists($this->config['cache_path'].$id.'.meta.php') && file_exists($this->config['cache_path'].$id.'.php')) {
+		if (file_exists($this->config['cache_path'].$id.'.meta'.$this->suffix) && file_exists($this->config['cache_path'].$id.$this->suffix)) {
 			$meta = $this->get_metadata($id);
 			if (time() > $meta['expire']) {
 				$this->delete($id);
 			} else {
-				$get = include $this->config['cache_path'].$id.'.php';
+				$get = include $this->config['cache_path'].$id.$this->suffix;
 			}
 		}
 
@@ -79,100 +108,128 @@ class Cache_export extends CI_Driver {
 	}
 
 	/**
-	 * save
-	 * Insert description here
 	 *
-	 * @param $id
+	 * Save an item to the cache store.
+	 * If saving fails, the method will return FALSE.
+	 * If include is true then return it
+	 *
+	 * @access public
+	 *
+	 * @param string $id
 	 * @param $data
-	 * @param $ttl
-	 * @param $include
+	 * @param int $ttl null
+	 * @param bool $include false
 	 *
-	 * @return
+	 * @throw \Exception
+	 * @return mixed
 	 *
 	 */
-	public function save($id, $data, $ttl = null, $include = false) {
+	public function save(string $id,$data,int $ttl = null,bool $include = false)
+	{
 		$ttl = ($ttl) ? $ttl : $this->parent->ttl();
 
 		if (is_array($data) || is_object($data)) {
 			$data = '<?php return '.str_replace('stdClass::__set_state','(object)',var_export($data, true)).';';
+		} elseif (is_scalar($data)) {
+			$data = '<?php return "'.str_replace('"','\"',$data).'";';
+		} else {
+			throw new Exception('Cache export save unknown data type.');
 		}
 
-		atomic_file_put_contents($this->config['cache_path'].$id.'.meta.php', '<?php return '.var_export(['strlen' => strlen($data), 'time' => time(), 'ttl' => (int) $ttl, 'expire' => (time() + $ttl)], true).';');
-		
-		$save = (atomic_file_put_contents($this->config['cache_path'].$id.'.php', $data)) ? true : false;
+		atomic_file_put_contents($this->config['cache_path'].$id.'.meta'.$this->suffix, '<?php return '.var_export(['strlen' => strlen($data), 'time' => time(), 'ttl' => (int) $ttl, 'expire' => (time() + $ttl)], true).';');
 
-		if ($include) {
-			$save = include $this->config['cache_path'].$id.'.php';
+		$save = (atomic_file_put_contents($this->config['cache_path'].$id.$this->suffix, $data)) ? true : false;
+
+		if ($include && $save) {
+			$save = include $this->config['cache_path'].$id.$this->suffix;
 		}
 
 		return $save;
 	}
 
 	/**
-	 * delete
-	 * Insert description here
 	 *
-	 * @param $id
+	 * Delete cache based on key
 	 *
-	 * @return
+	 * @access public
+	 *
+	 * @param string $id
+	 *
+	 * @return bool
 	 *
 	 */
-	public function delete($id) {
+	public function delete(string $id) : bool
+	{
 		return (isset($this->config['cache_multiple_servers'])) ? $this->multi_delete($id) : $this->single_delete($id);
 	}
 
 	/**
+	 *
 	 * increment - unsupported
 	 *
-	 * @param $id - unsupported
-	 * @param $offset - unsupported
+	 * @access public
 	 *
-	 * @return boolean
+	 * @param string $id - unsupported
+	 * @param int $offset 1 - unsupported
+	 *
+	 * @return bool
 	 *
 	 */
-	public function increment($id, $offset = 1) {
+	public function increment(string $id,int $offset = 1) : bool
+	{
 		return false;
 	}
 
 	/**
+	 *
 	 * decrement - unsupported
 	 *
-	 * @param $id - unsupported
-	 * @param $offset - unsupported
+	 * @access public
 	 *
-	 * @return boolean
+	 * @param string $id - unsupported
+	 * @param int $offset 1 - unsupported
+	 *
+	 * @return bool
 	 *
 	 */
-	public function decrement($id, $offset = 1) {
+	public function decrement(string $id,int $offset = 1) : bool
+	{
 		return false;
 	}
 
 	/**
-	 * clean - unsupported
 	 *
-	 * @return boolean
+	 * clean
+	 *
+	 * @access public
+	 *
+	 * @return bool
+	 *
 	 */
-	public function clean() {
-		array_map('unlink',glob($this->config['cache_path'].'*.php'));
-		
+	public function clean() : bool
+	{
+		array_map('unlink',glob($this->config['cache_path'].'*'.$this->suffix));
+
 		return true;
 	}
 
 	/**
-	 * cache info
 	 *
-	 * @param $type - unsupported
+	 * Get the cache info.
+	 *
+	 * @access public
 	 *
 	 * @return array
 	 *
 	 */
-	public function cache_info() {
+	public function cache_info() : array
+	{
 		$info = [];
-		
-		foreach (glob($this->config['cache_path'].'*.meta.php') as $path) {
-			$id = basename($path,'.meta.php');
+
+		foreach (glob($this->config['cache_path'].'*.meta'.$this->suffix) as $path) {
+			$id = basename($path,'.meta'.$this->suffix);
 			$metadata = $this->get_metadata($id);
-			
+
 			$info[$id] = [
 				'name'=>realpath($path),
 				'server_path'=>$path,
@@ -180,81 +237,99 @@ class Cache_export extends CI_Driver {
 				'expires'=>$metadata['expire'],
 				'created'=>$metadata['time'],
 				'ttl'=>$metadata['ttl'],
-				'meta'=>$id.'.meta.php',
-				'cache'=>$id.'.php',
+				'meta'=>$id.'.meta'.$this->suffix,
+				'cache'=>$id.$this->suffix,
 			];
 		}
-		
+
 		return $info;
 	}
 
 	/**
+	 *
 	 * Return detailed information on a specific item in the cache.
 	 *
-	 * @param $id string - Cache item name
+	 * @access public
 	 *
-	 * @return mixed - Metadata for the cached item
+	 * @param string $id
+	 *
+	 * @return mixed
 	 *
 	 */
-	public function get_metadata($id) {
-		return (!is_file($this->config['cache_path'].$id.'.meta.php') || !is_file($this->config['cache_path'].$id.'.php')) ? FALSE : include $this->config['cache_path'].$id.'.meta.php';
+	public function get_metadata(string $id)
+	{
+		return (!is_file($this->config['cache_path'].$id.'.meta'.$this->suffix) || !is_file($this->config['cache_path'].$id.$this->suffix)) ? FALSE : include $this->config['cache_path'].$id.'.meta'.$this->suffix;
 	}
 
 	/**
-	 * Is support
 	 *
-	 * @return boolean
+	 * Is this caching driver supported on the system?
+	 * Of course this one is.
+	 *
+	 * @access public
+	 *
+	 * @return bool
 	 *
 	 */
-	public function is_supported() {
-		return TRUE;
+	public function is_supported() : bool
+	{
+		return true;
 	}
 
 	/**
-	 * endpoint_delete
-	 * Insert description here
 	 *
-	 * @param $request
+	 * Handle cache delete request from another server
 	 *
-	 * @return
+	 * @access public
 	 *
-	 * @access
-	 * @static
-	 * @throws
-	 * @example ci('cache')->export->endpoint_delete($request);
+	 * @param string $request
+	 *
+	 * @return void
+	 *
+	 * #### Example
+	 * ```
+	 * In the receiving controller end point
+	 * ci('cache')->export->endpoint_delete($request);
+	 * ```
 	 */
-	public function endpoint_delete($request) {
+	public function endpoint_delete(string $request) : void
+	{
 		if (!in_array($this->input->ip_address(), $this->config['cache_allowed'])) {
 			exit(13);
 		}
 
 		list($hmac, $id) = explode(chr(0), hex2bin($request));
 
-		if (md5( $this->config['encryption_key'].$id) !== $hmac) {
+		if (md5($this->config['encryption_key'].$id) !== $hmac) {
 			exit(13);
 		}
 
 		$this->single_delete($id);
+
 		echo $request;
+
 		exit(200);
 	}
 
 	/**
-	 * cache
-	 * Insert description here
 	 *
-	 * @param $key
-	 * @param $closure
-	 * @param $ttl
+	 * Wrapper function to use this library in a closure fashion
 	 *
-	 * @return
+	 * @access public
 	 *
-	 * @access
-	 * @static
-	 * @throws
-	 * @example
+	 * @param string $key
+	 * @param callable $closure
+	 * @param int $ttl null
+	 *
+	 * @return mixed
+	 *
+	 * #### Example
+	 * ```
+	 * $cached = ci('cache')->export->cache('foobar',function(){ return 'cache me for 60 seconds!' },60);
+	 * ```
 	 */
-	public function cache($key, $closure, $ttl = null) {
+	public function cache(string $key,callable $closure,int $ttl = null)
+	{
 		if (!$cache = $this->get($key)) {
 			$ci = ci();
 			$cache = $closure($ci);
@@ -265,49 +340,47 @@ class Cache_export extends CI_Driver {
 	}
 
 	/**
-	 * single_delete
-	 * Insert description here
 	 *
-	 * @param $id
+	 * Preform a cache key delete
 	 *
-	 * @return
+	 * @access protected
 	 *
-	 * @access
-	 * @static
-	 * @throws
-	 * @example
+	 * @param string $id
+	 *
+	 * @return bool
+	 *
 	 */
-	protected function single_delete($id) {
-		$php_file = $this->config['cache_path'].$id.'.php';
-		$meta_file = $this->config['cache_path'].$id.'.meta.php';
-		
+	protected function single_delete(string $id) : bool
+	{
+		$php_file = $this->config['cache_path'].$id.$this->suffix;
+		$meta_file = $this->config['cache_path'].$id.'.meta'.$this->suffix;
+
 		if (file_exists($php_file)) {
 			$php_file_deleted = unlink($php_file);
 			remove_php_file_from_opcache($php_file);
 		}
-		
+
 		if (file_exists($meta_file)) {
 			$meta_file_deleted = unlink($meta_file);
 			remove_php_file_from_opcache($meta_file);
 		}
-		
+
 		return ($php_file_deleted || $meta_file_deleted);
 	}
 
 	/**
-	 * multi_delete
-	 * Insert description here
 	 *
-	 * @param $id
+	 * Handle calling the other servers to tell them to delete a cache key
 	 *
-	 * @return boolean
+	 * @access protected
 	 *
-	 * @access
-	 * @static
-	 * @throws
-	 * @example ci('cache')->export->multi_delete($key);
+	 * @param string $id
+	 *
+	 * @return bool
+	 *
 	 */
-	protected function multi_delete($id) {
+	protected function multi_delete(string $id) : bool
+	{
 		/* get the array of other servers */
 		$cache_servers =  $this->config['cache_servers'];
 

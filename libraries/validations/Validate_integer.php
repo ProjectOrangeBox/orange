@@ -17,10 +17,14 @@
  * helpers:
  * functions:
  *
+ * @help contains anything other than an integer.
+ *
  */
 class Validate_integer extends Validate_base {
-	public function validate(&$field, $options) {
+	public function validate(&$field, string $options = '') : bool
+	{
 		$this->error_string = '%s is not a integer.';
+
 		return (bool) preg_match('/^[\-+]?[0-9]+$/', $field);
 	}
 }

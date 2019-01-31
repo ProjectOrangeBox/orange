@@ -17,10 +17,14 @@
  * helpers:
  * functions:
  *
+ * @help matches the field in the parameter.
+ *
  */
 class Validate_matches extends Validate_base {
-	public function validate(&$field, $options) {
+	public function validate(&$field, string $options = '') : bool
+	{
 		$this->error_string = '%s does not match %s.';
-		return isset($this->field_data[$options]) ? ($field === $this->field_data[$options]) : false;
+
+		return isset($this->field_data[$options]) ? ($field === $this->field_data[$options]) : FALSE;
 	}
 }

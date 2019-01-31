@@ -16,12 +16,15 @@
  * models:
  * helpers:
  * functions:
- * @help may only contain alpha-numeric characters and spaces.
+ *
+ * @help contains anything other than alpha-numeric, space characters.
  *
  */
 class Validate_alpha_numeric_spaces extends Validate_base {
-	public function validate(&$field, $options) {
+	public function validate(&$field, string $options = '') : bool
+	{
 		$this->error_string = '%s may only contain alpha-numeric characters and spaces.';
+
 		return (bool) preg_match('/^[A-Z0-9 ]+$/i', $field);
 	}
 }

@@ -16,12 +16,17 @@
  * models:
  * helpers:
  * functions:
- * @help validate a error hasn't already been returned has_errors[group,field] has_errors[group] used to stop further rule processing in piped chain
+ *
+ * @help validate a error hasn't already been returned
+ * @help has_errors[group,field]
+ * @help has_errors[group]
+ * @help used to stop further rule processing in piped chain
  *
  */
 class Validate_has_errors extends Validate_base {
 
-	public function validate(&$field, $options) {
+	public function validate(&$field, string $options = '') : bool
+	{
 		if (strpos($options,',')) {
 			list($group,$field) = explode(',',$options);
 

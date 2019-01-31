@@ -1,61 +1,103 @@
 <?php
 /**
- * Wallet
- * Insert description here
+ * Orange
+ *
+ * An open source extensions for CodeIgniter 3.x
+ *
+ * This content is released under the MIT License (MIT)
+ * Copyright (c) 2014 - 2019, Project Orange Box
+ */
+
+/**
+ * Authorization class.
+ *
+ * Handles login, logout, refresh user data
  *
  * @package CodeIgniter / Orange
  * @author Don Myers
- * @copyright 2018
+ * @copyright 2019
  * @license http://opensource.org/licenses/MIT MIT License
  * @link https://github.com/ProjectOrangeBox
- * @version 2.0
+ * @version v2.0.0
  *
- * required
- * core: load, session, input
- * libraries: event
- * models:
- * helpers:
- * functions:
+ * @uses # \session - CodeIgniter Session
+ * @uses # \event - Orange Event
+ * @uses # \load - CodeIgniter Loader
+ *
+ * @config sticky_types `['red','danger','warning','yellow']`
+ * @config initial_pause `3`
+ * @config pause_for_each `1000`
  *
  */
 class Wallet {
+	/**
+	 * Storage of redirect messages
+	 *
+	 * @var Array
+	 */
 	protected $redirect_messages = [];
+
+	/**
+	 * Session key for wallet messages
+	 *
+	 * @var String
+	 */
 	protected $msg_key = 'internal::wallet::msg';
+
+	/**
+	 * View variable to place the redirect messages
+	 * This can then be used by the views javascript to display the messages
+	 * or for further processing
+	 *
+	 * @var String
+	 */
 	protected $view_variable = 'wallet_messages';
 
 	/**
-	 * track if the combined cached configuration has been loaded
+	 * Servers HTTP Referer
 	 *
-	 * @var boolean
+	 * @var string
 	 */
-	protected $default_msgs = [
-		'success' => 'Request Completed',
-		'failed'  => 'Request Failed',
-		'denied'  => 'Access Denied',
-		'created' => 'Record Created',
-		'updated' => 'Record Updated',
-		'deleted' => 'Record Deleted',
-	];
-
-	protected $config;
-	protected $load;
-	protected $session;
 	protected $http_referer;
+
+	/**
+	 * Local reference of wallet configuration
+	 *
+	 * @var Array
+	 */
+	protected $config;
+
+	/**
+	 * Local reference of CodeIgniter Loader
+	 *
+	 * @var Object
+	 */
+	protected $load;
+
+	/**
+	 * Local reference of CodeIgniter Session
+	 *
+	 * @var Object
+	 */
+	protected $session;
+
+	/**
+	 * Local reference of Orange Event
+	 *
+	 * @var \Event
+	 */
 	protected $event;
 
 	/**
-	 * __construct
-	 * Insert description here
 	 *
+	 * Constructor
 	 *
-	 * @return
+	 * @access public
 	 *
-	 * @access
-	 * @static
-	 * @throws
-	 * @example
+	 * @param array $config []
+	 *
 	 */
-	public function __construct(&$config=[]) {
+	public function __construct(array &$config=[]) {
 		$this->config = &$config;
 
 		$this->session = &ci('session');
@@ -66,25 +108,35 @@ class Wallet {
 		$this->sticky_types = ($this->config['sticky_types']) ?? ['red','danger','warning','yellow'];
 
 		/* set the view variable if any messages are available */
-		$this->set_view_variable($this->session->flashdata($this->msg_key));
+		$current_messages = $this->session->flashdata($this->msg_key);
+		
+		if (is_array($current_messages)) {
+			$this->set_view_variable($current_messages);
+		}
 
 		log_message('info', 'Wallet Class Initialized');
 	}
 
 	/**
-	 * msg
-	 * Add a msg to the current page variable
-	 * - or -
-	 * Add a msg as a session flash message and redirect
 	 *
-	 * @param $msg
-	 * @param $type
-	 * @param $redirect
+	 * Add a flash message to the current page as javascript variable
+	 * Add a flash message as a session flash message and redirect
 	 *
-	 * @return $this
+	 * @access public
 	 *
+	 * @param string $msg
+	 * @param string $type yellow
+	 * @param $redirect null, string, or true. if true http referring page will be used.
+	 *
+	 * @return \Wallet
+	 *
+	 * #### Example
+	 * ```
+	 * ci('wallet')->msg('Oh No!','yellow');
+	 * ci('wallet')->msg('oH No!','red','/folder/new');
+	 * ```
 	 */
-	public function msg($msg = '', $type = 'yellow', $redirect = null)
+	public function msg(string $msg = '',string $type = 'yellow', $redirect = null) : Wallet
 	{
 		/* is this type sticky? - use names not colors - colors support for legacy code */
 		$sticky = in_array($type,$this->sticky_types);
@@ -104,16 +156,50 @@ class Wallet {
 		return $this;
 	}
 
-	public function msgs($array,$type='blue')
+	/**
+	 *
+	 * Add multiple messages at one time
+	 *
+	 * @access public
+	 *
+	 * @param array $array
+	 * @param string $type blue
+	 *
+	 * @return \Wallet
+	 *
+	 * #### Example
+	 * ```
+	 * ci('wallet')->msgs(['Whoops!','Defcon 1'=>'red','Info']);
+	 * ```
+	 */
+	public function msgs(array $array,string $type='yellow') : Wallet
 	{
-		foreach ($array as $text) {
-			$this->msg($text,$type);
+		foreach ($array as $a=>$b) {
+			if (is_numeric($a)) {
+				$this->msg($b,$type);
+			} else {
+				$this->msg($a,$b);
+			}
 		}
-		
+
 		return $this;
 	}
 
-	protected function redirect($msg,$type,$sticky,$redirect)
+	/**
+	 *
+	 * Add a message and redirect
+	 *
+	 * @access protected
+	 *
+	 * @param $msg
+	 * @param $type
+	 * @param $sticky
+	 * @param $redirect
+	 *
+	 * @return void
+	 *
+	 */
+	protected function redirect(string $msg,string $type,bool $sticky,string $redirect) : void
 	{
 		/* add another message to any that might already be on there */
 		$this->redirect_messages[md5(trim($msg))] = ['msg' => trim($msg), 'type' => $type, 'sticky' => $sticky];
@@ -124,7 +210,20 @@ class Wallet {
 		redirect($redirect);
 	}
 
-	protected function add2page($msg,$type,$sticky)
+	/**
+	 *
+	 * Add message to the current pages view javascript variable
+	 *
+	 * @access protected
+	 *
+	 * @param string $msg
+	 * @param string $type
+	 * @param bool $sticky
+	 *
+	 * @return \Wallet
+	 *
+	 */
+	protected function add2page(string $msg,string $type,bool $sticky) : Wallet
 	{
 		/* add to the current wallet messages */
 		$current_msgs = $this->get_view_variable();
@@ -134,9 +233,40 @@ class Wallet {
 
 		/* put back in view variable */
 		$this->set_view_variable($current_msgs);
+
+		return $this;
 	}
 
-	protected function set_view_variable($messages)
+	/**
+	 *
+	 * Get the page view variable contents
+	 *
+	 * @access protected
+	 *
+	 * @return Array
+	 *
+	 */
+	protected function get_view_variable() : Array
+	{
+		/* get the current messages */
+		$wallet_messages = $this->load->get_var($this->view_variable);
+
+		/* we only need the messages */
+		return (array)$wallet_messages['messages'];
+	}
+
+	/**
+	 *
+	 * Set the page view variable
+	 *
+	 * @access protected
+	 *
+	 * @param $messages
+	 *
+	 * @return \Wallet
+	 *
+	 */
+	protected function set_view_variable(array $messages) : Wallet
 	{
 		/* get any flash messages in the session and add them to the view data */
 		$this->load->vars([$this->view_variable => [
@@ -144,15 +274,8 @@ class Wallet {
 			'initial_pause'  => (($this->config['initial_pause']) ?? 3),
 			'pause_for_each' => (($this->config['pause_for_each']) ?? 1000),
 		]]);
-	}
 
-	protected function get_view_variable()
-	{
-		/* get the current messages */
-		$wallet_messages = $this->load->get_var($this->view_variable);
-
-		/* we only need the messages */
-		return (array)$wallet_messages['messages'];
+		return $this;
 	}
 
 } /* end class */

@@ -1,193 +1,201 @@
 <?php
 /**
+ * Orange
+ *
+ * An open source extensions for CodeIgniter 3.x
+ *
+ * This content is released under the MIT License (MIT)
+ * Copyright (c) 2014 - 2019, Project Orange Box
+ */
+
+/**
  * Cache_request
- * Insert description here
+ *
+ * Cache for this request only.
  *
  * @package CodeIgniter / Orange
  * @author Don Myers
- * @copyright 2018
+ * @copyright 2019
  * @license http://opensource.org/licenses/MIT MIT License
  * @link https://github.com/ProjectOrangeBox
- * @version 2.0
+ * @version v2.0.0
  *
- * required
- * core:
- * libraries:
- * models:
- * helpers:
- * functions:
+ * @uses input Input
  *
- * @help Cache for this request only
+ * @config cache_path `ROOTPATH.'/var/cache/'`
+ * @config cache_default `dummy`
+ * @config cache_backup `dummy`
+ * @config cache_ttl `60`
+ * @config key_prefix `cache.`
+ * @config cache_allowed `['192.168.2.123','192.168.2.124']` array of except-able IPs
+ * @config encryption_key `30193e8de97f49de586d740f93403dea`
+ * @config cache_servers `['192.168.2.123','192.168.2.124']` array of other servers
+ * @config cache_server_secure `true`
+ * @config cache_url `http://www.example.com/api/cache/`
+ *
  */
 class Cache_request extends CI_Driver {
 	/**
-	 * track if the combined cached configuration has been loaded
+	 * Cache storage
 	 *
-	 * @var boolean
+	 * @var array
 	 */
 	protected $cache = [];
 
 	/**
-	 * track if the combined cached configuration has been loaded
+	 * Configuration array
 	 *
-	 * @var boolean
+	 * @var array
 	 */
-	protected $config;
+	protected $config = [];
 
+	/**
+	 * Parent Cache Class
+	 *
+	 * @var \Cache
+	 */
 	protected $parent;
 
-/**
- * __construct
- * Insert description here
- *
- * @param $cache_config
- *
- * @return
- *
- * @access
- * @static
- * @throws
- * @example
- */
+	/**
+	 *
+	 * Constructor
+	 *
+	 * @param array &$config
+	 * @param Cache &$parent
+	 *
+	 */
 	public function __construct(&$config,&$parent) {
 		$this->config = &$config;
 		$this->parent = &$parent;
 	}
 
-/**
- * get
- * Insert description here
- *
- * @param $id
- *
- * @return
- *
- * @access
- * @static
- * @throws
- * @example
- */
-	public function get($id) {
+	/**
+	 *
+	 * fetch an item from the cache store.
+	 * If the item does not exist, the method will return FALSE.
+	 *
+	 * @access public
+	 *
+	 * @param string $id
+	 *
+	 * @return mixed
+	 *
+	 */
+	public function get(string $id)
+	{
 		return (isset($this->cache[$id])) ? $this->cache[$id] : false;
 	}
 
-/**
- * save
- * Insert description here
- *
- * @param $id
- * @param $data
- * @param $ttl
- * @param $raw
- *
- * @return
- *
- * @access
- * @static
- * @throws
- * @example
- */
-	public function save($id, $data, $ttl = 0, $raw = false) {
+	/**
+	 *
+	 * save an item to the cache store.
+	 *
+	 * @access public
+	 *
+	 * @param string $id
+	 * @param $data
+	 * @param int $ttl - unsupported (entire request)
+	 * @param bool $raw false - unsupported
+	 *
+	 * @return bool
+	 *
+	 */
+	public function save(string $id, $data,int $ttl = 0,bool $raw = false) : bool
+	{
 		$this->cache[$id] = $data;
+
 		return true;
 	}
 
-/**
- * delete
- * Insert description here
- *
- * @param $id
- *
- * @return
- *
- * @access
- * @static
- * @throws
- * @example
- */
-	public function delete($id) {
+	/**
+	 *
+	 * delete a specific item from the cache store.
+	 *
+	 * @access public
+	 *
+	 * @param string $id
+	 *
+	 * @return bool
+	 *
+	 */
+	public function delete(string $id) : bool
+	{
 		unset($this->cache[$id]);
-		
+
 		return true;
 	}
 
-/**
- * increment
- * Insert description here
- *
- * @param $id
- * @param $offset
- *
- * @return
- *
- * @access
- * @static
- * @throws
- * @example
- */
-	public function increment($id, $offset = 1) {
+	/**
+	 *
+	 * Performs atomic incrementation of a raw stored value.
+	 *
+	 * @access public
+	 *
+	 * @param string $id
+	 * @param int $offset 1
+	 *
+	 * @return int
+	 *
+	 */
+	public function increment(string $id,int $offset = 1)
+	{
 		$new_value = (int)$this->get($id) + (int)$offset;
-		
+
 		$this->save($id,$new_value);
-		
+
 		return $new_value;
 	}
 
-/**
- * decrement
- * Insert description here
- *
- * @param $id
- * @param $offset
- *
- * @return
- *
- * @access
- * @static
- * @throws
- * @example
- */
-	public function decrement($id, $offset = 1) {
+	/**
+	 *
+	 * Performs atomic decrementation of a raw stored value.
+	 *
+	 * @access public
+	 *
+	 * @param string $id
+	 * @param int $offset 1
+	 *
+	 * @return int
+	 *
+	 */
+	public function decrement(string $id,int $offset = 1)
+	{
 		$new_value = (int)$this->get($id) - (int)$offset;
-		
+
 		$this->save($id,$new_value);
-		
+
 		return $new_value;
 	}
 
-/**
- * clean
- * Insert description here
- *
- *
- * @return
- *
- * @access
- * @static
- * @throws
- * @example
- */
-	public function clean() {
+	/**
+	 *
+	 * ‘clean’ the entire cache.
+	 *
+	 * @access public
+	 *
+	 * @return bool
+	 *
+	 */
+	public function clean() : bool
+	{
 		$this->cache = [];
-		
+
 		return true;
 	}
 
-/**
- * cache_info
- * Insert description here
- *
- *
- * @return
- *
- * @access
- * @static
- * @throws
- * @example
- */
-	public function cache_info() {
+	/**
+	 *
+	 * This method will return information on the entire cache.
+	 *
+	 * @access public
+	 *
+	 * @return array
+	 *
+	 */
+	public function cache_info() : array
+	{
 		$info = [];
-		
+
 		foreach ($this->cache as $key=>$value) {
 			$info[$key] = [
 				'value'=>$value,
@@ -195,63 +203,70 @@ class Cache_request extends CI_Driver {
 				'ttl'=>0,
 			];
 		}
-		
+
 		return $info;
 	}
 
-/**
- * get_metadata
- * Insert description here
- *
- * @param $id
- *
- * @return
- *
- * @access
- * @static
- * @throws
- * @example
- */
-	public function get_metadata($id) {
-		return ['count'=>count($this->cache),'keys'=>array_keys($this->cache)];
+	/**
+	 *
+	 * This method will return the size if the cached item.
+	 *
+	 * @access public
+	 *
+	 * @param string $id
+	 *
+	 * @return mixed
+	 *
+	 */
+	public function get_metadata(string $id)
+	{
+		$value = $this->get($id);
+		
+		return ($value) ? gettype($value) : false;
 	}
 
-/**
- * is_supported
- * Insert description here
- *
- *
- * @return
- *
- * @access
- * @static
- * @throws
- * @example
- */
-	public function is_supported() {
+	/**
+	 *
+	 * Is this caching driver supported on the system?
+	 * Of course this one is.
+	 *
+	 * @access public
+	 *
+	 * @return bool
+	 *
+	 */
+	public function is_supported() : bool
+	{
 		return true;
 	}
 
-/**
- * cache
- * Insert description here
- *
- * @param $key
- * @param $closure
- *
- * @return
- *
- * @access
- * @static
- * @throws
- * @example
- */
-	public function cache($key, $closure) {
+	/**
+	 *
+	 * Wrapper function to use this library in a closure fashion
+	 * of course these are request only cached items
+	 *
+	 * @access public
+	 *
+	 * @param string $key
+	 * @param callable $closure
+	 * @param int $ttl null
+	 *
+	 * @return mixed
+	 *
+	 * #### Example
+	 * ```
+	 * $cached = ci('cache')->request->cache('foobar',function(){ return 'cache me for 60 seconds!' });
+	 * ```
+	 */
+	public function cache(string $key,callable $closure,int $ttl = null)
+	{
 		if (!$cache = $this->get($key)) {
 			$ci = ci();
 			$cache = $closure($ci);
-			$this->save($key, $cache);
+			$this->save($key, $cache, $ttl);
 		}
+		
 		return $cache;
 	}
-}
+
+} /* end class */

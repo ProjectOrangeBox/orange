@@ -17,9 +17,12 @@
  * helpers:
  * functions:
  *
+ * @help contains anything other than a decimal number.
+ *
  */
 class Validate_decimal extends Validate_base {
-	public function validate(&$field, $options) {
+	public function validate(&$field, string $options = '') : bool
+	{
 		$this->error_string = '%s must contain a decimal number.';
 		return (bool) preg_match('/^[\-+]?[0-9]+\.[0-9]+$/', $field);
 	}

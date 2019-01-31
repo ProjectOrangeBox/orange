@@ -1,53 +1,138 @@
 <?php
 /**
- * Errors
- * Insert description here
+ * Orange
+ *
+ * An open source extensions for CodeIgniter 3.x
+ *
+ * This content is released under the MIT License (MIT)
+ * Copyright (c) 2014 - 2019, Project Orange Box
+ */
+
+/**
+ * Unified Error collecting class.
+ *
+ * Collection of errors with multiple grouping as well as displaying of errors.
  *
  * @package CodeIgniter / Orange
  * @author Don Myers
- * @copyright 2018
+ * @copyright 2019
  * @license http://opensource.org/licenses/MIT MIT License
  * @link https://github.com/ProjectOrangeBox
- * @version 2.0
+ * @version v2.0.0
  *
- * required
- * core: load, input, output
- * libraries: event
- * models:
- * helpers:
- * functions:
+ * @uses input \Input
+ * @uses output \Output
+ * @uses event \Event
  *
- * @help Unified Error collecting class
+ * @config html_prefix `<p class="{group class} orange-errors">`
+ * @config html_suffix `</p>`
+ * @config html_group_class `{group class}`
+ * @config default error group `records`
+ * @config auto detect `true`
+ *
  */
 class Errors {
+	/**
+	 * errors configuration array
+	 *
+	 * @var array
+	 */
 	protected $config;
+
+	/**
+	 * CodeIgniter Input object
+	 *
+	 * @var Input
+	 */
 	protected $input;
+
+	/**
+	 * CodeIgniter Output object
+	 *
+	 * @var Output
+	 */
 	protected $output;
+
+	/**
+	 * Orange Event object
+	 *
+	 * @var Event
+	 */
 	protected $event;
 
-	protected $flashdata_session_variable;
+	/**
+	 * html output error prefix
+	 *
+	 * @var string
+	 */
 	protected $html_prefix;
+
+	/**
+	 * html output error suffix
+	 *
+	 * @var string
+	 */
 	protected $html_suffix;
+
+	/**
+	 * html output class replacement tag ie. {class}
+	 *
+	 * @var string
+	 */
 	protected $html_group_class;
 
-	protected $data_records;
-	protected $data_count;
-
+	/**
+	 * array of errors
+	 *
+	 * @var array []
+	 */
 	protected $errors = [];
+
+	/**
+	 * current error array group
+	 *
+	 * @var string
+	 */
 	protected $current_group;
+
+	/**
+	 * default error array group
+	 * when no group is specified this group is the one an error is added to.
+	 * this then makes it the default or starting group.
+	 *
+	 * @var string
+	 */
 	protected $default_group;
+
+	/**
+	 * array of errors to prevent duplicates
+	 *
+	 * @var array []
+	 */
 	protected $duplicates = [];
+
+	/**
+	 * PHP request type cli, ajax|json, html, array
+	 *
+	 * @var string
+	 */
 	protected $request_type = 'array';
 
-	public function __construct(&$config=[])
+	/**
+	 * Constructor
+	 *
+	 * @access public
+	 *
+	 * @param array $config []
+	 *
+	 */
+	public function __construct(array &$config = [])
 	{
 		$this->config = &$config;
 
 		$this->input = &ci('input');
 		$this->output = &ci('output');
 		$this->event = &ci('event');
-
-		$this->flashdata_session_variable = $this->config['flashdata session variable'] ?? 'ci_errors';
 
 		$this->html_prefix = $this->config['html_prefix'] ?? '<p class="{group class} orange-errors">';
 		$this->html_suffix = $this->config['html_suffix'] ?? '</p>';
@@ -71,25 +156,58 @@ class Errors {
 	 *
 	 * For when you cast the object to a string
 	 *
+	 * @access public
+	 *
+	 * @return string
+	 *
 	 */
-	public function __toString()
+	public function __toString() : string
 	{
 		log_message('debug', 'Errors::__toString');
 
 		return $this->get();
 	}
 
-	public function get_default_group()
+	/**
+	 *
+	 * Get the default error group.
+	 *
+	 * @access public
+	 *
+	 * @return string
+	 *
+	 */
+	public function get_default_group() : string
 	{
 		return $this->default_group;
 	}
 
-	public function get_group()
+	/**
+	 *
+	 * Get the current error group.
+	 *
+	 * @access public
+	 *
+	 * @return string
+	 *
+	 */
+	public function get_group() : string
 	{
 		return $this->current_group;
 	}
 
-	public function group($group)
+	/**
+	 *
+	 * Set the error group for proceeding calls
+	 *
+	 * @access public
+	 *
+	 * @param string $group
+	 *
+	 * @return $this
+	 *
+	 */
+	public function group(string $group) : Errors
 	{
 		$this->current_group = $group;
 
@@ -98,13 +216,19 @@ class Errors {
 		return $this;
 	}
 
-	/* wrapper for as */
-	public function set_request_type($request_type)
-	{
-		return $this->as($request_type);
-	}
-
-	public function as($request_type)
+	/**
+	 *
+	 * Set the request type for this classes dynamic methods
+	 *
+	 * @access public
+	 *
+	 * @param string $request_type cli|ajax|json|html|array
+	 *
+	 * @throws Exception
+	 * @return $this
+	 *
+	 */
+	public function set_request_type(string $request_type) : Errors
 	{
 		log_message('debug', 'Errors::as::'.$request_type);
 
@@ -118,6 +242,20 @@ class Errors {
 		return $this;
 	}
 
+	/**
+	 *
+	 * Get the current errors
+	 *
+	 * @access public
+	 *
+	 * @return mixed
+	 *
+	 * #### Example
+	 * ```
+	 * $foo->set_request_type('html')->get();
+	 * ```
+	 *
+	 */
 	public function get()
 	{
 		log_message('debug', 'Errors::get');
@@ -141,9 +279,23 @@ class Errors {
 	}
 
 	/**
-	 * add
+	 *
+	 * Add an error to the current group with optional field-name.
+	 *
+	 * @access public
+	 *
+	 * @param string $msg
+	 * @param string $fieldname null
+	 *
+	 * @return $this
+	 *
+	 * #### Example
+	 * ```
+	 * $foo->group('foobar')->add('Error!')->set_request_type('cli')->get();
+	 * ```
+	 *
 	 */
-	public function add($msg,$fieldname=null)
+	public function add(string $msg,string $fieldname = null) : Errors
 	{
 		log_message('debug', 'Errors::add::'.$msg.' '.$this->current_group);
 
@@ -164,9 +316,22 @@ class Errors {
 	}
 
 	/**
-	 * clear
+	 *
+	 * Clear the specified group or current group
+	 *
+	 * @access public
+	 *
+	 * @param $group null
+	 *
+	 * @return $this
+	 *
+	 * #### Example
+	 * ```
+	 * $foo->clear('groupa');
+	 * ```
+	 *
 	 */
-	public function clear($group=null)
+	public function clear(string $group=null) : Errors
 	{
 		$group = ($group) ? $group : $this->current_group;
 
@@ -179,9 +344,22 @@ class Errors {
 	}
 
 	/**
-	 * has
+	 *
+	 * Returns wiether the specified group or current group has any errors (true)
+	 *
+	 * @access public
+	 *
+	 * @param string $group null
+	 *
+	 * @return boolean
+	 *
+	 * #### Example
+	 * ```
+	 * $has_errors = $foo->has('groupa');
+	 * ```
+	 *
 	 */
-	public function has($group=null)
+	public function has(string $group=null) : bool
 	{
 		$group = ($group) ? $group : $this->current_group;
 
@@ -193,11 +371,25 @@ class Errors {
 		return $has;
 	}
 
-
 	/**
-	 * show error view on error and die
+	 *
+	 * Show error view on error and die.
+	 *
+	 * @access public
+	 *
+	 * @param $view 400
+	 * @param string $group null
+	 *
+	 * @return $this
+	 *
+	 *
+	 * #### Example
+	 * ```
+	 * ci('errors')->group('foo')->add('Oh No!')->die_on_error(400,'foo');
+	 * ```
+	 *
 	 */
-	public function die_on_error($view = 400, $group = null)
+	public function die_on_error($view = 400,string $group = null) : Errors
 	{
 		$group = ($group) ? $group : $this->current_group;
 
@@ -211,9 +403,25 @@ class Errors {
 	}
 
 	/**
-	 * as_array
+	 *
+	 * Returns errors as array
+	 *
+	 * @access public
+	 *
+	 * @param string $group null
+	 *
+	 * @return array
+	 *
+	 * #### Example
+	 * ```
+	 * $array = ci('errors')->as_array();
+	 * $array = ci('errors')->as_array('groupa');
+	 * $array = ci('errors')->as_array('groupa,groupc');
+	 * $array = ci('errors')->as_array(['groupa','groupc']);
+	 * ```
+	 *
 	 */
-	public function as_array($group=null)
+	public function as_array(string $group=null) : array
 	{
 		log_message('debug', 'Errors::as_array::'.$group);
 
@@ -247,9 +455,19 @@ class Errors {
 	}
 
 	/**
-	 * as_html
+	 *
+	 * Returns errors as HTML.
+	 *
+	 * @access public
+	 *
+	 * @param string $prefix null
+	 * @param string $suffix null
+	 * @param string $group null
+	 *
+	 * @return string
+	 *
 	 */
-	public function as_html($prefix = null, $suffix = null, $group = null)
+	public function as_html(string $prefix = null,string $suffix = null,string $group = null) : string
 	{
 		log_message('debug', 'Errors::as_html::'.$group);
 
@@ -289,9 +507,17 @@ class Errors {
 	}
 
 	/**
-	 * as_cli
+	 *
+	 * Returns errors as formatted JSON string.
+	 *
+	 * @access public
+	 *
+	 * @param string $group null
+	 *
+	 * @return string
+	 *
 	 */
-	public function as_cli($group = null)
+	public function as_cli(string $group = null) : string
 	{
 		log_message('debug', 'Errors::as_cli::'.$group);
 
@@ -300,9 +526,17 @@ class Errors {
 	}
 
 	/**
-	 * as_json
+	 *
+	 * Returns errors as JSON string.
+	 *
+	 * @access public
+	 *
+	 * @param string $group null
+	 *
+	 * @return string
+	 *
 	 */
-	public function as_json($group = null)
+	public function as_json(string $group = null) : string
 	{
 		log_message('debug', 'Errors::as_json::'.$group);
 
@@ -310,20 +544,49 @@ class Errors {
 	}
 
 	/**
-	 * show
+	 *
+	 * Generic Error Message.
+	 *
+	 * @access public
+	 *
+	 * @param string $message
+	 * @param int $status_code 500
+	 * @param string $heading An Error Was Encountered
+	 *
+	 * @return void
+	 *
+	 * #### Example
+	 * ```
+	 * ci('errors')->show('Uh Oh!');
+	 * ```
+	 *
 	 */
-	public function show($message, $status_code, $heading = 'An Error Was Encountered')
+	public function show(string $message, int $status_code = 500,string $heading = 'An Error Was Encountered') : void
 	{
 		/* show the errors */
 		$this->display('general',['heading'=>$heading,'message'=>$message],$status_code);
 	}
 
 	/**
-	 * display
-	 * display error view and exit
+	 *
+	 * Display error(s) view and exit
+	 *
+	 * @access public
+	 *
+	 * @param string $view
+	 * @param array $data []
+	 * @param int $status_code 500
+	 * @param array $override []
+	 *
+	 * @return void
+	 *
+	 * #### Example
+	 * ```
+	 * ci('errors')->display(...);
+	 * ```
 	 *
 	 */
-	public function display($view, $data = [], $status_code = 500, $override = [])
+	public function display(string $view,array $data = [],int $status_code = 500,array $override = []) : void
 	{
 		log_message('debug', 'Errors::view::'.$view.' '.$status_code);
 
@@ -344,22 +607,22 @@ class Errors {
 		/* remap the view to another based on it's name */
 		$view = (isset($this->config['named'][$view])) ? $this->config['named'][$view] : $view;
 
-		$data['heading'] = ($data['heading']) ?? 'Fatal Error '.$status_code;
-		$data['message'] = ($data['message']) ?? 'Unknown Error';
+		$data['heading'] = $data['heading'] ?? 'Fatal Error '.$status_code;
+		$data['message'] = $data['message'] ?? 'Unknown Error';
 
 		switch ($output_format) {
 			case 'cli':
-				$this->as('cli');
+				$this->set_request_type('cli');
 				$view_folder = 'cli';
 			break;
 			case 'json':
 			case 'ajax':
-				$this->as('ajax');
+				$this->set_request_type('ajax');
 				$view_folder = 'ajax';
 				$mime_type   = 'application/json';
 			break;
 			default:
-				$this->as('html');
+				$this->set_request_type('html');
 				$view_folder = 'html';
 				$mime_type = 'text/html';
 				$charset = 'utf-8';
@@ -371,8 +634,8 @@ class Errors {
 		/* get "as" using __toString */
 		$data['message'] = (string)$this;
 
-		$charset     = ($override['charset']) ?? $charset;
-		$mime_type   = ($override['mime_type']) ?? $mime_type;
+		$charset     = $override['charset'] ?? $charset;
+		$mime_type   = $override['mime_type'] ?? $mime_type;
 
 		$status_code = abs($status_code);
 
@@ -387,7 +650,7 @@ class Errors {
 
 		log_message('error', 'Error: '.$view_path.' '.$status_code.' '.json_encode($data));
 
-		$this->event->trigger('death.show',$view_path,$data);
+		$this->event->trigger('errors.display',$view_path,$data,$mime_type,$charset,$exit_status);
 
 		$this->output
 			->enable_profiler(false)
@@ -401,10 +664,17 @@ class Errors {
 
 	/**
 	 *
-	 * add this here to cut down on external functions
+	 * Actual low level error view load and rendering method.
+	 *
+	 * @access protected
+	 *
+	 * @param string $_view
+	 * @param array $_data []
+	 *
+	 * @return string
 	 *
 	 */
-	protected function error_view($_view,$_data=[])
+	protected function error_view(string $_view,array $_data=[]) : string
 	{
 		log_message('debug', 'Errors::error_view::'.$_view);
 

@@ -1,92 +1,65 @@
 <?php
-/* some parts copyright CodeIgniter others from the original ProjectOrangeBox Event library */
-
 /**
- * CodeIgniter
+ * Orange
  *
- * An open source application development framework for PHP
+ * An open source extensions for CodeIgniter 3.x
  *
  * This content is released under the MIT License (MIT)
- *
- * Copyright (c) 2014-2018 British Columbia Institute of Technology
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
- *
+ * Copyright (c) 2014 - 2019, Project Orange Box
+ * 
+ * Some parts copyright CodeIgniter 4.x MIT
  * @package	CodeIgniter
  * @author	CodeIgniter Dev Team
  * @copyright	2014-2018 British Columbia Institute of Technology (https://bcit.ca/)
  * @license	https://opensource.org/licenses/MIT	MIT License
  * @link	https://codeigniter.com
- * @since	Version 3.0.0
- * @filesource
  */
 
 /**
- * Event
  * Manage Events in your Application
+ *
+ * Collection of errors with multiple grouping as well as displaying of errors.
  *
  * @package CodeIgniter / Orange
  * @author Don Myers
- * @copyright 2018
+ * @copyright 2019
  * @license http://opensource.org/licenses/MIT MIT License
  * @link https://github.com/ProjectOrangeBox
- * @version 2.0
+ * @version v2.0.0
  *
- * required
- * core:
- * libraries:
- * models:
- * helpers:
- * functions: log_message
- *
- * @help Event handler
  */
-
-/* Follows Linux Priority negative values are higher priority and positive values are lower priority */
-define('EVENT_PRIORITY_LOWEST', 1);
-define('EVENT_PRIORITY_LOW', 20);
-define('EVENT_PRIORITY_NORMAL', 50);
-define('EVENT_PRIORITY_HIGH', 80);
-define('EVENT_PRIORITY_HIGHEST', 100);
-
 class Event {
+	const PRIORITY_LOWEST = 10;
+	const PRIORITY_LOW = 20;
+	const PRIORITY_NORMAL = 50;
+	const PRIORITY_HIGH = 80;
+	const PRIORITY_HIGHEST = 90;
+
 	/**
-	 * storage for all listeners
+	 * storage for events
 	 *
 	 * @var array
 	 */
-	protected $listeners = [];
+	 protected $listeners = [];
 
 	/**
 	 * Register a listener
 	 *
-	 * @param $name - string - name of the event we want to listen for
-	 * @param $callable - function to call if the event if triggered
-	 * @param $priority - integer - the priority this listener has against other listeners
-	 *										A priority of −100 is the highest priority and 100 is the lowest priority.
+	 * @param string $name name of the event we want to listen for
+	 * @param callable $callable function to call if the event if triggered
+	 * @param int $priority the priority this listener has against other listeners
 	 *
 	 * @return $this
 	 *
 	 * @access public
-	 * @example register('open.page',function(&$var1) { echo "hello $var1"; },-100);
+	 *
+	 * #### Example
+	 * ```
+	 * register('open.page',function(&$var1) { echo "hello $var1"; },PRIORITY_HIGH);
+	 * ```
 	 */
-	public function register($name, $callable, $priority = EVENT_PRIORITY_NORMAL) {
+	public function register(string $name,$callable,int $priority = EVENT::PRIORITY_NORMAL) : Event
+	{
 		/* if they pass in a array treat it as a name=>closure pair */
 		if (is_array($name)) {
 			foreach ($name as $n) {
@@ -112,15 +85,20 @@ class Event {
 	/**
 	 * Trigger an event
 	 *
-	 * @param $name - string - event to trigger
-	 * @param ...$arguments - mixed - pass by reference
+	 * @param string $name event to trigger
+	 * @param mixed ...$arguments pass by reference
 	 *
 	 * @return $this
 	 *
 	 * @access public
-	 * @example trigger('open.page',$var1);
+	 *
+	 * #### Example
+	 * ```
+	 * trigger('open.page',$var1);
+	 * ```
 	 */
-	public function trigger($name,&...$arguments) {
+	public function trigger(string $name,&...$arguments) : Event
+	{
 		/* clean up the name */
 		$name = $this->_normalize_name($name);
 
@@ -141,16 +119,22 @@ class Event {
 	}
 
 	/**
+	 *
 	 * Is there any listeners for a certain event?
 	 *
-	 * @param $name - string - event to search for
-	 *
-	 * @return boolean
-	 *
 	 * @access public
-	 * @example has('page.load');
+	 *
+	 * @param string $name event to search for
+	 *
+	 * @return bool
+	 *
+	 * #### Example
+	 * ```
+	 * has('page.load');
+	 * ```
 	 */
-	public function has($name) {
+	public function has(string $name) : bool
+	{
 		/* clean up the name */
 		$name = $this->_normalize_name($name);
 
@@ -164,20 +148,33 @@ class Event {
 	 *
 	 * @access public
 	 */
-	public function events() {
+	/**
+	 *
+	 * Return an array of all of the event names
+	 *
+	 * @access public
+	 *
+	 * @return array
+	 *
+	 */
+	public function events() : array
+	{
 		return array_keys($this->listeners);
 	}
 
 	/**
+	 *
 	 * Return the number of events for a certain name
 	 *
-	 * @param $name - string - event to search for
-	 *
-	 * @return integer
-	 *
 	 * @access public
+	 *
+	 * @param string $name
+	 *
+	 * @return int
+	 *
 	 */
-	public function count($name) {
+	public function count(string $name) : int
+	{
 		/* clean up the name */
 		$name = $this->_normalize_name($name);
 
@@ -185,15 +182,20 @@ class Event {
 	}
 
 	/**
+	 *
 	 * Removes a single listener from an event.
-	 * NOTE: this doesn't work for closures!
+	 * this doesn't work for closures!
 	 *
-	 * @param          $name
-	 * @param callable $listener
+	 * @access public
 	 *
-	 * @return boolean
+	 * @param string $name
+	 * @param $listener
+	 *
+	 * @return bool
+	 *
 	 */
-	public function unregister($name, $listener) {
+	public function unregister(string $name, $listener) : bool
+	{
 		/* clean up the name */
 		$name = $this->_normalize_name($name);
 
@@ -216,16 +218,21 @@ class Event {
 	}
 
 	/**
+	 *
 	 * Removes all listeners.
 	 *
 	 * If the event_name is specified, only listeners for that event will be
 	 * removed, otherwise all listeners for all events are removed.
 	 *
-	 * @param $name
+	 * @access public
 	 *
-	 * @return $this
+	 * @param string $name
+	 *
+	 * @return \Event
+	 *
 	 */
-	public function unregister_all($name='') 	{
+	public function unregister_all(string $name = '') : Event
+	{
 		/* clean up the name */
 		$name = $this->_normalize_name($name);
 
@@ -240,28 +247,34 @@ class Event {
 	}
 
 	/**
+	 *
 	 * Normalize the event name
 	 *
-	 * @param $name string
+	 * @access protected
+	 *
+	 * @param string $name
 	 *
 	 * @return string
 	 *
-	 * @access protected
 	 */
-	protected function _normalize_name($name) {
+	protected function _normalize_name(string $name) : string
+	{
 		return trim(preg_replace('/[^a-z0-9]+/','.',strtolower($name)),'.');
 	}
 
 	/**
+	 *
 	 * Do the actual sorting
 	 *
-	 * @param $name string
+	 * @access protected
+	 *
+	 * @param string $name
 	 *
 	 * @return array
 	 *
-	 * @access protected
 	 */
-	protected function _listeners($name) {
+	protected function _listeners(string $name) : array
+	{
 		$name = $this->_normalize_name($name);
 		$listeners = [];
 

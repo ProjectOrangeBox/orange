@@ -1,119 +1,133 @@
 <?php
 /**
- * Validate_base
- * Insert description here
+ * Orange
+ *
+ * An open source extensions for CodeIgniter 3.x
+ *
+ * This content is released under the MIT License (MIT)
+ * Copyright (c) 2014 - 2019, Project Orange Box
+ */
+
+/**
+ * Authorization class.
+ *
+ * Handles login, logout, refresh user data
  *
  * @package CodeIgniter / Orange
  * @author Don Myers
- * @copyright 2018
+ * @copyright 2019
  * @license http://opensource.org/licenses/MIT MIT License
  * @link https://github.com/ProjectOrangeBox
- * @version 2.0
- *
- * required
- * core:
- * libraries:
- * models:
- * helpers:
- * functions:
+ * @version v2.0.0
  *
  */
-abstract class Validate_base {
+
+abstract class Validate_base
+{
 	/**
-	 * true values
+	 * Array of values considered true
+	 *
+	 * @var array
 	 */
 	protected $true_array = [1, '1', 'y', 'on', 'yes', 't', 'true', true];
 
 	/**
-	 * false values
+	 * Array of values considered false
+	 *
+	 * @var array
 	 */
 	protected $false_array = [0, '0', 'n', 'off', 'no', 'f', 'false', false];
 
 	/**
-	 * Error String
+	 * Current Error String used in sprintf()
+	 *
+	 * @var string
 	 */
 	protected $error_string = '';
 
 	/**
-	 * track if the combined cached configuration has been loaded
+	 * All of the current field data in a multi validation
+	 *
+	 * @var array
 	 */
 	protected $field_data;
 
 	/**
-	 * track if the combined cached configuration has been loaded
+	 * Contains the currently validated field value
+	 *
+	 * @var mixed
 	 */
 	protected $field;
 
 	/**
-	 * __construct
-	 * Insert description here
 	 *
-	 * @param $field_data
-	 * @param $error_string
+	 * Constructor
 	 *
-	 * @return
+	 * @access public
 	 *
-	 * @access
-	 * @static
-	 * @throws
-	 * @example
+	 * @param array $field_data All of the current field data in a multi validation []
+	 * @param string $error_string Current Error String used in sprintf()
+	 *
 	 */
-	public function __construct(&$field_data=null, &$error_string=null) {
-		$this->field_data   = &$field_data;
+	public function __construct(array &$field_data = [],string &$error_string = '')
+	{
+		$this->field_data = &$field_data;
 		$this->error_string = &$error_string;
 
 		log_message('info', 'Validate_base Class Initialized');
 	}
 
 	/**
-	 * field
-	 * Insert description here
 	 *
-	 * @param $field
+	 * Storage a reference to the current field for further processing
 	 *
-	 * @return
+	 * @access public
 	 *
-	 * @access
-	 * @static
-	 * @throws
-	 * @example
+	 * @param &$field
+	 *
+	 * @return Validate_base
+	 *
 	 */
-	public function field(&$field) {
+	public function field(&$field) : Validate_base
+	{
 		$this->field = &$field;
 
 		return $this;
 	}
 
 	/**
-	 * validate
-	 * Insert description here
 	 *
-	 * @param $field
-	 * @param $options
+	 * validate method place holder
 	 *
-	 * @return
+	 * @access public
 	 *
-	 * @access
-	 * @static
-	 * @throws
-	 * @example
+	 * @param &$field
+	 * @param string $options
+	 *
+	 * @return bool
+	 *
 	 */
-	public function validate(&$field, $options) {}
+	public function validate(&$field,string $options = '') : bool
+	{
+	}
 
 	/**
-	 * length
-	 * Insert description here
 	 *
-	 * @param $length
+	 * Trim the current field reference by a certain number of characters
 	 *
-	 * @return
+	 * @access public
 	 *
-	 * @access
-	 * @static
-	 * @throws
-	 * @example
+	 * @param $length null
+	 *
+	 * @return Validate_base
+	 *
+	 * #### Example
+	 * ```
+	 * $this->field($value)->length(8);
+	 * ```
 	 */
-	public function length($length = null) {
+	public function length($length = null) : Validate_base
+	{
 		if (is_numeric($length)) {
 			if ((int) $length > 0) {
 				$this->field = substr($this->field, 0, $length);
@@ -124,108 +138,149 @@ abstract class Validate_base {
 	}
 
 	/**
-	 * trim
-	 * Insert description here
 	 *
+	 * Preform a PHP trim on the current field reference
 	 *
-	 * @return
+	 * @access public
 	 *
-	 * @access
-	 * @static
-	 * @throws
-	 * @example
+	 * @param 
+	 *
+	 * @return Validate_base
+	 *
+	 * #### Example
+	 * ```
+	 * $this->field($value)->trim();
+	 * ```
 	 */
-	public function trim() {
+	public function trim() : Validate_base
+	{
 		$this->field = trim($this->field);
 
 		return $this;
 	}
 
 	/**
-	 * human
-	 * Insert description here
 	 *
+	 * Preform a non human character replace on the current field reference
 	 *
-	 * @return
+	 * @access public
 	 *
-	 * @access
-	 * @static
-	 * @throws
-	 * @example
+	 * @param 
+	 *
+	 * @return Validate_base
+	 *
+	 * #### Example
+	 * ```
+	 * $this->field($value)->human();
+	 * ```
 	 */
-	public function human() {
+	public function human() : Validate_base
+	{
 		$this->field = preg_replace("/[^\\x20-\\x7E]/mi", '', $this->field);
 
 		return $this;
 	}
 
 	/**
-	 * human_plus
-	 * Insert description here
 	 *
+	 * Preform a non human character replace on the current field reference
+	 * but also allow line-feed, tabs, and returns
 	 *
-	 * @return
+	 * @access public
 	 *
-	 * @access
-	 * @static
-	 * @throws
-	 * @example
+	 * @param 
+	 *
+	 * @return Validate_base
+	 *
+	 * #### Example
+	 * ```
+	 * $this->field($value)->human_plus();
+	 * ```
 	 */
-	public function human_plus() {
+	public function human_plus() : Validate_base
+	{
 		$this->field = preg_replace("/[^\\x20-\\x7E\\n\\t\\r]/mi", '', $this->field);
 
 		return $this;
 	}
 
 	/**
-	 * strip
-	 * Insert description here
+	 *
+	 * remove any character in the provided string on the current field reference
+	 *
+	 * @access public
 	 *
 	 * @param $strip
 	 *
-	 * @return
-	 *
-	 * @access
-	 * @static
 	 * @throws
-	 * @example
+	 * @return Validate_base
+	 *
+	 * #### Example
+	 * ```
+	 * $this->field($value)->strip('!@#$%^&*()');
+	 * ```
 	 */
-	public function strip($strip) {
+	public function strip($strip) : Validate_base
+	{
 		$this->field = str_replace(str_split($strip), '', $this->field);
 
 		return $this;
 	}
 
 	/**
-	 * is_bol
-	 * Insert description here
+	 *
+	 * Test the current field reference to see if it falls into any of the boolean compatible options
+	 *
+	 * @access public
 	 *
 	 * @param $field
 	 *
-	 * @return
+	 * @return bool
 	 *
-	 * @access
-	 * @static
-	 * @throws
-	 * @example
+	 * #### Example
+	 * ```
+	 * $this->field($value)->is_bol();
+	 * ```
 	 */
-	public function is_bol($field) {
+	public function is_bol($field) : bool
+	{
 		return (in_array(strtolower($field), array_merge($this->true_array, $this->false_array), true)) ? true : false;
 	}
-	
-	public function locate_file($file) {
+
+	/**
+	 *
+	 * Locate a file in WWW or ROOT and return it if it's found.
+	 *
+	 * @access public
+	 *
+	 * @param string $file
+	 *
+	 * @throws
+	 * @return 
+	 *
+	 * #### Example
+	 * ```
+	 * $found = locate_file('/assets/images/bicycle.jpg');
+	 * ```
+	 */
+	public function locate_file(string $file)
+	{
 		$file = trim($file,'/');
 		
+		/* is it based off the www folder? */
 		if (file_exists(WWW.'/'.$file)) {
 			return WWW.'/'.$file;
 		}
-		
+
+		/* is it based off the rootpath folder? */
 		if (file_exists(ROOTPATH.'/'.$file)) {
 			return ROOTPATH.'/'.$file;
 		}
 		
+		/* not sure where it is */
 		$this->error_string = 'File Not Found.';
 
 		return false;
 	}
+
 } /* end class */
