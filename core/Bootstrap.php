@@ -1,7 +1,29 @@
 <?php
+/**
+ * Orange
+ *
+ * An open source extensions for CodeIgniter 3.x
+ *
+ * This content is released under the MIT License (MIT)
+ * Copyright (c) 2014 - 2019, Project Orange Box
+ */
+
+/**
+ * Bootstrap CodeIgniter and Orange
+ *
+ * @package CodeIgniter / Orange
+ * @author Don Myers
+ * @copyright 2019
+ * @license http://opensource.org/licenses/MIT MIT License
+ * @link https://github.com/ProjectOrangeBox
+ * @version v2.0.0
+ *
+ *
+ */
+
 /* Orange */
 
-/* register the version */
+/* register orange the version */
 const ORANGE_VERSION = '2.3';
 
 /* load the orange autoloader library - this builds the "super" search array */
@@ -36,7 +58,7 @@ assert_options(ASSERT_CALLBACK,'_assert_handler');
 * @var	string
 *
 */
-const CI_VERSION = '3.1.9';
+const CI_VERSION = '3.1.10';
 
 /*
 * ------------------------------------------------------

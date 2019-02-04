@@ -1,32 +1,58 @@
 <?php
 /**
- * MY_Loader
- * Insert description here
+ * Orange
+ *
+ * An open source extensions for CodeIgniter 3.x
+ *
+ * This content is released under the MIT License (MIT)
+ * Copyright (c) 2014 - 2019, Project Orange Box
+ */
+
+/**
+ * Extension to CodeIgniter Load Class
+ *
+ * Overrides Model & library
+ * Adds Entity, 
  *
  * @package CodeIgniter / Orange
  * @author Don Myers
- * @copyright 2018
+ * @copyright 2019
  * @license http://opensource.org/licenses/MIT MIT License
  * @link https://github.com/ProjectOrangeBox
- * @version 2.0
- *
- * required
- * core:
- * libraries: config, orange_locator
- * models:
- * helpers:
- * functions: log_message, config, load_config
+ * @version v2.0.0
  *
  */
 class MY_Loader extends CI_Loader {
 
-	public function __construct() {
+	/**
+	 *
+	 * Constructor
+	 *
+	 * @access public
+	 *
+	 */
+	public function __construct()
+	{
 		$this->_ci_classes =& is_loaded();
 
 		log_message('info', 'MY_Loader Class Initialized');
 	}
 
-	public function library($library, $params = NULL, $object_name = NULL) {
+	/**
+	 *
+	 * Load a library
+	 *
+	 * @access public
+	 *
+	 * @param $library
+	 * @param $params NULL
+	 * @param $object_name NULL
+	 *
+	 * @return $this
+	 *
+	 */
+	public function library($library, $params = NULL, $object_name = NULL)
+	{
 		if (is_array($library)) {
 			foreach ($library as $l) {
 				$this->library($l);
@@ -38,7 +64,21 @@ class MY_Loader extends CI_Loader {
 		return $this->_init_object($library,$params,$object_name);
 	}
 
-	public function model($model, $name = '', $db_conn = FALSE) {
+	/**
+	 *
+	 * Load a model and optionally attach a database connection
+	 *
+	 * @access public
+	 *
+	 * @param $model
+	 * @param $name
+	 * @param $db_conn FALSE
+	 *
+	 * @return $this
+	 *
+	 */
+	public function model($model, $name = '', $db_conn = FALSE)
+	{
 		if (is_array($model)) {
 			foreach ($model as $m) {
 				$this->model($m,'',$db_conn);
@@ -58,8 +98,19 @@ class MY_Loader extends CI_Loader {
 		return $this->_init_object($model,null,$name);
 	}
 
-	/* this returns the new entity */
-	public function entity($name) {
+	/**
+	 *
+	 * Return a new model entity
+	 *
+	 * @access public
+	 *
+	 * @param string $name
+	 *
+	 * @return Object
+	 *
+	 */
+	public function entity(string $name)
+	{
 		$name = basename(strtolower($name),'.php');
 
 		if (!$object =& $this->instantiate($name,'',false)) {
@@ -70,13 +121,20 @@ class MY_Loader extends CI_Loader {
 	}
 
 	/**
-	*
-	* Protected
-	*
-	*/
-
-	/* used by library and model */
-	protected function _init_object($name,$params = null,$object_name = null) {
+	 *
+	 * Create a new instance
+	 *
+	 * @access protected
+	 *
+	 * @param $name
+	 * @param $params null
+	 * @param $object_name null
+	 *
+	 * @return $this
+	 *
+	 */
+	protected function _init_object(string $name,array $params = null,string $object_name = null) : MY_Loader
+	{
 		$name = basename(strtolower($name),'.php');
 
 		$config = config($name,[]);
@@ -94,8 +152,23 @@ class MY_Loader extends CI_Loader {
 		return $this;
 	}
 
-	/* used by library, model and entity */
-	protected function instantiate($name,$prefix='',$attach=false,&$config=[],$object_name=null) {
+	/**
+	 *
+	 * Instantiate the class
+	 *
+	 * @access protected
+	 *
+	 * @param string $name super object object name
+	 * @param string $prefix prefix to look for if any
+	 * @param bool $attach weither to attach it to the CodeIgniter SuperObject
+	 * @param array $config []
+	 * @param string $object_name null
+	 *
+	 * @return bool | object if attach is false
+	 *
+	 */
+	protected function instantiate(string $name,string $prefix = '',bool $attach = false,array &$config=[],$object_name=null)
+	{
 		$CI = get_instance();
 
 		/* is it already setup? */

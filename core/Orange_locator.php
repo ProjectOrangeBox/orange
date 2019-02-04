@@ -1,42 +1,58 @@
 <?php
 /**
- * orange_locator
- * Insert description here
+ * Orange
+ *
+ * An open source extensions for CodeIgniter 3.x
+ *
+ * This content is released under the MIT License (MIT)
+ * Copyright (c) 2014 - 2019, Project Orange Box
+ */
+
+/**
+ * File Locator Class
+ *
+ * Locates and caches the location of the CodeIgniter / Orange Files
  *
  * @package CodeIgniter / Orange
  * @author Don Myers
- * @copyright 2018
+ * @copyright 2019
  * @license http://opensource.org/licenses/MIT MIT License
  * @link https://github.com/ProjectOrangeBox
- * @version 2.0
+ * @version v2.0.0
  *
- * required: none
- * constants: ENVIRONMENT, APPPATH, ORANGEPATH, ROOTPATH
+ * @uses atomic_file_put_contents()
+ *
+ * @constant ENVIRONMENT
+ * @constant APPPATH
+ * @constant ORANGEPATH
+ * @constant ROOTPATH
+ *
  */
+
 class Orange_locator {
 	/**
-	 * internal paths to search
+	 * Paths to search
 	 *
-	 * @var array
+	 * @var Array
 	 */
 	protected static $paths = [];
 
 	/**
-	 * where should we store the cache file
+	 * Where should we store the cache file
 	 *
 	 * @var string
 	 */
 	protected static $cache_path;
 
 	/**
-	 * how many folder down is the root folder
+	 * How many folder down is the root folder
 	 *
 	 * @var int
 	 */
 	protected static $folder_levels;
 
 	/**
-	 * actual file array
+	 * Actual file array
 	 *
 	 * @var array
 	 */
@@ -49,7 +65,8 @@ class Orange_locator {
 	 * @param integer $level how many folder down is the root folder?
 	 *
 	 */
-	public static function load($cache_path,$folder_levels=2) {
+	public static function load(string $cache_path,int $folder_levels=2) : array
+	{
 		self::$cache_path = $cache_path;
 		self::$folder_levels = $folder_levels;
 
@@ -70,31 +87,38 @@ class Orange_locator {
 		return self::$array;
 	}
 
-	public static function controllers() {
+	public static function controllers() : Array
+	{
 		return self::$array['controllers'];
 	}
 
-	public static function views() {
+	public static function views() : Array
+	{
 		return self::$array['views'];
 	}
 
-	public static function view($file) {
+	public static function view(string $file) : String
+	{
 		return self::paths('views',$file);
 	}
 
-	public static function classes() {
+	public static function classes() : Array
+	{
 		return self::$array['classes'];
 	}
 
-	public static function class($file) {
+	public static function class(string $file) : String
+	{
 		return self::paths('classes',$file);
 	}
 
-	public static function append($section,$file,$value) {
+	public static function append(string $section,string $file,string $value) : void
+	{
 		self::$array[$section] = [$file=>$value] + self::$array[$section];
 	}
 
-	protected static function paths($section=null,$file=null) {
+	protected static function paths(string $section=null,string $file=null)
+	{
 		$file = strtolower($file);
 
 		return (isset(self::$array[$section][$file])) ? self::$array[$section][$file] : false;
@@ -108,7 +132,8 @@ class Orange_locator {
 	 * @return
 	 *
 	 */
-	protected static function write_cache($array) {
+	protected static function write_cache(array $array)
+	{
 		$php1 = $php2 = '';
 		
 		/* traverse "up" this many folder to create $baseDir */

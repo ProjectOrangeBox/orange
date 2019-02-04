@@ -29,6 +29,7 @@
  * @config html_group_class `{group class}`
  * @config default error group `records`
  * @config auto detect `true`
+ * @config errors view path `'/application/views/errors/'`
  *
  */
 class Errors {
@@ -119,6 +120,13 @@ class Errors {
 	protected $request_type = 'array';
 
 	/**
+	 * Path to all error view files
+	 *
+	 * @var string
+	 */
+	protected $errors_view_path = '';
+
+	/**
 	 * Constructor
 	 *
 	 * @access public
@@ -140,6 +148,8 @@ class Errors {
 
 		$this->default_group = $this->config['default error group'] ?? 'records';
 		$this->current_group = $this->default_group;
+
+		$this->errors_view_path = $this->config['errors view path'] ?? ROOTPATH.'/application/views/errors/';
 
 		if ($this->config['auto detect']) {
 			if ($this->input->is_cli_request()) {
@@ -214,6 +224,24 @@ class Errors {
 		log_message('debug', 'Errors::group::'.$this->current_group);
 
 		return $this;
+	}
+
+	/**
+	 *
+	 * Returns an array of all groups
+	 *
+	 * @access public
+	 *
+	 * @return array
+	 *
+	 * #### Example
+	 * ```
+	 * $array = ci('errors')->groups();
+	 * ```
+	 */
+	public function groups() : array
+	{
+		return array_keys($this->errors);
 	}
 
 	/**
@@ -373,33 +401,42 @@ class Errors {
 
 	/**
 	 *
-	 * Show error view on error and die.
+	 * returns if any groups have an error
 	 *
 	 * @access public
 	 *
-	 * @param $view 400
-	 * @param string $group null
+	 * @return bool
 	 *
-	 * @return $this
+	 */
+	public function has_any() : bool
+	{
+		foreach ($this->errors as $group=>$errors) {
+			if (count($this->errors[$group])) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
 	 *
+	 * Information on all errors
+	 *
+	 * @access public
+	 *
+	 * @param
+	 *
+	 * @return array
 	 *
 	 * #### Example
 	 * ```
-	 * ci('errors')->group('foo')->add('Oh No!')->die_on_error(400,'foo');
+	 * $array = ci('errors')->error_info();
 	 * ```
-	 *
 	 */
-	public function die_on_error($view = 400,string $group = null) : Errors
+	public function error_info() : array
 	{
-		$group = ($group) ? $group : $this->current_group;
-
-		log_message('debug', 'Errors::die_on_error::'.$view.' '.$group);
-
-		if ($this->has($group)) {
-			$this->display($view);
-		}
-
-		return $this;
+		return $this->errors;
 	}
 
 	/**
@@ -545,6 +582,37 @@ class Errors {
 
 	/**
 	 *
+	 * Show error view on error and die.
+	 *
+	 * @access public
+	 *
+	 * @param $view 400
+	 * @param string $group null
+	 *
+	 * @return $this
+	 *
+	 *
+	 * #### Example
+	 * ```
+	 * ci('errors')->group('foo')->add('Oh No!')->die_on_error(400,'foo');
+	 * ```
+	 *
+	 */
+	public function die_on_error($view = 400,string $group = null) : Errors
+	{
+		$group = ($group) ? $group : $this->current_group;
+
+		log_message('debug', 'Errors::die_on_error::'.$view.' '.$group);
+
+		if ($this->has($group)) {
+			$this->display($view);
+		}
+
+		return $this;
+	}
+
+	/**
+	 *
 	 * Generic Error Message.
 	 *
 	 * @access public
@@ -659,7 +727,7 @@ class Errors {
 			->set_output($this->error_view($view_path,$data))
 			->_display();
 
-		$this->output->exit($exit_status);
+		$this->output->_exit($exit_status);
 	}
 
 	/**
@@ -678,13 +746,9 @@ class Errors {
 	{
 		log_message('debug', 'Errors::error_view::'.$_view);
 
-		/* clean up the view path */
-		$_file = APPPATH.'views/errors/'.$_view.'.php';
-
 		/* get a list of all the found views */
-		if (!file_exists($_file)) {
-			/* Not Found */
-			die('Could not locate error view "'.$_file.'"');
+		if (!$_file = realpath($this->errors_view_path.$_view.'.php')) {
+			throw new Exception('Could not locate error view "'.$this->errors_view_path.$_view.'"');
 		}
 
 		/* import variables into the current symbol table from an only prefix invalid/numeric variable names with _ 	*/

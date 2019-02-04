@@ -1,34 +1,63 @@
 <?php
 /**
- * MY_Output
- * Insert description here
+ * Orange
+ *
+ * An open source extensions for CodeIgniter 3.x
+ *
+ * This content is released under the MIT License (MIT)
+ * Copyright (c) 2014 - 2019, Project Orange Box
+ */
+
+/**
+ * Extension to CodeIgniter Output Class
+ *
+ * Provides automatic handling of
+ * JSON output
+ * nocache header
+ * setting & deleting cookies
  *
  * @package CodeIgniter / Orange
  * @author Don Myers
- * @copyright 2018
+ * @copyright 2019
  * @license http://opensource.org/licenses/MIT MIT License
  * @link https://github.com/ProjectOrangeBox
- * @version 2.0
+ * @version v2.0.0
  *
- * required
- * core:
- * libraries:
- * models:
- * helpers:
- * functions:
+ * @uses # input - CodeIgniter Input
+ *
+ * @config base_url
  *
  */
+
 class MY_Output extends CI_Output {
+	/**
+	 * JSON encoding for all json output
+	 *
+	 * @var int
+	 */
 	protected $json_options = JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE;
 
-/**
- * json
- * Send a Json responds
- *
- * @return $this
- *
- */
-	public function json($data = null, $val = null, $raw = false) {
+	/**
+	 * Send a JSON responds
+	 *
+	 * @access public
+	 *
+	 * @param $data null
+	 * @param $val null
+	 * @param $raw false
+	 *
+	 * @return MY_Output
+	 *
+	 * #### Example
+	 * ```
+	 * ci('output')->json('name','Johnny');
+	 * ci('output')->json(['name'=>'Johnny']);
+	 * ci('output')->json('{name:"Johnny"}',null,true);
+	 * ci('output')->json(null,null,true); # use loader (view) variables
+	 * ```
+	 */
+	public function json($data = null, $val = null, $raw = false) : MY_Output
+	{
 		/* what the heck do we have here... */
 		if ($raw && $data === null) {
 			$json = $val;
@@ -54,14 +83,17 @@ class MY_Output extends CI_Output {
 	}
 
 
-/**
- * nocache
- * Send a nocache header
- *
- * @return $this
- *
- */
-	public function nocache() {
+	/**
+	 *
+	 * Send a nocache header
+	 *
+	 * @access public
+	 *
+	 * @return MY_Output
+	 *
+	 */
+	public function nocache() : MY_Output
+	{
 		$this
 			->set_header('Expires: Sat,26 Jul 1997 05:00:00 GMT')
 			->set_header('Cache-Control: no-cache,no-store,must-revalidate,max-age=0')
@@ -71,36 +103,42 @@ class MY_Output extends CI_Output {
 		return $this;
 	}
 
-/**
- * set_cookie
- * Wrapper for input's set cookie because it more of a "output" function
- *
- * @param $name
- * @param $value
- * @param $expire
- * @param $domain
- * @param $path
- * @param $prefix
- * @param $secure
- * @param $httponly
- *
- * @return $this
- *
- */
-	public function set_cookie($name = '', $value = '', $expire = '', $domain = '', $path = '/', $prefix = '', $secure = FALSE, $httponly = FALSE) {
+	/**
+	 *
+ 	 * Wrapper for input's set cookie because it more of a "output" function
+	 *
+	 * @access public
+	 *
+	 * @param $name
+	 * @param string $value
+	 * @param int $expire
+	 * @param string $domain
+	 * @param string $path /
+	 * @param string $prefix
+	 * @param bool $secure FALSE
+	 * @param bool $httponly FALSE
+	 *
+	 * @return MY_Output
+	 *
+	 */
+	public function set_cookie($name = '',string $value = '',int $expire = 0,string $domain = '',string $path = '/',string $prefix = '',bool $secure = FALSE,bool $httponly = FALSE) : MY_Output
+	{
 		ci('input')->set_cookie($name, $value, $expire, $domain, $path, $prefix, $secure, $httponly);
 
 		return $this;
 	}
 
-/**
- * delete_all_cookies
- * Delete all cookies (ie. set to a time in the past since which will make the browser ignore them
- *
- * @return $this
- *
- */
-	public function delete_all_cookies() {
+	/**
+	 *
+ 	 * Delete all cookies (ie. set to a time in the past since which will make the browser ignore them
+	 *
+	 * @access public
+	 *
+	 * @return MY_Output
+	 *
+	 */
+	public function delete_all_cookies() : MY_Output
+	{
 		foreach (ci('input')->cookie() as $name=>$value) {
 			ci('input')->set_cookie($name, $value, (time() - 3600),config('config.base_url'));
 		}
@@ -108,10 +146,19 @@ class MY_Output extends CI_Output {
 		return $this;
 	}
 
-/**
- * provide this to allow mocking
- */
-	public function exit($code=1) {
+	/**
+	 *
+	 * Provided to allow mocking to override and not exit
+	 *
+	 * @access public
+	 *
+	 * @param int $code 1
+	 *
+	 * @return void
+	 *
+	 */
+	public function _exit(int $code = 1) : void
+	{
 		exit($code);
 	}
 

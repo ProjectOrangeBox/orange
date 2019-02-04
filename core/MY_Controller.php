@@ -1,98 +1,124 @@
 <?php
 /**
- * MY_Controller
- * base controller
+ * Orange
+ *
+ * An open source extensions for CodeIgniter 3.x
+ *
+ * This content is released under the MIT License (MIT)
+ * Copyright (c) 2014 - 2019, Project Orange Box
+ */
+
+/**
+ * Controller Base Class
+ *
+ * middleware request & responds handling
+ * Determining if the site is "open"
+ * auto library, model, helper, model catalog, controller model loading
  *
  * @package CodeIgniter / Orange
  * @author Don Myers
- * @copyright 2018
+ * @copyright 2019
  * @license http://opensource.org/licenses/MIT MIT License
  * @link https://github.com/ProjectOrangeBox
- * @version 2.0
+ * @version v2.0.0
  *
- * required
- * core:
- * libraries:
- * models:
- * helpers:
- * functions:
+ * @config application.site open boolean
+ * @config application.site open boolean
+ *
+ * @uses # router - CodeIgniter Router
+ * @uses # event - Orange event
  *
  */
+
 class MY_Controller extends CI_Controller {
 	/**
-	 * cache the controllers output in seconds
+	 * Cache the controllers output in seconds
 	 *
 	 * @var int
 	 */
-	public $cache_page_for = null;
+	public $cache_page_for;
 
 	/**
-	 * name of the controller
+	 * Name of the controller
 	 *
 	 * @var string
 	 */
-	public $controller = null;
+	public $controller;
 
 	/**
 	 * URL to this controller
 	 *
 	 * @var string
 	 */
-	public $controller_path = null;
+	public $controller_path;
 
 	/**
-	 * libraries to load
+	 * Libraries to autoload
 	 * available to all methods
 	 *
 	 * @var array
 	 */
-	public $libraries = null;
+	public $libraries;
 
 	/**
-	 * helpers to load
+	 * Helpers to autoload
 	 * available to all methods
 	 *
 	 * @var array
 	 */
-	public $helpers = null;
+	public $helpers;
 
 	/**
-	 * models to load
+	 * Models to autoload
 	 * available to all methods
 	 *
 	 * @var array
 	 */
-	public $models = null;
+	public $models;
 
 	/**
-	 * catalogs to load
+	 * Model catalogs to autoload
 	 * available to all methods
 	 *
 	 * @var array
 	 */
-	public $catalogs = null;
+	public $catalogs;
 
 	/**
-	 * universally accessible view data
+	 * Universally accessible view data array
 	 *
 	 * @var array
 	 */
 	public $data = [];
 
 	/**
-	 * name of the default controller model
+	 * Name of the default controller model autoloaded
 	 *
 	 * @var string
 	 */
-	public $controller_model = null;
+	public $controller_model;
 
+	/**
+	 *
+	 * Constructor
+	 *
+	 * @access public
+	 *
+	 */
 	public function __construct() {
 		/* let the parent controller do it's work */
 		parent::__construct();
 
 		log_message('debug', 'MY_Controller::__construct');
 
-		/* is the site up? */
+		/**
+		 * Is the site up?
+		 *
+		 * If this is a cli request then it's always up
+		 * If they have ISOPEN cookie matching application.is open cookie configuration value then continue processing
+		 * Else Show the 503 server down error page
+		 *
+		 */
 		if (php_sapi_name() !== 'cli') {
 			if (!config('application.site open',true)) {
 				if ($_COOKIE['ISOPEN'] !== config('application.is open cookie', md5(uniqid(true)))) {
@@ -103,58 +129,47 @@ class MY_Controller extends CI_Controller {
 
 		$this->router->handle_requests($this);
 
-		/* load the libraries, models, helpers, catalogs from the properties as needed */
-		if ($this->libraries) {
-			$this->load->library((array) $this->libraries);
-		}
-
-		if ($this->models) {
-			$this->load->model((array) $this->models);
-		}
-
-		if ($this->helpers) {
-			$this->load->helpers((array) $this->helpers);
-		}
-
-		if ($this->catalogs) {
-			foreach ($this->catalogs as $variable_name=>$args) {
-				if (!is_array($args)) {
-					$model_name = $args;
-					$args = [];
-				} else {
-					$model_name = $args['model'];
-				}
-
-				$this->load->model($model_name);
-
-				$model_method = (isset($args['method'])) ? $args['method'] : 'catalog';
-
-				if (method_exists($this->$model_name,$model_method)) {
-					if ($model_method == 'catalog') {
-						$this->load->vars($variable_name, $this->$model_name->$model_method(@$args['array_key'],@$args['select'],@$args['where'],@$args['order_by'],@$args['cache'],@$args['with_deleted']));
-					} else {
-						$this->load->vars($variable_name, $this->$model_name->$model_method($args));
-					}
-				} else {
-					throw new Exception('Method "'.$model_method.'" doesn\'t exist on "'.$model_name.'"');
-				}
-			}
-		}
-
-		/* does the controller have a "default" model? */
-		if ($this->controller_model) {
-			$this->load->model(strtolower($this->controller_model));
-		}
-
 		/* trigger our start up event */
 		ci('event')->trigger('ci.controller.startup', $this);
 	}
 
-	public function _output($output) {
+	/**
+	 *
+	 * Final output
+	 *
+	 * @access public
+	 *
+	 * @param $output
+	 *
+	 * @return void
+	 *
+	 */
+	public function _output($output) : void
+	{
+		/**
+		 * CodeIgniter sends in null if nothing has been sent for output
+		 * lets normalize it
+		 */
+		$output = ($output) ?? '';
+
 		echo $this->router->handle_responds($this,$output);
+
+		/* trigger our output event */
+		ci('event')->trigger('ci.controller.output',$this,$output);
 	}
 
-	/* place holder for cli */
-	public function indexCliAction(){}
+	/**
+	 *
+	 * Command Line Placeholder
+	 *
+	 * @access public
+	 *
+	 * @return mixed
+	 *
+	 */
+	public function indexCliAction()
+	{
+
+	}
 
 } /* end class */

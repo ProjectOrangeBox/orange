@@ -1,25 +1,38 @@
 <?php
 /**
- * MY_Config
- * The Config class provides a means to retrieve configuration preferences.
- * These preferences can come from the default config file (application/config/config.php)
- * or from your own custom config files.
+ * Orange
+ *
+ * An open source extensions for CodeIgniter 3.x
+ *
+ * This content is released under the MIT License (MIT)
+ * Copyright (c) 2014 - 2019, Project Orange Box
+ */
+
+/**
+ * Extension to CodeIgniter Config Class
+ *
+ * `dot_item_lookup($keyvalue,$default)` lookup configuration using dot notation with optional default
+ *
+ * `set_dot_item($name,$value)` set non permanent value in config
+ *
+ * `flush()` flush the cached configuration
  *
  * @package CodeIgniter / Orange
  * @author Don Myers
- * @copyright 2018
+ * @copyright 2019
  * @license http://opensource.org/licenses/MIT MIT License
  * @link https://github.com/ProjectOrangeBox
- * @version 2.0
+ * @version v2.0.0
  *
- * required
- * core: cache
- * libraries:
- * models: o_setting_model
- * helpers:
- * functions:
+ * @uses # o_setting_model - Orange Settings Model
+ * @uses # export cache - Orange Export Cache
+ * @uses # load_config() - Orange Config File Loader
+ * @uses # convert_to_real() - Orange convert string values into PHP real values where possible
+ *
+ * @config no_database_settings boolean
  *
  */
+
 class MY_Config extends CI_Config {
 	/**
 	 * track if the combined cached configuration has been loaded
@@ -29,21 +42,27 @@ class MY_Config extends CI_Config {
 	protected $setup = false;
 
 	/**
-	 * provide dot notation selection
-	 * this is the new "recommended" way to make sure you get database values as well
 	 *
-	 * @param string $setting dot notation format config item
-	 * @param mixed $default if not found
-	 *
-	 * @return string|null The configuration item or NULL if the item doesn't exist
+	 * Provides dot notation selection of configuration values
+	 * this is the "recommended" way to make sure you get database values as well
 	 *
 	 * @access public
-	 * @uses none
-	 * @examples dot_item('email.mailtype','html')
+	 *
+	 * @param string $setting filename.key
+	 * @param $default null
+	 *
+	 * @return mixed
+	 *
+	 * #### Example
+	 * ```
+	 * $value = ci('config')->dot_item('email.protocol','sendmail');
+	 * ```
 	 */
-	public function dot_item($setting,$default=null) {
+	public function dot_item(string $setting,$default=null)
+	{
 		log_message('debug', 'MY_Config::item_dot::'.$setting);
 
+		/* have we loaded the config? */
 		$this->_load_config();
 
 		$key = false;
@@ -66,21 +85,23 @@ class MY_Config extends CI_Config {
 	}
 
 	/**
-	 * Change dot notation config value
+	 *
+	 * Change or Add a dot notation config value
 	 * NOT Saved between requests
 	 *
-	 * @param string $setting Config item name in dot notation format
-	 * @param mixed $value value to set configuration value to
-	 *
-	 * @return this
-	 *
 	 * @access public
-	 * @uses none
-	 * @examples set_dot_item('email.mailtype','html')
+	 *
+	 * @param string $setting
+	 * @param $value null
+	 *
+	 * @return $this
+	 *
 	 */
-	public function set_dot_item($setting,$value=null) {
+	public function set_dot_item(string $setting,$value=null) : MY_Config
+	{
 		log_message('debug', 'MY_Config::set_item_dot::'.$setting);
 
+		/* have we loaded the config? */
 		$this->_load_config();
 
 		list($file,$key) = explode('.', strtolower($setting), 2);
@@ -96,14 +117,17 @@ class MY_Config extends CI_Config {
 	}
 
 	/**
-	 * flush the cached data for the NEXT request
 	 *
-	 * @return boolean success or failure
+	 * Flush the cached data for the NEXT request
 	 *
 	 * @access public
-	 * @examples flush()
+	 *
+	 * @throws
+	 * @return bool
+	 *
 	 */
-	public function flush() {
+	public function flush() : bool
+	{
 		log_message('debug', 'MY_Config::settings_flush');
 
 		$this->setup = false;
@@ -111,7 +135,17 @@ class MY_Config extends CI_Config {
 		return ci('cache')->export->delete('config');
 	}
 
-	protected function _load_config() {
+	/**
+	 *
+	 * Load the configuration if it's not already
+	 *
+	 * @access protected
+	 *
+	 * @return void
+	 *
+	 */
+	protected function _load_config() : void
+	{
 		if (!$this->setup) {
 			$this->setup = true;
 			$this->config = $this->_load_combined_config();
@@ -119,13 +153,18 @@ class MY_Config extends CI_Config {
 	}
 
 	/**
-	 * configuration cache builder
-	 * combined file config files, environment files, database values
 	 *
-	 * @return null
+	 * Load the combined Application, Environmental, Database Configuration values
+	 *
+	 * @access protected
+	 *
+	 * @param
+	 *
+	 * @return array
 	 *
 	 */
-	protected function _load_combined_config() {
+	protected function _load_combined_config() : array
+	{
 		/* load from the cache */
 		$complete_config = ci('cache')->export->get('config');
 

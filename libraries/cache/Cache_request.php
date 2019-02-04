@@ -100,7 +100,7 @@ class Cache_request extends CI_Driver {
 	 * @return bool
 	 *
 	 */
-	public function save(string $id, $data,int $ttl = 0,bool $raw = false) : bool
+	public function save(string $id, $data,int $ttl = null,bool $raw = false) : bool
 	{
 		$this->cache[$id] = $data;
 

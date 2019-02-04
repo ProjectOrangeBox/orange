@@ -1,25 +1,64 @@
 <?php
 /**
-* Orange Framework Extension
-*
-* This content is released under the MIT License (MIT)
-*
-* @package	CodeIgniter / Orange
-* @author	Don Myers
-* @license http://opensource.org/licenses/MIT MIT License
-* @link	https://github.com/ProjectOrangeBox
-*
-* required
-* core: config
-* libraries:
-* models:
-* helpers:
-*
-*/
+ * Orange
+ *
+ * An open source extensions for CodeIgniter 3.x
+ *
+ * This content is released under the MIT License (MIT)
+ * Copyright (c) 2014 - 2019, Project Orange Box
+ */
+
+/**
+ * Extension to CodeIgniter Log Class
+ *
+ * Handle general logging with optional Monolog library support
+ *
+ * @package CodeIgniter / Orange
+ * @author Don Myers
+ * @copyright 2019
+ * @license http://opensource.org/licenses/MIT MIT License
+ * @link https://github.com/ProjectOrangeBox
+ * @version v2.0.0
+ *
+ * @config config.log_threshold `0`
+ * @config config.log_path `ROOTPATH.'/var/logs/'`
+ * @config config.log_file_extension `log`
+ * @config config.log_file_permissions `0644`
+ * @config config.log_date_format `Y-m-d H:i:s.u`
+ * @config config.log_use_bitwise_psr `true`
+ * @config config.log_handler
+ *
+ * @method __call
+ *
+ */
+
 class MY_Log extends CI_Log {
+	/**
+	 * Local reference to monolog object
+	 *
+	 * @var \Monolog\Logger
+	 */
 	protected $_monolog = null; /* singleton reference to monolog */
+
+	/**
+	 * Boolean whether we are using bitwise error levels
+	 *
+	 * @var Boolean
+	 */
 	protected $_bitwise = false; /* Are we using CodeIgniter Mode or PSR3 Bitwise Mode? */
 
+	/**
+	 * Local reference to logging configurations
+	 *
+	 * @var Array
+	 */
+	protected $config = [];
+
+	/**
+	 * String to PSR error levels
+	 *
+	 * @var Array
+	 */
 	protected $psr_levels = [
 		'EMERGENCY' => 1,
 		'ALERT'     => 2,
@@ -30,6 +69,12 @@ class MY_Log extends CI_Log {
 		'INFO'      => 64,
 		'DEBUG'     => 128,
 	];
+
+	/**
+	 * String to RFC error levels
+	 *
+	 * @var Array
+	 */
 	protected $rfc_log_levels = [
 		'DEBUG'     => 100,
 		'INFO'      => 200,
@@ -41,41 +86,71 @@ class MY_Log extends CI_Log {
 		'EMERGENCY' => 600,
 	];
 
-	/*
-	Useful Configuration in the config.php File
-
-	log_threshold - CodeIgniter 0-4 / PSR3 0-255
-	log_path - file based logs path
-	log_file_extension - file based logs file extension
-	log_file_permissions - file based log permissions
-	log_date_format - date format used by Formatters
-	log_use_bitwise_psr - Should the threshold be a bitwise/monolog style or CodeIgniter style?
-	log_handler - codeigniter | monolog
-	*/
+	/**
+	 *
+	 * Constructor
+	 *
+	 * @access public
+	 *
+	 */
 	public function __construct() {
-		/* defaults */
-		$this->_log_path = APPPATH.'logs/';
+		$this->config = load_config('config');
 
-		$this->reconfigure(load_config('config'));
+		$this->bootstrap();
 
 		$this->write_log('DEBUG', 'MY_Log initialized');
 	}
 
 	/**
-	 * Write Log File
 	 *
-	 * Generally this function will be called using the global log_message() function
+	 * Allow the assigning of any configuration that starts with log_
 	 *
-	 * @param	string	the error level: 'error','debug' or 'info'
-	 * @param	string	the error message
-	 * @return	bool
+	 * @access public
+	 *
+	 * @param string $name
+	 * @param array $arguments
+	 *
+	 * @return MY_Log
+	 *
+	 * #### Example
+	 * ```
+	 * ci('log')->log_threshold(255)
+	 * ci('log')->log_path(APPPATH.'/logs')
+	 * ```
 	 */
-	public function write_log($level, $msg) {
-		/*
-		This function has multiple exit points
-		because we try to bail as soon as possible
-		if no logging is needed to keep it a little faster
-		*/
+	public function __call(string $name,array $arguments) : MY_Log
+	{
+		if (substr($name,0,4) == 'log_') {
+			$this->config[$name] = $arguments[0];
+
+			$this->bootstrap();
+		}
+		
+		return $this;
+	}
+
+	/**
+	 *
+	 * Write to log file
+	 * Generally this function will be called using the global log_message() function
+	 * If configuration value log_use_bitwise_psr is true
+	 * then you can also use all of the other psr error levels
+	 *
+	 * @access public
+	 *
+	 * @param $level error|debug|info
+	 * @param $msg the error message
+	 *
+	 * @return bool
+	 *
+	 */
+	public function write_log($level, $msg) : bool
+	{
+		/**
+		 * This function has multiple exit points
+		 * because we try to bail as soon as possible
+		 * if no logging is needed to keep it a little faster
+		 */
 		if (!$this->_enabled) {
 			return false;
 		}
@@ -92,13 +167,55 @@ class MY_Log extends CI_Log {
 		return ($this->_monolog) ? $this->monolog_write_log($level, $msg) : $this->ci_write_log($level, $msg);
 	}
 
-	public function get_log_file() {
-		$file = $this->_log_path.'log-'.date('Y-m-d').'.'.$this->_file_ext;
+	/**
+	 *
+	 * Get the contents of the current log file
+	 *
+	 * @access public
+	 *
+	 * @return string
+	 *
+	 */
+	public function get_log_file() : string
+	{
+		$file = $this->build_log_file_path();
 
 		return (file_exists($file)) ? file_get_contents($file) : '';
 	}
 
-	protected function monolog_write_log($level, $msg) {
+	/**
+	 *
+	 * Test whether logging is enabled
+	 *
+	 * @access public
+	 *
+	 * @return Bool
+	 *
+	 * #### Example
+	 * ```
+	 * ci('log')->is_enabled();
+	 * ```
+	 */
+	public function is_enabled() : Bool
+	{
+		return $this->_enabled;
+	}
+
+	/**
+	 *
+	 * Handle writing to monolog
+	 * if we are using it
+	 *
+	 * @access protected
+	 *
+	 * @param string $level
+	 * @param string $msg
+	 *
+	 * @return bool
+	 *
+	 */
+	protected function monolog_write_log(string $level,string $msg) : bool
+	{
 		/* route to monolog */
 		switch ($level) {
 		case 'EMERGENCY': // 1
@@ -130,13 +247,37 @@ class MY_Log extends CI_Log {
 		return true;
 	}
 
-	/*
-	overridden to allow all PSR3 log levels
+	/**
+	 *
+	 * Build the CodeIgniter Log File Path
+	 *
+	 * @access protected
+	 *
+	 * @return string
+	 *
+	 */
+	protected function build_log_file_path() : string
+	{
+		return rtrim($this->_log_path,'/').'/log-'.date('Y-m-d').'.'.$this->_file_ext;
+	}
 
-	pretty much a copy of CodeIgniter's Method.
-	*/
-	protected function ci_write_log($level, $msg) {
-		$filepath = $this->_log_path.'log-'.date('Y-m-d').'.'.$this->_file_ext;
+	/**
+	 *
+	 * Overridden to allow all PSR3 log levels if they are passed
+	 * This should be tested before calling this mehtod
+	 * Pretty much a copy of CodeIgniter's Method.
+	 *
+	 * @access protected
+	 *
+	 * @param string $level
+	 * @param string $msg
+	 *
+	 * @return bool success
+	 *
+	 */
+	protected function ci_write_log(string $level,string $msg) : bool
+	{
+		$filepath = $this->build_log_file_path();
 		$message = '';
 
 		if (!file_exists($filepath)) {
@@ -168,50 +309,65 @@ class MY_Log extends CI_Log {
 		return is_int($result);
 	}
 
-	protected function _convert_string_to_value($string) {
-
-	}
-
-	public function reconfigure($config,$value=null) {
-		if ($value !== null) {
-			$config = [$config=>$value];
-		}
-
-		if (isset($config['log_threshold'])) {
-			$log_threshold = $config['log_threshold'];
-
+	/**
+	 *
+	 * Bootstrap / reconfigure bootstrap after a configuration value change
+	 *
+	 * @access protected
+	 *
+	 */
+	protected function bootstrap() : void
+	{
+		if (isset($this->config['log_threshold'])) {
+			$log_threshold = $this->config['log_threshold'];
+			
+			/* if they sent in a string split it into a array */
 			if (is_string($log_threshold)) {
-				$log_threshold = strtoupper($log_threshold);
-				
-				if (strpos($log_threshold,',') !== false) {
-					$log_threshold = explode(',',$log_threshold);
-				} elseif ($log_threshold == 'ALL') {
+				$log_threshold = explode(',',$log_threshold);
+			}
+			
+			/* is the array empty? */
+			if (is_array($log_threshold)) {
+				if (count($log_threshold) == 0) {
+					$log_threshold = 0;
+				}
+			}
+
+			/* Is all in the array (uppercase or lowercase?) */
+			if (is_array($log_threshold)) {
+				if (array_search('all',$log_threshold) !== false) {
 					$log_threshold = 255;
 				}
 			}
 
+			/* build the bitwise integer */
 			if (is_array($log_threshold)) {
 				$int = 0;
-				
+
 				foreach ($log_threshold as $t) {
-					$int += $this->psr_levels[strtoupper($t)];
+					$t = strtoupper($t);
+					
+					if (isset($this->psr_levels[$t])) {
+						$int += $this->psr_levels[$t];
+					}
 				}
 
 				$log_threshold = $int;
 			}
 
 			$this->_threshold = (int)$log_threshold;
+			
 			$this->_enabled = ($this->_threshold > 0);
 		}
 
 		isset(self::$func_overload) || self::$func_overload = (extension_loaded('mbstring') && ini_get('mbstring.func_overload'));
 
-		if (isset($config['log_file_extension'])) {
-			$this->_file_ext = (!empty($config['log_file_extension'])) 	? ltrim($config['log_file_extension'], '.') : 'php';
+		if (isset($this->config['log_file_extension'])) {
+			$this->_file_ext = (!empty($this->config['log_file_extension'])) 	? ltrim($this->config['log_file_extension'], '.') : 'php';
 		}
 
-		if (isset($config['log_path'])) {
-			$this->_log_path = ($config['log_path'] !== '') ? $config['log_path'] : APPPATH.'logs/';
+		if (isset($this->config['log_path'])) {
+			$this->_log_path = ($this->config['log_path'] !== '') ? $this->config['log_path'] : APPPATH.'logs/';
 
 			file_exists($this->_log_path) || mkdir($this->_log_path, 0755, TRUE);
 
@@ -221,43 +377,42 @@ class MY_Log extends CI_Log {
 			}
 		}
 
-		if (!empty($config['log_date_format'])) 	{
-			$this->_date_fmt = $config['log_date_format'];
+		if (!empty($this->config['log_date_format'])) 	{
+			$this->_date_fmt = $this->config['log_date_format'];
 		}
 
-		if (!empty($config['log_file_permissions']) && is_int($config['log_file_permissions'])) 	{
-			$this->_file_permissions = $config['log_file_permissions'];
+		if (!empty($this->config['log_file_permissions']) && is_int($this->config['log_file_permissions'])) 	{
+			$this->_file_permissions = $this->config['log_file_permissions'];
 		}
 
-		if (isset($config['log_handler'])) {
-			if ($config['log_handler'] == 'monolog' && class_exists('\Monolog\Logger',false)) {
+		if (isset($this->config['log_handler'])) {
+			if ($this->config['log_handler'] == 'monolog' && class_exists('\Monolog\Logger',false)) {
 				if (!$this->_monolog) {
-					/*
-					Create a instance of monolog for the bootstrapper
-					Make the monolog "channel" "CodeIgniter"
-					This is a local variable so the bootstrapper can attach stuff to it
-					*/
-
+					/**
+					 * Create a instance of monolog for the bootstrapper
+					 * Make the monolog "channel" "CodeIgniter"
+					 * This is a local variable so the bootstrapper can attach stuff to it
+					 */
 					$monolog = new \Monolog\Logger('CodeIgniter');
 
-					/*
-					Find the monolog_bootstrap files
-					This is NOT a standard Codeigniter config
-					It includes PHP code which can use the $monolog object we just made
-					*/
+					/**
+					 * Find the monolog_bootstrap files
+					 * This is NOT a standard Codeigniter config
+					 * It includes PHP code which can use the $monolog object we just made
+					 */
 					if (file_exists(APPPATH.'config/'.ENVIRONMENT.'/monolog.php')) {
 						include APPPATH.'config/'.ENVIRONMENT.'/monolog.php';
 					} elseif (file_exists(APPPATH.'config/monolog.php')) {
 						include APPPATH.'config/monolog.php';
 					}
 
-					/* Attach the monolog instance to our class for later use */
+					/**
+					 * Attach the monolog instance to our class for later use
+					 */
 					$this->_monolog = &$monolog;
 				}
 			}
 		}
-
-		return $this->_enabled;
 	}
 
 } /* End of Class */

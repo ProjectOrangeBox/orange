@@ -1,35 +1,80 @@
 <?php
 /**
- * MY_Input
- * provides some helper methods for fetching input data and pre-processing it.
+ * Orange
+ *
+ * An open source extensions for CodeIgniter 3.x
+ *
+ * This content is released under the MIT License (MIT)
+ * Copyright (c) 2014 - 2019, Project Orange Box
+ */
+
+/**
+ * Extension to CodeIgniter Input Class
+ *
+ * Provides unified Request Method to read php://input
+ * A way to set / change the request data
+ * valid validation on input returning success
+ * filter validation on input replacing input with filtered
+ * filtered validation on input returning filtered input
+ * A way to dynamically remap the input
+ * read a cookie like other input with default option
+ * manually set the request type
+ * test if the request is ajax or cli
+ * stash / unstash input between requests
  *
  * @package CodeIgniter / Orange
  * @author Don Myers
- * @copyright 2018
+ * @copyright 2019
  * @license http://opensource.org/licenses/MIT MIT License
  * @link https://github.com/ProjectOrangeBox
- * @version 2.0
+ * @version v2.0.0
  *
- * required
- * core:
- * libraries:
- * models:
- * helpers:
- * functions:
+ * @uses # session - CodeIgniter Session 
+ * @uses # validate - Orange validate
+ *
+ * @config config.encryption_key  
  *
  */
+
 class MY_Input extends CI_Input {
 	/**
-	 * contains the current POST or PUT or PATCH request data
+	 * Contains the current POST or PUT or PATCH request data
 	 *
 	 * @var array
 	 */
 	protected $_request = [];
+
+	/**
+	 * Contains the current request type
+	 * HTML (default), ajax, cli
+	 *
+	 * @var string
+	 */
 	protected $request_type = 'html';
+
+	/**
+	 * The input stash session key
+	 *
+	 * @var string
+	 */
 	protected $stash_key = '_input_stash_';
+
+	/**
+	 * Contains the current POST or PUT or PATCH request data
+	 *
+	 * @var array
+	 */
 	protected $stash_hash_key = '_stash_hash_key_';
 
-	public function __construct() {
+	/**
+	 *
+	 * Constructor
+	 *
+	 * @access public
+	 *
+	 */
+	public function __construct()
+	{
 		/* grab raw input for patch and such */
 		$this->_raw_input_stream = file_get_contents('php://input');
 
@@ -44,23 +89,37 @@ class MY_Input extends CI_Input {
 		/* call the parent classes constructor */
 		parent::__construct();
 
+		/* let's figure out the request type */
+		if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') {
+			$this->request_type = 'ajax';
+		} elseif (is_cli()) {
+			$this->request_type = 'cli';
+		}
+
 		log_message('info', 'MY_Input Class Initialized');
 	}
 
 	/**
-	 * fetch post or put data
 	 *
-	 * @param string $index input parameter name
-	 * @param mixed $default default value if empty
-	 * @param boolean $xss_clean whether to apply XSS filtering
+	 * Fetch post or put data
 	 *
-	 * @return mixed
+	 * @access public
 	 *
-	 * @examples request('name','nothing supplied',true) - returns the value of name or nothing supplied if not provided with XSS filter
-	 * @examples request(null,null,true) - returns all POST items with XSS filter
-	 * @examples request() - returns all POST items without XSS filter
+	 * @param $index input parameter name
+	 * @param $default default value if empty
+	 * @param bool $xss_clean whether to apply XSS filtering
+	 *
+	 * @return 
+	 *
+	 * #### Example
+	 * ```
+	 * request('name','nothing supplied',true)
+	 * request(null,null,true)
+	 * request()
+	 * ```
 	 */
-	public function request($index = null, $default = null, $xss_clean = false) {
+	public function request($index = null,$default = null,bool $xss_clean = false)
+	{
 		log_message('debug', 'MY_Input::request::'.$index);
 
 		/* pull the value from our array and process with our built in function */
@@ -71,17 +130,19 @@ class MY_Input extends CI_Input {
 	}
 
 	/**
-	 * set_request
-	 * replace or add input data
 	 *
-	 * @param string $index input parameter name
-	 * @param mixed $replace_value value
+	 * Change or replace request data
 	 *
-	 * @return $this
+	 * @access public
 	 *
-	 * @examples set_request('name','Dr Pepper')
+	 * @param $index request index key or array or key value pairs
+	 * @param $replace_value value if true is provided and $index is a array then the entire request will be replaced
+	 *
+	 * @return MY_Input
+	 *
 	 */
-	public function set_request($index = null, $replace_value = null) {
+	public function set_request($index = null,$replace_value = null) : MY_Input
+	{
 		if (is_array($index) && $replace_value === true) {
 			$this->_request = $index;
 		} elseif (is_array($index)) {
@@ -95,8 +156,24 @@ class MY_Input extends CI_Input {
 		return $this;
 	}
 
-	/* return boolean success */
-	public function valid($key,$rules='',$human=null)
+	/**
+	 *
+	 * Validate input fields
+	 *
+	 * @access public
+	 *
+	 * @param $key field index
+	 * @param string $rules validation rules
+	 * @param string $human optional human readable field name
+	 *
+	 * @return Bool
+	 *
+	 * #### Example
+	 * ```
+	 * ci('input')->valid('first_name','required|string','First Name');
+	 * ```
+	 */
+	public function valid($key,string $rules='',string $human=null) : Bool
 	{
 		if (is_array($key)) {
 			foreach ($key as $k=>$r) {
@@ -126,8 +203,19 @@ class MY_Input extends CI_Input {
 		return ci('validate')->success();
 	}
 
-	/* filter and replace */
-	public function filter($key=null,$rules='')
+	/**
+	 *
+	 * Filter request data and replace
+	 *
+	 * @access public
+	 *
+	 * @param $key null
+	 * @param string $rules
+	 *
+	 * @return MY_Input
+	 *
+	 */
+	public function filter($key=null,string $rules='') : MY_Input
 	{
 		if (is_array($key)) {
 			foreach ($key as $k=>$r) {
@@ -146,8 +234,19 @@ class MY_Input extends CI_Input {
 		return $this;
 	}
 
-	/* return filtered value but do not replace */
-	public function filtered($key=null,$rules='')
+	/**
+	 *
+	 * Return filtered value but do not replace in request
+	 *
+	 * @access public
+	 *
+	 * @param $key null
+	 * @param $rules
+	 *
+	 * @return mixed
+	 *
+	 */
+	public function filtered($key=null,string $rules='')
 	{
 		if (is_array($key)) {
 			$return = [];
@@ -230,7 +329,8 @@ class MY_Input extends CI_Input {
 	 * $formatted = $this->input->request_remap(['fullname'=>'name'],['age'=>'number'],['remove'],'name',false,'|',true,$post);
 	 *
 	 */
-	public function request_remap($copy=[],$move=[],$remove=[],$default_model='#',$only_index=null,$separator='|',$append_model=false,$_request=[]) {
+	public function request_remap($copy=[],$move=[],$remove=[],$default_model='#',$only_index=null,$separator='|',$append_model=false,$_request=[])
+	{
 		/* use form request or what was sent in? */
 		if (is_bool($_request)) {
 			/* if it's true or false use the form request data */
@@ -334,20 +434,26 @@ class MY_Input extends CI_Input {
 	}
 
 	/**
-	 * cookie
-	 * treat cookie like request with default value
 	 *
-	 * @param string $index input parameter name
-	 * @param string $default default value if empty
-	 * @param boolean $xss_clean whether to apply XSS filtering
+	 * Treat cookie like request with default value
+	 *
+	 * @access public
+	 *
+	 * @param $index
+	 * @param $default
+	 * @param $xss_clean false
 	 *
 	 * @return mixed
 	 *
-	 * @examples cookies('username','unknown',true)- returns the value of name or nothing supplied if not provided with XSS filter
-	 * @examples cookies(null,null,true) - returns all COOKIE items with XSS filter
-	 * @examples cookies() - returns all COOKIE items without XSS filter
+	 * #### Example
+	 * ```
+	 * ci('input')->cookies('username','unknown',true)
+	 * ci('input')->cookies(null,null,true)
+	 * ci('input')->cookies()
+	 * ```
 	 */
-	public function cookie($index = null, $default = null, $xss_clean = false) {
+	public function cookie($index = null, $default = null, $xss_clean = false)
+	{
 		$value = $this->_fetch_from_array($_COOKIE, $index, false);
 
 		$value = ($value === null) ? $default : $value;
@@ -355,10 +461,22 @@ class MY_Input extends CI_Input {
 		return ($xss_clean) ? $this->security->xss_clean($value) : $value;
 	}
 
-	public function set_request_type($request_type)
+	/**
+	 *
+	 * Manually set the current request type
+	 *
+	 * @access public
+	 *
+	 * @param string $request_type [cli|ajax|html]
+	 *
+	 * @throws \Exception
+	 * @return \Input
+	 *
+	 */
+	public function set_request_type(string $request_type) : MY_Input
 	{
 		/* options include cli, ajax, html */
-		if (!in_array($request_type,['cli','ajax','html'])) {
+		if (!in_array($request_type,['cli','ajax','html'])) 	{
 			throw new Exception(__METHOD__.' unknown type '.$request_type.'.');
 		}
 		
@@ -367,75 +485,69 @@ class MY_Input extends CI_Input {
 		return $this;
 	}
 
-	public function is_ajax_request()
-	{
-		return ($this->request_type == 'ajax') ? true : (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest');
-	}
-
-	// --------------------------------------------------------------------
-
 	/**
-	 * Is CLI request?
 	 *
-	 * Test to see if a request was made from the command line.
+	 * Determine if this is a ajax request
 	 *
-	 * @deprecated	3.0.0	Use is_cli() instead
-	 * @return	bool
+	 * @access public
+	 *
+	 * @return bool
+	 *
 	 */
-	public function is_cli_request()
+	public function is_ajax_request() : bool
 	{
-		return ($this->request_type == 'cli') ? true : is_cli();
+		return ($this->request_type == 'ajax');
 	}
 
 	/**
-	 * stash
-	 * stash the request data
+	 * Determine if this is a Command Line request
 	 *
-	 * @return
+	 * @access public
+	 *
+	 * @return bool
 	 *
 	 */
-	public function stash() {
-		$stash = $this->_request;
+	public function is_cli_request() : bool
+	{
+		return ($this->request_type == 'cli');
+	}
 
+	/**
+	 *
+	 * Stash the request data for later retrieval
+	 *
+	 * @return \Input
+	 *
+	 */
+	public function stash() : MY_Input
+	{
 		/* is there even an array to store? */
-		if (is_array($stash)) {
-			/* put a simple checksum on this */
-			$stash[$this->stash_hash_key] = md5(json_encode($stash).config('config.encryption_key'));
-
-			ci('session')->set_tempdata($this->stash_key,$stash,3600); /* defaults to 10 minutes */
+		if (is_array($this->_request)) {
+			ci('session')->set_tempdata($this->stash_key,$this->_request,3600); /* fixed at 10 minutes */
 		}
 
 		return $this;
 	}
 
 	/**
-	 * unstash
-	 * load the request from the stashed data
 	 *
-	 * @return
+	 * Load the request from the stashed data
+	 *
+	 * @return bool
 	 *
 	 */
-	public function unstash() {
-		$success = false;
-
+	public function unstash() : bool
+	{
+		/* read the stashed data if any */
 		$stashed = ci('session')->tempdata($this->stash_key);
-
+		
+		/* clear the stashed data */
 		ci('session')->unset_tempdata($this->stash_key);
+		
+		/* set the request to the stashed data or nothing is it's not an array */
+		$this->_request = (is_array($stashed)) ? $stashed : [];
 
-		if (is_array($stashed)) {
-			$stored_key = $stashed[$this->stash_hash_key];
-
-			unset($stashed[$this->stash_hash_key]);
-
-			$check_key = md5(json_encode($stashed).config('config.encryption_key'));
-
-			if ($check_key == $stored_key) {
-				$success = true;
-				$this->_request = $stashed;
-			}
-		}
-
-		return $success;
+		return is_array($stashed);
 	}
 
 } /* end class */

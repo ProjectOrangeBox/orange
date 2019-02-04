@@ -1,61 +1,163 @@
 <?php
 /**
- * MY_Router
- * Insert description here
+ * Orange
+ *
+ * An open source extensions for CodeIgniter 3.x
+ *
+ * This content is released under the MIT License (MIT)
+ * Copyright (c) 2014 - 2019, Project Orange Box
+ */
+
+/**
+ * Extension to CodeIgniter Router Class
+ *
+ * Handles login, logout, refresh user data
  *
  * @package CodeIgniter / Orange
  * @author Don Myers
- * @copyright 2018
+ * @copyright 2019
  * @license http://opensource.org/licenses/MIT MIT License
  * @link https://github.com/ProjectOrangeBox
- * @version 2.0
+ * @version v2.0.0
  *
- * required
- * core:
- * libraries:
- * models:
- * helpers:
- * functions:
+ * @uses # o_user_model - Orange User Model 
+ * @uses # session - CodeIgniter Session 
+ * @uses # event - Orange event
+ * @uses # errors - Orange errors
+ * @uses # controller - CodeIgniter Controller
+ * @uses # output - CodeIgniter Output
+ *
+ * @config username min length  
+ * @config username max length  
+ *
+ * @define NOBODY_USER_ID
+ * @define ADMIN_ROLE_ID
  *
  */
+
 class MY_Router extends CI_Router {
 	/**
-	 * class without Controller suffix
+	 * Storage for the clean version of the Controller Class without the Controller Suffix
 	 *
 	 * @var string
 	 */
 	protected $clean_class = null;
 
 	/**
-	 * method without Http Method and Action suffix
+	 * Storage for the Clean version of the method without the HTTP method and Prefix
 	 *
 	 * @var string
 	 */
 	protected $clean_method = null;
 
+	/**
+	 * Storage for loaded routes
+	 *
+	 * @var Array
+	 */
+	protected $loaded_routes = [];
+	
+	/**
+	 * Storage for current route
+	 *
+	 * @var string
+	 */
+	protected $current_route;
 
-	protected $route = false;
-
+	/**
+	 * Storage for request handlers
+	 *
+	 * @var Array
+	 */
 	protected $requests = [];
+
+	/**
+	 * Storage for responds handlers
+	 *
+	 * @var Array
+	 */
 	protected $responds = [];
 
-	public function on_request() {
+	/**
+	 *
+	 * Register Request handlers
+	 *
+	 * @access public
+	 *
+	 * @param mixed
+	 *
+	 * @return void
+	 *
+	 * #### Example
+	 * ```
+	 * 'stock/(.*)' => function($url,$router) {
+	 *  $router->on_request('PublicMiddleware','GuiMiddleware','NavbarMiddleware');
+	 *
+	 *	return 'vendor_stock/vendor/'.$url;
+	 * },
+	 * ```
+	 */
+	public function on_request() : void
+	{
 		$this->requests = func_get_args();
 	}
 
-	public function on_responds() {
+	/**
+	 *
+	 * Register Responds handlers
+	 *
+	 * @access public
+	 *
+	 * @param mixed
+	 *
+	 * @return void
+	 *
+	 * #### Example
+	 * ```
+	 * 'stock/(.*)' => function($url,$router) {
+	 *  $router->on_responds('GuiMiddleware');
+	 *
+	 *	return 'vendor_stock/vendor/'.$url;
+	 * },
+	 * ```
+	 */
+	public function on_responds() : void
+	{
 		$this->responds = func_get_args();
 	}
 
-	public function handle_requests(&$ci) {
-		/* fire off middleware if necessary */
+	/**
+	 *
+	 * Handle the "Middleware" Filter for input
+	 *
+	 * @access public
+	 *
+	 * @param &$ci
+	 *
+	 * @return void
+	 *
+	 */
+	public function handle_requests(&$ci) : void
+	{
 		foreach ($this->requests as $middleware) {
 			(new $middleware($ci))->request();
 		}
 	}
 
-	public function handle_responds(&$ci,$output) {
-		/* fire off middleware if necessary */
+	/**
+	 *
+	 * Handle the "Middleware" Filter for output
+	 *
+	 * @access public
+	 *
+	 * @param &$ci
+	 * @param string $output
+	 *
+	 * @return string
+	 *
+	 */
+	public function handle_responds(&$ci,string $output) : string
+	{
 		foreach ($this->responds as $middleware) {
 			$output = (new $middleware($ci))->responds($output);
 		}
@@ -64,48 +166,19 @@ class MY_Router extends CI_Router {
 	}
 
 	/**
-	 * _set_default_controller
-	 * Insert description here
 	 *
+	 * Search the controllers for the matching path
+	 * Type Hinting turned off because this parent CodeIgniter Method do not support it.
 	 *
-	 * @return
+	 * @access public
 	 *
-	 * @access
-	 * @static
-	 * @throws
-	 * @example
+	 * @param array $segments
+	 *
+	 * @return 
+	 *
 	 */
-	protected function _set_default_controller() {
-		if (empty($this->default_controller)) {
-			throw new Exception('Unable to determine what should be displayed. A default route has not been specified in the routing file.');
-		}
-
-		$segments = $this->controller_method($this->default_controller);
-
-		if (PHP_SAPI === 'cli' or defined('STDIN')) {
-			$segments[1] = substr($segments[1], 0, -6).'CliAction';
-		}
-
-		$this->set_class($segments[0]);
-		$this->set_method($segments[1]);
-		$this->uri->rsegments = [1=>$segments[0],2=>$segments[1]];
-		$this->directory = '';
-	}
-
-	/**
-	 * _validate_request
-	 * Insert description here
-	 *
-	 * @param $segments
-	 *
-	 * @return
-	 *
-	 * @access
-	 * @static
-	 * @throws
-	 * @example
-	 */
-	public function _validate_request($segments) {
+	public function _validate_request($segments)
+	{
 		$uri = implode('/',str_replace('-','_',$segments));
 
 		foreach (orange_locator::controllers() as $key=>$rec) {
@@ -143,96 +216,172 @@ class MY_Router extends CI_Router {
 	}
 
 	/**
-	 * fetch_request_method
-	 * Insert description here
 	 *
-	 * @param $filter_get
+	 * Get the current request method
 	 *
-	 * @return
+	 * @access public
 	 *
-	 * @access
-	 * @static
-	 * @throws
-	 * @example
+	 * @param $filter_get determine if you want GET (the HTTP default) filtered out [false]
+	 *
+	 * @return string
+	 *
 	 */
-	public function fetch_request_method($filter_get=false) {
+	public function fetch_request_method($filter_get=false) : string
+	{
 		$method = isset($_SERVER['REQUEST_METHOD']) ? ucfirst(strtolower($_SERVER['REQUEST_METHOD'])) : 'Cli';
 
 		return ($filter_get && $method == 'Get') ? '' : $method;
 	}
 
 	/**
-	 * fetch_directory
-	 * Insert description here
 	 *
+	 * Get the current directory
 	 *
-	 * @return
+	 * @access public
 	 *
-	 * @access
-	 * @static
-	 * @throws
-	 * @example
+	 * @return string
+	 *
 	 */
-	public function fetch_directory() {
+	public function fetch_directory() : string
+	{
 		return substr($this->directory, strpos($this->directory,'/controllers/') + 13);
 	}
 
 	/**
-	 * fetch_class
-	 * Insert description here
 	 *
-	 * @param $clean
+	 * Get the current Class (Controller)
 	 *
-	 * @return
+	 * @access public
 	 *
-	 * @access
-	 * @static
-	 * @throws
-	 * @example
+	 * @param bool $clean determine if you want the Controller prefix stripped [false]
+	 *
+	 * @return string
+	 *
 	 */
-	public function fetch_class($clean=false) {
+	public function fetch_class(bool $clean=false) : string
+	{
 		return ($clean) ? $this->clean_class : $this->class;
 	}
 
 	/**
-	 * fetch_method
-	 * Insert description here
 	 *
-	 * @param $clean
+	 * Get the current Method (Action)
 	 *
-	 * @return
+	 * @access public
 	 *
-	 * @access
-	 * @static
-	 * @throws
-	 * @example
+	 * @param bool $clean determine if you want the method and action prefix stripped [false]
+	 *
+	 * @return string
+	 *
 	 */
-	public function fetch_method($clean=false) {
+	public function fetch_method(bool $clean=false) : string
+	{
 		return ($clean) ? $this->clean_method : $this->method;
 	}
 
-	public function fetch_route() {
-		if (!$this->route) {
-			$this->route = strtolower(trim($this->fetch_directory().$this->fetch_class(true).'/'.$this->fetch_method(true), '/'));
+	/**
+	 *
+	 * Get the current route
+	 *
+	 * @access public
+	 *
+	 * @return string
+	 *
+	 */
+	public function fetch_route() : string
+	{
+		if (!$this->current_route) {
+			$this->current_route = strtolower(trim($this->fetch_directory().$this->fetch_class(true).'/'.$this->fetch_method(true), '/'));
 		}
 
-		return $this->route;
+		return $this->current_route;
 	}
 
 	/**
-	 * controller_method
-	 * Insert description here
 	 *
-	 * @param $input
+	 * Determine if a route is available
 	 *
-	 * @return
+	 * @access public
 	 *
-	 * @access
-	 * @static
-	 * @throws
-	 * @example
+	 * @param string $directory
+	 * @param string $class
+	 * @param string $method
+	 *
+	 * @return bool
+	 *
 	 */
-	protected function controller_method($input) {
+	public function route(string &$directory,string &$class,string &$method) : bool
+	{
+		$class = ucfirst($class);
+
+		$e404 = false;
+
+		if (empty($class) || !file_exists(APPPATH.'controllers/'.$directory.$class.'.php')) {
+			$e404 = true;
+		} else {
+			/* this brings in the controller file */
+			require_once(APPPATH.'controllers/'.$directory.$class.'.php');
+
+			if (!class_exists($class, FALSE) || $method[0] === '_' || method_exists('CI_Controller', $method)) {
+				$e404 = true;
+			} elseif (method_exists($class, '_remap')) {
+				$params = array($method, array_slice($URI->rsegments, 2));
+				$method = '_remap';
+			} elseif (!method_exists($class, $method)) {
+				$e404 = true;
+			}	elseif (!is_callable(array($class, $method))) 	{
+				$reflection = new ReflectionMethod($class, $method);
+
+				if (!$reflection->isPublic() || $reflection->isConstructor()) {
+					$e404 = true;
+				}
+			}
+		}
+
+		return $e404;
+	}
+
+	/**
+	 *
+	 * Set the default controller
+	 *
+	 * @access protected
+	 *
+	 * @throws \Exception
+	 * @return void
+	 *
+	 */
+	protected function _set_default_controller() : void
+	{
+		if (empty($this->default_controller)) {
+			throw new Exception('Unable to determine what should be displayed. A default route has not been specified in the routing file.');
+		}
+
+		$segments = $this->controller_method($this->default_controller);
+
+		if (PHP_SAPI === 'cli' or defined('STDIN')) {
+			$segments[1] = substr($segments[1], 0, -6).'CliAction';
+		}
+
+		$this->set_class($segments[0]);
+		$this->set_method($segments[1]);
+		$this->uri->rsegments = [1=>$segments[0],2=>$segments[1]];
+		$this->directory = '';
+	}
+
+	/**
+	 *
+	 * Set the Controller and Method
+	 *
+	 * @access protected
+	 *
+	 * @param string $input
+	 *
+	 * @return array
+	 *
+	 */
+	protected function controller_method(string $input) : array
+	{
 		$segments[0] = $input;
 		$segments[1] = 'index';
 
@@ -249,29 +398,38 @@ class MY_Router extends CI_Router {
 		return $segments;
 	}
 
-
 	/**
-	 * Set route mapping
 	 *
-	 * Determines what should be served based on the URI request,
-	 * as well as any "routes" that have been set in the routing config file.
+	 * Set the default route
 	 *
-	 * @return	void
+	 * @access protected
+	 *
+	 * @return void
+	 *
 	 */
-	protected function _set_routing() {
+	protected function _set_routing() : void
+	{
 		$route = load_config('routes','route');
 
-		// Validate & get reserved routes
-		if (isset($route) && is_array($route)) {
+		/**
+		 * 
+		 * Validate & get reserved routes
+		 *
+		 */
+ 		if (isset($route) && is_array($route)) {
 			isset($route['default_controller']) && $this->default_controller = $route['default_controller'];
 
 			unset($route['default_controller']);
 
-			$this->routes = $route;
+			$this->loaded_routes = $route;
 		}
 
-		// Is there anything to parse?
-		if ($this->uri->uri_string !== '') {
+		/**
+		 * 
+		 * Is there anything to parse?
+		 *
+		 */
+ 		if ($this->uri->uri_string !== '') {
 			$this->_parse_routes();
 		} else {
 			$this->_set_default_controller();
@@ -281,14 +439,18 @@ class MY_Router extends CI_Router {
 	}
 
 	/**
-	 * Parse Routes
 	 *
-	 * Matches any routes that may exist in the config/routes.php file
-	 * against the URI to determine if the class/method need to be remapped.
+	 * Handle route
 	 *
-	 * @return	void
+	 * @access protected
+	 *
+	 * @param bool $skip_set false
+	 *
+	 * @return void
+	 *
 	 */
-	protected function _parse_routes($skip_set=false) {
+	protected function _parse_routes(bool $skip_set = false) : void
+	{
 		// Turn the segment array into a URI string
 		$uri = implode('/', $this->uri->segments);
 
@@ -296,7 +458,7 @@ class MY_Router extends CI_Router {
 		$http_verb = $this->fetch_request_method(false);
 
 		// Loop through the route array looking for wildcards
-		foreach ($this->routes as $key=>$val) 	{
+		foreach ($this->loaded_routes as $key=>$val) 	{
 			// Check if route format is using HTTP verbs
 			if (is_array($val)) {
 				$val = array_change_key_case($val, CASE_LOWER);
@@ -335,39 +497,13 @@ class MY_Router extends CI_Router {
 			}
 		}
 
-		// If we got this far it means we didn't encounter a
-		// matching route so we'll set the site default route
-		$this->_set_request(array_values($this->uri->segments));
-	}
-
-	public function route(&$directory,&$class,&$method,&$params) {
-		$class = ucfirst($class);
-
-		$e404 = false;
-
-		if (empty($class) || !file_exists(APPPATH.'controllers/'.$directory.$class.'.php')) {
-			$e404 = true;
-		} else {
-			/* this brings in the controller file */
-			require_once(APPPATH.'controllers/'.$directory.$class.'.php');
-
-			if (!class_exists($class, FALSE) || $method[0] === '_' || method_exists('CI_Controller', $method)) {
-				$e404 = true;
-			} elseif (method_exists($class, '_remap')) {
-				$params = array($method, array_slice($URI->rsegments, 2));
-				$method = '_remap';
-			} elseif (!method_exists($class, $method)) {
-				$e404 = true;
-			}	elseif (!is_callable(array($class, $method))) 	{
-				$reflection = new ReflectionMethod($class, $method);
-
-				if (!$reflection->isPublic() || $reflection->isConstructor()) {
-					$e404 = true;
-				}
-			}
-		}
-
-		return $e404;
+		/**
+		 * 
+		 * If we got this far it means we didn't encounter a
+		 * matching route so we'll set the site default route
+		 *
+		 */
+ 		$this->_set_request(array_values($this->uri->segments));
 	}
 
 } /* end class */

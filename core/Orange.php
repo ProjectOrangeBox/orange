@@ -542,24 +542,17 @@ if (!function_exists('get_instance')) {
 
 if (!function_exists('_assert_handler')) {
 	function _assert_handler($file,$line,$code,$desc='') {
-		$error = '<!doctype html>
-		<title>Assertion Failed</title>
-		<style>
-		body, html { text-align: center; padding: 150px; background-color: #492727; font: 20px Helvetica, sans-serif; color: #fff; font-size: 18px;}
-		h1 { font-size: 150%; }
-		article { display: block; text-align: left; width: 650px; margin: 0 auto; }
-		</style>
-		<article>
-		<h1>Assertion Failed</h1>
-		<div>
-		<p>File: '.$file.'</p>
-		<p>Line: '.$line.'</p>
-		<p>Code: '.$code.'</p>
-		<p>Description: '.$desc.'</p>
-		</div>
-		</article>';
+		/* ajax, html, cli */
+		if (defined('STDIN')) {
+			echo json_encode(['file'=>$file,'line'=>$line,'description'=>$desc],JSON_PRETTY_PRINT);
+		} elseif (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') {
+			echo json_encode(['file'=>$file,'line'=>$line,'description'=>$desc],JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE | JSON_FORCE_OBJECT);
+		} else {
+			echo '<!doctype html><title>Assertion Failed</title>';
+			echo '<style>body, html { text-align: center; padding: 150px; background-color: #492727; font: 20px Helvetica, sans-serif; color: #fff; font-size: 18px;}h1 { font-size: 150%; }article { display: block; text-align: left; width: 650px; margin: 0 auto; }</style>';
+			echo '<article><h1>Assertion Failed</h1>	<div><p>File: '.$file.'</p><p>Line: '.$line.'</p><p>Code: '.$code.'</p><p>Description: '.$desc.'</p></div></article>';
+		}
 
-		echo (defined('STDIN')) ? strip_tags(substr($error,strpos($error,'<article>'),strpos($error,'</article>') - strpos($error,'<article>'))).chr(10) : $error;
 		exit(1);
 	}
 }

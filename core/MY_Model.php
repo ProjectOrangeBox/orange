@@ -1,236 +1,322 @@
 <?php
 /**
- * MY_Model
- * Insert description here
+ * Orange
+ *
+ * An open source extensions for CodeIgniter 3.x
+ *
+ * This content is released under the MIT License (MIT)
+ * Copyright (c) 2014 - 2019, Project Orange Box
+ */
+
+/**
+ * Extension to CodeIgniter Model Class
+ * Provides validation in the model
  *
  * @package CodeIgniter / Orange
  * @author Don Myers
- * @copyright 2018
+ * @copyright 2019
  * @license http://opensource.org/licenses/MIT MIT License
  * @link https://github.com/ProjectOrangeBox
- * @version 2.0
- *
- * required
- * core:
- * libraries: validate
- * models:
- * helpers:
- * functions:
+ * @version v2.0.0
  *
  */
+
 class MY_Model extends CI_Model {
 	/**
-	 * array of ALL of the rules for this model
+	 * Formatted array of rules for this model
+	 * ['id' => ['field' => 'id', 'label' => 'Id', 'rules' => 'required|integer|max_length[10]|less_than[4294967295]|filter_int[10]']]
 	 *
-	 * example:
-	 *  'id' => ['field' => 'id', 'label' => 'Id', 'rules' => 'required|integer|max_length[10]|less_than[4294967295]|filter_int[10]'],
-	 *
-	 * @var array
+	 * @var Array
 	 */
 	protected $rules = [];
 
-	/* used to tell the model to skip all rule validations */
+	/**
+	 * Used to tell the model to skip all rule validations
+	 *
+	 * @var Boolean
+	 */
 	protected $skip_rules = false;
 
 	/**
-	 * set of rules to use
+	 * Named rules sets to use on Model method called
 	 *
-	 * example:
-	 *  'basic_form'=>'id,first_name,last_name'
-	 *  'adv_form'=>'id,first_name,last_name,age,weight'
+	 * [
+	 *		'basic_form'=>'id,first_name,last_name',
+	 *		'adv_form'=>'id,first_name,last_name,age,weight',
+	 *		'insert'=>'first_name,last_name,age,weight',
+	 *		'update'=>'id,first_name,last_name,age,weight',
+	 * ]
 	 *
-	 * @var array
+	 * @var Array
 	 */
 	protected $rule_sets = [];
 
 	/**
-	 * name of the object
+	 * Name of the object
 	 *
-	 * @var string
+	 * @var String
 	 */
 	protected $object = null;
 
 	/**
-	 * object
+	 * Get the object name
 	 *
-	 * @return object
+	 * @access public
+	 *
+	 * @return String
 	 *
 	 */
-	public function object() {
+	public function object() : String
+	{
 		return $this->object;
 	}
 
 	/**
-	 * rules
+	 * Get the models Rules
 	 *
-	 * @return models rules
+	 * @access public
+	 *
+	 * @return Array
 	 *
 	 */
-	public function rules() {
+	public function rules() : Array
+	{
 		return $this->rules;
 	}
 
 	/**
-	 * rule
-	 * get a rule by column name or column name and section
+	 * Get a rule by column name or column name and section
 	 *
-	 * @param $column
-	 * @param $section
+	 * @param $key column name
+	 * @param $section column section
 	 *
-	 * @return array
+	 * @return mixed
 	 */
-	public function rule($key, $section = null) {
+	public function rule(string $key, $section = null)
+	{
 		log_message('debug', 'MY_Model::rule '.$key.' '.$section);
 
-		return ($section) ? $this->rules[$key][$section] : $this->rules[$key];
+		$rule = ($section) ? $this->rules[$key][$section] : $this->rules[$key];
+		
+		return ($rule === null) ? false : $rule;
 	}
 
 	/**
-	 * clear
 	 *
-	 * @return $this
+	 * Clear any validation errors for this object
+	 *
+	 * @access public
+	 *
+	 * @return \MY_Model
 	 *
 	 */
-	public function clear() {
+	public function clear() : MY_Model
+	{
 		log_message('debug', 'MY_Model::clear '.$this->object);
 
-		/* clear this group */
+		/* validation wrapper */
 		ci('validate')->clear($this->object);
 
 		return $this;
 	}
 
 	/**
-	 * validate
-	 * Insert description here
-	 * 'id' => ['field' => 'id', 'label' => 'Id', 'rules' => 'required|integer|max_length[10]|less_than[4294967295]|filter_int[10]'],
 	 *
-	 * @param $data - array of key value pairs to test
-	 * @param $rules -
+	 * Preform Model Validation
+	 * If rules is boolean true
+	 *   then we auto use the rule names which match the data array keys
+	 * If rules is an array
+	 *   then we use them verbatim
+	 * If rules is a string
+	 *   then we convert it to a array by separating the string on commas
+	 * 
+	 * @access public
 	 *
-	 * @return boolean - has error
+	 * @param Array &$data key value pairs to test
+	 * @param Mixed $rules rules to use for the validations
+	 *
+	 * @return Bool Success
 	 *
 	 */
-	public function validate(&$data, $rules = true) {
+	public function validate(Array &$data, $rules = true) : Bool
+	{
 		log_message('debug', 'MY_Model::validate');
 
-		/* if it's already a array then it's already in the format we need */
+		/**
+		 * if it's already a array then it's already in the format we need
+		 */
 		if (!is_array($rules)) {
-			/* if rules is true then just use the data array keys as the fields to validate to */
+			/**
+			 * if rules is true then just use the data array keys as the fields to validate to
+			 */
 			if ($rules === true) {
 				$rules_names = array_keys($data);
 			} elseif (is_string($rules)) {
-				/* if it's a string then see if it's a rule set if not treat as a comma sep list of field to validate */
+				/**
+				 * if it's a string then see if it's a rule set if not treat as a comma sep list of field to validate
+				 */
 				$rules_names = explode(',',(isset($this->rule_sets[$rules]) ? $this->rule_sets[$rules] : $rules));
 			}
 
-			/* copy all the rules */
+			/**
+			 * copy all the rules so we can modify the copy
+			 */
 			$rules = $this->rules;
 
-			/* now filter out the rules we don't need */
+			/**
+			 * now filter out the rules we don't need
+			 */
 			$this->only_columns($rules, $rules_names);
 		}
 
-		/* let's make sure the data "keys" have rules */
+		/**
+		 * let's make sure the data "keys" have rules
+		 */
 		$this->only_columns($data, $rules);
 
-		/* save the current group in validate so we can put it back after this model is done validating */
+		/**
+		 * Save the current group in validate
+		 * so we can put it back after this model is done validating this model
+		 */
 		$previous_error_group = ci('validate')->get_group();
 
-		/* did we actually get any rules? */
+		/**
+		 * did we actually get any rules?
+		 */
 		if (count($rules)) {
-			/* run the rules on the data array */
+			/**
+			 * run the rules on the data array
+			 */
 			ci('validate')->group($this->object)->multiple($rules, $data);
 		}
 
-		/* return if we got any errors */
+		/**
+		 * return if we got any errors
+		 */
 		$success = ci('validate')->success($this->object);
 
-		/* we are done put back the previous error group */
+		/**
+		 * we are done put back the previous error group
+		 */
 		ci('validate')->group($previous_error_group);
 
 		return $success;
 	}
 
 	/**
-	 * remove_columns
 	 *
 	 * remove matching keys in the data array from input in columns
 	 * remove the matching keys in the data array from input in columns
 	 * columns can be a array ['firstname','lastname','age'] or comma sep string 'firstname,lastname,age'
 	 *
-	 * @param $data array
-	 * @param $columns string or array
+	 * @access public
 	 *
-	 * @return $this
+	 * @param Array &$data
+	 * @param $columns []
+	 *
+	 * @return MY_Model
 	 *
 	 */
-	public function remove_columns(&$data, $columns = []) {
+	public function remove_columns(Array &$data, $columns = []) : MY_Model 
+	{
 		log_message('debug', 'MY_Model::remove_columns');
 
-		/* convert string with commas to array */
+		/**
+		 * convert string with commas to array
+		 */
 		$columns = (!is_array($columns)) ? explode(',', $columns) : $columns;
 
-		/* remove any data "key" in columns array */
-		$data = array_diff_key($data,array_combine($columns,$columns));
+		/**
+		 * remove any data "key" in columns array
+		 */
+ 		$data = array_diff_key($data,array_combine($columns,$columns));
 
 		return $this;
 	}
 
 	/**
-	 * only_columns
 	 *
 	 * only the matching keys in the data array from input in columns
 	 * columns can be a array ['firstname','lastname','age'] or comma sep string 'firstname,lastname,age'
 	 *
-	 * @param $data array
-	 * @param $columns string or array
+	 * @access public
 	 *
-	 * @return $this
+	 * @param Array &$data
+	 * @param $columns []
+	 *
+	 * @return MY_Model
 	 *
 	 */
-	public function only_columns(&$data, $columns = []) {
+	public function only_columns(Array &$data, $columns = []) : MY_Model
+	{
 		log_message('debug', 'MY_Model::only_columns');
 
-		/* convert string with commas to array */
-		$columns = (!is_array($columns)) ? explode(',', $columns) : $columns;
+		/**
+		 * convert string with commas to array
+		 */
+ 		$columns = (!is_array($columns)) ? explode(',', $columns) : $columns;
 
-		/* let' make sure the values are singular not an array if they are singular then create the key/value pair */
-		if (!is_array(current($columns))) {
+		/**
+		 * let' make sure the values are singular not an array if they are singular then create the key/value pair
+		 */
+ 		if (!is_array(current($columns))) {
 			$columns = array_combine($columns,$columns);
 		}
 
-		/* remove any data "key" not in columns array */
-		$data = array_intersect_key($data,$columns);
+		/**
+		 * remove any data "key" not in columns array
+		 */
+ 		$data = array_intersect_key($data,$columns);
 
 		return $this;
 	}
 
 	/**
-	 * remap_columns
 	 *
-	 * 'long_description' => ['field' => 'description', 'label' => 'Description', 'rules' => 'max_length[255]|filter_input[255]|is_uniquem[o_role_model.description.id]'],
+	 * Remap columns in the input array (data) with the rules field names
 	 *
-	 * This remaps "long_description" into a new array where it's now "description"
+	 * @access public
 	 *
-	 * @param $data array passed by reference
-	 * @param $rules array
+	 * @param Array &$data
+	 * @param Array $rules []
 	 *
-	 * @return $this
+	 * @return MY_Model
+	 *
+	 * #### Example
+	 * ```
+	 * $rules = [
+	 *	'id' => ['field' => 'id', 'label' => 'Id', 'rules' => 'required|integer],
+	 *	'key' => ['field' => 'key', 'label' => 'Key', 'rules' => 'required|strtolower'],
+	 *	'description' => ['field' => 'description', 'label' => 'Description', 'rules' => 'required'],
+	 *	'group' => ['field' => 'group', 'label' => 'Group', 'rules' => 'required'],
+	 *	'group_test' => ['field' => 'group'],
+	 * ];
+	 *
+	 * $data = ['id'=>123,'key'=>'cookies','description'=>'The greatest show ever','group_test'=>'live'];
+	 * 
+	 * $this->my_model->remap_columns($data,$rules);
+	 *
+	 * $data now contains ['id'=>123,'key'=>'cookies','description'=>'The greatest show ever','group'=>'live']
+	 * 
+	 * ```
 	 */
-	public function remap_columns(&$data, $rules = []) {
+	public function remap_columns(Array &$data,Array $rules = []) : MY_Model
+	{
 		log_message('debug', 'MY_Model::remap_columns');
 
 		if (!$this->skip_rules && count($rules)) {
-			$new_data = [];
+			$remapped_data = [];
 
 			foreach ($rules as $key=>$rule) {
 				if (isset($data[$key])) {
-					$new_data[$rule['field']] = $data[$key];
+					$remapped_data[$rule['field']] = $data[$key];
 				}
 			}
-
-			$data = $new_data;
+			
+			/**
+			 * reassign the new data to the data reference
+			 */
+ 			$data = $remapped_data;
 		}
 
 		return $this;
