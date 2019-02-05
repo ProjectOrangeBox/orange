@@ -1,23 +1,26 @@
 <?php
 
 /************************
-* Orange Global Functions
-*************************/
+ * Orange Global Functions
+ *************************/
 
 /**
  * newer / smarter version of CodeIgniter get_instance()
  *
- * @param string $class name of the library or model you are looking for
+ * @param $class null
+ * @param $object null
  *
  * @return mixed
  *
- * @throws Exception
- * @examples ci()->load->library('email')
- * @examples ci('email')->send()
- * @examples ci('page')->render()
+ * #### Example
+ * ```
+ * ci('email')->send()
+ * ci('event',new Event)
+ * ```
  */
 if (!function_exists('ci')) {
-	function &ci($class=null,&$object=null) {
+	function &ci($class=null,&$object=null)
+	{
 		/* this function uses the "return on first match" */
 		$CI = get_instance();
 
@@ -37,6 +40,7 @@ if (!function_exists('ci')) {
 				return $CI->$class;
 			}
 		} elseif ($class && $object) {
+			/* assign a object to a name */
 			$CI->$class = &$object;
 		}
 
@@ -52,13 +56,16 @@ if (!function_exists('ci')) {
  * exist it is instantiated and set to a static variable. If it has
  * previously been instantiated the variable is returned.
  *
- * @param	string the class name being requested
- * @param	string the directory where the class should be found
- * @param	mixed	an optional argument to pass to the class constructor
- * @return	object
+ * @param	$class class name to load
+ *
+ * @throws \Exception
+ *
+ * @return object
+ *
  */
 if (!function_exists('load_class')) {
-	function &load_class($class) {
+	function &load_class(string $class)
+	{
 		static $_classes = array();
 
 		if (isset($_classes[$class])) {
@@ -102,10 +109,14 @@ if (!function_exists('load_class')) {
  *
  * @return
  *
- * @example site_url('/{www theme}/assets/css');
+ * #### Example
+ * ```
+ * $url = site_url('/{www theme}/assets/css');
+ * ```
  */
 if (!function_exists('site_url')) {
-	function site_url($uri = '', $protocol = NULL) {
+	function site_url(string $uri = '',bool $protocol = NULL) : string
+	{
 		if ($protocol !== false) {
 			/* Call CodeIgniter version first */
 			$uri = ci()->config->site_url($uri, $protocol);
@@ -138,20 +149,25 @@ if (!function_exists('site_url')) {
 }
 
 /**
- * Wrapper for configure with dot notation
+ * Wrapper for getting configure with dot notation
  * ci('config')->dot_item(...)
  *
- * @param $setting
- * @param $default
+ * @param string $setting
+ * @param mixed $default
  *
- * @return
+ * @throws \Exception
  *
- * @example $foo = config('file.key');
- * @example $foo = config('file.key2','default value');
+ * @return mixed
  *
+ * #### Example
+ * ```
+ * $foo = config('file.key');
+ * $foo = config('file.key2','default value');
+ * ```
  */
 if (!function_exists('config')) {
-	function config($setting,$default='%%no_value%%') {
+	function config(string $setting,$default='%%no_value%%')
+	{
 		$value = ci('config')->dot_item($setting,$default);
 
 		/* only throw an error if nothing found and no default given */
@@ -164,28 +180,34 @@ if (!function_exists('config')) {
 }
 
 /**
- * Wrapper for filter
+ * Wrapper for validation filters
+ * This returns the filtered value
  *
-*/
+ */
 if (!function_exists('filter')) {
-	function filter($rule,$field) {
+	function filter(string $rule,$value)
+	{
 		/* add filter_ if it's not there */
 		foreach (explode('|',$rule) as $r) {
 			$a[] = 'filter_'.str_replace('filter_','',strtolower($r));
 		}
 
-		ci('validate')->single(implode('|',$a),$field);
+		ci('validate')->single(implode('|',$a),$value);
 
-		return $field;
+		return $value;
 	}
 }
 
 /**
  * Wrapper for validate single
+ * This return whether there validation
+ * passes (true)
+ * or fails (false)
  *
-*/
+ */
 if (!function_exists('valid')) {
-	function valid($rule,$field) {
+	function valid(string $rule,$field) : bool
+	{
 		ci('validate')->single($rule,$field);
 
 		return (!ci('errors')->has());
@@ -193,21 +215,22 @@ if (!function_exists('valid')) {
 }
 
 /**
- * escape any single quotes with \"
+ * Escape any single quotes with \"
  *
- * @param $string
+ * @param string $string
  *
  * @return string
  *
  */
 if (!function_exists('esc')) {
-	function esc($string) {
+	function esc(string $string) : string
+	{
 		return str_replace('"', '\"', $string);
 	}
 }
 
 /**
- * escape html special chracters
+ * Escape html special characters
  *
  * @param $string
  *
@@ -215,7 +238,8 @@ if (!function_exists('esc')) {
  *
  */
 if (!function_exists('e')) {
-	function e($string) {
+	function e(string $string) : string
+	{
 		return html_escape($string);
 	}
 }
@@ -228,12 +252,17 @@ if (!function_exists('e')) {
  *
  * @return string
  *
- * @example $foo = env('key');
- * @example $foo = env('key2','default value');
+ * @throws \Exception
  *
+ * #### Example
+ * ```
+ * $foo = env('key');
+ * $foo = env('key2','default value');
+ * ```
  */
 if (!function_exists('env')) {
-	function env($key,$default=null) {
+	function env(string $key,$default=null)
+	{
 		if (!isset($_ENV[$key]) && $default === null) {
 			throw new Exception('The environmental variable "'.$key.'" is not set and no default was provided.');
 		}
@@ -247,13 +276,14 @@ if (!function_exists('env')) {
  * the file name is ALWAYS orange_debug.log
  * and saved in the paths config file log path
  *
- * @params 1 or more mixed parameters
+ * @params ...mixed
  *
  * @return the number of bytes that were written to the file, or FALSE on failure.
  *
  */
 if (!function_exists('l')) {
-	function l() {
+	function l() : mixed
+	{
 		/* get the number of arguments passed */
 		$args = func_get_args();
 
@@ -277,20 +307,22 @@ if (!function_exists('l')) {
  *
  */
 if (!function_exists('unlock_session')) {
-	function unlock_session() {
-		session_write_close();
+	function unlock_session() : bool
+	{
+		return session_write_close();
 	}
 }
 
 /**
  * Show output in Browser Console
  *
- * @param $var mixed - converted to json
- * @param $type - browser console log types defaults to log
+ * @param mixed $var converted to json
+ * @param string $type - browser console log types [log]
  *
  */
 if (!function_exists('console')) {
-	function console($var, $type = 'log') {
+	function console($var,string $type = 'log') : void
+	{
 		echo '<script type="text/javascript">console.'.$type.'('.json_encode($var).')</script>';
 	}
 }
@@ -298,8 +330,10 @@ if (!function_exists('console')) {
 /**
  * The most Basic MVC View loader
  *
- * @param $_view string view filename
- * @param $_data array list of view variables
+ * @param string $_view view filename
+ * @param array $_data list of view variables
+ *
+ * @throws \Exception
  *
  * @return string
  *
@@ -307,7 +341,8 @@ if (!function_exists('console')) {
  *
  */
 if (!function_exists('view')) {
-	function view($_view,$_data=[]) {
+	function view(string $_view,array $_data=[]) : string
+	{
 		/* clean up the view path */
 		$_file = trim(str_replace('.php','',$_view),'/');
 
@@ -334,14 +369,14 @@ if (!function_exists('view')) {
 /**
  * Write a string to a file with atomic uninterruptible
  *
- * @param $filepath string path to the file where to write the data
- * @param $content string the data to write
+ * @param string $filepath path to the file where to write the data
+ * @param mixed $content the data to write
  *
- * @return the number of bytes that were written to the file, or FALSE on failure.
- *
+ * @return int the number of bytes that were written to the file.
  */
 if (!function_exists('atomic_file_put_contents')) {
-	function atomic_file_put_contents($filepath, $content) {
+	function atomic_file_put_contents(string $filepath,$content) : int
+	{
 		/* get the path where you want to save this file so we can put our file in the same file */
 		$dirname = dirname($filepath);
 
@@ -398,13 +433,18 @@ if (!function_exists('atomic_file_put_contents')) {
  *
  */
 if (!function_exists('remove_php_file_from_opcache')) {
-	function remove_php_file_from_opcache($filepath) {
+	function remove_php_file_from_opcache(string $filepath) : bool
+	{
+		$success = true;
+		
 		/* flush from the cache */
 		if (function_exists('opcache_invalidate')) {
-			opcache_invalidate($filepath, true);
+			$success = opcache_invalidate($filepath, true);
 		} elseif (function_exists('apc_delete_file')) {
-			apc_delete_file($filepath);
+			$success = apc_delete_file($filepath);
 		}
+		
+		return $success;
 	}
 }
 
@@ -413,15 +453,15 @@ if (!function_exists('remove_php_file_from_opcache')) {
  * this is nice for pulling string from a database
  * such as configuration values stored in string format
  *
- * @param $value
+ * @param string $value
  *
  * @return mixed
  *
  */
 if (!function_exists('convert_to_real')) {
-	function convert_to_real($value) {
+	function convert_to_real(string $value)
+	{
 		/* return on first match multiple exists */
-
 		switch (trim(strtolower($value))) {
 		case 'true':
 			return true;
@@ -452,13 +492,14 @@ if (!function_exists('convert_to_real')) {
  * this is nice for storing string into a database
  * such as configuration values stored in string format
  *
- * @param $value mixed
+ * @param mixed $value
  *
  * @return string
  *
  */
 if (!function_exists('convert_to_string')) {
-	function convert_to_string($value) {
+	function convert_to_string($value) : string
+	{
 		/* return on first match multiple exists */
 
 		if (is_array($value)) {
@@ -482,17 +523,19 @@ if (!function_exists('convert_to_string')) {
 }
 
 /**
- * this will collapse a array with multiple values into a single key=>value pair
+ * This will collapse a array with multiple values into a single key=>value pair
  *
- * @param $array
- * @param $key string value to use for the key
- * @param $value value to use for the value
+ * @param array $array
+ * @param string $key id
+ * @param string $value null
+ * @param string $sort null
  *
  * @return array
  *
  */
 if (!function_exists('simplify_array')) {
-	function simplify_array($array, $key = 'id', $value = null, $sort = null) {
+	function simplify_array(array $array,string $key = 'id',string $value = null,string $sort = null) : array
+	{
 		$value = ($value) ? $value : $key;
 		$new_array = [];
 
@@ -535,18 +578,36 @@ if (!function_exists('simplify_array')) {
  * @return CI_Controller
  */
 if (!function_exists('get_instance')) {
-	function &get_instance() {
+	function &get_instance()
+	{
 		return CI_Controller::get_instance();
 	}
 }
 
+/**
+ *
+ * Orange Assertion Handler
+ *
+ * @param $file
+ * @param $line
+ * @param $code
+ * @param $desc
+ *
+ * @return void
+ *
+ */
 if (!function_exists('_assert_handler')) {
-	function _assert_handler($file,$line,$code,$desc='') {
-		/* ajax, html, cli */
+	function _assert_handler($file,$line,$code,$desc='') : void
+	{
+		/* CLI */
 		if (defined('STDIN')) {
 			echo json_encode(['file'=>$file,'line'=>$line,'description'=>$desc],JSON_PRETTY_PRINT);
+
+		/* AJAX */
 		} elseif (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') {
 			echo json_encode(['file'=>$file,'line'=>$line,'description'=>$desc],JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE | JSON_FORCE_OBJECT);
+
+		/* HTML */
 		} else {
 			echo '<!doctype html><title>Assertion Failed</title>';
 			echo '<style>body, html { text-align: center; padding: 150px; background-color: #492727; font: 20px Helvetica, sans-serif; color: #fff; font-size: 18px;}h1 { font-size: 150%; }article { display: block; text-align: left; width: 650px; margin: 0 auto; }</style>';
@@ -557,8 +618,20 @@ if (!function_exists('_assert_handler')) {
 	}
 }
 
+/**
+ *
+ * Low Level configuration file loader
+ * this does NOT include any database configurations
+ *
+ * @param string $name filename
+ * @param string $variable array variable name there configuration is stored in [config]
+ *
+ * @return array
+ *
+ */
 if (!function_exists('load_config')) {
-	function load_config($name,$variable='config') {
+	function load_config(string $name,string $variable='config') : array
+	{
 		$$variable = [];
 
 		if (file_exists(APPPATH.'config/'.$name.'.php')) {
@@ -573,8 +646,26 @@ if (!function_exists('load_config')) {
 	}
 }
 
+/**
+ *
+ * Simple view merger
+ * replace {tags} with data in the passed data array
+ *
+ * @access 
+ *
+ * @param string $template
+ * @param array $data []
+ *
+ * @return string
+ *
+ * #### Example
+ * ```
+ * $html = quick_merge('Hello {name}',['name'=>'Johnny'])
+ * ```
+ */
 if (!function_exists('quick_merge')) {
-	function quick_merge($template,$data=[]) {
+	function quick_merge(string $template,array $data=[]) : string
+	{
 		if (preg_match_all('/{([^}]+)}/m',$template,$matches)) {
 			foreach ($matches[1] as $key) {
 				$template = str_replace('{'.$key.'}',$data[$key],$template);
