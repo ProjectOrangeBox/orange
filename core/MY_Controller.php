@@ -97,6 +97,8 @@ class MY_Controller extends CI_Controller {
 	 * @var string
 	 */
 	public $controller_model;
+	
+	public $user;
 
 	/**
 	 *

@@ -73,6 +73,11 @@ class O_user_model extends Database_model {
 		log_message('info', 'o_user_model Class Initialized');
 	}
 
+	public function get_by_user_identifier($user_identifier)
+	{
+		return $this->ignore_read_role()->get($user_identifier);
+	}
+
 /**
  * insert
  * Insert description here

@@ -436,14 +436,14 @@ if (!function_exists('remove_php_file_from_opcache')) {
 	function remove_php_file_from_opcache(string $filepath) : bool
 	{
 		$success = true;
-		
+
 		/* flush from the cache */
 		if (function_exists('opcache_invalidate')) {
 			$success = opcache_invalidate($filepath, true);
 		} elseif (function_exists('apc_delete_file')) {
 			$success = apc_delete_file($filepath);
 		}
-		
+
 		return $success;
 	}
 }
@@ -503,7 +503,7 @@ if (!function_exists('convert_to_string')) {
 		/* return on first match multiple exists */
 
 		if (is_array($value)) {
-			return str_replace("stdClass::__set_state", "(object)",var_export($value, true));
+			return str_replace('stdClass::__set_state','(object)',var_export($value, true));
 		}
 
 		if ($value === true) {
@@ -651,7 +651,7 @@ if (!function_exists('load_config')) {
  * Simple view merger
  * replace {tags} with data in the passed data array
  *
- * @access 
+ * @access
  *
  * @param string $template
  * @param array $data []

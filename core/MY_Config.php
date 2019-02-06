@@ -188,7 +188,7 @@ class MY_Config extends CI_Config {
 
 			/* load the database configs (settings) */
 			if (parent::item('no_database_settings') !== true) {
-				$db_configs = ci('o_setting_model')->for_config();
+				$db_configs = ci('o_setting_model')->get_enabled();
 
 				if (is_array($db_configs)) {
 					foreach ($db_configs as $record) {

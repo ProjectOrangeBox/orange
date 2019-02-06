@@ -32,6 +32,20 @@ class O_user_entity extends model_entity {
 	protected $permissions = [];
 	protected $lazy_loaded = false;
 
+	public function is_nobody(int $nobody_user_id,int $everyone_role_id)
+	{
+		$this->id = $nobody_user_id;
+		$this->username = 'Nobody';
+		
+		$this->user_read_role_id = $nobody_user_id;
+		$this->user_edit_role_id = $nobody_user_id;
+		$this->user_delete_role_id = $nobody_user_id;
+		
+		$this->roles = [$everyone_role_id=>'Everyone'];
+
+		$this->lazy_loaded = true;
+	}
+
 /**
  * __get
  * Insert description here

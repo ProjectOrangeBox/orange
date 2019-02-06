@@ -53,8 +53,8 @@ class O_setting_model extends Database_model {
  * @throws
  * @example
  */
-	public function for_config() {
-		return $this->get_many_by(['enabled' => 1]);
+	public function get_enabled() {
+		return $this->ignore_read_role()->get_many_by(['enabled' => 1]);
 	}
 
 /**
@@ -69,7 +69,8 @@ class O_setting_model extends Database_model {
  * @throws
  * @example
  */
-	protected function delete_cache_by_tags() {
+	protected function delete_cache_by_tags() : Database_model
+	{
 		ci('config')->flush();
 
 		return parent::delete_cache_by_tags();
