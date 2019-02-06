@@ -20,32 +20,32 @@
  * @link https://github.com/ProjectOrangeBox
  * @version v2.0.0
  *
- * @uses # \o_user_model - Orange User Model 
- * @uses # \session - CodeIgniter Session 
+ * @uses # \o_user_model - Orange User Model
+ * @uses # \session - CodeIgniter Session
  * @uses # \event - Orange event
  * @uses # \errors - Orange errors
  * @uses # \controller - CodeIgniter Controller
  * @uses # \output - CodeIgniter Output
  *
- * @config username min length `8` 
- * @config username max length `32` 
- * @config password regex `/((?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,32})/` 
- * @config password copy `Password must be at least: 8 characters, 1 upper, 1 lower case letter, 1 number, Less than 32 characters.` 
- * @config admin user id `1` 
- * @config admin role id `1` 
- * @config nobody user id `2` 
- * @config nobody role id `2` 
- * @config everyone role id `3` 
- * @config login h2 `Please Sign in<h4>Using your Windows Login</h4>` 
- * @config username field `Login` 
- * @config empty fields error `Please enter your login credentials.` 
- * @config general failure error `Incorrect Login and/or Password.` 
- * @config account not active error `Your account is not active.` 
- * @config user table `orange_users` 
- * @config user role table `orange_user_role` 
- * @config role table `orange_roles` 
- * @config role permission table `orange_role_permission` 
- * @config permission table `orange_permissions` 
+ * @config username min length `8`
+ * @config username max length `32`
+ * @config password regex `/((?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,32})/`
+ * @config password copy `Password must be at least: 8 characters, 1 upper, 1 lower case letter, 1 number, Less than 32 characters.`
+ * @config admin user id `1`
+ * @config admin role id `1`
+ * @config nobody user id `2`
+ * @config nobody role id `2`
+ * @config everyone role id `3`
+ * @config login h2 `Please Sign in<h4>Using your Windows Login</h4>`
+ * @config username field `Login`
+ * @config empty fields error `Please enter your login credentials.`
+ * @config general failure error `Incorrect Login and/or Password.`
+ * @config account not active error `Your account is not active.`
+ * @config user table `orange_users`
+ * @config user role table `orange_user_role`
+ * @config role table `orange_roles`
+ * @config role permission table `orange_role_permission`
+ * @config permission table `orange_permissions`
  *
  * @define NOBODY_USER_ID
  * @define ADMIN_ROLE_ID
@@ -58,14 +58,14 @@ class Auth {
 	 * @var string
 	 */
 	protected $session_key = 'user::data';
-	
+
 	/**
 	 * Auth configuration array
 	 *
 	 * @var array
 	 */
 	protected $config;
-	
+
 	/**
 	 * CodeIgniter Session Object
 	 *
@@ -77,21 +77,21 @@ class Auth {
 	 * CodeIgniter Event Object
 	 *
 	 * @var array
-	 */	
+	 */
 	protected $event;
 
 	/**
 	 * Orange Errors Object
 	 *
 	 * @var array
-	 */	
+	 */
 	protected $errors;
 
 	/**
 	 * CodeIgniter Controller (active)
 	 *
 	 * @var array
-	 */	
+	 */
 	protected $controller;
 
 	/**
@@ -126,28 +126,34 @@ class Auth {
 		define('NOBODY_USER_ID',$this->config['nobody user id']);
 		define('EVERYONE_ROLE_ID',$this->config['everyone role id']);
 
-		/* attach a empty one to super object */
-		$this->controller->user = &$this->user_model->get(NOBODY_USER_ID);
+		/* We all start off as nobody in life... */
+		$this->switch_to_nobody();
 
 		/* Are we in GUI mode? */
 		if (!is_cli()) {
 			/* yes - is there a user id in the session? */
 			$user_identifier = $this->session->userdata($this->session_key);
 
-			/* if user identifier is empty then set the user to nobody */
-			$user_identifier = (!empty($user_identifier)) ? $user_identifier : NOBODY_USER_ID;
-
-			/* refresh the user based on the id */
-			$this->refresh_userdata($user_identifier,false);
-		} else {
-			/* no - in CLI you have the nobody user privileges */
-			$this->refresh_userdata(NOBODY_USER_ID,false);
-
-			/* and set the user name to cli (not nobody) */
-			ci('user')->username = 'cli';
+			if (!empty($user_identifier)) {
+				/**
+				 * refresh the user based on the id
+				 * but don't save to the session
+				 * because we already loaded it from the session
+				 */
+				$this->refresh_userdata($user_identifier,false);
+			}
 		}
 
 		log_message('info', 'Auth Class Initialized');
+	}
+
+	protected function switch_to_nobody() : void
+	{
+		$nobody_user = ci('load')->entity('o_user_entity');
+
+		$nobody_user->is_nobody(NOBODY_USER_ID,EVERYONE_ROLE_ID);
+
+		$this->controller->user = $nobody_user;
 	}
 
 	/**
@@ -187,12 +193,12 @@ class Auth {
 		log_message('info', 'Auth Class logout');
 
 		$success = true;
-		$switch_to = NOBODY_USER_ID;
-		
-		$this->event->trigger('auth.logout',$success,$switch_to);
+
+		$this->event->trigger('auth.logout',$success);
 
 		if ($success) {
-			$this->refresh_userdata($switch_to);
+			$this->switch_to_nobody();
+			$this->session->set_userdata([$this->session_key => '']);
 		}
 
 		return $success;
@@ -211,34 +217,30 @@ class Auth {
 	 * @return String
 	 *
 	 */
-	public function refresh_userdata(String $user_identifier,Bool $save_session = true) : String
+	public function refresh_userdata(String $user_identifier,Bool $save_session) : Void
 	{
 		log_message('debug', 'Auth::refresh_userdata::'.$user_identifier);
 
-		$user_identifier = (!empty($user_identifier)) ? $user_identifier : NOBODY_USER_ID;
-
-		$profile = $this->user_model->get($user_identifier);
-
-		if ((int)$profile->is_active != 1 || !$profile instanceof O_user_entity) {
-			$user_identifier = NOBODY_USER_ID;
-
-			$profile = $this->user_model->get($user_identifier);
+		if (empty($user_identifier)) {
+			throw new Exception('Auth session refresh user identifier empty.');
 		}
 
-		/* no real need to have this floating around */
-		unset($profile->password);
+		$profile = $this->user_model->get_by_user_identifier($user_identifier);
 
-		/* update the CodeIgniter user object to the profile */
-		$this->controller->user = &$profile;
+		if ((int)$profile->is_active === 1 && $profile instanceof O_user_entity) {
+			/* no real need to have this floating around */
+			unset($profile->password);
 
-		/* should we save this profile id in the session? */
-		if ($save_session) {
-			$this->session->set_userdata([$this->session_key => $profile->id]);
+			/* update the CodeIgniter user object to the profile */
+			$this->controller->user = &$profile;
+
+			/* should we save this profile id in the session? */
+			if ($save_session) {
+				$this->session->set_userdata([$this->session_key => $profile->id]);
+			}
 		}
 
 		log_message('info', 'Auth Class Refreshed');
-
-		return (string)$user_identifier;
 	}
 
 	/**
@@ -303,7 +305,7 @@ class Auth {
 		}
 
 		/* ok they are good refresh the user and save to the session */
-		$this->refresh_userdata($user->id);
+		$this->refresh_userdata($user->id,true);
 
 		return true;
 	}
