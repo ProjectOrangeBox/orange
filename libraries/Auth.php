@@ -136,7 +136,7 @@ class Auth {
 
 			if (!empty($user_identifier)) {
 				/**
-				 * refresh the user based on the id
+				 * refresh the user based on the user identifier
 				 * but don't save to the session
 				 * because we already loaded it from the session
 				 */
