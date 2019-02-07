@@ -287,7 +287,7 @@ class Cache_export extends CI_Driver {
 	 * @return void
 	 *
 	 * #### Example
-	 * ```
+	 * ```php
 	 * In the receiving controller end point
 	 * ci('cache')->export->endpoint_delete($request);
 	 * ```
@@ -324,7 +324,7 @@ class Cache_export extends CI_Driver {
 	 * @return mixed
 	 *
 	 * #### Example
-	 * ```
+	 * ```php
 	 * $cached = ci('cache')->export->cache('foobar',function(){ return 'cache me for 60 seconds!' },60);
 	 * ```
 	 */

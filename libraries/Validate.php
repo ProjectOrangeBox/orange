@@ -113,7 +113,7 @@ class Validate {
 	 * @return Validate
 	 *
 	 * #### Example
-	 * ```
+	 * ```php
 	 * ci('validate')->group('user_model');
 	 * ```
 	 */
@@ -135,7 +135,7 @@ class Validate {
 	 * @return string
 	 *
 	 * #### Example
-	 * ```
+	 * ```php
 	 * $group_name = ci('validate')->get_group();
 	 * ```
 	 */
@@ -158,7 +158,7 @@ class Validate {
 	 * @return Validate
 	 *
 	 * #### Example
-	 * ```
+	 * ```php
 	 *
 	 * ```
 	 */
@@ -249,7 +249,7 @@ class Validate {
 	 * @return Validate
 	 *
 	 * #### Example
-	 * ```
+	 * ```php
 	 * ci('validate')->attach('filter_lower',function(&$field, $options) { return strtolower($field); });
 	 * ci('validate')->attach('return_true',function(&$field, $options) { return true; });
 	 * ```
@@ -276,7 +276,7 @@ class Validate {
 	 * @return Validate
 	 *
 	 * #### Example
-	 * ```
+	 * ```php
 	 *
 	 * ```
 	 */

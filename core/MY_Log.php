@@ -105,6 +105,11 @@ class MY_Log extends CI_Log {
 	 *
 	 * Allow the assigning of any configuration that starts with log_
 	 *
+	 * #### Example
+	 * ```php
+	 * ci('log')->log_threshold(255)
+	 * ci('log')->log_path(APPPATH.'/logs')
+	 * ```
 	 * @access public
 	 *
 	 * @param string $name
@@ -112,11 +117,6 @@ class MY_Log extends CI_Log {
 	 *
 	 * @return MY_Log
 	 *
-	 * #### Example
-	 * ```
-	 * ci('log')->log_threshold(255)
-	 * ci('log')->log_path(APPPATH.'/logs')
-	 * ```
 	 */
 	public function __call(string $name,array $arguments) : MY_Log
 	{
@@ -187,14 +187,14 @@ class MY_Log extends CI_Log {
 	 *
 	 * Test whether logging is enabled
 	 *
+	 * #### Example
+	 * ```php
+	 * ci('log')->is_enabled();
+	 * ```
 	 * @access public
 	 *
 	 * @return Bool
 	 *
-	 * #### Example
-	 * ```
-	 * ci('log')->is_enabled();
-	 * ```
 	 */
 	public function is_enabled() : Bool
 	{

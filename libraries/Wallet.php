@@ -131,7 +131,7 @@ class Wallet {
 	 * @return \Wallet
 	 *
 	 * #### Example
-	 * ```
+	 * ```php
 	 * ci('wallet')->msg('Oh No!','yellow');
 	 * ci('wallet')->msg('oH No!','red','/folder/new');
 	 * ```
@@ -168,7 +168,7 @@ class Wallet {
 	 * @return \Wallet
 	 *
 	 * #### Example
-	 * ```
+	 * ```php
 	 * ci('wallet')->msgs(['Whoops!','Defcon 1'=>'red','Info']);
 	 * ```
 	 */

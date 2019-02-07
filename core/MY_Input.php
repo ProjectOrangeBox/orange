@@ -103,6 +103,12 @@ class MY_Input extends CI_Input {
 	 *
 	 * Fetch post or put data
 	 *
+	 * #### Example
+	 * ```php
+	 * request('name','nothing supplied',true)
+	 * request(null,null,true)
+	 * request()
+	 * ```
 	 * @access public
 	 *
 	 * @param $index input parameter name
@@ -111,12 +117,6 @@ class MY_Input extends CI_Input {
 	 *
 	 * @return 
 	 *
-	 * #### Example
-	 * ```
-	 * request('name','nothing supplied',true)
-	 * request(null,null,true)
-	 * request()
-	 * ```
 	 */
 	public function request($index = null,$default = null,bool $xss_clean = false)
 	{
@@ -169,7 +169,7 @@ class MY_Input extends CI_Input {
 	 * @return Bool
 	 *
 	 * #### Example
-	 * ```
+	 * ```php
 	 * ci('input')->valid('first_name','required|string','First Name');
 	 * ```
 	 */
@@ -446,7 +446,7 @@ class MY_Input extends CI_Input {
 	 * @return mixed
 	 *
 	 * #### Example
-	 * ```
+	 * ```php
 	 * ci('input')->cookies('username','unknown',true)
 	 * ci('input')->cookies(null,null,true)
 	 * ci('input')->cookies()

@@ -49,7 +49,7 @@ class MY_Output extends CI_Output {
 	 * @return MY_Output
 	 *
 	 * #### Example
-	 * ```
+	 * ```php
 	 * ci('output')->json('name','Johnny');
 	 * ci('output')->json(['name'=>'Johnny']);
 	 * ci('output')->json('{name:"Johnny"}',null,true);

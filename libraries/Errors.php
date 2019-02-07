@@ -235,7 +235,7 @@ class Errors {
 	 * @return array
 	 *
 	 * #### Example
-	 * ```
+	 * ```php
 	 * $array = ci('errors')->groups();
 	 * ```
 	 */
@@ -279,7 +279,7 @@ class Errors {
 	 * @return mixed
 	 *
 	 * #### Example
-	 * ```
+	 * ```php
 	 * $foo->set_request_type('html')->get();
 	 * ```
 	 *
@@ -318,7 +318,7 @@ class Errors {
 	 * @return Errors
 	 *
 	 * #### Example
-	 * ```
+	 * ```php
 	 * $foo->group('foobar')->add('Error!')->set_request_type('cli')->get();
 	 * ```
 	 *
@@ -354,7 +354,7 @@ class Errors {
 	 * @return Errors
 	 *
 	 * #### Example
-	 * ```
+	 * ```php
 	 * $foo->clear('groupa');
 	 * ```
 	 *
@@ -382,7 +382,7 @@ class Errors {
 	 * @return boolean
 	 *
 	 * #### Example
-	 * ```
+	 * ```php
 	 * $has_errors = $foo->has('groupa');
 	 * ```
 	 *
@@ -430,7 +430,7 @@ class Errors {
 	 * @return array
 	 *
 	 * #### Example
-	 * ```
+	 * ```php
 	 * $array = ci('errors')->error_info();
 	 * ```
 	 */
@@ -450,7 +450,7 @@ class Errors {
 	 * @return array
 	 *
 	 * #### Example
-	 * ```
+	 * ```php
 	 * $array = ci('errors')->as_array();
 	 * $array = ci('errors')->as_array('groupa');
 	 * $array = ci('errors')->as_array('groupa,groupc');
@@ -593,7 +593,7 @@ class Errors {
 	 *
 	 *
 	 * #### Example
-	 * ```
+	 * ```php
 	 * ci('errors')->group('foo')->add('Oh No!')->die_on_error(400,'foo');
 	 * ```
 	 *
@@ -624,7 +624,7 @@ class Errors {
 	 * @return void
 	 *
 	 * #### Example
-	 * ```
+	 * ```php
 	 * ci('errors')->show('Uh Oh!');
 	 * ```
 	 *
@@ -649,7 +649,7 @@ class Errors {
 	 * @return void
 	 *
 	 * #### Example
-	 * ```
+	 * ```php
 	 * ci('errors')->display(...);
 	 * ```
 	 *

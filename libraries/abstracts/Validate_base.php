@@ -122,7 +122,7 @@ abstract class Validate_base
 	 * @return Validate_base
 	 *
 	 * #### Example
-	 * ```
+	 * ```php
 	 * $this->field($value)->length(8);
 	 * ```
 	 */
@@ -148,7 +148,7 @@ abstract class Validate_base
 	 * @return Validate_base
 	 *
 	 * #### Example
-	 * ```
+	 * ```php
 	 * $this->field($value)->trim();
 	 * ```
 	 */
@@ -170,7 +170,7 @@ abstract class Validate_base
 	 * @return Validate_base
 	 *
 	 * #### Example
-	 * ```
+	 * ```php
 	 * $this->field($value)->human();
 	 * ```
 	 */
@@ -193,7 +193,7 @@ abstract class Validate_base
 	 * @return Validate_base
 	 *
 	 * #### Example
-	 * ```
+	 * ```php
 	 * $this->field($value)->human_plus();
 	 * ```
 	 */
@@ -216,7 +216,7 @@ abstract class Validate_base
 	 * @return Validate_base
 	 *
 	 * #### Example
-	 * ```
+	 * ```php
 	 * $this->field($value)->strip('!@#$%^&*()');
 	 * ```
 	 */
@@ -238,7 +238,7 @@ abstract class Validate_base
 	 * @return bool
 	 *
 	 * #### Example
-	 * ```
+	 * ```php
 	 * $this->field($value)->is_bol();
 	 * ```
 	 */
@@ -259,7 +259,7 @@ abstract class Validate_base
 	 * @return 
 	 *
 	 * #### Example
-	 * ```
+	 * ```php
 	 * $found = locate_file('/assets/images/bicycle.jpg');
 	 * ```
 	 */

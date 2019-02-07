@@ -254,7 +254,7 @@ class Cache_request extends CI_Driver {
 	 * @return mixed
 	 *
 	 * #### Example
-	 * ```
+	 * ```php
 	 * $cached = ci('cache')->request->cache('foobar',function(){ return 'cache me for 60 seconds!' });
 	 * ```
 	 */

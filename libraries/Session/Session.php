@@ -37,7 +37,7 @@ class Session extends CI_Session {
 	 * @return mixed
 	 *
 	 * #### Example
-	 * ```
+	 * ```php
 	 * $name = ci('session')->userdata('name');
 	 * $name = ci('session')->userdata('name',true);
 	 * ```
@@ -66,7 +66,7 @@ class Session extends CI_Session {
 	 * @return mixed
 	 *
 	 * #### Example
-	 * ```
+	 * ```php
 	 * $name = ci('session')->tempdata('name');
 	 * $name = ci('session')->tempdata('name',true);
 	 * ```

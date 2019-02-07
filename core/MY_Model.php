@@ -283,7 +283,7 @@ class MY_Model extends CI_Model {
 	 * @return MY_Model
 	 *
 	 * #### Example
-	 * ```
+	 * ```php
 	 * $rules = [
 	 *	'id' => ['field' => 'id', 'label' => 'Id', 'rules' => 'required|integer],
 	 *	'key' => ['field' => 'key', 'label' => 'Key', 'rules' => 'required|strtolower'],

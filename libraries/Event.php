@@ -45,18 +45,18 @@ class Event {
 	/**
 	 * Register a listener
 	 *
+	 * #### Example
+	 * ```php
+	 * register('open.page',function(&$var1) { echo "hello $var1"; },EVENT::PRIORITY_HIGH);
+	 * ```
+	 * @access public
+	 *
 	 * @param string $name name of the event we want to listen for
 	 * @param callable $callable function to call if the event if triggered
 	 * @param int $priority the priority this listener has against other listeners
 	 *
 	 * @return Event
 	 *
-	 * @access public
-	 *
-	 * #### Example
-	 * ```
-	 * register('open.page',function(&$var1) { echo "hello $var1"; },PRIORITY_HIGH);
-	 * ```
 	 */
 	public function register(string $name,$callable,int $priority = EVENT::PRIORITY_NORMAL) : Event
 	{
@@ -85,6 +85,10 @@ class Event {
 	/**
 	 * Trigger an event
 	 *
+	 * #### Example
+	 * ```php
+	 * trigger('open.page',$var1);
+	 * ```
 	 * @param string $name event to trigger
 	 * @param mixed ...$arguments pass by reference
 	 *
@@ -92,10 +96,6 @@ class Event {
 	 *
 	 * @access public
 	 *
-	 * #### Example
-	 * ```
-	 * trigger('open.page',$var1);
-	 * ```
 	 */
 	public function trigger(string $name,&...$arguments) : Event
 	{
@@ -122,16 +122,16 @@ class Event {
 	 *
 	 * Is there any listeners for a certain event?
 	 *
+	 * #### Example
+	 * ```php
+	 * $bool = ci('event')->has('page.load');
+	 * ```
 	 * @access public
 	 *
 	 * @param string $name event to search for
 	 *
 	 * @return bool
 	 *
-	 * #### Example
-	 * ```
-	 * has('page.load');
-	 * ```
 	 */
 	public function has(string $name) : bool
 	{
@@ -142,16 +142,13 @@ class Event {
 	}
 
 	/**
-	 * Return an array of all of the event names
-	 *
-	 * @return array
-	 *
-	 * @access public
-	 */
-	/**
 	 *
 	 * Return an array of all of the event names
 	 *
+	 * #### Example
+	 * ```php
+	 * $triggers = ci('event')->events();
+	 * ```
 	 * @access public
 	 *
 	 * @return array
@@ -166,6 +163,10 @@ class Event {
 	 *
 	 * Return the number of events for a certain name
 	 *
+	 * #### Example
+	 * ```php
+	 * $listeners = ci('event')->count('database.user_model');
+	 * ```
 	 * @access public
 	 *
 	 * @param string $name

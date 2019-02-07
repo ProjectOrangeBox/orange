@@ -107,7 +107,7 @@ class Cache extends CI_Cache {
 	 * @return mixed
 	 *
 	 * #### Example
-	 * ```
+	 * ```php
 	 * $cached = ci('cache')->inline('foobar',function(){ return 'cache me for 60 seconds!' },60);
 	 * ```
 	 */
@@ -160,7 +160,7 @@ class Cache extends CI_Cache {
 	 * @return Cache
 	 *
 	 * #### Example
-	 * ```
+	 * ```php
 	 * delete_cache_by_tags('acl','user','roles');
 	 * delete_cache_by_tags('acl.user.roles');
 	 * delete_cache_by_tags(['acl','user','roles']);

@@ -89,7 +89,7 @@ class MY_Router extends CI_Router {
 	 * @return void
 	 *
 	 * #### Example
-	 * ```
+	 * ```php
 	 * 'stock/(.*)' => function($url,$router) {
 	 *  $router->on_request('PublicMiddleware','GuiMiddleware','NavbarMiddleware');
 	 *
@@ -113,7 +113,7 @@ class MY_Router extends CI_Router {
 	 * @return void
 	 *
 	 * #### Example
-	 * ```
+	 * ```php
 	 * 'stock/(.*)' => function($url,$router) {
 	 *  $router->on_responds('GuiMiddleware');
 	 *

@@ -46,6 +46,10 @@ class MY_Config extends CI_Config {
 	 * Provides dot notation selection of configuration values
 	 * this is the "recommended" way to make sure you get database values as well
 	 *
+	 * #### Example
+	 * ```php
+	 * $value = ci('config')->dot_item('email.protocol','sendmail');
+	 * ```
 	 * @access public
 	 *
 	 * @param string $setting filename.key
@@ -53,10 +57,6 @@ class MY_Config extends CI_Config {
 	 *
 	 * @return mixed
 	 *
-	 * #### Example
-	 * ```
-	 * $value = ci('config')->dot_item('email.protocol','sendmail');
-	 * ```
 	 */
 	public function dot_item(string $setting,$default=null)
 	{

@@ -233,7 +233,7 @@ class Page {
 	 * @return mixed
 	 *
 	 * #### Example
-	 * ```
+	 * ```php
 	 * ci('page')->view('folder/my_view',['name'=>'Johnny']);
 	 * ci('page')->view('folder/my_block',['name'=>'Johnny Appleseed'],'name_block');
 	 * ```
@@ -269,7 +269,7 @@ class Page {
 	 * @return Page
 	 *
 	 * #### Example
-	 * ```
+	 * ```php
 	 * ci('page')->data('name','Johnny');
 	 * ci('page')->data(['name'=>'Johnny','age'=>23]);
 	 * ```
@@ -295,7 +295,7 @@ class Page {
 	 * @return Page
 	 *
 	 * #### Example
-	 * ```
+	 * ```php
 	 * ci('page')->extend('_templates/default');
 	 * ```
 	 */
@@ -322,7 +322,7 @@ class Page {
 	 * @return string
 	 *
 	 * #### Example
-	 * ```
+	 * ```php
 	 * $html = ci('page')->link_html('/assets/css/style.css');
 	 * ```
 	 */
@@ -344,7 +344,7 @@ class Page {
 	 * @return string
 	 *
 	 * #### Example
-	 * ```
+	 * ```php
 	 *
 	 * ```
 	 */
@@ -367,7 +367,7 @@ class Page {
 	 * @return string
 	 *
 	 * #### Example
-	 * ```
+	 * ```php
 	 * $html = ci('page')->ary2element('a',['class'=>'bold','id'=>'id3'],'link!');
 	 * ```
 	 */
@@ -396,7 +396,7 @@ class Page {
 	 * @return Page
 	 *
 	 * #### Example
-	 * ```
+	 * ```php
 	 * ci('page')->meta('charset','UTF-8');
 	 * ```
 	 */
@@ -421,7 +421,7 @@ class Page {
 	 * @return Page
 	 *
 	 * #### Example
-	 * ```
+	 * ```php
 	 * ci('page')->script('alert("Page Ready!");');
 	 * ```
 	 */
@@ -442,7 +442,7 @@ class Page {
 	 * @return Page
 	 *
 	 * #### Example
-	 * ```
+	 * ```php
 	 * ci('page')->domready('alert("Page Ready!");');
 	 * ```
 	 */
@@ -463,7 +463,7 @@ class Page {
 	 * @return Page
 	 *
 	 * #### Example
-	 * ```
+	 * ```php
 	 * ci('page')->title('My Web Page');
 	 * ```
 	 */
@@ -484,7 +484,7 @@ class Page {
 	 * @return Page
 	 *
 	 * #### Example
-	 * ```
+	 * ```php
 	 * ci('page')->style('. { font-size: 9px }');
 	 * ```
 	 */
@@ -506,7 +506,7 @@ class Page {
 	 * @return Page
 	 *
 	 * #### Example
-	 * ```
+	 * ```php
 	 * ci('page')->script('/assets/javascript.js');
 	 * ci('page')->script('/assets/javascript.js',PAGE::PRIORITY_HIGHEST);
 	 * ```
@@ -536,7 +536,7 @@ class Page {
 	 * @return Page
 	 *
 	 * #### Example
-	 * ```
+	 * ```php
 	 * ci('page')->css('/assets/application.cs');
 	 * ```
 	 */
@@ -566,7 +566,7 @@ class Page {
 	 * @return Page
 	 *
 	 * #### Example
-	 * ```
+	 * ```php
 	 * ci('page')->js_variable('name','Johnny Appleseed');
 	 * ci('page')->js_variable('name','{name: "Johnny Appleseed"}',PAGE::PRIORITY_NORMAL,true);
 	 * ```
@@ -594,7 +594,7 @@ class Page {
 	 * @return Page
 	 *
 	 * #### Example
-	 * ```
+	 * ```php
 	 * ci('page')->js_variables(['name'=>'Johnny','age'=>23]);
 	 * ```
 	 */
@@ -619,7 +619,7 @@ class Page {
 	 * @return Page
 	 *
 	 * #### Example
-	 * ```
+	 * ```php
 	 * ci('page')->body_class('body-wrapper');
 	 * ci('page')->body_class('body-wrapper o-theme');
 	 * ci('page')->body_class(['body-wrapper','o-theme']);
@@ -644,7 +644,7 @@ class Page {
 	 * @return Page
 	 *
 	 * #### Example
-	 * ```
+	 * ```php
 	 * ci('page')->add('custom_var','<p>Custom Stuff!</p>');
 	 * ```
 	 */
@@ -675,7 +675,7 @@ class Page {
 	 * @return mixed
 	 *
 	 * #### Example
-	 * ```
+	 * ```php
 	 * ci('page')->var('script');
 	 * ```
 	 */
@@ -700,7 +700,7 @@ class Page {
 	 * @return string
 	 *
 	 * #### Example
-	 * ```
+	 * ```php
 	 * $script_html = ci('page')->var('script');
 	 * ```
 	 */
