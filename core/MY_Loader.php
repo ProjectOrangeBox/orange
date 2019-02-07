@@ -48,7 +48,7 @@ class MY_Loader extends CI_Loader {
 	 * @param $params NULL
 	 * @param $object_name NULL
 	 *
-	 * @return $this
+	 * @return MY_Loader
 	 *
 	 */
 	public function library($library, $params = NULL, $object_name = NULL)
@@ -74,7 +74,7 @@ class MY_Loader extends CI_Loader {
 	 * @param $name
 	 * @param $db_conn FALSE
 	 *
-	 * @return $this
+	 * @return MY_Loader
 	 *
 	 */
 	public function model($model, $name = '', $db_conn = FALSE)
@@ -130,7 +130,7 @@ class MY_Loader extends CI_Loader {
 	 * @param $params null
 	 * @param $object_name null
 	 *
-	 * @return $this
+	 * @return MY_Loader
 	 *
 	 */
 	protected function _init_object(string $name,array $params = null,string $object_name = null) : MY_Loader

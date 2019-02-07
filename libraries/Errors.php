@@ -214,7 +214,7 @@ class Errors {
 	 *
 	 * @param string $group
 	 *
-	 * @return $this
+	 * @return Errors
 	 *
 	 */
 	public function group(string $group) : Errors
@@ -253,7 +253,7 @@ class Errors {
 	 * @param string $request_type cli|ajax|json|html|array
 	 *
 	 * @throws Exception
-	 * @return $this
+	 * @return Errors
 	 *
 	 */
 	public function set_request_type(string $request_type) : Errors
@@ -315,7 +315,7 @@ class Errors {
 	 * @param string $msg
 	 * @param string $fieldname null
 	 *
-	 * @return $this
+	 * @return Errors
 	 *
 	 * #### Example
 	 * ```
@@ -351,7 +351,7 @@ class Errors {
 	 *
 	 * @param $group null
 	 *
-	 * @return $this
+	 * @return Errors
 	 *
 	 * #### Example
 	 * ```
@@ -589,7 +589,7 @@ class Errors {
 	 * @param $view 400
 	 * @param string $group null
 	 *
-	 * @return $this
+	 * @return Errors
 	 *
 	 *
 	 * #### Example

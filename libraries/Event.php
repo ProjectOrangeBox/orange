@@ -49,7 +49,7 @@ class Event {
 	 * @param callable $callable function to call if the event if triggered
 	 * @param int $priority the priority this listener has against other listeners
 	 *
-	 * @return $this
+	 * @return Event
 	 *
 	 * @access public
 	 *
@@ -88,7 +88,7 @@ class Event {
 	 * @param string $name event to trigger
 	 * @param mixed ...$arguments pass by reference
 	 *
-	 * @return $this
+	 * @return Event
 	 *
 	 * @access public
 	 *

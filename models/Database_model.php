@@ -1275,7 +1275,7 @@ class Database_model extends MY_Model {
 	 *
 	 * @access protected
 	 *
-	 * @return $this
+	 * @return Database_model
 	 *
 	 */
 	protected function where_can_read() : Database_model
@@ -1299,7 +1299,7 @@ class Database_model extends MY_Model {
 	 *
 	 * @param array $data
 	 *
-	 * @return $this
+	 * @return Database_model
 	 *
 	 */
 	protected function where_can_edit(array &$data) : Database_model
@@ -1323,7 +1323,7 @@ class Database_model extends MY_Model {
 	 *
 	 * @param array $data
 	 *
-	 * @return $this
+	 * @return Database_model
 	 *
 	 */
 	protected function where_can_delete(array &$data) : Database_model
@@ -1347,7 +1347,7 @@ class Database_model extends MY_Model {
 	 *
 	 * @param array $data
 	 *
-	 * @return $this
+	 * @return Database_model
 	 *
 	 */
 	protected function add_fields_on_insert(array &$data) : Database_model
@@ -1399,7 +1399,7 @@ class Database_model extends MY_Model {
 	 *
 	 * @param array $data
 	 *
-	 * @return $this
+	 * @return Database_model
 	 *
 	 */
 	protected function add_fields_on_update(array &$data) : Database_model
@@ -1427,7 +1427,7 @@ class Database_model extends MY_Model {
 	 *
 	 * @param array $data
 	 *
-	 * @return $this
+	 * @return Database_model
 	 *
 	 */
 	protected function add_fields_on_delete(array &$data) : Database_model
@@ -1457,7 +1457,7 @@ class Database_model extends MY_Model {
 	 *
 	 * @access protected
 	 *
-	 * @return $this
+	 * @return Database_model
 	 *
 	 */
 	protected function add_where_on_select() : Database_model
@@ -1484,7 +1484,7 @@ class Database_model extends MY_Model {
 	 *
 	 * @param $data
 	 *
-	 * @return $this
+	 * @return Database_model
 	 *
 	 */
 	protected function add_where_on_update(array &$data) : Database_model
@@ -1500,7 +1500,7 @@ class Database_model extends MY_Model {
 	 *
 	 * @param $data
 	 *
-	 * @return $this
+	 * @return Database_model
 	 *
 	 */
 	protected function add_where_on_insert(array &$data) : Database_model
@@ -1516,7 +1516,7 @@ class Database_model extends MY_Model {
 	 *
 	 * @param $data
 	 *
-	 * @return $this
+	 * @return Database_model
 	 *
 	 */
 	protected function add_where_on_delete(array &$data) : Database_model

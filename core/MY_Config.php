@@ -94,7 +94,7 @@ class MY_Config extends CI_Config {
 	 * @param string $setting
 	 * @param $value null
 	 *
-	 * @return $this
+	 * @return MY_Config
 	 *
 	 */
 	public function set_dot_item(string $setting,$value=null) : MY_Config

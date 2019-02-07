@@ -157,7 +157,7 @@ class Cache extends CI_Cache {
 	 *
 	 * @param mixed $args array, period separated list of tags or multiple arguments
 	 *
-	 * @return $this
+	 * @return Cache
 	 *
 	 * #### Example
 	 * ```

@@ -282,15 +282,6 @@ class Page {
 	}
 
 	/**
-	 * extended
-	 * Insert description here
-	 *
-	 * @param $template
-	 *
-	 * @return $this
-	 *
-	 */
-	/**
 	 *
 	 * Specify a additional template which will be loaded after the view template
 	 * this allows you to use a "base" template and extend it with your view
