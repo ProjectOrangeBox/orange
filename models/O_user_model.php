@@ -91,7 +91,7 @@ class O_user_model extends Database_model {
  * @throws
  * @example
  */
-	public function insert($data) {
+	public function insert(array $data) {
 		$this->_password_check('insert',$data);
 
 		if (!ci('errors')->has()) {
@@ -112,7 +112,7 @@ class O_user_model extends Database_model {
  * @throws
  * @example
  */
-	public function update($data) {
+	public function update(array $data) {
 		if (!empty($data['password'])) {
 			$this->_password_check('update',$data);
 		} else {

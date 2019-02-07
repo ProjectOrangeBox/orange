@@ -20,38 +20,89 @@
  * @link https://github.com/ProjectOrangeBox
  * @version v2.0.0
  *
- * @uses # o_user_model - Orange User Model
- * @uses # session - CodeIgniter Session
- * @uses # event - Orange event
- * @uses # errors - Orange errors
- * @uses # controller - CodeIgniter Controller
- * @uses # output - CodeIgniter Output
- *
- * @config username min length
- * @config username max length
- *
- * @define NOBODY_USER_ID
- * @define ADMIN_ROLE_ID
+ * @throws Exception
  *
  */
-
 class Database_model extends MY_Model {
-	protected $db_group = null; /* database config to use for _database */
-	protected $read_db_group = null; /* database config to use for reads */
-	protected $write_db_group = null; /* database config to use for write */
+	/**
+	 * Database config to use for _database if other than default
+	 *
+	 * @var string
+	 */
+	protected $db_group = null;
 
-	protected $table; /* database models table name */
+	/**
+	 * Database configuration to use for _database on read operations if other than default
+	 *
+	 * @var string
+	 */
+	protected $read_db_group = null;
 
-	protected $protected = []; /* protected $data columns - these are never inserted / updated */
-	protected $debug = false; /* boolean stored in ROOTPATH.'/var/logs/model.{class name}.log' */
-	protected $primary_key = 'id'; /* primary id used as default for many SQL commands */
-	protected $additional_cache_tags = ''; /* additional cache tags to add to cache prefix remember each tag is separated by . */
-	protected $entity = null; /* true or string name of the entity to use for records - if true it uses the class name and replaces _model with _entity */
-	protected $entity_class = null; /* empty entity */
-	protected $filter_out_deleted = true; /* internal tracking whether we should filter out deleted records */
-	protected $ignore_read = false; /* internal tracking whether to ignore read role */
-	
-	/* add the name of the column to "enable" on model */
+	/**
+	 * Database configuration to use for _database on write operations if other than default
+	 *
+	 * @var string
+	 */
+	protected $write_db_group = null;
+
+	/**
+	 * Database models table name
+	 *
+	 * @var string
+	 */
+	protected $table;
+
+	/**
+	 * Columns removed from the data array on update and insert statements
+	 *
+	 * @var array
+	 */
+	protected $protected = [];
+
+	/**
+	 * If true a log will be generated LOGPATH folder under the table name
+	 *
+	 * @var boolean
+	 */
+	protected $debug = false;
+
+	/**
+	 * Default primary id without one many automatic methods will not work
+	 *
+	 * @var string
+	 */
+	protected $primary_key = 'id'; /*  */
+
+	/**
+	 * Additional cache tags to add to cache prefix remember each tag is separated by periods
+	 *
+	 * @var string
+	 */
+	protected $additional_cache_tags = '';
+
+	/**
+	 * If a boolean true is provided the models name will be used to try to automatically attach and use the matching entity name
+	 * If a string name is provided it will be used to automatically attach and use the matching entity name
+	 *
+	 * @var mixed
+	 */
+	protected $entity = null;
+
+	/**
+	 * Reference to the attached empty entity
+	 *
+	 * @var object
+	 */
+	protected $entity_class = null;
+
+	/**
+	 * Array of additional features
+	 * defaults to boolean false to disable feature
+	 * each feature has different requirements to enable
+	 * but, for column name features you must provide the column name as a string
+	 *
+	 * @var array
+	 */
 	protected $has = [
 		'read_role'=>false,
 		'edit_role'=>false,
@@ -65,25 +116,120 @@ class Database_model extends MY_Model {
 		'deleted_by'=>false,
 		'deleted_on'=>false,
 		'deleted_ip'=>false,
-		'is_deleted'=>false, /* add the column name here to turning on soft delete */
+		'is_deleted'=>false,
 	];
 
-	protected $cache_prefix; /* calculated in construct - internal */
-	protected $auto_generated_primary = true; /* if the primary key is auto generated then remove it from insert commands */
-
-	/* internal */
-	protected $_database; /* local instance of database connection */
-	protected $read_database = null; /* local instance of write database connection */
-	protected $write_database = null; /* local instance of read database connection */
-
-	protected $temporary_column_name = null;
-	protected $temporary_return_as_array = null;
-
-	protected $default_return_on_many; /* return this on "no records found" */
-	protected $default_return_on_single; /* return this on "no record found" */
+	/**
+	 * internal storage of formatted cache prefixes
+	 *
+	 * @var string
+	 */
+	protected $cache_prefix;
 
 	/**
-	 * __construct
+	 * Used to determine if the primary key is auto generated then remove it from insert commands
+	 *
+	 * @var boolean
+	 */
+	protected $auto_generated_primary = true;
+
+	/**
+	 * Internal reference to the database connection
+	 *
+	 * @var object
+	 */
+	protected $_database; /*  */
+
+	/**
+	 * internal reference to write database connection
+	 *
+	 * @var object
+	 */
+	protected $read_database = null;
+
+	/**
+	 * internal reference to read database connection
+	 *
+	 * @var object
+	 */
+	protected $write_database = null;
+
+	/**
+	 * internal storage of a single column name when a single column from a single record is requested
+	 *
+	 * @var string
+	 */
+	protected $temporary_column_name = null;
+
+	/**
+	 * internal storage to let the database class know to return an array based instead of a class based database cursor
+	 *
+	 * @var mixed
+	 */
+	protected $temporary_return_as_array = null;
+
+	/**
+	 * internal storage of what to return when nothing is found on select for multiple records
+	 *
+	 * @var mixed
+	 */
+	protected $default_return_on_many;
+
+	/**
+	 * internal storage of what to return when nothing is found on select for a single record
+	 *
+	 * @var mixed
+	 */
+	protected $default_return_on_single;
+
+	/**
+	 * internal storage of whether we should filter out deleted records
+	 *
+	 * @var boolean
+	 */
+	protected $filter_out_deleted = true;
+
+	/**
+	 * internal storage of whether we should skip rule validation
+	 *
+	 * @var boolean
+	 */
+	protected $skip_rules = false;
+
+	/**
+	 * internal storage whether to ignore read role
+	 *
+	 * @var boolean
+	 */
+	protected $ignore_read_role = false;
+
+	/**
+	 * internal storage whether to ignore edit role
+	 *
+	 * @var boolean
+	 */
+	protected $ignore_edit_role = false;
+
+	/**
+	 * internal storage whether to ignore delete role
+	 *
+	 * @var boolean
+	 */
+	protected $ignore_delete_role = false;
+
+	/**
+	 * internal storage whether to limit the query (select)
+	 *
+	 * @var integer
+	 */
+	protected $limit_to = false;
+
+	/**
+	 *
+	 * Constructor
+	 *
+	 * @access public
+	 *
 	 */
 	public function __construct()
 	{
@@ -127,25 +273,9 @@ class Database_model extends MY_Model {
 			$this->_database = $this->db;
 		}
 
-		/**
-		 * does this model have rules? if so add the role validation rules
-		 */
-		if ($this->has['read_role']) {
-			$this->rules = $this->rules + [$this->has['read_role'] => ['field' => $this->has['read_role'], 'label' => 'Read Role', 	'rules' => 'required|integer|max_length[10]|less_than[4294967295]|filter_int[10]']];
-		}
+		$this->reset_query();
 
-		if ($this->has['edit_role']) {
-			$this->rules = $this->rules + [$this->has['edit_role'] => ['field' => $this->has['edit_role'], 'label' => 'Edit Role', 	'rules' => 'required|integer|max_length[10]|less_than[4294967295]|filter_int[10]']];
-		}
-
-		if ($this->has['delete_role']) {
-			$this->rules = $this->rules + [$this->has['delete_role'] => ['field' => $this->has['delete_role'], 'label' => 'Delete Role', 'rules' => 'required|integer|max_length[10]|less_than[4294967295]|filter_int[10]']];
-		}
-
-		/* what is the default on return many */
-		$this->default_return_on_many = [];
-
-		/* is there are record entity attached? */
+		/* Is there are record entity attached? */
 		if ($this->entity) {
 			$this->entity_class = ci('load')->entity($this->entity,true);
 
@@ -159,32 +289,115 @@ class Database_model extends MY_Model {
 	}
 
 	/**
-	 * Try to call built in CodeIgniter Database methods on the CodeIgniter _database object
 	 *
-	 * @param $name string
-	 * @param $arguments mixed
+	 * Try to call CodeIgniter Database methods on our _database object
+	 * or throw a error if it's a invalid method
+	 * note: use the switch_db method before using this if you are using different read and write databases
+	 *       so the correct CodeIgniter's Query Builder is being used.
 	 *
-	 * @return $this
+	 * @access public
+	 *
+	 * @param string $name
+	 * @param array $arguments
+	 *
+	 * @throws Exception
+	 * @return Database_model
 	 *
 	 */
-	public function __call($name, $arguments)
+	public function __call(string $name,array $arguments) : Database_model
 	{
+		/* pass thru */
 		if (method_exists($this->_database,$name)) {
 			call_user_func_array([$this->_database,$name],$arguments);
+		} else {
+			throw new Exception('Unknown method "'.$name.'".');
 		}
 
 		return $this;
 	}
 
-	public function ignore_read_role() : Database_model
+	/**
+	 *
+	 * Reset the model for another Query
+	 *
+	 * @access public
+	 *
+	 * @return Database_model
+	 *
+	 */
+	public function reset_query() : Database_model
 	{
-		$this->ignore_read = true;
-	
+		/* Reset the CodeIgniter Query Builder */
+		$this->_database->reset_query();
+
+		/* and now ours */
+		$this->temporary_column_name = null;
+		$this->temporary_return_as_array = null;
+		$this->default_return_on_many = [];
+		$this->default_return_on_single = ($this->entity_class) ? $this->entity_class : new stdClass();
+		$this->filter_out_deleted = true;
+		$this->ignore_read_role = false;
+		$this->ignore_edit_role = false;
+		$this->ignore_delete_role = false;
+		$this->skip_rules = false;
+		$this->limit_to = false;
+
 		return $this;
 	}
 
 	/**
+	 *
+	 * Informs the where clause to not include the read role rules condition
+	 *
+	 * @access public
+	 *
+	 * @return Database_model
+	 *
+	 */
+	public function ignore_read_role() : Database_model
+	{
+		$this->ignore_read_role = true;
+
+		return $this;
+	}
+
+	/**
+	 *
+	 * Informs the where clause to not include the edit role rules condition
+	 *
+	 * @access public
+	 *
+	 * @return Database_model
+	 *
+	 */
+	public function ignore_edit_role() : Database_model
+	{
+		$this->ignore_edit_role = true;
+
+		return $this;
+	}
+
+	/**
+	 *
+	 * Informs the where clause to not include the delete role condition
+	 *
+	 * @access public
+	 *
+	 * @return Database_model
+	 *
+	 */
+	public function ignore_delete_role() : Database_model
+	{
+		$this->ignore_delete_role = true;
+
+		return $this;
+	}
+
+	/**
+	 *
 	 * Return the current cache prefix
+	 *
+	 * @access public
 	 *
 	 * @return string
 	 *
@@ -197,6 +410,8 @@ class Database_model extends MY_Model {
 	/**
 	 * Return the current table name
 	 *
+	 * @access public
+	 *
 	 * @return string
 	 *
 	 */
@@ -208,7 +423,9 @@ class Database_model extends MY_Model {
 	/**
 	 * Return the current primary key
 	 *
-	 * @return
+	 * @access public
+	 *
+	 * @return string
 	 *
 	 */
 	public function get_primary_key() : string
@@ -219,18 +436,22 @@ class Database_model extends MY_Model {
 	/**
 	 * Return if this table uses soft deletes
 	 *
+	 * @access public
+	 *
 	 * @return boolean
 	 *
 	 */
 	public function get_soft_delete() : bool
 	{
-		return (bool)isset($this->has['is_deleted']);
+		return ($this->has['is_deleted'] !== false);
 	}
 
 	/**
-	 * Return the current query as an array overriding what ever is currently set as default
+	 * Informs the class to return an array overriding what ever is currently set as default
 	 *
-	 * @return $this
+	 * @access public
+	 *
+	 * @return Database_model
 	 *
 	 */
 	public function as_array() : Database_model
@@ -241,26 +462,27 @@ class Database_model extends MY_Model {
 	}
 
 	/**
-	 * Return only this single column
+	 * Return only this single column value from single record
 	 *
-	 * @param $name string
+	 * @param string $name name of the single column value to return
 	 *
-	 * @return
+	 * @return Database_model
 	 *
 	 */
-	public function column($name) : Database_model
+	public function column(string $name) : Database_model
 	{
 		$this->temporary_column_name = (string)$name;
+		$this->limit_to = 1;
 
 		return $this;
 	}
 
 	/**
-	 * If no records / record are found return this
+	 * If no record(s) are found return this
 	 *
-	 * @param $return mixed
+	 * @param mixed $return
 	 *
-	 * @return $this
+	 * @return Database_model
 	 *
 	 */
 	public function on_empty_return($return) : Database_model
@@ -273,38 +495,44 @@ class Database_model extends MY_Model {
 
 	/**
 	 * Get a single record
+	 * if nothing provided than return the value for default on single record
 	 *
-	 * @param $primary_value
+	 * @param mixed $primary_value
 	 *
 	 * @return mixed
 	 *
 	 */
 	public function get($primary_value = null)
 	{
-		return ($primary_value === null)
-			? $this->default_return_on_single
-			: $this->get_by([$this->primary_key => $primary_value]);
+		$this->limit_to = 1;
+		
+		return ($primary_value === null) ? $this->default_return_on_single : $this->get_by([$this->primary_key => $primary_value]);
 	}
 
 	/**
-	 * Get a single using a where clause
+	 * Get a single record using an where clause
 	 *
-	 * @param $where array
+	 * @param array $where CodeIgniter builder compatible where clause
+	 *
+	 * @see https://www.codeigniter.com/user_guide/database/query_builder.html#looking-for-specific-data
 	 *
 	 * @return mixed
 	 *
 	 */
-	public function get_by($where = null)
+	public function get_by(array $where = null)
 	{
+		$this->limit_to = 1;
+
 		if ($where) {
 			$this->_database->where($where);
 		}
 
+		/* get the results as a record */
 		return $this->_get(false);
 	}
 
 	/**
-	 * Get multiple records
+	 * Get multiple records no filter
 	 *
 	 * @return mixed
 	 *
@@ -315,101 +543,34 @@ class Database_model extends MY_Model {
 	}
 
 	/**
-	 * Get multiple records using a where clause
+	 * Get multiple records using a filter
 	 *
-	 * @param $where array
+	 * @param array $where CodeIgniter builder compatible where clause
+	 *
+	 * @see https://www.codeigniter.com/user_guide/database/query_builder.html#looking-for-specific-data
 	 *
 	 * @return mixed
 	 *
 	 */
-	public function get_many_by($where = null)
+	public function get_many_by(array $where = null)
 	{
 		if ($where) {
 			$this->_database->where($where);
 		}
-
+		
+		/* get the results as an array of records */
 		return $this->_get(true);
 	}
 
 	/**
-	 * Preform the actual SQL select
+	 * Insert a database record
 	 *
-	 * @param $as_array boolean return as a array
-	 * @param $table string optional
+	 * @param array $data array of key (column name) value pairs
 	 *
-	 * @return mixed
-	 *
-	 */
-	protected function _get($as_array = true, $table = null)
-	{
-		/* switch to the read database if we are using 2 different connections */
-		$this->switch_database('read');
-
-		/* figure out the table for the select */
-		$table = ($table) ? $table : $this->table;
-
-		/* add the select where - this also makes it easy to override select just by extending this method */
-		$this->add_where_on_select();
-
-		/* are we looking for a single column? */
-		if ($this->temporary_column_name) {
-			/* yes - then tell CodeIgniter to only select that column */
-			$this->_database->select($this->temporary_column_name);
-		}
-
-		/* run the actual CodeIgniter query builder select */
-		$dbc = $this->_database->get($table);
-
-		/* log it if we need to */
-		$this->log_last_query();
-
-		/* what type of results are they looking for? */
-		$results = ($as_array) ? $this->_as_array($dbc) : $this->_as_row($dbc);
-
-		/* ar they looking for a single column? */
-		if ($this->temporary_column_name) {
-			/* yes - then the results are that single column */
-
-			/* is it a array or object that was returned */
-			if (is_array($results)) {
-				$results = $results[$this->temporary_column_name];
-			} elseif (is_object($results)) {
-				$results = $results->{$this->temporary_column_name};
-			}
-		}
-
-		/* clear the temp stuff */
-		$this->_clear();
-
-		/* return the results */
-		return $results;
-	}
-
-/**
- * Clear our query temp values etc...
- *
- * @return $this
- *
- */
-	public function _clear() : Database_model
-	{
-		$this->temporary_column_name = null;
-		$this->temporary_return_as_array = null;
-		$this->default_return_on_many = [];
-		$this->default_return_on_single = ($this->entity_class) ? $this->entity_class : new stdClass();
-
-		return $this;
-	}
-
-	/**
-	 * Insert a database record based on the name value associated array pairs
-	 *
-	 * @param $data array
-	 *
-	 * @return mixed - false on fail or the insert id
+	 * @return mixed - false on failure or the insert id
 	 *
 	 */
-	public function insert($data)
+	public function insert(array $data)
 	{
 		/* switch to the write database if we are using 2 different connections */
 		$this->switch_database('write');
@@ -424,7 +585,7 @@ class Database_model extends MY_Model {
 		}
 
 		/* preform the validation if there are rules and skip rules is false only using the data input that has rules using the insert rule set */
-		$success = (!$this->skip_rules && count($this->rules)) ? $this->only_columns($data,$this->rules)->add_rule_set_columns($data,'insert')->validate($data) : true;
+		$success = (!$this->skip_rules && count($this->rules)) ? $this->add_additional_rules()->only_columns($data,$this->rules)->add_rule_set_columns($data,'update')->validate($data) : true;
 
 		/* if the validation was successful then proceed */
 		if ($success) {
@@ -434,6 +595,7 @@ class Database_model extends MY_Model {
 			call the add field on insert method which can be overridden on the extended model class
 			call the add where on insert method which can be overridden on the extended model class
 			 */
+
 			$this
 				->remap_columns($data, $this->rules)
 				->remove_columns($data, $this->protected)
@@ -457,50 +619,22 @@ class Database_model extends MY_Model {
 		}
 
 		/* clear the temp stuff */
-		$this->_clear();
+		$this->reset_query();
 
 		/* return false on error or the primary id of the auto generated primary if if there is no auto generated primary if 0 is returned */
 		return $success;
 	}
 
 	/**
-	 * Make sure each column is added to data even if empty
-	 * this makes sure each validation rule can work on something if necessary
-	 * if data didn't include the column then the rules would be skipped
+	 * Update a database record
 	 *
-	 * @param $data
-	 * @param $which_set
+	 * @param array $data array of key (column name) value pairs
 	 *
-	 * @return $this
+	 * @throws Exception
+	 * @return mixed - false on fail or the number of affected rows
 	 *
 	 */
-	protected function add_rule_set_columns(&$data,$which_set) : Database_model
-	{
-		/* $this->rule_sets['update'] = 'id,name,phone,address,city,state,zip' */
-
-		if (isset($this->rule_sets[$which_set])) {
-
-			$required_fields = explode(',',$this->rule_sets[$which_set]);
-
-			foreach ($required_fields as $required_field) {
-				if (!isset($data[$required_field])) {
-					$data[$required_field] = '';
-				}
-			}
-		}
-
-		return $this;
-	}
-
-	/**
-	 * Update a database record based on the name value associated array pairs
-	 *
-	 * @param $data array
-	 *
-	 * @return mixed - false on fail or the affected rows
-	 *
-	 */
-	public function update($data)
+	public function update(array $data)
 	{
 		/* convert the input to any array if it's not already */
 		$data = (array)$data;
@@ -518,13 +652,15 @@ class Database_model extends MY_Model {
 	/**
 	 * Update a database record based on the name value associated array pairs using a where clause
 	 *
-	 * @param $data array
-	 * @param $where array
+	 * @param array $data array of key (column name) value pairs
+	 * @param array $where CodeIgniter builder compatible where clause
+	 *
+	 * @see https://www.codeigniter.com/user_guide/database/query_builder.html#looking-for-specific-data
 	 *
 	 * @return mixed - false on fail or the affected rows
 	 *
 	 */
-	public function update_by($data, $where = [])
+	public function update_by(array $data,array $where = [])
 	{
 		/* switch to the write database if we are using 2 different connections */
 		$this->switch_database('write');
@@ -533,7 +669,7 @@ class Database_model extends MY_Model {
 		$data = (array)$data;
 
 		/* preform the validation if there are rules and skip rules is false only using the data input that has rules using the update rule set */
-		$success = (!$this->skip_rules && count($this->rules)) ? $this->only_columns($data,$this->rules)->add_rule_set_columns($data,'update')->validate($data) : true;
+		$success = (!$this->skip_rules && count($this->rules)) ? $this->add_additional_rules()->only_columns($data,$this->rules)->add_rule_set_columns($data,'update')->validate($data) : true;
 
 		/* always remove the primary key */
 		unset($data[$this->primary_key]);
@@ -566,7 +702,7 @@ class Database_model extends MY_Model {
 		}
 
 		/* clear the temp stuff */
-		$this->_clear();
+		$this->reset_query();
 
 		/* return false on error or 0 (also false) if no rows changed */
 		return $success;
@@ -575,26 +711,29 @@ class Database_model extends MY_Model {
 	/**
 	 * Delete based on primary key
 	 *
-	 * @param $arg
+	 * @param $arg single value which will automatically be used with the primary key or an actual CodeIgniter where clause
+	 *
+	 * @see https://www.codeigniter.com/user_guide/database/query_builder.html#looking-for-specific-data
 	 *
 	 * @return mixed - false on fail or the affected rows
 	 *
 	 */
 	public function delete($arg)
 	{
-		return $this->delete_by($this->create_where($arg,true));
+		$where = $this->create_where($arg,true);
+		
+		return $this->delete_by($where);
 	}
 
 	/**
-	 * delete_by
-	 * Insert description here
+	 * Delete based on passed data
 	 *
 	 * @param $data
 	 *
 	 * @return mixed - false on fail or the affected rows
 	 *
 	 */
-	public function delete_by($data)
+	public function delete_by(array $data)
 	{
 		/* switch to the write database if we are using 2 different connections */
 		$this->switch_database('write');
@@ -635,41 +774,10 @@ class Database_model extends MY_Model {
 		}
 
 		/* clear the temp stuff */
-		$this->_clear();
+		$this->reset_query();
 
 		/* return false on error or 0 (also false) if no rows changed */
 		return $success;
-	}
-
-	/**
-	 * Convert Database Cursor into something useable
-	 *
-	 * @param $dbc database cursor object
-	 *
-	 * @return mixed
-	 *
-	 */
-	protected function _as_array($dbc)
-	{
-		/* setup default if empty */
-		$result = $this->default_return_on_many;
-
-		/* is the cursor actually a object? */
-		if (is_object($dbc)) {
-			/* 1 or more rows found? */
-			if ($dbc->num_rows()) {
-				/* yes - ok let's return a entity, array, or object */
-				if ($this->entity && $this->temporary_return_as_array !== true) {
-					$result = $dbc->custom_result_object($this->entity);
-				} elseif ($this->temporary_return_as_array) {
-					$result = $dbc->result_array();
-				} else {
-					$result = $dbc->result();
-				}
-			}
-		}
-
-		return $result;
 	}
 
 	/**
@@ -704,39 +812,6 @@ class Database_model extends MY_Model {
 	}
 
 	/**
-	 * if debug save the last query into a log file
-	 * this is mostly for development and should really be used on a live system
-	 * as this file can grow very quickly!
-	 *
-	 * @return $this
-	 *
-	 */
-	protected function log_last_query() : Database_model
-	{
-		if ($this->debug) {
-			$query  = $this->_database->last_query();
-			$output = (is_array($query)) ? print_r($query, true) : $query;
-			file_put_contents(LOGPATH.'/model.'.get_called_class().'.log',$output.chr(10), FILE_APPEND);
-		}
-
-		return $this;
-	}
-
-	/**
-	 * Delete cache entries by tag
-	 * This can be extended to provide additional features
-	 *
-	 * @return $this
-	 *
-	 */
-	protected function delete_cache_by_tags() : Database_model
-	{
-		ci('cache')->delete_by_tags($this->cache_prefix);
-
-		return $this;
-	}
-
-	/**
 	 * Catalog provides a simple way and interface to make a simple query
 	 *
 	 * @param string $array_key
@@ -749,14 +824,14 @@ class Database_model extends MY_Model {
 	 * @return array records as objects
 	 *
 	 */
-	public function catalog($array_key = null, $select_columns = null, $where = null, $order_by = null, $cache_key = null, $with_deleted = false)
+	public function catalog(string $array_key = null,string $select_columns = null,array $where = null,string $order_by = null, $cache_key = null,bool $with_deleted = false) : Array
 	{
 		/*
 		if they provide a cache key then we will cache the responds
 		Note: roles may affect the select statement so that must be taken into account
-		*/
+		 */
 		$is_cached = false;
-	
+
 		if (is_array($cache_key)) {
 			$cache_key = md5(json_encode($cache_key));
 		}
@@ -818,7 +893,7 @@ class Database_model extends MY_Model {
 				}
 			}
 
-			/* run the actual query */
+			/* get the results as an array of record */
 			$dbc = $this->_get(true);
 
 			/* for each returned row format into a simple array with keys and values or complex with keys and array of columns */
@@ -842,18 +917,23 @@ class Database_model extends MY_Model {
 	/**
 	 * is unique model based
 	 *
-	 * @param $field string - value we are testing
-	 * @param $column string - database column name
-	 * @param $form_key string - form input key
+	 * @param string $field value we are testing
+	 * @param string $column database column name
+	 * @param string $form_key form input key
 	 *
-	 * @return
+	 * @return bool
 	 *
 	 * $success = ci('foo_model')->is_uniquem('Johnny Appleseed','name','id');
 	 *
 	 */
-	public function is_uniquem($field, $column, $form_key)
+	public function is_uniquem(string $field,string $column,string $form_key) : Bool
 	{
-		/* run the query return a maximum of 3 */
+		/**
+		 * run the query
+		 * return a maximum of 3 ignore
+		 * Ignoring any read roles permissions
+		 * if it's not unique then clearly it's it's not unique
+		 */
 		$dbc = $this->_database->select($column.','.$this->primary_key)->where([$column=>$field])->get($this->table, 3);
 
 		/* how many records where found? */
@@ -874,17 +954,6 @@ class Database_model extends MY_Model {
 	}
 
 	/**
-	 * update_if_exists
-	 */
-	public function update_if_exists($data,$where=false)
-	{
-		$where = ($where) ? $where : [$this->primary_key=>$data[$this->primary_key]];
-		$record = $this->exists($where);
-
-		return (isset($record->{$this->primary_key})) ? $this->update_by($data,[$this->primary_key=>$record->{$this->primary_key}]) : $this->insert($data);
-	}
-
-	/**
 	 * exists
 	 */
 	public function exists($arg)
@@ -896,7 +965,7 @@ class Database_model extends MY_Model {
 	/**
 	 * count
 	 */
-	public function count()
+	public function count() : int
 	{
 		return $this->count_by();
 	}
@@ -904,7 +973,7 @@ class Database_model extends MY_Model {
 	/**
 	 * count_by
 	 */
-	public function count_by($where = null)
+	public function count_by(array $where = null) : int
 	{
 		$this->_database->select("count('".$this->primary_key."') as codeigniter_column_count");
 
@@ -912,6 +981,7 @@ class Database_model extends MY_Model {
 			$this->_database->where($where);
 		}
 
+		/* get the results as a record */
 		$results = $this->_get(false);
 
 		return (int)$results->codeigniter_column_count;
@@ -920,7 +990,7 @@ class Database_model extends MY_Model {
 	/**
 	 * index
 	 */
-	public function index($order_by = null, $limit = null, $where = null, $select = null)
+	public function index(string $order_by = null,int $limit = null,array $where = null,string $select = null)
 	{
 		if ($order_by) {
 			$this->_database->order_by($order_by);
@@ -930,44 +1000,18 @@ class Database_model extends MY_Model {
 			$this->_database->limit($limit);
 		}
 
-		if ($select) {
-			$this->_database->select($select);
-		}
-
 		if ($where) {
 			$this->_database->where($where);
 		}
 
+		if ($select) {
+			$this->_database->select($select);
+		}
+
 		$this->add_where_on_select();
 
+		/* get the results as an array of record */
 		return $this->_get(true);
-	}
-
-	/**
-	 *
-	 * switch between read and write database connection if specified on model
-	 *
-	 * @access protected
-	 *
-	 * @param string $which [read|write]
-	 *
-	 * @throws \Exception
-	 * @return Database_model
-	 *
-	 */
-	protected function switch_database(string $which) : Database_model
-	{
-		if (!in_array($which,['read','write'])) {
-			throw new Exception('Cannot switch database connection '.__CLASS__.' '.$which);
-		}
-		
-		if ($which == 'read' && $this->read_database) {
-			$this->_database = $this->read_database;
-		} elseif ($which == 'write' && $this->write_database) {
-			$this->_database = $this->write_database;
-		}
-
-		return $this;
 	}
 
 	/**
@@ -975,8 +1019,8 @@ class Database_model extends MY_Model {
 	 */
 	public function with_deleted() : Database_model
 	{
-		/* this adds it to the where clause in the _get statement */
-		$this->without_deleted = false;
+		/* this removes it from the where clause in the _get statement */
+		$this->filter_out_deleted = false;
 
 		return $this;
 	}
@@ -992,7 +1036,7 @@ class Database_model extends MY_Model {
 	 */
 	public function only_deleted() : Database_model
 	{
-		/* this keeps it from adding the is deleted where clause in the _get statement */
+		/* this removes it from the where clause in the _get statement */
 		$this->filter_out_deleted = false;
 
 		if ($this->has['is_deleted']) {
@@ -1018,16 +1062,146 @@ class Database_model extends MY_Model {
 		$rows = 0;
 
 		if ($this->has['is_deleted']) {
-			$data[$this->has['is_deleted']] = 0;
-	
+			/* build data array so add_fields_on_update can modify it if necessary */
+			$data = [$this->has['is_deleted'] => 0];
+
 			$this->add_fields_on_update($data)->_database->update($this->table, $data, $this->create_where($id,true));
-	
+
 			$this->delete_cache_by_tags()->log_last_query();
 
 			$rows = (int)$this->_database->affected_rows();
 		}
-		
+
 		return (int)$rows;
+	}
+
+	/**
+	 * Preform the actual SQL select
+	 *
+	 * @param $as_array boolean return as a array
+	 * @param $table string optional
+	 *
+	 * @throws Exception
+	 * @return mixed
+	 *
+	 */
+	protected function _get(bool $as_array = true,string $table = null)
+	{
+		/* switch to the read database if we are using 2 different connections */
+		$this->switch_database('read');
+
+		/* figure out the table for the select */
+		$table = ($table) ? $table : $this->table;
+
+		/* add the select where - this also makes it easy to override select just by extending this method */
+		$this->add_where_on_select();
+
+		/* are we looking for a single column? */
+		if ($this->temporary_column_name) {
+			/* yes - then tell CodeIgniter to only select that column */
+			$this->_database->select($this->temporary_column_name);
+		}
+
+		if ($this->limit_to) {
+			$this->_database->limit($this->limit_to);
+		}
+
+		/* run the actual CodeIgniter query builder select */
+		$dbc = $this->_database->get($table);
+
+		/* log it if we need to */
+		$this->log_last_query();
+
+		/* what type of results are they looking for? */
+		$results = ($as_array) ? $this->_as_array($dbc) : $this->_as_row($dbc);
+
+		/* are they looking for a single column? */
+		if ($this->temporary_column_name) {
+			/* yes - then the results are that single column */
+
+			/* nothing found therefore there is no column to read */
+			if (count($results) == 0) {
+				$results = $this->default_return_on_single;
+			} else {
+				/* more than 1 column found? this shouldn't be possible with the limit used above */
+				if (count($results) != 1) {
+					throw new Exception(count($results).' rows found when trying to use column(...). This only works when your query returns a single record.');
+				}
+
+				/* ok we got a single column so return the column value */
+
+				/* is it a array or object that was returned */
+				if (is_array($results)) {
+					$results = $results[$this->temporary_column_name];
+				} elseif (is_object($results)) {
+					$results = $results->{$this->temporary_column_name};
+				}
+			}
+		}
+
+		/* clear the temp stuff */
+		$this->reset_query();
+
+		/* return the results */
+		return $results;
+	}
+
+	/**
+	 * Convert Database Cursor into something useable
+	 *
+	 * @param $dbc database cursor object
+	 *
+	 * @return mixed
+	 *
+	 */
+	protected function _as_array($dbc)
+	{
+		/* setup default if empty */
+		$result = $this->default_return_on_many;
+
+		/* is the cursor actually a object? */
+		if (is_object($dbc)) {
+			/* 1 or more rows found? */
+			if ($dbc->num_rows()) {
+				/* yes - ok let's return a entity, array, or object */
+				if ($this->entity && $this->temporary_return_as_array !== true) {
+					$result = $dbc->custom_result_object($this->entity);
+				} elseif ($this->temporary_return_as_array) {
+					$result = $dbc->result_array();
+				} else {
+					$result = $dbc->result();
+				}
+			}
+		}
+
+		return $result;
+	}
+	
+	/**
+	 *
+	 * switch between read and write database connection if specified on model
+	 *
+	 * @access protected
+	 *
+	 * @param string $which [read|write]
+	 *
+	 * @throws \Exception
+	 * @return Database_model
+	 *
+	 */
+	protected function switch_database(string $which) : Database_model
+	{
+		if (!in_array($which,['read','write'])) {
+			throw new Exception('Cannot switch database connection '.__CLASS__.' '.$which);
+		}
+
+		if ($which == 'read' && $this->read_database) {
+			$this->_database = $this->read_database;
+		} elseif ($which == 'write' && $this->write_database) {
+			$this->_database = $this->write_database;
+		}
+
+		return $this;
 	}
 
 	/**
@@ -1073,13 +1247,13 @@ class Database_model extends MY_Model {
 	 */
 	protected function where_can_read() : Database_model
 	{
-		if (!$this->ignore_read) {
+		if (!$this->ignore_read_role) {
 			if ($this->has['read_role']) {
 				$this->_database->where_in($this->has['read_role'],$this->get_user_roles());
 			}
 		}
 
-		$this->ignore_read = false;
+		$this->ignore_read_role = false;
 
 		return $this;
 	}
@@ -1097,9 +1271,13 @@ class Database_model extends MY_Model {
 	 */
 	protected function where_can_edit(array &$data) : Database_model
 	{
-		if ($this->has['edit_role']) {
-			$this->_database->where_in($this->has['edit_role'],$this->get_user_roles());
+		if (!$this->ignore_edit_role) {
+			if ($this->has['edit_role']) {
+				$this->_database->where_in($this->has['edit_role'],$this->get_user_roles());
+			}
 		}
+
+		$this->ignore_edit_role = false;
 
 		return $this;
 	}
@@ -1117,9 +1295,13 @@ class Database_model extends MY_Model {
 	 */
 	protected function where_can_delete(array &$data) : Database_model
 	{
-		if ($this->has['delete_role']) {
-			$this->_database->where_in($this->has['delete_role'],$this->get_user_roles());
+		if (!$this->ignore_delete_role) {
+			if ($this->has['delete_role']) {
+				$this->_database->where_in($this->has['delete_role'],$this->get_user_roles());
+			}
 		}
+
+		$this->ignore_delete_role = false;
 
 		return $this;
 	}
@@ -1168,7 +1350,7 @@ class Database_model extends MY_Model {
 				$data[$this->has['delete_role']] = $this->get_user_delete_role_id();
 			}
 		}
-		
+
 		if ($this->has['is_deleted']) {
 			$data[$this->has['is_deleted']] = 0;
 		}
@@ -1255,7 +1437,7 @@ class Database_model extends MY_Model {
 		if ($this->filter_out_deleted && $this->has['is_deleted']) {
 			$this->_database->where($this->has['is_deleted'],0);
 		}
-		
+
 		return $this;
 	}
 
@@ -1306,7 +1488,7 @@ class Database_model extends MY_Model {
 	{
 		return $this->where_can_delete($data);
 	}
-	
+
 	protected function get_user_id() : int
 	{
 		return (int)ci()->user->id;
@@ -1315,7 +1497,7 @@ class Database_model extends MY_Model {
 	protected function get_user_roles() : array
 	{
 		$roles = ci()->user->roles();
-		
+
 		return (is_array($roles)) ? array_keys($roles) : [];
 	}
 
@@ -1332,6 +1514,86 @@ class Database_model extends MY_Model {
 	protected function get_user_delete_role_id() : int
 	{
 		return (int)ci()->user->delete_role_id;
+	}
+
+	protected function add_additional_rules() : Database_model
+	{
+		/**
+		 * does this model have rules? if so add the role validation rules
+		 */
+		if ($this->has['read_role']) {
+			$this->rules = $this->rules + [$this->has['read_role'] => ['field' => $this->has['read_role'], 'label' => 'Read Role', 	'rules' => 'required|integer|max_length[10]|less_than[4294967295]|filter_int[10]']];
+		}
+
+		if ($this->has['edit_role']) {
+			$this->rules = $this->rules + [$this->has['edit_role'] => ['field' => $this->has['edit_role'], 'label' => 'Edit Role', 	'rules' => 'required|integer|max_length[10]|less_than[4294967295]|filter_int[10]']];
+		}
+
+		if ($this->has['delete_role']) {
+			$this->rules = $this->rules + [$this->has['delete_role'] => ['field' => $this->has['delete_role'], 'label' => 'Delete Role', 'rules' => 'required|integer|max_length[10]|less_than[4294967295]|filter_int[10]']];
+		}
+
+		return $this;
+	}
+
+	/**
+	 * Make sure each column is added to data even if empty
+	 * this makes sure each validation rule can work on something if necessary
+	 * if data didn't include the column then the rules would be skipped
+	 *
+	 *
+	 * @param array $data fields to append columns to
+	 * @param string $rule_set rule set name ie. update, insert, delete, form_login
+	 *
+	 * @return $this
+	 *
+	 */
+	protected function add_rule_set_columns(array &$fields,string $rule_set) : Database_model
+	{
+		if (isset($this->rule_sets[$rule_set])) {
+			foreach (explode(',',$this->rule_sets[$rule_set]) as $fieldname) {
+				if (!isset($fields[$fieldname])) {
+					/* not in the fields set so add it as empty */
+					$fields[$fieldname] = '';
+				}
+			}
+		}
+
+		return $this;
+	}
+
+
+	/**
+	 * if debug save the last query into a log file
+	 * this is mostly for development and should really be used on a live system
+	 * as this file can grow very quickly!
+	 *
+	 * @return $this
+	 *
+	 */
+	protected function log_last_query() : Database_model
+	{
+		if ($this->debug) {
+			$query  = $this->_database->last_query();
+			$output = (is_array($query)) ? print_r($query, true) : $query;
+			file_put_contents(LOGPATH.'/model.'.get_called_class().'.log',$output.chr(10), FILE_APPEND);
+		}
+
+		return $this;
+	}
+
+	/**
+	 * Delete cache entries by tag
+	 * This can be extended to provide additional features
+	 *
+	 * @return $this
+	 *
+	 */
+	protected function delete_cache_by_tags() : Database_model
+	{
+		ci('cache')->delete_by_tags($this->cache_prefix);
+
+		return $this;
 	}
 
 } /* end class */
