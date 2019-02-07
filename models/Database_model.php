@@ -183,13 +183,6 @@ class Database_model extends MY_Model {
 	protected $default_return_on_single;
 
 	/**
-	 * internal storage of whether we should filter out deleted records
-	 *
-	 * @var boolean
-	 */
-	protected $filter_out_deleted = true;
-
-	/**
 	 * internal storage of whether we should skip rule validation
 	 *
 	 * @var boolean
@@ -223,6 +216,13 @@ class Database_model extends MY_Model {
 	 * @var integer
 	 */
 	protected $limit_to = false;
+	
+	/**
+	 * internal storage to soft deleted where clause
+	 *
+	 * @var mixed false or array
+	 */
+	protected $deleted_where_clause = false;
 
 	/**
 	 *
@@ -272,7 +272,8 @@ class Database_model extends MY_Model {
 		if (!$group_attach) {
 			$this->_database = $this->db;
 		}
-
+		
+		/* run Reset CodeIgniter Query Builder and our tools */
 		$this->reset_query();
 
 		/* Is there are record entity attached? */
@@ -335,12 +336,13 @@ class Database_model extends MY_Model {
 		$this->temporary_return_as_array = null;
 		$this->default_return_on_many = [];
 		$this->default_return_on_single = ($this->entity_class) ? $this->entity_class : new stdClass();
-		$this->filter_out_deleted = true;
 		$this->ignore_read_role = false;
 		$this->ignore_edit_role = false;
 		$this->ignore_delete_role = false;
 		$this->skip_rules = false;
 		$this->limit_to = false;
+		
+		$this->deleted_where_clause = [$this->has['is_deleted'] => 0];
 
 		return $this;
 	}
@@ -443,7 +445,7 @@ class Database_model extends MY_Model {
 	 */
 	public function get_soft_delete() : bool
 	{
-		return ($this->has['is_deleted'] !== false);
+		return (is_string($this->has['is_deleted']));
 	}
 
 	/**
@@ -505,7 +507,7 @@ class Database_model extends MY_Model {
 	public function get($primary_value = null)
 	{
 		$this->limit_to = 1;
-		
+
 		return ($primary_value === null) ? $this->default_return_on_single : $this->get_by([$this->primary_key => $primary_value]);
 	}
 
@@ -557,7 +559,7 @@ class Database_model extends MY_Model {
 		if ($where) {
 			$this->_database->where($where);
 		}
-		
+
 		/* get the results as an array of records */
 		return $this->_get(true);
 	}
@@ -721,49 +723,50 @@ class Database_model extends MY_Model {
 	public function delete($arg)
 	{
 		$where = $this->create_where($arg,true);
-		
+
 		return $this->delete_by($where);
 	}
 
 	/**
-	 * Delete based on passed data
 	 *
-	 * @param $data
+	 * Delete Record with support for soft deletes if configured
 	 *
-	 * @return mixed - false on fail or the affected rows
+	 * @access public
+	 *
+	 * @param array $data array of key (column name) value pairs
+	 * @param array $where CodeIgniter builder compatible where clause
+	 *
+	 * @see https://www.codeigniter.com/user_guide/database/query_builder.html#looking-for-specific-data
+	 *
+	 * @return mixed
 	 *
 	 */
-	public function delete_by(array $data)
+	public function delete_by(array $data,array $where = null)
 	{
 		/* switch to the write database if we are using 2 different connections */
 		$this->switch_database('write');
 
-		/* convert the input to any array if it's not already */
-		$data = (array)$data;
+		/* first we need to either build the where or use the where included */
+		$where = ($where) ?? $data;
 
 		/* preform the validation if there are rules and skip rules is false only using the data input that has rules using the delete rule set */
 		$success = (!$this->skip_rules && count($this->rules)) ? $this->only_columns($data,$this->rules)->add_rule_set_columns($data,'delete')->validate($data) : true;
 
 		/* if the validation was successful then proceed */
 		if ($success) {
-			/* remap any data field columns to actual data base columns */
-			$this->remap_columns($data, $this->rules);
+			/**
+			 * call the add field on delete method which can be overridden on the extended class
+			 * remap any data field columns to actual data base columns
+			 */
+			$this->remap_columns($data, $this->rules)->add_fields_on_delete($data)->add_where_on_delete($data);
 
 			/* does this model support soft delete */
 			if ($this->has['is_deleted']) {
-				/* save a copy of data */
-				$where = $data;
-
-				/* call the add field on delete method which can be overridden on the extended class */
-				$this->add_fields_on_delete($data)->add_where_on_delete($data);
-
 				/* preform the actual CodeIgniter Database soft delete */
 				$this->_database->where($where)->set($data)->update($this->table);
 			} else {
 				/* preform the actual CodeIgniter Database Delete */
-				$this->add_where_on_delete($data);
-
-				$this->_database->where($data)->delete($this->table);
+				$this->_database->where($where)->delete($this->table);
 			}
 
 			/* ok now delete any caches since we did a delete and log it if we need to */
@@ -783,7 +786,7 @@ class Database_model extends MY_Model {
 	/**
 	 * Convert Database Cursor into a useable record
 	 *
-	 * @param $dbc database cursor object
+	 * @param $dbc database cursor
 	 *
 	 * @return $mixed
 	 *
@@ -793,7 +796,7 @@ class Database_model extends MY_Model {
 		/* setup default if empty */
 		$result = $this->default_return_on_single;
 
-		/* is the cursor actually a object? */
+		/* is the cursor actually an object? */
 		if (is_object($dbc)) {
 			/* 1 or more rows found? */
 			if ($dbc->num_rows()) {
@@ -848,10 +851,7 @@ class Database_model extends MY_Model {
 			$results = [];
 
 			if ($with_deleted) {
-				if ($this->has['is_deleted']) {
-					/* don't filter out the deleted records */
-					$this->filter_out_deleted = false;
-				}
+				$this->with_deleted();
 			}
 
 			/* we aren't looking for a single column by default */
@@ -915,7 +915,7 @@ class Database_model extends MY_Model {
 	}
 
 	/**
-	 * is unique model based
+	 *  Model based is unique for validation rule
 	 *
 	 * @param string $field value we are testing
 	 * @param string $column database column name
@@ -954,16 +954,33 @@ class Database_model extends MY_Model {
 	}
 
 	/**
-	 * exists
+	 *
+	 * Determine if a record exists
+	 *
+	 * @access public
+	 *
+	 * @param mixed $where CodeIgniter builder compatible where clause or primary id (which if you have that then why do you need to determine if the record exists?)
+	 *
+	 * @see https://www.codeigniter.com/user_guide/database/query_builder.html#looking-for-specific-data
+	 *
+	 * @return mixed - boolean false or actual record
+	 *
 	 */
-	public function exists($arg)
+	public function exists($where)
 	{
 		/* did we get one or more columns */
-		return $this->on_empty_return(false)->get_by($this->create_where($arg));
+		return $this->on_empty_return(false)->get_by(((is_array($where)) ? $where : [$this->primary_key=>$where]));
 	}
 
 	/**
-	 * count
+	 *
+	 * Count Total records in table
+	 * by default filtering out by read role and soft deleted where applicable
+	 *
+	 * @access public
+	 *
+	 * @return int
+	 *
 	 */
 	public function count() : int
 	{
@@ -971,7 +988,18 @@ class Database_model extends MY_Model {
 	}
 
 	/**
-	 * count_by
+	 *
+	 * Count Total records in table with where clause
+	 * by default filtering out by read role and soft deleted where applicable
+	 *
+	 * @access public
+	 *
+	 * @param mixed $where CodeIgniter builder compatible where clause or primary id (which if you have that then why do you need to determine if the record exists?)
+	 *
+	 * @see https://www.codeigniter.com/user_guide/database/query_builder.html#looking-for-specific-data
+	 *
+	 * @return int
+	 *
 	 */
 	public function count_by(array $where = null) : int
 	{
@@ -988,7 +1016,18 @@ class Database_model extends MY_Model {
 	}
 
 	/**
-	 * index
+	 *
+	 * Model Method used for generating the models default "index" (GUI Table) view
+	 *
+	 * @access public
+	 *
+	 * @param string $order_by
+	 * @param int $limit
+	 * @param array $where
+	 * @param string $select
+	 *
+	 * @return mixed
+	 *
 	 */
 	public function index(string $order_by = null,int $limit = null,array $where = null,string $select = null)
 	{
@@ -1019,8 +1058,7 @@ class Database_model extends MY_Model {
 	 */
 	public function with_deleted() : Database_model
 	{
-		/* this removes it from the where clause in the _get statement */
-		$this->filter_out_deleted = false;
+		$this->deleted_where_clause = false;
 
 		return $this;
 	}
@@ -1036,12 +1074,7 @@ class Database_model extends MY_Model {
 	 */
 	public function only_deleted() : Database_model
 	{
-		/* this removes it from the where clause in the _get statement */
-		$this->filter_out_deleted = false;
-
-		if ($this->has['is_deleted']) {
-			$this->_database->where($this->has['is_deleted'],1);
-		}
+		$this->deleted_where_clause = [$this->has['is_deleted'] => 1];
 
 		return $this;
 	}
@@ -1176,7 +1209,7 @@ class Database_model extends MY_Model {
 
 		return $result;
 	}
-	
+
 	/**
 	 *
 	 * switch between read and write database connection if specified on model
@@ -1324,11 +1357,11 @@ class Database_model extends MY_Model {
 		}
 
 		if ($this->has['created_on']) {
-			$data[$this->has['created_on']] = date('Y-m-d H:i:s');
+			$data[$this->has['created_on']] = $this->get_date_stamp();
 		}
 
 		if ($this->has['created_ip']) {
-			$data[$this->has['created_ip']] = ci()->input->ip_address();
+			$data[$this->has['created_ip']] = $this->get_ip();
 		}
 
 		$admin_role_id = config('auth.admin role id');
@@ -1376,11 +1409,11 @@ class Database_model extends MY_Model {
 		}
 
 		if ($this->has['updated_on']) {
-			$data[$this->has['updated_on']] = date('Y-m-d H:i:s');
+			$data[$this->has['updated_on']] = $this->get_date_stamp();
 		}
 
 		if ($this->has['updated_ip']) {
-			$data[$this->has['updated_ip']] = ci()->input->ip_address();
+			$data[$this->has['updated_ip']] = $this->get_ip();
 		}
 
 		return $this;
@@ -1404,11 +1437,11 @@ class Database_model extends MY_Model {
 		}
 
 		if ($this->has['deleted_on']) {
-			$data[$this->has['deleted_on']] = date('Y-m-d H:i:s');
+			$data[$this->has['deleted_on']] = $this->get_date_stamp();
 		}
 
 		if ($this->has['deleted_ip']) {
-			$data[$this->has['deleted_ip']] = ci()->input->ip_address();
+			$data[$this->has['deleted_ip']] = $this->get_ip();
 		}
 
 		if ($this->has['is_deleted']) {
@@ -1434,8 +1467,10 @@ class Database_model extends MY_Model {
 
 	protected function where_deleted() : Database_model
 	{
-		if ($this->filter_out_deleted && $this->has['is_deleted']) {
-			$this->_database->where($this->has['is_deleted'],0);
+		if ($this->get_soft_delete()) {
+			if (is_array($this->deleted_where_clause)) {
+				$this->_database->where($this->deleted_where_clause);
+			}
 		}
 
 		return $this;
@@ -1489,33 +1524,99 @@ class Database_model extends MY_Model {
 		return $this->where_can_delete($data);
 	}
 
+	/**
+	 *
+	 * Get the current user id
+	 *
+	 * @access protected
+	 *
+	 * @return int
+	 *
+	 */
 	protected function get_user_id() : int
 	{
 		return (int)ci()->user->id;
 	}
 
+	/**
+	 *
+	 * Get the current user roles
+	 * make sure something is returned since this is used in the where in clause
+	 * if nothing was returned we still need the in clause or nothing would be filtered out
+	 *
+	 * @access protected
+	 *
+	 * @return array
+	 *
+	 */
 	protected function get_user_roles() : array
 	{
 		$roles = ci()->user->roles();
+		
+		/* we must return something for the in clause or every record will match which is not what we want */
+		$keys = [-1];
+		
+		if (is_array($roles)) {
+			if (count($roles) > 0) {
+				$keys = array_keys($roles);
+			}
+		}
 
-		return (is_array($roles)) ? array_keys($roles) : [];
+		return $keys;
 	}
 
+	/**
+	 *
+	 * Get the users read role id
+	 *
+	 * @access protected
+	 *
+	 * @return int
+	 *
+	 */
 	protected function get_user_read_role_id() : int
 	{
 		return (int)ci()->user->read_role_id;
 	}
 
+	/**
+	 *
+	 * Get the users edit role id
+	 *
+	 * @access protected
+	 *
+	 * @return int
+	 *
+	 */
 	protected function get_user_edit_role_id() : int
 	{
 		return (int)ci()->user->edit_role_id;
 	}
 
+	/**
+	 *
+	 * Get the users delete role id
+	 *
+	 * @access protected
+	 *
+	 * @return int
+	 *
+	 */
 	protected function get_user_delete_role_id() : int
 	{
 		return (int)ci()->user->delete_role_id;
 	}
 
+	/**
+	 *
+	 * Add any additional role rules
+	 * because we still need to enforce model input regardless of where it's from
+	 *
+	 * @access protected
+	 *
+	 * @return Database_model
+	 *
+	 */
 	protected function add_additional_rules() : Database_model
 	{
 		/**
@@ -1541,11 +1642,12 @@ class Database_model extends MY_Model {
 	 * this makes sure each validation rule can work on something if necessary
 	 * if data didn't include the column then the rules would be skipped
 	 *
+	 * @access protected
 	 *
 	 * @param array $data fields to append columns to
 	 * @param string $rule_set rule set name ie. update, insert, delete, form_login
 	 *
-	 * @return $this
+	 * @return Database_model
 	 *
 	 */
 	protected function add_rule_set_columns(array &$fields,string $rule_set) : Database_model
@@ -1562,13 +1664,15 @@ class Database_model extends MY_Model {
 		return $this;
 	}
 
-
 	/**
+	 *
 	 * if debug save the last query into a log file
 	 * this is mostly for development and should really be used on a live system
 	 * as this file can grow very quickly!
 	 *
-	 * @return $this
+	 * @access protected
+	 *
+	 * @return Database_model
 	 *
 	 */
 	protected function log_last_query() : Database_model
@@ -1583,10 +1687,13 @@ class Database_model extends MY_Model {
 	}
 
 	/**
+	 *
 	 * Delete cache entries by tag
 	 * This can be extended to provide additional features
 	 *
-	 * @return $this
+	 * @access protected
+	 *
+	 * @return Database_model
 	 *
 	 */
 	protected function delete_cache_by_tags() : Database_model
@@ -1594,6 +1701,39 @@ class Database_model extends MY_Model {
 		ci('cache')->delete_by_tags($this->cache_prefix);
 
 		return $this;
+	}
+
+	/**
+	 *
+	 * Return the current date for time-stamping methods
+	 *
+	 * @access protected
+	 *
+	 * @param string $format [Y-m-d H:i:s]
+	 *
+	 * @return string
+	 *
+	 */
+	protected function get_date_stamp(string $format='Y-m-d H:i:s') : string
+	{
+		/* also handles unit testing hard coded timestamp */
+		$timestamp = (defined('PHPUNITTIMESTAMP')) ? PHPUNITTIMESTAMP : time();
+
+		return date($format,$timestamp);
+	}
+
+	/**
+	 *
+	 * Return the current IP for time-stamping methods
+	 *
+	 * @access protected
+	 *
+	 * @return string
+	 *
+	 */
+	protected function get_ip() : string
+	{
+		return ci('input')->ip_address();
 	}
 
 } /* end class */
