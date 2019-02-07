@@ -302,14 +302,16 @@ if (!function_exists('l')) {
 
 /**
  * End the current session and store session data.
+ * (7.2 returns a boolean but prior it was null)
+ * therefore we don't return anything
  *
- * @return boolean TRUE on success or FALSE on failure.
+ * @return void
  *
  */
 if (!function_exists('unlock_session')) {
-	function unlock_session() : bool
+	function unlock_session() : void
 	{
-		return session_write_close();
+		session_write_close();
 	}
 }
 
