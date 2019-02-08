@@ -238,9 +238,9 @@ if (!function_exists('esc')) {
  *
  */
 if (!function_exists('e')) {
-	function e(string $string) : string
+	function e($input) : string
 	{
-		return html_escape($string);
+		return (empty($input)) ? '' : html_escape($input);
 	}
 }
 

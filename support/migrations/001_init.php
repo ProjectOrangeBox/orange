@@ -25,12 +25,15 @@ class Migration_001_init extends Migration_base {
 		$table = config('auth.role table');
 		
 		ci()->db->query("INSERT INTO `$table` (`id`, `name`, `description`, `migration`) VALUES (1,'Admin','Logged in super user','$hash')");
-		ci()->db->query("INSERT INTO `$table` (`id`, `name`, `description`, `migration`) VALUES (2,'Nobody','User not logged in','$hash')");
+		ci()->db->query("INSERT INTO `$table` (`id`, `name`, `description`, `migration`) VALUES (2,'Nobody','Users not logged in','$hash')");
+		ci()->db->query("INSERT INTO `$table` (`id`, `name`, `description`, `migration`) VALUES (3,'Everyone','Every user including nobody users','$hash')");
 		
 		/* assign admin user to admin role */
 		$table = config('auth.user role table');
 
 		ci()->db->query("INSERT INTO `$table` (`user_id`, `role_id`) VALUES (1,1)");
+		
+		/* we don't actually need to attach every user to the everyone role. the code does this manually without the db link */
 
 		return true;
 	}

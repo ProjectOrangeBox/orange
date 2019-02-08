@@ -18,7 +18,8 @@
  * @copyright 2019
  * @license http://opensource.org/licenses/MIT MIT License
  * @link https://github.com/ProjectOrangeBox
- * @version v2.0.0
+ * @version v2.0
+ * @filesource
  *
  * @throws Exception
  *
@@ -1576,7 +1577,7 @@ class Database_model extends MY_Model {
 	 */
 	protected function get_user_read_role_id() : int
 	{
-		return (int)ci()->user->read_role_id;
+		return (int)ci()->user->user_read_role_id;
 	}
 
 	/**
@@ -1590,7 +1591,7 @@ class Database_model extends MY_Model {
 	 */
 	protected function get_user_edit_role_id() : int
 	{
-		return (int)ci()->user->edit_role_id;
+		return (int)ci()->user->user_edit_role_id;
 	}
 
 	/**
@@ -1604,7 +1605,7 @@ class Database_model extends MY_Model {
 	 */
 	protected function get_user_delete_role_id() : int
 	{
-		return (int)ci()->user->delete_role_id;
+		return (int)ci()->user->user_delete_role_id;
 	}
 
 	/**
@@ -1623,15 +1624,15 @@ class Database_model extends MY_Model {
 		 * does this model have rules? if so add the role validation rules
 		 */
 		if ($this->has['read_role']) {
-			$this->rules = $this->rules + [$this->has['read_role'] => ['field' => $this->has['read_role'], 'label' => 'Read Role', 	'rules' => 'required|integer|max_length[10]|less_than[4294967295]|filter_int[10]']];
+			$this->rules = $this->rules + [$this->has['read_role'] => ['field' => $this->has['read_role'], 'label' => 'Read Role', 	'rules' => 'integer|max_length[10]|less_than[4294967295]|filter_int[10]']];
 		}
 
 		if ($this->has['edit_role']) {
-			$this->rules = $this->rules + [$this->has['edit_role'] => ['field' => $this->has['edit_role'], 'label' => 'Edit Role', 	'rules' => 'required|integer|max_length[10]|less_than[4294967295]|filter_int[10]']];
+			$this->rules = $this->rules + [$this->has['edit_role'] => ['field' => $this->has['edit_role'], 'label' => 'Edit Role', 	'rules' => 'integer|max_length[10]|less_than[4294967295]|filter_int[10]']];
 		}
 
 		if ($this->has['delete_role']) {
-			$this->rules = $this->rules + [$this->has['delete_role'] => ['field' => $this->has['delete_role'], 'label' => 'Delete Role', 'rules' => 'required|integer|max_length[10]|less_than[4294967295]|filter_int[10]']];
+			$this->rules = $this->rules + [$this->has['delete_role'] => ['field' => $this->has['delete_role'], 'label' => 'Delete Role', 'rules' => 'integer|max_length[10]|less_than[4294967295]|filter_int[10]']];
 		}
 
 		return $this;

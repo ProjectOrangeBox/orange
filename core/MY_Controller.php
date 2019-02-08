@@ -20,7 +20,8 @@
  * @copyright 2019
  * @license http://opensource.org/licenses/MIT MIT License
  * @link https://github.com/ProjectOrangeBox
- * @version v2.0.0
+ * @version v2.0
+ * @filesource
  *
  * @config application.site open boolean
  * @config application.site open boolean

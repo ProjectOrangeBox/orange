@@ -8,7 +8,7 @@
  * @copyright 2018
  * @license http://opensource.org/licenses/MIT MIT License
  * @link https://github.com/ProjectOrangeBox
- * @version 2.0
+ * @version v2.0
  *
  * required
  * core:

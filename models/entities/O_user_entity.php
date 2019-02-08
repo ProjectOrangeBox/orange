@@ -8,7 +8,7 @@
  * @copyright 2018
  * @license http://opensource.org/licenses/MIT MIT License
  * @link https://github.com/ProjectOrangeBox
- * @version 2.0
+ * @version v2.0
  *
  * required
  * core:
@@ -24,27 +24,18 @@ class O_user_entity extends model_entity {
 	public $username;
 	public $dashboard_url;
 	public $is_active;
+	
 	public $user_read_role_id;
 	public $user_edit_role_id;
 	public $user_delete_role_id;
+	
+	public $read_role_id;
+	public $edit_role_id;
+	public $delete_role_id;
 
 	protected $roles       = [];
 	protected $permissions = [];
 	protected $lazy_loaded = false;
-
-	public function is_nobody(int $nobody_user_id,int $everyone_role_id)
-	{
-		$this->id = $nobody_user_id;
-		$this->username = 'Nobody';
-		
-		$this->user_read_role_id = $nobody_user_id;
-		$this->user_edit_role_id = $nobody_user_id;
-		$this->user_delete_role_id = $nobody_user_id;
-		
-		$this->roles = [$everyone_role_id=>'Everyone'];
-
-		$this->lazy_loaded = true;
-	}
 
 /**
  * __get

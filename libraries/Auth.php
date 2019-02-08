@@ -18,7 +18,8 @@
  * @copyright 2019
  * @license http://opensource.org/licenses/MIT MIT License
  * @link https://github.com/ProjectOrangeBox
- * @version v2.0.0
+ * @version v2.0
+ * @filesource
  *
  * @uses # \o_user_model - Orange User Model
  * @uses # \session - CodeIgniter Session
@@ -147,13 +148,20 @@ class Auth {
 		log_message('info', 'Auth Class Initialized');
 	}
 
-	protected function switch_to_nobody() : void
+	/**
+	 *
+	 * Switch the current user to nobody
+	 *
+	 * @access public
+	 *
+	 * @return Auth
+	 *
+	 */
+	public function switch_to_nobody() : Auth
 	{
-		$nobody_user = ci('load')->entity('o_user_entity');
-
-		$nobody_user->is_nobody(NOBODY_USER_ID,EVERYONE_ROLE_ID);
-
-		$this->controller->user = $nobody_user;
+		$this->refresh_userdata($this->config['nobody user id'],false);
+		
+		return $this;
 	}
 
 	/**
