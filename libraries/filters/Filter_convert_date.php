@@ -22,13 +22,12 @@
  * @filesource
  *
  */
-class Filter_convert_date extends Filter_base {
-	
-	public function filter(&$field,string $options = '') : void
+class Filter_convert_date extends Filter_base
+{
+	public function filter(&$field, string $options = '') : void
 	{
 		$options = ($options) ? $options : 'Y-m-d H:i:s';
 		
 		$field = date($options, strtotime($field));
 	}
-
 }

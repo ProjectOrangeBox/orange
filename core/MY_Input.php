@@ -30,14 +30,15 @@
  * @version v2.0
  * @filesource
  *
- * @uses # session - CodeIgniter Session 
+ * @uses # session - CodeIgniter Session
  * @uses # validate - Orange validate
  *
- * @config config.encryption_key  
+ * @config config.encryption_key
  *
  */
 
-class MY_Input extends CI_Input {
+class MY_Input extends CI_Input
+{
 	/**
 	 * Contains the current POST or PUT or PATCH request data
 	 *
@@ -80,7 +81,7 @@ class MY_Input extends CI_Input {
 		$this->_raw_input_stream = file_get_contents('php://input');
 
 		/* try to parse the input */
-		parse_str($this->_raw_input_stream,$this->_request);
+		parse_str($this->_raw_input_stream, $this->_request);
 
 		/* did we get anything? if not fall back to the posted input */
 		if (!count($this->_request)) {
@@ -116,10 +117,10 @@ class MY_Input extends CI_Input {
 	 * @param $default default value if empty
 	 * @param bool $xss_clean whether to apply XSS filtering
 	 *
-	 * @return 
+	 * @return
 	 *
 	 */
-	public function request($index = null,$default = null,bool $xss_clean = false)
+	public function request($index = null, $default = null, bool $xss_clean = false)
 	{
 		log_message('debug', 'MY_Input::request::'.$index);
 
@@ -142,13 +143,13 @@ class MY_Input extends CI_Input {
 	 * @return MY_Input
 	 *
 	 */
-	public function set_request($index = null,$replace_value = null) : MY_Input
+	public function set_request($index = null, $replace_value = null) : MY_Input
 	{
 		if (is_array($index) && $replace_value === true) {
 			$this->_request = $index;
 		} elseif (is_array($index)) {
 			foreach ($index as $i=>$v) {
-				$this->set_request($i,$v);
+				$this->set_request($i, $v);
 			}
 		} else {
 			$this->_request[$index] = $replace_value;
@@ -174,7 +175,7 @@ class MY_Input extends CI_Input {
 	 * ci('input')->valid('first_name','required|string','First Name');
 	 * ```
 	 */
-	public function valid($key,string $rules='',string $human=null) : Bool
+	public function valid($key, string $rules='', string $human=null) : Bool
 	{
 		if (is_array($key)) {
 			foreach ($key as $k=>$r) {
@@ -184,12 +185,12 @@ class MY_Input extends CI_Input {
 					 * 'field_age'=>['Age','int|md5']]
 					 * 'name'=>'int'
 					 */
-					$this->valid($k,$r[1],$r[0]);
+					$this->valid($k, $r[1], $r[0]);
 				} else {
 					/**
 					 * Key, Rule
 					 */
-					$this->valid($k,$r);
+					$this->valid($k, $r);
 				}
 			}
 
@@ -216,11 +217,11 @@ class MY_Input extends CI_Input {
 	 * @return MY_Input
 	 *
 	 */
-	public function filter($key=null,string $rules='') : MY_Input
+	public function filter($key=null, string $rules='') : MY_Input
 	{
 		if (is_array($key)) {
 			foreach ($key as $k=>$r) {
-				$this->filter($k,$r);
+				$this->filter($k, $r);
 			}
 
 			return $this;
@@ -247,13 +248,13 @@ class MY_Input extends CI_Input {
 	 * @return mixed
 	 *
 	 */
-	public function filtered($key=null,string $rules='')
+	public function filtered($key=null, string $rules='')
 	{
 		if (is_array($key)) {
 			$return = [];
 
 			foreach ($key as $k=>$r) {
-				$return[$k] = $this->filtered($k,$r);
+				$return[$k] = $this->filtered($k, $r);
 			}
 
 			return $return;
@@ -330,7 +331,7 @@ class MY_Input extends CI_Input {
 	 * $formatted = $this->input->request_remap(['fullname'=>'name'],['age'=>'number'],['remove'],'name',false,'|',true,$post);
 	 *
 	 */
-	public function request_remap($copy=[],$move=[],$remove=[],$default_model='#',$only_index=null,$separator='|',$append_model=false,$_request=[])
+	public function request_remap($copy=[], $move=[], $remove=[], $default_model='#', $only_index=null, $separator='|', $append_model=false, $_request=[])
 	{
 		/* use form request or what was sent in? */
 		if (is_bool($_request)) {
@@ -372,8 +373,8 @@ class MY_Input extends CI_Input {
 
 		/* now create model groups based on the indexes */
 		foreach ($request as $index=>$value) {
-			if (strpos($index,$separator) !== false) {
-				list($model,$field) = explode($separator,$index,2);
+			if (strpos($index, $separator) !== false) {
+				list($model, $field) = explode($separator, $index, 2);
 
 				if (is_array($value)) {
 					foreach ($value as $idx=>$v) {
@@ -391,8 +392,8 @@ class MY_Input extends CI_Input {
 		foreach ($groups as $key=>$value) {
 			if (is_array($value)) {
 				foreach ($value as $k=>$v) {
-					if (substr($k,-2) == '[]') {
-						$kk = substr($k,0,-2);
+					if (substr($k, -2) == '[]') {
+						$kk = substr($k, 0, -2);
 						unset($groups[$key][$k]);
 						foreach ($groups[$key] as $aa=>$bb) {
 							$groups[$key][$aa][$kk] = $v;
@@ -405,7 +406,7 @@ class MY_Input extends CI_Input {
 		/* add _model if necessary */
 		if ($append_model) {
 			foreach ($groups as $model_name=>$value) {
-				if (substr($model_name,-strlen($append_model)) != $append_model) {
+				if (substr($model_name, -strlen($append_model)) != $append_model) {
 					$groups[$model_name.$append_model] = $value;
 
 					unset($groups[$model_name]);
@@ -413,7 +414,7 @@ class MY_Input extends CI_Input {
 			}
 
 			if (is_string($only_index)) {
-				$only_index = str_replace($append_model,'',$only_index).$append_model;
+				$only_index = str_replace($append_model, '', $only_index).$append_model;
 			}
 		}
 
@@ -477,7 +478,7 @@ class MY_Input extends CI_Input {
 	public function set_request_type(string $request_type) : MY_Input
 	{
 		/* options include cli, ajax, html */
-		if (!in_array($request_type,['cli','ajax','html'])) 	{
+		if (!in_array($request_type, ['cli','ajax','html'])) {
 			throw new Exception(__METHOD__.' unknown type '.$request_type.'.');
 		}
 		
@@ -524,7 +525,7 @@ class MY_Input extends CI_Input {
 	{
 		/* is there even an array to store? */
 		if (is_array($this->_request)) {
-			ci('session')->set_tempdata($this->stash_key,$this->_request,3600); /* fixed at 10 minutes */
+			ci('session')->set_tempdata($this->stash_key, $this->_request, 3600); /* fixed at 10 minutes */
 		}
 
 		return $this;
@@ -550,5 +551,4 @@ class MY_Input extends CI_Input {
 
 		return is_array($stashed);
 	}
-
 } /* end class */

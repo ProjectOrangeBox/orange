@@ -30,7 +30,8 @@
  * @config pause_for_each `1000`
  *
  */
-class Wallet {
+class Wallet
+{
 	/**
 	 * Storage of redirect messages
 	 *
@@ -98,7 +99,8 @@ class Wallet {
 	 * @param array $config []
 	 *
 	 */
-	public function __construct(array &$config=[]) {
+	public function __construct(array &$config=[])
+	{
 		$this->config = &$config;
 
 		$this->session = &ci('session');
@@ -137,21 +139,21 @@ class Wallet {
 	 * ci('wallet')->msg('oH No!','red','/folder/new');
 	 * ```
 	 */
-	public function msg(string $msg = '',string $type = 'yellow', $redirect = null) : Wallet
+	public function msg(string $msg = '', string $type = 'yellow', $redirect = null) : Wallet
 	{
 		/* is this type sticky? - use names not colors - colors support for legacy code */
-		$sticky = in_array($type,$this->sticky_types);
+		$sticky = in_array($type, $this->sticky_types);
 
 		/* trigger a event incase they need to do something */
 		$this->event->trigger('wallet.msg', $msg, $type, $sticky, $redirect);
 
 		/* is this a redirect */
 		if (is_string($redirect)) {
-			$this->redirect($msg,$type,$sticky,$redirect);
+			$this->redirect($msg, $type, $sticky, $redirect);
 		} elseif ($redirect === true) {
-			$this->redirect($msg,$type,$sticky,$this->http_referer);
+			$this->redirect($msg, $type, $sticky, $this->http_referer);
 		} else {
-			$this->add2page($msg,$type,$sticky);
+			$this->add2page($msg, $type, $sticky);
 		}
 
 		return $this;
@@ -173,13 +175,13 @@ class Wallet {
 	 * ci('wallet')->msgs(['Whoops!','Defcon 1'=>'red','Info']);
 	 * ```
 	 */
-	public function msgs(array $array,string $type='yellow') : Wallet
+	public function msgs(array $array, string $type='yellow') : Wallet
 	{
 		foreach ($array as $a=>$b) {
 			if (is_numeric($a)) {
-				$this->msg($b,$type);
+				$this->msg($b, $type);
 			} else {
-				$this->msg($a,$b);
+				$this->msg($a, $b);
 			}
 		}
 
@@ -200,7 +202,7 @@ class Wallet {
 	 * @return void
 	 *
 	 */
-	protected function redirect(string $msg,string $type,bool $sticky,string $redirect) : void
+	protected function redirect(string $msg, string $type, bool $sticky, string $redirect) : void
 	{
 		/* add another message to any that might already be on there */
 		$this->redirect_messages[md5(trim($msg))] = ['msg' => trim($msg), 'type' => $type, 'sticky' => $sticky];
@@ -224,7 +226,7 @@ class Wallet {
 	 * @return \Wallet
 	 *
 	 */
-	protected function add2page(string $msg,string $type,bool $sticky) : Wallet
+	protected function add2page(string $msg, string $type, bool $sticky) : Wallet
 	{
 		/* add to the current wallet messages */
 		$current_msgs = $this->get_view_variable();
@@ -247,7 +249,7 @@ class Wallet {
 	 * @return Array
 	 *
 	 */
-	protected function get_view_variable() : Array
+	protected function get_view_variable() : array
 	{
 		/* get the current messages */
 		$wallet_messages = $this->load->get_var($this->view_variable);
@@ -278,5 +280,4 @@ class Wallet {
 
 		return $this;
 	}
-
 } /* end class */

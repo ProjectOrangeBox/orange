@@ -30,7 +30,8 @@
  *
  */
 
-class MY_Output extends CI_Output {
+class MY_Output extends CI_Output
+{
 	/**
 	 * JSON encoding for all json output
 	 *
@@ -64,14 +65,14 @@ class MY_Output extends CI_Output {
 			$json = $val;
 		} elseif ($raw && $data !== null) {
 			$json = '{"'.$data.'":'.$val.'}';
-		} elseif  (is_array($data) || is_object($data)) {
-			$json = json_encode($data,$this->json_options);
+		} elseif (is_array($data) || is_object($data)) {
+			$json = json_encode($data, $this->json_options);
 		} elseif (is_string($data) && $val === null) {
 			$json = $data;
 		} elseif ($data === null && $val === null) {
-			$json = json_encode(ci()->load->get_vars(),$this->json_options);
+			$json = json_encode(ci()->load->get_vars(), $this->json_options);
 		} else {
-			$json = json_encode([$data => $val],$this->json_options);
+			$json = json_encode([$data => $val], $this->json_options);
 		}
 
 		$this
@@ -106,7 +107,7 @@ class MY_Output extends CI_Output {
 
 	/**
 	 *
- 	 * Wrapper for input's set cookie because it more of a "output" function
+	 * Wrapper for input's set cookie because it more of a "output" function
 	 *
 	 * @access public
 	 *
@@ -122,7 +123,7 @@ class MY_Output extends CI_Output {
 	 * @return MY_Output
 	 *
 	 */
-	public function set_cookie($name = '',string $value = '',int $expire = 0,string $domain = '',string $path = '/',string $prefix = '',bool $secure = FALSE,bool $httponly = FALSE) : MY_Output
+	public function set_cookie($name = '', string $value = '', int $expire = 0, string $domain = '', string $path = '/', string $prefix = '', bool $secure = false, bool $httponly = false) : MY_Output
 	{
 		ci('input')->set_cookie($name, $value, $expire, $domain, $path, $prefix, $secure, $httponly);
 
@@ -131,7 +132,7 @@ class MY_Output extends CI_Output {
 
 	/**
 	 *
- 	 * Delete all cookies (ie. set to a time in the past since which will make the browser ignore them
+	 * Delete all cookies (ie. set to a time in the past since which will make the browser ignore them
 	 *
 	 * @access public
 	 *
@@ -141,7 +142,7 @@ class MY_Output extends CI_Output {
 	public function delete_all_cookies() : MY_Output
 	{
 		foreach (ci('input')->cookie() as $name=>$value) {
-			ci('input')->set_cookie($name, $value, (time() - 3600),config('config.base_url'));
+			ci('input')->set_cookie($name, $value, (time() - 3600), config('config.base_url'));
 		}
 
 		return $this;
@@ -162,5 +163,4 @@ class MY_Output extends CI_Output {
 	{
 		exit($code);
 	}
-
 } /* end class */

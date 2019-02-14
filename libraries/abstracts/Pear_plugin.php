@@ -21,11 +21,9 @@
  *
  */
 
-abstract class Pear_plugin {
-
+abstract class Pear_plugin
+{
 	public function render()
 	{
-
 	}
-
 }

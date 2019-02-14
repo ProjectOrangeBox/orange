@@ -23,8 +23,9 @@
  *
  */
 
-class Filter_slug extends Filter_base {
-	public function filter(&$field,string $options = '') : void
+class Filter_slug extends Filter_base
+{
+	public function filter(&$field, string $options = '') : void
 	{
 		$field = preg_replace('~[^\pL\d]+~u', '-', $field);
 		$field = iconv('utf-8', 'us-ascii//TRANSLIT', $field);

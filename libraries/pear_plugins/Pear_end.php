@@ -22,8 +22,8 @@
  *
  */
 
-class Pear_end extends Pear_plugin {
-
+class Pear_end extends Pear_plugin
+{
 	public function render()
 	{
 		if (!count(pear::$fragment)) {
@@ -34,7 +34,6 @@ class Pear_end extends Pear_plugin {
 		$buffer = ob_get_contents();
 		ob_end_clean();
 
-		ci('page')->data($name,$buffer);
+		ci('page')->data($name, $buffer);
 	}
-
 } /* end plugin */

@@ -31,7 +31,8 @@
  *
  */
 
-class MY_Controller extends CI_Controller {
+class MY_Controller extends CI_Controller
+{
 	/**
 	 * Cache the controllers output in seconds
 	 *
@@ -108,7 +109,8 @@ class MY_Controller extends CI_Controller {
 	 * @access public
 	 *
 	 */
-	public function __construct() {
+	public function __construct()
+	{
 		/* let the parent controller do it's work */
 		parent::__construct();
 
@@ -123,7 +125,7 @@ class MY_Controller extends CI_Controller {
 		 *
 		 */
 		if (php_sapi_name() !== 'cli') {
-			if (!config('application.site open',true)) {
+			if (!config('application.site open', true)) {
 				if ($_COOKIE['ISOPEN'] !== config('application.is open cookie', md5(uniqid(true)))) {
 					$this->errors->display(503, ['heading' => 'Please Stand By', 'message' => 'Site Down for Maintenance']);
 				}
@@ -155,10 +157,10 @@ class MY_Controller extends CI_Controller {
 		 */
 		$output = ($output) ?? '';
 
-		echo $this->router->handle_responds($this,$output);
+		echo $this->router->handle_responds($this, $output);
 
 		/* trigger our output event */
-		ci('event')->trigger('ci.controller.output',$this,$output);
+		ci('event')->trigger('ci.controller.output', $this, $output);
 	}
 
 	/**
@@ -172,7 +174,5 @@ class MY_Controller extends CI_Controller {
 	 */
 	public function indexCliAction()
 	{
-
 	}
-
 } /* end class */

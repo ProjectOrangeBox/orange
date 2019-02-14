@@ -34,7 +34,8 @@
  *
  */
 
-class MY_Config extends CI_Config {
+class MY_Config extends CI_Config
+{
 	/**
 	 * track if the combined cached configuration has been loaded
 	 *
@@ -59,7 +60,7 @@ class MY_Config extends CI_Config {
 	 * @return mixed
 	 *
 	 */
-	public function dot_item(string $setting,$default=null)
+	public function dot_item(string $setting, $default=null)
 	{
 		log_message('debug', 'MY_Config::item_dot::'.$setting);
 
@@ -68,13 +69,13 @@ class MY_Config extends CI_Config {
 
 		$key = false;
 
-		if (strpos($setting,'.')) {
-			list($file,$key) = explode('.', strtolower($setting), 2);
+		if (strpos($setting, '.')) {
+			list($file, $key) = explode('.', strtolower($setting), 2);
 		} else {
 			$file = strtolower($setting);
 		}
 
-		$file = str_replace(' ','_',$file);
+		$file = str_replace(' ', '_', $file);
 
 		if ($key) {
 			$value = isset($this->config[$file], $this->config[$file][$key]) ? $this->config[$file][$key] : $default;
@@ -98,14 +99,14 @@ class MY_Config extends CI_Config {
 	 * @return MY_Config
 	 *
 	 */
-	public function set_dot_item(string $setting,$value=null) : MY_Config
+	public function set_dot_item(string $setting, $value=null) : MY_Config
 	{
 		log_message('debug', 'MY_Config::set_item_dot::'.$setting);
 
 		/* have we loaded the config? */
 		$this->_load_config();
 
-		list($file,$key) = explode('.', strtolower($setting), 2);
+		list($file, $key) = explode('.', strtolower($setting), 2);
 
 		if ($key) {
 			$this->config[$file][$key] = $value;
@@ -176,7 +177,7 @@ class MY_Config extends CI_Config {
 
 			/* load the application configs */
 			foreach (glob(APPPATH.'/config/*.php') as $filepath) {
-				$basename = basename($filepath,'.php');
+				$basename = basename($filepath, '.php');
 
 				$config = load_config($basename);
 
@@ -199,10 +200,10 @@ class MY_Config extends CI_Config {
 			}
 
 			/* combined with any configuration already loaded */
-			$complete_config = array_replace($this->config,$built_config);
+			$complete_config = array_replace($this->config, $built_config);
 
 			/* save it in the cache */
-			ci('cache')->export->save('config',$complete_config);
+			ci('cache')->export->save('config', $complete_config);
 		}
 
 		return $complete_config;

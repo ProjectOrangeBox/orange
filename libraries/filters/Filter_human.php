@@ -22,8 +22,9 @@
  * @filesource
  *
  */
-class Filter_human extends Filter_base {
-	public function filter(&$field,string $options = '') : void
+class Filter_human extends Filter_base
+{
+	public function filter(&$field, string $options = '') : void
 	{
 		/*
 		only word characters - from a-z, A-Z, 0-9, including the _ (underscore) character
@@ -32,7 +33,7 @@ class Filter_human extends Filter_base {
 		replace _ (underscore) characters with spaces
 		uppercase words
 		*/
-		$field = ucwords(str_replace('_',' ',strtolower(trim(preg_replace('#\W+#',' ', $field),' '))));
+		$field = ucwords(str_replace('_', ' ', strtolower(trim(preg_replace('#\W+#', ' ', $field), ' '))));
 
 		/* options is max length */
 		$this->field($field)->length($options);

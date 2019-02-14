@@ -18,7 +18,8 @@
  * functions:
  *
  */
-class O_role_model extends Database_model {
+class O_role_model extends Database_model
+{
 	protected $table;
 	protected $additional_cache_tags = '.acl';
 	protected $entity = 'o_role_entity';
@@ -28,19 +29,20 @@ class O_role_model extends Database_model {
 		'description' => ['field' => 'description', 'label' => 'Description', 'rules' => 'max_length[255]|filter_input[255]|is_uniquem[o_role_model.description.id]'],
 	];
 
-/**
- * __construct
- * Insert description here
- *
- *
- * @return
- *
- * @access
- * @static
- * @throws
- * @example
- */
-	public function __construct() {
+	/**
+	 * __construct
+	 * Insert description here
+	 *
+	 *
+	 * @return
+	 *
+	 * @access
+	 * @static
+	 * @throws
+	 * @example
+	 */
+	public function __construct()
+	{
 		$this->table = config('auth.role table');
 		
 		parent::__construct();
@@ -48,21 +50,22 @@ class O_role_model extends Database_model {
 		log_message('info', 'o_role_model Class Initialized');
 	}
 
-/**
- * add_permission
- * Insert description here
- *
- * @param $role
- * @param $permission
- *
- * @return
- *
- * @access
- * @static
- * @throws
- * @example
- */
-	public function add_permission($role, $permission) {
+	/**
+	 * add_permission
+	 * Insert description here
+	 *
+	 * @param $role
+	 * @param $permission
+	 *
+	 * @return
+	 *
+	 * @access
+	 * @static
+	 * @throws
+	 * @example
+	 */
+	public function add_permission($role, $permission)
+	{
 		if (is_array($permission)) {
 			foreach ($permission as $p) {
 				$this->add_permission($role, $p);
@@ -73,21 +76,22 @@ class O_role_model extends Database_model {
 		return $this->_database->replace(config('auth.role permission table'), ['role_id' => (int) $this->_find_role_id($role), 'permission_id' => (int) $this->_find_permission_id($permission)]);
 	}
 
-/**
- * remove_permission
- * Insert description here
- *
- * @param $role
- * @param $permission
- *
- * @return
- *
- * @access
- * @static
- * @throws
- * @example
- */
-	public function remove_permission($role, $permission = null) {
+	/**
+	 * remove_permission
+	 * Insert description here
+	 *
+	 * @param $role
+	 * @param $permission
+	 *
+	 * @return
+	 *
+	 * @access
+	 * @static
+	 * @throws
+	 * @example
+	 */
+	public function remove_permission($role, $permission = null)
+	{
 		if (is_array($permission)) {
 			foreach ($permission as $p) {
 				$this->remove_permission($role, $p);
@@ -103,26 +107,28 @@ class O_role_model extends Database_model {
 		return $this->_database->delete(config('auth.role permission table'), ['role_id' => (int) $this->_find_role_id($role), 'permission_id' => (int) $this->_find_permission_id($permission)]);
 	}
 
-	public function delete($role_id) {
+	public function delete($role_id)
+	{
 		parent::delete($role_id);
 
 		return $this->_database->delete(config('auth.role permission table'), ['role_id' => (int) $this->_find_role_id($role_id)]);
 	}
 
-/**
- * permissions
- * Insert description here
- *
- * @param $role
- *
- * @return
- *
- * @access
- * @static
- * @throws
- * @example
- */
-	public function permissions($role) {
+	/**
+	 * permissions
+	 * Insert description here
+	 *
+	 * @param $role
+	 *
+	 * @return
+	 *
+	 * @access
+	 * @static
+	 * @throws
+	 * @example
+	 */
+	public function permissions($role)
+	{
 		$role_id = $this->_find_role_id($role);
 		
 		$dbc = $this->_database
@@ -134,20 +140,21 @@ class O_role_model extends Database_model {
 		return ($dbc->num_rows() > 0) ? $dbc->result() : [];
 	}
 
-/**
- * users
- * Insert description here
- *
- * @param $role
- *
- * @return
- *
- * @access
- * @static
- * @throws
- * @example
- */
-	public function users($role) {
+	/**
+	 * users
+	 * Insert description here
+	 *
+	 * @param $role
+	 *
+	 * @return
+	 *
+	 * @access
+	 * @static
+	 * @throws
+	 * @example
+	 */
+	public function users($role)
+	{
 		$role_id = $this->_find_role_id($role);
 		
 		$dbc = $this->_database
@@ -159,20 +166,21 @@ class O_role_model extends Database_model {
 		return ($dbc->num_rows() > 0) ? $dbc->result() : [];
 	}
 
-/**
- * truncate
- * Insert description here
- *
- * @param $ensure
- *
- * @return
- *
- * @access
- * @static
- * @throws
- * @example
- */
-	public function truncate($ensure = false) {
+	/**
+	 * truncate
+	 * Insert description here
+	 *
+	 * @param $ensure
+	 *
+	 * @return
+	 *
+	 * @access
+	 * @static
+	 * @throws
+	 * @example
+	 */
+	public function truncate($ensure = false)
+	{
 		if ($ensure !== true) {
 			throw new Exception(__METHOD__.' please provide "true" to truncate a database model');
 		}
@@ -183,49 +191,53 @@ class O_role_model extends Database_model {
 		return parent::truncate($ensure);
 	}
 
-/**
- * _find_role_id
- * Insert description here
- *
- * @param $role
- *
- * @return
- *
- * @access
- * @static
- * @throws
- * @example
- */
-	public function _find_role_id($role) {
+	/**
+	 * _find_role_id
+	 * Insert description here
+	 *
+	 * @param $role
+	 *
+	 * @return
+	 *
+	 * @access
+	 * @static
+	 * @throws
+	 * @example
+	 */
+	public function _find_role_id($role)
+	{
 		return (int) ((int) $role > 0) ? $role : $this->o_role_model->column('id')->get_by(['name' => $role]);
 	}
 
-/**
- * _find_permission_id
- * Insert description here
- *
- * @param $permission
- *
- * @return
- *
- * @access
- * @static
- * @throws
- * @example
- */
-	public function _find_permission_id($permission) {
+	/**
+	 * _find_permission_id
+	 * Insert description here
+	 *
+	 * @param $permission
+	 *
+	 * @return
+	 *
+	 * @access
+	 * @static
+	 * @throws
+	 * @example
+	 */
+	public function _find_permission_id($permission)
+	{
 		return (int) ((int) $permission > 0) ? $permission : $this->o_permission_model->column('id')->get_by(['key' => $permission]);
 	}
 	
 	/* migration */
-	public function migration_add($name=null,$description=null,$migration=null) {
+	public function migration_add($name=null, $description=null, $migration=null)
+	{
 		$this->skip_rules = true;
 
 		/* we already verified the key that's the "real" primary key */
 		return (!$this->exists(['name'=>$name])) ? $this->insert(['name'=>$name,'description'=>$description,'migration'=>$migration]) : false;
 	}
 
-	public function migration_remove($where=null) {
+	public function migration_remove($where=null)
+	{
 		$this->skip_rules = true;
 
 		if (!is_array($where)) {
@@ -234,5 +246,4 @@ class O_role_model extends Database_model {
 
 		return $this->delete_by($where);
 	}
-	
 }

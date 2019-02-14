@@ -20,7 +20,8 @@
  * @help greater than or equal to the parameter value, or not numeric.
  *
  */
-class Validate_greater_than_equal_to extends Validate_base {
+class Validate_greater_than_equal_to extends Validate_base
+{
 	public function validate(&$field, string $options = '') : bool
 	{
 		$this->error_string = '%s must contain a number greater than or equal to %s.';

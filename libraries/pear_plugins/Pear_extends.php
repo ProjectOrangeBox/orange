@@ -1,4 +1,4 @@
-<?php 
+<?php
 /**
  * Orange
  *
@@ -22,11 +22,10 @@
  *
  */
 
-class Pear_extends extends Pear_plugin {
-
-	public function render(string $name = null,array $data = [])
+class Pear_extends extends Pear_plugin
+{
+	public function render(string $name = null, array $data = [])
 	{
 		ci('page')->data($data)->extend($name);
 	}
-
 } /* end plugin */

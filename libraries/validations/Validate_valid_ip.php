@@ -20,7 +20,8 @@
  * @help if the supplied IP address is valid. Accepts an optional parameter of ‘ipv4’ or ‘ipv6’ to specify an IP format.
  *
  */
-class Validate_valid_ip extends Validate_base {
+class Validate_valid_ip extends Validate_base
+{
 	public function validate(&$field, string $options = '') : bool
 	{
 		$this->error_string = '%s must contain a valid IP.';

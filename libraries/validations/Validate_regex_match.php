@@ -20,7 +20,8 @@
  * @help matches the regular expression.
  *
  */
-class Validate_regex_match extends Validate_base {
+class Validate_regex_match extends Validate_base
+{
 	public function validate(&$field, string $options = '') : bool
 	{
 		if (empty($options)) {

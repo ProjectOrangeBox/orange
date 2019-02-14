@@ -20,7 +20,8 @@
  * @help contains anything other than an integer.
  *
  */
-class Validate_integer extends Validate_base {
+class Validate_integer extends Validate_base
+{
 	public function validate(&$field, string $options = '') : bool
 	{
 		$this->error_string = '%s is not a integer.';

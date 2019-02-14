@@ -19,7 +19,8 @@
  * functions:
  *
  */
-abstract class Model_entity {
+abstract class Model_entity
+{
 	protected $_model_name = null;
 	protected $save_columns = null;
 
@@ -27,9 +28,10 @@ abstract class Model_entity {
 	 * __construct
 	 *
 	 */
-	public function __construct() {
+	public function __construct()
+	{
 		/* the model name should match the entity name */
-		$this->_model_name = strtolower(substr(get_called_class(),0,-7).'_model');
+		$this->_model_name = strtolower(substr(get_called_class(), 0, -7).'_model');
 		
 		log_message('info', 'Model_entity Class Initialized');
 	}
@@ -40,7 +42,8 @@ abstract class Model_entity {
 	 * @return mixed success
 	 *
 	 */
-	public function save() {
+	public function save()
+	{
 		/* get the model */
 		$model = ci()->{$this->_model_name};
 		

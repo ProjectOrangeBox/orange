@@ -52,7 +52,8 @@
  * @define ADMIN_ROLE_ID
  *
  */
-class Auth {
+class Auth
+{
 	/**
 	 * session key
 	 *
@@ -123,9 +124,9 @@ class Auth {
 		$this->user_model =& ci('o_user_model');
 
 		/* define some global Constants */
-		define('ADMIN_ROLE_ID',$this->config['admin role id']);
-		define('NOBODY_USER_ID',$this->config['nobody user id']);
-		define('EVERYONE_ROLE_ID',$this->config['everyone role id']);
+		define('ADMIN_ROLE_ID', $this->config['admin role id']);
+		define('NOBODY_USER_ID', $this->config['nobody user id']);
+		define('EVERYONE_ROLE_ID', $this->config['everyone role id']);
 
 		/* We all start off as nobody in life... */
 		$this->switch_to_nobody();
@@ -141,7 +142,7 @@ class Auth {
 				 * but don't save to the session
 				 * because we already loaded it from the session
 				 */
-				$this->refresh_userdata($user_identifier,false);
+				$this->refresh_userdata($user_identifier, false);
 			}
 		}
 
@@ -159,7 +160,7 @@ class Auth {
 	 */
 	public function switch_to_nobody() : Auth
 	{
-		$this->refresh_userdata($this->config['nobody user id'],false);
+		$this->refresh_userdata($this->config['nobody user id'], false);
 		
 		return $this;
 	}
@@ -176,7 +177,7 @@ class Auth {
 	 * @return Bool
 	 *
 	 */
-	public function login(string $user_identifier,string $password) : Bool
+	public function login(string $user_identifier, string $password) : Bool
 	{
 		$success = $this->_login($user_identifier, $password);
 
@@ -202,7 +203,7 @@ class Auth {
 
 		$success = true;
 
-		$this->event->trigger('auth.logout',$success);
+		$this->event->trigger('auth.logout', $success);
 
 		if ($success) {
 			$this->switch_to_nobody();
@@ -225,7 +226,7 @@ class Auth {
 	 * @return String
 	 *
 	 */
-	public function refresh_userdata(String $user_identifier,Bool $save_session) : Void
+	public function refresh_userdata(String $user_identifier, Bool $save_session) : Void
 	{
 		log_message('debug', 'Auth::refresh_userdata::'.$user_identifier);
 
@@ -263,7 +264,7 @@ class Auth {
 	 * @return Bool
 	 *
 	 */
-	protected function _login(String $login,String $password) : Bool
+	protected function _login(String $login, String $password) : Bool
 	{
 		/* Does login and password contain anything empty values are NOT permitted for any reason */
 		if ((strlen(trim($login)) == 0) or (strlen(trim($password)) == 0)) {
@@ -313,9 +314,8 @@ class Auth {
 		}
 
 		/* ok they are good refresh the user and save to the session */
-		$this->refresh_userdata($user->id,true);
+		$this->refresh_userdata($user->id, true);
 
 		return true;
 	}
-
 } /* end class */

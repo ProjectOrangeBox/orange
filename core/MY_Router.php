@@ -21,22 +21,23 @@
  * @version v2.0
  * @filesource
  *
- * @uses # o_user_model - Orange User Model 
- * @uses # session - CodeIgniter Session 
+ * @uses # o_user_model - Orange User Model
+ * @uses # session - CodeIgniter Session
  * @uses # event - Orange event
  * @uses # errors - Orange errors
  * @uses # controller - CodeIgniter Controller
  * @uses # output - CodeIgniter Output
  *
- * @config username min length  
- * @config username max length  
+ * @config username min length
+ * @config username max length
  *
  * @define NOBODY_USER_ID
  * @define ADMIN_ROLE_ID
  *
  */
 
-class MY_Router extends CI_Router {
+class MY_Router extends CI_Router
+{
 	/**
 	 * Storage for the clean version of the Controller Class without the Controller Suffix
 	 *
@@ -157,7 +158,7 @@ class MY_Router extends CI_Router {
 	 * @return string
 	 *
 	 */
-	public function handle_responds(&$ci,string $output) : string
+	public function handle_responds(&$ci, string $output) : string
 	{
 		foreach ($this->responds as $middleware) {
 			$output = (new $middleware($ci))->responds($output);
@@ -175,17 +176,16 @@ class MY_Router extends CI_Router {
 	 *
 	 * @param array $segments
 	 *
-	 * @return 
+	 * @return
 	 *
 	 */
 	public function _validate_request($segments)
 	{
-		$uri = implode('/',str_replace('-','_',$segments));
+		$uri = implode('/', str_replace('-', '_', $segments));
 
 		foreach (orange_locator::controllers() as $key=>$rec) {
-
 			if (preg_match('#^'.$key.'$#', strtolower($uri), $matches)) {
-				$segs = explode('/',trim($matches[1],'/'));
+				$segs = explode('/', trim($matches[1], '/'));
 
 				$this->directory = $rec['directory'];
 				$this->clean_class = $rec['clean_controller'];
@@ -245,7 +245,7 @@ class MY_Router extends CI_Router {
 	 */
 	public function fetch_directory() : string
 	{
-		return substr($this->directory, strpos($this->directory,'/controllers/') + 13);
+		return substr($this->directory, strpos($this->directory, '/controllers/') + 13);
 	}
 
 	/**
@@ -311,7 +311,7 @@ class MY_Router extends CI_Router {
 	 * @return bool
 	 *
 	 */
-	public function route(string &$directory,string &$class,string &$method) : bool
+	public function route(string &$directory, string &$class, string &$method) : bool
 	{
 		$class = ucfirst($class);
 
@@ -323,14 +323,14 @@ class MY_Router extends CI_Router {
 			/* this brings in the controller file */
 			require_once(APPPATH.'controllers/'.$directory.$class.'.php');
 
-			if (!class_exists($class, FALSE) || $method[0] === '_' || method_exists('CI_Controller', $method)) {
+			if (!class_exists($class, false) || $method[0] === '_' || method_exists('CI_Controller', $method)) {
 				$e404 = true;
 			} elseif (method_exists($class, '_remap')) {
 				$params = array($method, array_slice($URI->rsegments, 2));
 				$method = '_remap';
 			} elseif (!method_exists($class, $method)) {
 				$e404 = true;
-			}	elseif (!is_callable(array($class, $method))) 	{
+			} elseif (!is_callable(array($class, $method))) {
 				$reflection = new ReflectionMethod($class, $method);
 
 				if (!$reflection->isPublic() || $reflection->isConstructor()) {
@@ -410,14 +410,14 @@ class MY_Router extends CI_Router {
 	 */
 	protected function _set_routing() : void
 	{
-		$route = load_config('routes','route');
+		$route = load_config('routes', 'route');
 
 		/**
-		 * 
+		 *
 		 * Validate & get reserved routes
 		 *
 		 */
- 		if (isset($route) && is_array($route)) {
+		if (isset($route) && is_array($route)) {
 			isset($route['default_controller']) && $this->default_controller = $route['default_controller'];
 
 			unset($route['default_controller']);
@@ -426,11 +426,11 @@ class MY_Router extends CI_Router {
 		}
 
 		/**
-		 * 
+		 *
 		 * Is there anything to parse?
 		 *
 		 */
- 		if ($this->uri->uri_string !== '') {
+		if ($this->uri->uri_string !== '') {
 			$this->_parse_routes();
 		} else {
 			$this->_set_default_controller();
@@ -459,7 +459,7 @@ class MY_Router extends CI_Router {
 		$http_verb = $this->fetch_request_method(false);
 
 		// Loop through the route array looking for wildcards
-		foreach ($this->loaded_routes as $key=>$val) 	{
+		foreach ($this->loaded_routes as $key=>$val) {
 			// Check if route format is using HTTP verbs
 			if (is_array($val)) {
 				$val = array_change_key_case($val, CASE_LOWER);
@@ -472,10 +472,10 @@ class MY_Router extends CI_Router {
 			}
 
 			// Convert wildcards to RegEx
-			$key = str_replace(array(':any',':num'), array('[^/]+','[0-9]+'),$key);
+			$key = str_replace(array(':any',':num'), array('[^/]+','[0-9]+'), $key);
 
 			// Does the RegEx match?
-			if (preg_match('#^'.$key.'$#', $uri, $matches)) 	{
+			if (preg_match('#^'.$key.'$#', $uri, $matches)) {
 				// Are we using callbacks to process back-references?
 				if (!is_string($val) && is_callable($val)) {
 					// Remove the original string from the matches array.
@@ -485,7 +485,7 @@ class MY_Router extends CI_Router {
 
 					// Execute the callback using the values in matches as its parameters.
 					$val = call_user_func_array($val, $matches);
-				} elseif (strpos($val, '$') !== FALSE && strpos($key, '(') !== FALSE) 	{
+				} elseif (strpos($val, '$') !== false && strpos($key, '(') !== false) {
 					// Are we using the default routing method for back-references?
 					$val = preg_replace('#^'.$key.'$#', $val, $uri);
 				}
@@ -499,12 +499,11 @@ class MY_Router extends CI_Router {
 		}
 
 		/**
-		 * 
+		 *
 		 * If we got this far it means we didn't encounter a
 		 * matching route so we'll set the site default route
 		 *
 		 */
- 		$this->_set_request(array_values($this->uri->segments));
+		$this->_set_request(array_values($this->uri->segments));
 	}
-
 } /* end class */

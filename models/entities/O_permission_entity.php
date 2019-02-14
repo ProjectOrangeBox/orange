@@ -18,26 +18,28 @@
  * functions:
  *
  */
-class O_permission_entity extends model_entity {
+class O_permission_entity extends model_entity
+{
 	public $id;
 	public $key;
 	public $group;
 	public $description;
 
-/**
- * __get
- * Insert description here
- *
- * @param $name
- *
- * @return
- *
- * @access
- * @static
- * @throws
- * @example
- */
-	public function __get($name) {
+	/**
+	 * __get
+	 * Insert description here
+	 *
+	 * @param $name
+	 *
+	 * @return
+	 *
+	 * @access
+	 * @static
+	 * @throws
+	 * @example
+	 */
+	public function __get($name)
+	{
 		switch ($name) {
 			case 'roles':
 				return $this->roles();
@@ -45,19 +47,20 @@ class O_permission_entity extends model_entity {
 		}
 	}
 
-/**
- * roles
- * Insert description here
- *
- *
- * @return
- *
- * @access
- * @static
- * @throws
- * @example
- */
-	public function roles() {
+	/**
+	 * roles
+	 * Insert description here
+	 *
+	 *
+	 * @return
+	 *
+	 * @access
+	 * @static
+	 * @throws
+	 * @example
+	 */
+	public function roles()
+	{
 		return ci()->o_permission_model->roles($this->id);
 	}
 }

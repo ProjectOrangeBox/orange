@@ -1,4 +1,4 @@
-<?php 
+<?php
 /**
  * Orange
  *
@@ -22,9 +22,9 @@
  *
  */
 
-class Pear_include extends Pear_plugin {
-
-	public function render(string $view = null,array $data = [],$name = true)
+class Pear_include extends Pear_plugin
+{
+	public function render(string $view = null, array $data = [], $name = true)
 	{
 		if ($name === true) {
 			echo ci('page')->view($view, $data, $name);
@@ -32,5 +32,4 @@ class Pear_include extends Pear_plugin {
 			ci('page')->view($view, $data, $name);
 		}
 	}
-
 } /* end plugin */

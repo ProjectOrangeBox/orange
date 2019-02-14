@@ -34,7 +34,8 @@
  * @define PAGE_MIN
  *
  */
-class Page {
+class Page
+{
 	const PRIORITY_LOWEST = 10;
 	const PRIORITY_LOW = 20;
 	const PRIORITY_NORMAL = 50;
@@ -121,7 +122,7 @@ class Page {
 		}
 
 		/* if it's true then use the default else use what's in page_min config */
-		define('PAGE_MIN',$page_min);
+		define('PAGE_MIN', $page_min);
 
 		$this->page_variable_prefix = $this->config['page_prefix'] ?? 'page_';
 
@@ -129,13 +130,13 @@ class Page {
 
 		if (is_array($page_configs)) {
 			foreach ($page_configs as $method=>$parameters) {
-				if (method_exists($this,$method)) {
+				if (method_exists($this, $method)) {
 					if (is_array($parameters)) {
 						foreach ($parameters as $p) {
-							call_user_func([$this,$method],$p);
+							call_user_func([$this,$method], $p);
 						}
 					} else {
-						call_user_func([$this,$method],$parameters);
+						call_user_func([$this,$method], $parameters);
 					}
 				}
 			}
@@ -176,7 +177,7 @@ class Page {
 	 * @return Page
 	 *
 	 */
-	public function render(string $view = null,array $data = null) : Page
+	public function render(string $view = null, array $data = null) : Page
 	{
 		log_message('debug', 'page::render::'.$view);
 
@@ -187,20 +188,20 @@ class Page {
 		}
 
 		/* called everytime - use with caution */
-		$this->event->trigger('page.render',$this,$view);
+		$this->event->trigger('page.render', $this, $view);
 
 		/* called only when a trigger matches the view */
-		$this->event->trigger('page.render.'.$view,$this,$view);
+		$this->event->trigger('page.render.'.$view, $this, $view);
 
 		/* this is going to be the "main" section */
-		$view_content = $this->view($view,$data);
+		$view_content = $this->view($view, $data);
 
 		if ($this->extending) {
 			$view_content = $this->view($this->extending);
 		}
 
 		/* called everytime - use with caution  */
-		$this->event->trigger('page.render.content',$view_content,$view,$data);
+		$this->event->trigger('page.render.content', $view_content, $view, $data);
 
 		/* append to the output responds */
 		$this->output->append_output($view_content);
@@ -239,19 +240,19 @@ class Page {
 	 * ci('page')->view('folder/my_block',['name'=>'Johnny Appleseed'],'name_block');
 	 * ```
 	 */
-	public function view(string $view_file = null,array $data = null,$return = true)
+	public function view(string $view_file = null, array $data = null, $return = true)
 	{
-		$data = (is_array($data)) ? array_merge($this->load->get_vars(),$data) : $this->load->get_vars();
+		$data = (is_array($data)) ? array_merge($this->load->get_vars(), $data) : $this->load->get_vars();
 
 		/**
 		 * call core orange function view()
 		 *
 		 * Throws Exception if view not found.
 		 */
-		$buffer = view($view_file,$data);
+		$buffer = view($view_file, $data);
 
 		if (is_string($return)) {
-			$this->data($return,$buffer);
+			$this->data($return, $buffer);
 		}
 
 		return ($return === true) ? $buffer : $this;
@@ -275,9 +276,9 @@ class Page {
 	 * ci('page')->data(['name'=>'Johnny','age'=>23]);
 	 * ```
 	 */
-	public function data($name,$value = null) : Page
+	public function data($name, $value = null) : Page
 	{
-		$this->load->vars($name,$value);
+		$this->load->vars($name, $value);
 
 		return $this;
 	}
@@ -329,7 +330,7 @@ class Page {
 	 */
 	public function link_html(string $file) : string
 	{
-		return $this->ary2element('link', array_merge($this->config['link_attributes'],['href' => $file]));
+		return $this->ary2element('link', array_merge($this->config['link_attributes'], ['href' => $file]));
 	}
 
 	/**
@@ -351,7 +352,7 @@ class Page {
 	 */
 	public function script_html(string $file) : string
 	{
-		return $this->ary2element('script',array_merge($this->config['script_attributes'],['src' => $file]));
+		return $this->ary2element('script', array_merge($this->config['script_attributes'], ['src' => $file]));
 	}
 
 	/**
@@ -372,11 +373,11 @@ class Page {
 	 * $html = ci('page')->ary2element('a',['class'=>'bold','id'=>'id3'],'link!');
 	 * ```
 	 */
-	public function ary2element(string $element,array $attributes,string $content = '') : string
+	public function ary2element(string $element, array $attributes, string $content = '') : string
 	{
 		/* uses CodeIgniter Common.php _stringify_attributes function */
 
-		return (in_array($element,['area','base','br','col','embed','hr','img','input','link','meta','param','source','track','wbr'])) ?
+		return (in_array($element, ['area','base','br','col','embed','hr','img','input','link','meta','param','source','track','wbr'])) ?
 			'<'.$element._stringify_attributes($attributes).'/>' :
 			'<'.$element._stringify_attributes($attributes).'>'.$content.'</'.$element.'>';
 	}
@@ -401,13 +402,13 @@ class Page {
 	 * ci('page')->meta('charset','UTF-8');
 	 * ```
 	 */
-	public function meta($attr,string $name = null,string $content = null,int $priority = PAGE::PRIORITY_NORMAL) : Page
+	public function meta($attr, string $name = null, string $content = null, int $priority = PAGE::PRIORITY_NORMAL) : Page
 	{
 		if (is_array($attr)) {
 			extract($attr);
 		}
 
-		return $this->add('meta','<meta '.$attr.'="'.$name.'"'.(($content) ? ' content="'.$content.'"' : '').'>'.PHP_EOL,$priority);
+		return $this->add('meta', '<meta '.$attr.'="'.$name.'"'.(($content) ? ' content="'.$content.'"' : '').'>'.PHP_EOL, $priority);
 	}
 
 	/**
@@ -426,9 +427,9 @@ class Page {
 	 * ci('page')->script('alert("Page Ready!");');
 	 * ```
 	 */
-	public function script(string $script,int $priority = PAGE::PRIORITY_NORMAL) : Page
+	public function script(string $script, int $priority = PAGE::PRIORITY_NORMAL) : Page
 	{
-		return $this->add('script',$script.PHP_EOL,$priority);
+		return $this->add('script', $script.PHP_EOL, $priority);
 	}
 
 	/**
@@ -447,9 +448,9 @@ class Page {
 	 * ci('page')->domready('alert("Page Ready!");');
 	 * ```
 	 */
-	public function domready(string $script,int $priority = PAGE::PRIORITY_NORMAL) : Page
+	public function domready(string $script, int $priority = PAGE::PRIORITY_NORMAL) : Page
 	{
-		return $this->add('domready',$script.PHP_EOL,$priority);
+		return $this->add('domready', $script.PHP_EOL, $priority);
 	}
 
 	/**
@@ -468,9 +469,9 @@ class Page {
 	 * ci('page')->title('My Web Page');
 	 * ```
 	 */
-	public function title(string $title = '',int $priority = PAGE::PRIORITY_NORMAL) : Page
+	public function title(string $title = '', int $priority = PAGE::PRIORITY_NORMAL) : Page
 	{
-		return $this->add('title',$title,$priority);
+		return $this->add('title', $title, $priority);
 	}
 
 	/**
@@ -489,9 +490,9 @@ class Page {
 	 * ci('page')->style('. { font-size: 9px }');
 	 * ```
 	 */
-	public function style(string $style,int $priority = PAGE::PRIORITY_NORMAL) : Page
+	public function style(string $style, int $priority = PAGE::PRIORITY_NORMAL) : Page
 	{
-		return $this->add('style',$style.PHP_EOL,$priority);
+		return $this->add('style', $style.PHP_EOL, $priority);
 	}
 
 	/**
@@ -512,16 +513,16 @@ class Page {
 	 * ci('page')->script('/assets/javascript.js',PAGE::PRIORITY_HIGHEST);
 	 * ```
 	 */
-	public function js($file = '',int $priority = PAGE::PRIORITY_NORMAL) : Page
+	public function js($file = '', int $priority = PAGE::PRIORITY_NORMAL) : Page
 	{
 		if (is_array($file)) {
 			foreach ($file as $f) {
-				$this->js($f,$priority);
+				$this->js($f, $priority);
 			}
 			return $this;
 		}
 
-		return $this->add('js',$this->script_html($file).PHP_EOL,$priority);
+		return $this->add('js', $this->script_html($file).PHP_EOL, $priority);
 	}
 
 	/**
@@ -541,16 +542,16 @@ class Page {
 	 * ci('page')->css('/assets/application.cs');
 	 * ```
 	 */
-	public function css($file = '',int $priority = PAGE::PRIORITY_NORMAL) : Page
+	public function css($file = '', int $priority = PAGE::PRIORITY_NORMAL) : Page
 	{
 		if (is_array($file)) {
 			foreach ($file as $f) {
-				$this->css($f,$priority);
+				$this->css($f, $priority);
 			}
 			return $this;
 		}
 
-		return $this->add('css',$this->link_html($file).PHP_EOL,$priority);
+		return $this->add('css', $this->link_html($file).PHP_EOL, $priority);
 	}
 
 	/**
@@ -572,7 +573,7 @@ class Page {
 	 * ci('page')->js_variable('name','{name: "Johnny Appleseed"}',PAGE::PRIORITY_NORMAL,true);
 	 * ```
 	 */
-	public function js_variable(string $key,$value,int $priority = PAGE::PRIORITY_NORMAL,bool $raw = false) : Page
+	public function js_variable(string $key, $value, int $priority = PAGE::PRIORITY_NORMAL, bool $raw = false) : Page
 	{
 		if ($raw) {
 			$value = 'var '.$key.'='.$value.';' ;
@@ -580,7 +581,7 @@ class Page {
 			$value = ((is_scalar($value)) ? 'var '.$key.'="'.str_replace('"', '\"', $value).'";' : 'var '.$key.'='.json_encode($value, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE).';');
 		}
 
-		return $this->add('js_variables',$value,$priority);
+		return $this->add('js_variables', $value, $priority);
 	}
 
 	/**
@@ -626,9 +627,9 @@ class Page {
 	 * ci('page')->body_class(['body-wrapper','o-theme']);
 	 * ```
 	 */
-	public function body_class($class,int $priority = PAGE::PRIORITY_NORMAL) : Page
+	public function body_class($class, int $priority = PAGE::PRIORITY_NORMAL) : Page
 	{
-		return (is_array($class)) ? $this->_body_class($class,$priority) : $this->_body_class(explode(' ',$class),$priority);
+		return (is_array($class)) ? $this->_body_class($class, $priority) : $this->_body_class(explode(' ', $class), $priority);
 	}
 
 	/**
@@ -649,7 +650,7 @@ class Page {
 	 * ci('page')->add('custom_var','<p>Custom Stuff!</p>');
 	 * ```
 	 */
-	public function add(string $name,string $value,int $priority = PAGE::PRIORITY_NORMAL,bool $prevent_duplicates = true) : Page
+	public function add(string $name, string $value, int $priority = PAGE::PRIORITY_NORMAL, bool $prevent_duplicates = true) : Page
 	{
 		$key = md5($value);
 
@@ -680,7 +681,7 @@ class Page {
 	 * ci('page')->var('script');
 	 * ```
 	 */
-	public function __call(string $name,array $arguments = [])
+	public function __call(string $name, array $arguments = [])
 	{
 		if ($name == 'var') {
 			return $this->_var($arguments[0]);
@@ -719,7 +720,7 @@ class Page {
 			/* has it already been sorted */
 			if (!$this->variables[$name][0]) {
 				/* no we must sort it */
-				array_multisort($this->variables[$name][1],SORT_DESC,SORT_NUMERIC,$this->variables[$name][2]);
+				array_multisort($this->variables[$name][1], SORT_DESC, SORT_NUMERIC, $this->variables[$name][2]);
 
 				/* mark it as sorted */
 				$this->variables[$name][0] = true;
@@ -745,13 +746,12 @@ class Page {
 	 * @return Page
 	 *
 	 */
-	protected function _body_class(array $class,int $priority) : Page
+	protected function _body_class(array $class, int $priority) : Page
 	{
 		foreach ($class as $c) {
-			$this->add('body_class',' '.strtolower(trim($c)),$priority);
+			$this->add('body_class', ' '.strtolower(trim($c)), $priority);
 		}
 
 		return $this;
 	}
-
 } /* end page */

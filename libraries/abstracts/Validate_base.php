@@ -70,7 +70,7 @@ abstract class Validate_base
 	 * @param string $error_string Current Error String used in sprintf()
 	 *
 	 */
-	public function __construct(array &$field_data = [],string &$error_string = '')
+	public function __construct(array &$field_data = [], string &$error_string = '')
 	{
 		$this->field_data = &$field_data;
 		$this->error_string = &$error_string;
@@ -108,7 +108,7 @@ abstract class Validate_base
 	 * @return bool
 	 *
 	 */
-	public function validate(&$field,string $options = '') : bool
+	public function validate(&$field, string $options = '') : bool
 	{
 	}
 
@@ -144,7 +144,7 @@ abstract class Validate_base
 	 *
 	 * @access public
 	 *
-	 * @param 
+	 * @param
 	 *
 	 * @return Validate_base
 	 *
@@ -166,7 +166,7 @@ abstract class Validate_base
 	 *
 	 * @access public
 	 *
-	 * @param 
+	 * @param
 	 *
 	 * @return Validate_base
 	 *
@@ -189,7 +189,7 @@ abstract class Validate_base
 	 *
 	 * @access public
 	 *
-	 * @param 
+	 * @param
 	 *
 	 * @return Validate_base
 	 *
@@ -257,7 +257,7 @@ abstract class Validate_base
 	 * @param string $file
 	 *
 	 * @throws
-	 * @return 
+	 * @return
 	 *
 	 * #### Example
 	 * ```php
@@ -266,7 +266,7 @@ abstract class Validate_base
 	 */
 	public function locate_file(string $file)
 	{
-		$file = trim($file,'/');
+		$file = trim($file, '/');
 		
 		/* is it based off the www folder? */
 		if (file_exists(WWW.'/'.$file)) {
@@ -283,5 +283,4 @@ abstract class Validate_base
 
 		return false;
 	}
-
 } /* end class */

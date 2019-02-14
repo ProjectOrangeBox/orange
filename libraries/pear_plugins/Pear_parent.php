@@ -1,4 +1,4 @@
-<?php 
+<?php
 /**
  * Orange
  *
@@ -22,13 +22,12 @@
  *
  */
 
-class Pear_parent extends Pear_plugin {
-
+class Pear_parent extends Pear_plugin
+{
 	public function render(string $name = null)
 	{
 		$name = ($name) ?? end(pear::$fragment);
 
 		echo ci('load')->get_var($name);
 	}
-
 } /* end plugin */

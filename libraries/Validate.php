@@ -25,7 +25,8 @@
  * @config ~ preset filters
  *
  */
-class Validate {
+class Validate
+{
 	/**
 	 * Storage for attached (Closure) validations
 	 *
@@ -91,7 +92,8 @@ class Validate {
 	 * @param array $config []
 	 *
 	 */
-	public function __construct(array &$config=[]) {
+	public function __construct(array &$config=[])
+	{
 		$this->config = &$config;
 
 		$this->errors = &ci('errors');
@@ -189,7 +191,7 @@ class Validate {
 		 * sprintf argument 3 field value
 		 */
 
-		$this->errors->add(sprintf($this->error_string, $this->error_human, $this->error_params, $this->error_field_value),$fieldname);
+		$this->errors->add(sprintf($this->error_string, $this->error_human, $this->error_params, $this->error_field_value), $fieldname);
 
 		return $this;
 	}
@@ -209,10 +211,10 @@ class Validate {
 	 * @return Validate
 	 *
 	 */
-	public function die_on_fail($view = '400',string $index = null) : Validate
+	public function die_on_fail($view = '400', string $index = null) : Validate
 	{
 		/* if there is a error then you never return from this method call */
-		$this->errors->die_on_error($view,$index);
+		$this->errors->die_on_error($view, $index);
 
 		/* if there is no error */
 		return $this;
@@ -280,7 +282,7 @@ class Validate {
 	 *
 	 * ```
 	 */
-	public function variable(string $rules = '',&$field,string $human = null) : Validate
+	public function variable(string $rules = '', &$field, string $human = null) : Validate
 	{
 		return $this->single($rules, $field, $human);
 	}
@@ -302,13 +304,13 @@ class Validate {
 	 * @return mixed
 	 *
 	 */
-	public function request(string $rules,string $key,$human = null)
+	public function request(string $rules, string $key, $human = null)
 	{
-		$field = ci('input')->request($key,null);
+		$field = ci('input')->request($key, null);
 
 		$this->single($rules, $field, $human);
 
-		ci('input')->set_request($key,$field);
+		ci('input')->set_request($key, $field);
 
 		return ($human === true) ? $field : $this;
 	}
@@ -327,7 +329,7 @@ class Validate {
 	 * @return Validate
 	 *
 	 */
-	public function run($rules = '', &$fields,string $human = null) : Validate
+	public function run($rules = '', &$fields, string $human = null) : Validate
 	{
 		return (is_array($fields)) ? $this->multiple($rules, $fields) : $this->single($rules, $fields, $human);
 	}
@@ -344,7 +346,7 @@ class Validate {
 	 * @return Validate
 	 *
 	 */
-	public function multiple(array $rules = [],array &$fields) : Validate
+	public function multiple(array $rules = [], array &$fields) : Validate
 	{
 		/* save this as a reference for the validations and filters to use */
 		$this->field_data = &$fields;
@@ -376,7 +378,7 @@ class Validate {
 	 * @return Validate
 	 *
 	 */
-	public function single($rules, &$field,string $human = null) : Validate
+	public function single($rules, &$field, string $human = null) : Validate
 	{
 		/* break apart the rules */
 		if (!is_array($rules)) {
@@ -447,7 +449,7 @@ class Validate {
 				/* hopefully error_params looks presentable now? */
 
 				/* take action on a validation or filter - filters MUST always start with "filter_" */
-				$success = (substr(strtolower($rule),0,7) == 'filter_') ? $this->_filter($field,$rule,$param) : $this->_validation($field,$rule,$param);
+				$success = (substr(strtolower($rule), 0, 7) == 'filter_') ? $this->_filter($field, $rule, $param) : $this->_validation($field, $rule, $param);
 
 				log_message('debug', 'Validate Success '.$success);
 
@@ -478,17 +480,17 @@ class Validate {
 	 * @return bool
 	 *
 	 */
-	protected function _filter(&$field,string $rule,string $param = null) : bool
+	protected function _filter(&$field, string $rule, string $param = null) : bool
 	{
 		$class_name = $this->_normalize_rule($rule);
-		$short_rule = substr($class_name,7);
+		$short_rule = substr($class_name, 7);
 
 		if (isset($this->attached[$class_name])) {
 			$this->attached[$class_name]($field, $param);
-		} elseif (class_exists($class_name,true)) {
+		} elseif (class_exists($class_name, true)) {
 			(new $class_name($this->field_data))->filter($field, $param);
 		} elseif (function_exists($short_rule)) {
-			$field = ($param) ? $short_rule($field,$param) : $short_rule($field);
+			$field = ($param) ? $short_rule($field, $param) : $short_rule($field);
 		} else {
 			throw new Exception('Could not filter '.$rule);
 		}
@@ -511,20 +513,20 @@ class Validate {
 	 * @return bool
 	 *
 	 */
-	protected function _validation(&$field,string $rule,string $param = null) : bool
+	protected function _validation(&$field, string $rule, string $param = null) : bool
 	{
 		$class_name = $this->_normalize_rule($rule);
-		$short_rule = substr($class_name,9);
+		$short_rule = substr($class_name, 9);
 
 		/* default error */
 		$this->error_string = '%s is not valid.';
 
 		if (isset($this->attached[$class_name])) {
 			$success = $this->attached[$class_name]($field, $param, $this->error_string, $this->field_data, $this);
-		} elseif (class_exists($class_name,true)) {
+		} elseif (class_exists($class_name, true)) {
 			$success = (new $class_name($this->field_data, $this->error_string))->validate($field, $param);
 		} elseif (function_exists($short_rule)) {
-			$success = ($param) ? $short_rule($field,$param) : $short_rule($field);
+			$success = ($param) ? $short_rule($field, $param) : $short_rule($field);
 		} else {
 			throw new Exception('Could not validate '.$rule);
 		}
@@ -564,9 +566,8 @@ class Validate {
 		$name = strtolower($name);
 
 		/* if validate or filter is already prepended */
-		$prefix = (substr($name,0,9) != 'validate_' && (substr($name,0,7) != 'filter_')) ? 	'validate_' : '';
+		$prefix = (substr($name, 0, 9) != 'validate_' && (substr($name, 0, 7) != 'filter_')) ? 	'validate_' : '';
 
 		return $prefix.$name;
 	}
-
 } /* end class */

@@ -1,4 +1,4 @@
-<?php 
+<?php
 /**
  * Orange
  *
@@ -22,12 +22,11 @@
  *
  */
 
-class Pear_section extends Pear_plugin {
-
+class Pear_section extends Pear_plugin
+{
 	public function render(string $name = null)
 	{
 		pear::$fragment[$name] = $name;
 		ob_start();
 	}
-
 } /* end plugin */

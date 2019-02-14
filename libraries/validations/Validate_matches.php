@@ -20,11 +20,12 @@
  * @help matches the field in the parameter.
  *
  */
-class Validate_matches extends Validate_base {
+class Validate_matches extends Validate_base
+{
 	public function validate(&$field, string $options = '') : bool
 	{
 		$this->error_string = '%s does not match %s.';
 
-		return isset($this->field_data[$options]) ? ($field === $this->field_data[$options]) : FALSE;
+		return isset($this->field_data[$options]) ? ($field === $this->field_data[$options]) : false;
 	}
 }

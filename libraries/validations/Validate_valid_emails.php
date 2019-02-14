@@ -20,14 +20,15 @@
  * @help value provided in a comma separated list are valid emails.
  *
  */
-class Validate_valid_emails extends Validate_base {
+class Validate_valid_emails extends Validate_base
+{
 	public function validate(&$field, string $options = '') : bool
 	{
 		$this->error_string = '%s must contain all valid email addresses.';
 		
 		foreach (explode(',', $field) as $email) {
 			/* bail on first failure */
-			if (trim($email) !== '' && $this->valid_email(trim($email)) === FALSE) {
+			if (trim($email) !== '' && $this->valid_email(trim($email)) === false) {
 				return false;
 			}
 		}
@@ -46,7 +47,8 @@ class Validate_valid_emails extends Validate_base {
 	 * @return bool success
 	 *
 	 */
-	public function valid_email(string $field) {
+	public function valid_email(string $field)
+	{
 		$this->error_string = '%s must contain a valid email address.';
 		
 		if (function_exists('idn_to_ascii') && $atpos = strpos($field, '@')) {

@@ -6,7 +6,7 @@
  *
  * This content is released under the MIT License (MIT)
  * Copyright (c) 2014 - 2019, Project Orange Box
- * 
+ *
  * Some parts copyright CodeIgniter 4.x MIT
  * @package	CodeIgniter
  * @author	CodeIgniter Dev Team
@@ -29,7 +29,8 @@
  * @filesource
  *
  */
-class Event {
+class Event
+{
 	const PRIORITY_LOWEST = 10;
 	const PRIORITY_LOW = 20;
 	const PRIORITY_NORMAL = 50;
@@ -41,7 +42,7 @@ class Event {
 	 *
 	 * @var array
 	 */
-	 protected $listeners = [];
+	protected $listeners = [];
 
 	/**
 	 * Register a listener
@@ -59,7 +60,7 @@ class Event {
 	 * @return Event
 	 *
 	 */
-	public function register(string $name,$callable,int $priority = EVENT::PRIORITY_NORMAL) : Event
+	public function register(string $name, $callable, int $priority = EVENT::PRIORITY_NORMAL) : Event
 	{
 		/* if they pass in a array treat it as a name=>closure pair */
 		if (is_array($name)) {
@@ -98,13 +99,13 @@ class Event {
 	 * @access public
 	 *
 	 */
-	public function trigger(string $name,&...$arguments) : Event
+	public function trigger(string $name, &...$arguments) : Event
 	{
 		/* clean up the name */
 		$name = $this->_normalize_name($name);
 
 		/* log a debug event */
-		log_message('debug','event::trigger::'.$name);
+		log_message('debug', 'event::trigger::'.$name);
 
 		/* do we even have any events with this name? */
 		if (isset($this->listeners[$name])) {
@@ -261,7 +262,7 @@ class Event {
 	 */
 	protected function _normalize_name(string $name) : string
 	{
-		return trim(preg_replace('/[^a-z0-9]+/','.',strtolower($name)),'.');
+		return trim(preg_replace('/[^a-z0-9]+/', '.', strtolower($name)), '.');
 	}
 
 	/**
@@ -284,7 +285,7 @@ class Event {
 			/* The list is not sorted */
 			if (!$this->listeners[$name][0]) {
 				/* Sort it! */
-				array_multisort($this->listeners[$name][1],SORT_DESC,SORT_NUMERIC,$this->listeners[$name][2]);
+				array_multisort($this->listeners[$name][1], SORT_DESC, SORT_NUMERIC, $this->listeners[$name][2]);
 
 				/* Mark it as sorted already! */
 				$this->listeners[$name][0] = true;
@@ -295,5 +296,4 @@ class Event {
 
 		return $listeners;
 	}
-
 } /* end class */

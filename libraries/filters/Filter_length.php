@@ -23,8 +23,9 @@
  *
  */
 
-class Filter_length extends Filter_base {
-	public function filter(&$field,string $options = '') : void
+class Filter_length extends Filter_base
+{
+	public function filter(&$field, string $options = '') : void
 	{
 		$this->field($field)->length($options);
 	}

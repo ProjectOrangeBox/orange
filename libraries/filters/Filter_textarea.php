@@ -22,8 +22,9 @@
  *
  */
 
-class Filter_textarea extends Filter_base {
-	public function filter(&$field,string $options = '') : void
+class Filter_textarea extends Filter_base
+{
+	public function filter(&$field, string $options = '') : void
 	{
 		$this->field($field)->human_plus()->length($options);
 	}

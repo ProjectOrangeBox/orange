@@ -35,7 +35,8 @@
  * @config cache_url `http://www.example.com/api/cache/`
  *
  */
-class Cache_request extends CI_Driver {
+class Cache_request extends CI_Driver
+{
 	/**
 	 * Cache storage
 	 *
@@ -65,7 +66,8 @@ class Cache_request extends CI_Driver {
 	 * @param Cache &$parent
 	 *
 	 */
-	public function __construct(&$config,&$parent) {
+	public function __construct(&$config, &$parent)
+	{
 		$this->config = &$config;
 		$this->parent = &$parent;
 	}
@@ -101,7 +103,7 @@ class Cache_request extends CI_Driver {
 	 * @return bool
 	 *
 	 */
-	public function save(string $id, $data,int $ttl = null,bool $raw = false) : bool
+	public function save(string $id, $data, int $ttl = null, bool $raw = false) : bool
 	{
 		$this->cache[$id] = $data;
 
@@ -138,11 +140,11 @@ class Cache_request extends CI_Driver {
 	 * @return int
 	 *
 	 */
-	public function increment(string $id,int $offset = 1)
+	public function increment(string $id, int $offset = 1)
 	{
 		$new_value = (int)$this->get($id) + (int)$offset;
 
-		$this->save($id,$new_value);
+		$this->save($id, $new_value);
 
 		return $new_value;
 	}
@@ -159,11 +161,11 @@ class Cache_request extends CI_Driver {
 	 * @return int
 	 *
 	 */
-	public function decrement(string $id,int $offset = 1)
+	public function decrement(string $id, int $offset = 1)
 	{
 		$new_value = (int)$this->get($id) - (int)$offset;
 
-		$this->save($id,$new_value);
+		$this->save($id, $new_value);
 
 		return $new_value;
 	}
@@ -259,7 +261,7 @@ class Cache_request extends CI_Driver {
 	 * $cached = ci('cache')->request->cache('foobar',function(){ return 'cache me for 60 seconds!' });
 	 * ```
 	 */
-	public function cache(string $key,callable $closure,int $ttl = null)
+	public function cache(string $key, callable $closure, int $ttl = null)
 	{
 		if (!$cache = $this->get($key)) {
 			$ci = ci();
@@ -269,5 +271,4 @@ class Cache_request extends CI_Driver {
 		
 		return $cache;
 	}
-
 } /* end class */

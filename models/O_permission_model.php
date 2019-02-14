@@ -18,7 +18,8 @@
  * functions:
  *
  */
-class O_permission_model extends Database_model {
+class O_permission_model extends Database_model
+{
 	protected $table;
 	protected $additional_cache_tags = '.acl';
 	protected $entity = 'o_permission_entity';
@@ -29,19 +30,20 @@ class O_permission_model extends Database_model {
 		'group'       => ['field' => 'group', 'label' => 'Group', 'rules' => 'required|max_length[255]|filter_input[255]'],
 	];
 
-/**
- * __construct
- * Insert description here
- *
- *
- * @return
- *
- * @access
- * @static
- * @throws
- * @example
- */
-	public function __construct() {
+	/**
+	 * __construct
+	 * Insert description here
+	 *
+	 *
+	 * @return
+	 *
+	 * @access
+	 * @static
+	 * @throws
+	 * @example
+	 */
+	public function __construct()
+	{
 		$this->table = config('auth.permission table');
 
 		parent::__construct();
@@ -49,20 +51,21 @@ class O_permission_model extends Database_model {
 		log_message('info', 'o_permission_model Class Initialized');
 	}
 
-/**
- * roles
- * Insert description here
- *
- * @param $role
- *
- * @return
- *
- * @access
- * @static
- * @throws
- * @example
- */
-	public function roles($role) {
+	/**
+	 * roles
+	 * Insert description here
+	 *
+	 * @param $role
+	 *
+	 * @return
+	 *
+	 * @access
+	 * @static
+	 * @throws
+	 * @example
+	 */
+	public function roles($role)
+	{
 		$dbc = $this->_database
 			->from(config('auth.role permission table'))
 			->join(config('auth.role table'), config('auth.role table').'.id = '.config('auth.role permission table').'.role_id')
@@ -72,54 +75,57 @@ class O_permission_model extends Database_model {
 		return ($this->_database->num_rows() > 0) ? $dbc->result() : [];
 	}
 
-/**
- * _find_role_id
- * Insert description here
- *
- * @param $role
- *
- * @return
- *
- * @access
- * @static
- * @throws
- * @example
- */
-	public function _find_role_id($role) {
+	/**
+	 * _find_role_id
+	 * Insert description here
+	 *
+	 * @param $role
+	 *
+	 * @return
+	 *
+	 * @access
+	 * @static
+	 * @throws
+	 * @example
+	 */
+	public function _find_role_id($role)
+	{
 		return (int) ((int) $role > 0) ? $role : $this->o_role_model->column('id')->get_by(['name' => $role]);
 	}
 
-/**
- * _find_permission_id
- * Insert description here
- *
- * @param $permission
- *
- * @return
- *
- * @access
- * @static
- * @throws
- * @example
- */
-	public function _find_permission_id($permission) {
+	/**
+	 * _find_permission_id
+	 * Insert description here
+	 *
+	 * @param $permission
+	 *
+	 * @return
+	 *
+	 * @access
+	 * @static
+	 * @throws
+	 * @example
+	 */
+	public function _find_permission_id($permission)
+	{
 		return (int) ((int) $permission > 0) ? $permission : $this->o_permission_model->column('id')->get_by(['key' => $permission]);
 	}
 
-/**
- * insert
- * Insert description here
- *
- * @param $data
- *
- * @return
- *
- * @access
- * @static
- * @throws
- * @example
- */
-	public function insert($data) {
+	/**
+	 * insert
+	 * Insert description here
+	 *
+	 * @param $data
+	 *
+	 * @return
+	 *
+	 * @access
+	 * @static
+	 * @throws
+	 * @example
+	 */
+	public function insert($data)
+	{
 		$success = parent::insert($data);
 		$this->_refresh();
 		$this->delete_cache_by_tags();
@@ -127,20 +133,21 @@ class O_permission_model extends Database_model {
 		return $success;
 	}
 
-/**
- * update
- * Insert description here
- *
- * @param $data
- *
- * @return
- *
- * @access
- * @static
- * @throws
- * @example
- */
-	public function update($data) {
+	/**
+	 * update
+	 * Insert description here
+	 *
+	 * @param $data
+	 *
+	 * @return
+	 *
+	 * @access
+	 * @static
+	 * @throws
+	 * @example
+	 */
+	public function update($data)
+	{
 		$success = parent::update($data);
 		$this->_refresh();
 		$this->delete_cache_by_tags();
@@ -148,30 +155,32 @@ class O_permission_model extends Database_model {
 		return $success;
 	}
 
-/**
- * _refresh
- * Insert description here
- *
- *
- * @return
- *
- * @access
- * @static
- * @throws
- * @example
- */
-	public function _refresh() {
+	/**
+	 * _refresh
+	 * Insert description here
+	 *
+	 *
+	 * @return
+	 *
+	 * @access
+	 * @static
+	 * @throws
+	 * @example
+	 */
+	public function _refresh()
+	{
 		$records = $this->get_many();
 		
 		foreach ($records as $record) {
-			ci('o_role_model')->add_permission(ADMIN_ROLE_ID,$record->id);
+			ci('o_role_model')->add_permission(ADMIN_ROLE_ID, $record->id);
 		}
 		
 		ci('o_role_model')->remove_permission(NOBODY_USER_ID);
 	}
 
 	/* migration */
-	public function migration_add($key=null,$group=null,$description=null,$migration=null) {
+	public function migration_add($key=null, $group=null, $description=null, $migration=null)
+	{
 		$this->skip_rules = true;
 
 		/* we already verified the key that's the "real" primary key */
@@ -182,7 +191,8 @@ class O_permission_model extends Database_model {
 		return $success;
 	}
 	
-	public function migration_remove($where=null) {
+	public function migration_remove($where=null)
+	{
 		$this->skip_rules = true;
 
 		if (!is_array($where)) {
@@ -195,5 +205,4 @@ class O_permission_model extends Database_model {
 		
 		return $success;
 	}
-	
 }

@@ -20,7 +20,8 @@
  * @help is longer than the parameter value.
  *
  */
-class Validate_min_length extends Validate_base {
+class Validate_min_length extends Validate_base
+{
 	public function validate(&$field, string $options = '') : bool
 	{
 		$this->error_string = '%s must be at least %s characters in length.';
@@ -29,6 +30,6 @@ class Validate_min_length extends Validate_base {
 			return false;
 		}
 
-		return (MB_ENABLED === TRUE) ? ($options <= mb_strlen($field)) : ($options <= strlen($field));
+		return (MB_ENABLED === true) ? ($options <= mb_strlen($field)) : ($options <= strlen($field));
 	}
 }

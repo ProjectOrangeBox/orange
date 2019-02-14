@@ -23,13 +23,13 @@
  *
  */
 
-class Filter_int extends Filter_base {
-	
-	public function filter(&$field,string $options = '') : void
+class Filter_int extends Filter_base
+{
+	public function filter(&$field, string $options = '') : void
 	{
 		$pos = strpos($field, '.');
 		
-		if ($pos !== FALSE) {
+		if ($pos !== false) {
 			$field = substr($field, 0, $pos);
 		}
 		
@@ -38,5 +38,4 @@ class Filter_int extends Filter_base {
 		$field  = $prefix.preg_replace('/[^0-9]+/', '', $field);
 		$this->field($field)->length($options);
 	}
-
 }

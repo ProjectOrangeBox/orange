@@ -33,7 +33,8 @@
  *
  */
 
-class MY_Log extends CI_Log {
+class MY_Log extends CI_Log
+{
 	/**
 	 * Local reference to monolog object
 	 *
@@ -94,7 +95,8 @@ class MY_Log extends CI_Log {
 	 * @access public
 	 *
 	 */
-	public function __construct() {
+	public function __construct()
+	{
 		$this->config = load_config('config');
 
 		$this->bootstrap();
@@ -119,9 +121,9 @@ class MY_Log extends CI_Log {
 	 * @return MY_Log
 	 *
 	 */
-	public function __call(string $name,array $arguments) : MY_Log
+	public function __call(string $name, array $arguments) : MY_Log
 	{
-		if (substr($name,0,4) == 'log_') {
+		if (substr($name, 0, 4) == 'log_') {
 			$this->config[$name] = $arguments[0];
 
 			$this->bootstrap();
@@ -215,7 +217,7 @@ class MY_Log extends CI_Log {
 	 * @return bool
 	 *
 	 */
-	protected function monolog_write_log(string $level,string $msg) : bool
+	protected function monolog_write_log(string $level, string $msg) : bool
 	{
 		/* route to monolog */
 		switch ($level) {
@@ -259,7 +261,7 @@ class MY_Log extends CI_Log {
 	 */
 	protected function build_log_file_path() : string
 	{
-		return rtrim($this->_log_path,'/').'/log-'.date('Y-m-d').'.'.$this->_file_ext;
+		return rtrim($this->_log_path, '/').'/log-'.date('Y-m-d').'.'.$this->_file_ext;
 	}
 
 	/**
@@ -276,7 +278,7 @@ class MY_Log extends CI_Log {
 	 * @return bool success
 	 *
 	 */
-	protected function ci_write_log(string $level,string $msg) : bool
+	protected function ci_write_log(string $level, string $msg) : bool
 	{
 		$filepath = $this->build_log_file_path();
 		$message = '';
@@ -290,7 +292,7 @@ class MY_Log extends CI_Log {
 		}
 
 		/* Instantiating DateTime with microseconds appended to initial date is needed for proper support of this format */
-		if (strpos($this->_date_fmt, 'u') !== FALSE) {
+		if (strpos($this->_date_fmt, 'u') !== false) {
 			$microtime_full = microtime(true);
 			$microtime_short = sprintf("%06d", ($microtime_full - floor($microtime_full)) * 1000000);
 			$date = new DateTime(date('Y-m-d H:i:s.'.$microtime_short, $microtime_full));
@@ -303,7 +305,7 @@ class MY_Log extends CI_Log {
 
 		$result = file_put_contents($filepath, $message, FILE_APPEND | LOCK_EX);
 
-		if (isset($newfile) && $newfile === true) 	{
+		if (isset($newfile) && $newfile === true) {
 			chmod($filepath, $this->_file_permissions);
 		}
 
@@ -324,7 +326,7 @@ class MY_Log extends CI_Log {
 			
 			/* if they sent in a string split it into a array */
 			if (is_string($log_threshold)) {
-				$log_threshold = explode(',',$log_threshold);
+				$log_threshold = explode(',', $log_threshold);
 			}
 			
 			/* is the array empty? */
@@ -336,7 +338,7 @@ class MY_Log extends CI_Log {
 
 			/* Is all in the array (uppercase or lowercase?) */
 			if (is_array($log_threshold)) {
-				if (array_search('all',$log_threshold) !== false) {
+				if (array_search('all', $log_threshold) !== false) {
 					$log_threshold = 255;
 				}
 			}
@@ -370,24 +372,24 @@ class MY_Log extends CI_Log {
 		if (isset($this->config['log_path'])) {
 			$this->_log_path = ($this->config['log_path'] !== '') ? $this->config['log_path'] : APPPATH.'logs/';
 
-			file_exists($this->_log_path) || mkdir($this->_log_path, 0755, TRUE);
+			file_exists($this->_log_path) || mkdir($this->_log_path, 0755, true);
 
 			if (!is_dir($this->_log_path) || !is_really_writable($this->_log_path)) {
 				/* can't write */
-				$this->_enabled = FALSE;
+				$this->_enabled = false;
 			}
 		}
 
-		if (!empty($this->config['log_date_format'])) 	{
+		if (!empty($this->config['log_date_format'])) {
 			$this->_date_fmt = $this->config['log_date_format'];
 		}
 
-		if (!empty($this->config['log_file_permissions']) && is_int($this->config['log_file_permissions'])) 	{
+		if (!empty($this->config['log_file_permissions']) && is_int($this->config['log_file_permissions'])) {
 			$this->_file_permissions = $this->config['log_file_permissions'];
 		}
 
 		if (isset($this->config['log_handler'])) {
-			if ($this->config['log_handler'] == 'monolog' && class_exists('\Monolog\Logger',false)) {
+			if ($this->config['log_handler'] == 'monolog' && class_exists('\Monolog\Logger', false)) {
 				if (!$this->_monolog) {
 					/**
 					 * Create a instance of monolog for the bootstrapper
@@ -415,5 +417,4 @@ class MY_Log extends CI_Log {
 			}
 		}
 	}
-
 } /* End of Class */

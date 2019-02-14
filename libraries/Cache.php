@@ -30,7 +30,8 @@
  * @config key_prefix `cache.`
  *
  */
-class Cache extends CI_Cache {
+class Cache extends CI_Cache
+{
 	/**
 	 * errors configuration array
 	 *
@@ -72,7 +73,7 @@ class Cache extends CI_Cache {
 	{
 		$this->event = &ci('event');
 
-		$this->config = &array_replace(load_config('config','config'),(array)$config);
+		$this->config = &array_replace(load_config('config', 'config'), (array)$config);
 
 		parent::__construct([
 			'adapter'=>$this->config['cache_default'],
@@ -81,8 +82,8 @@ class Cache extends CI_Cache {
 		]);
 
 		/* attach page and export to CodeIgniter cache singleton loaded above */
-		$this->request = new Cache_request($this->config,$this);
-		$this->export = new Cache_export($this->config,$this);
+		$this->request = new Cache_request($this->config, $this);
+		$this->export = new Cache_export($this->config, $this);
 	}
 
 	/**
@@ -112,7 +113,7 @@ class Cache extends CI_Cache {
 	 * $cached = ci('cache')->inline('foobar',function(){ return 'cache me for 60 seconds!' },60);
 	 * ```
 	 */
-	public function inline(string $key,callable $closure,int $ttl = null)
+	public function inline(string $key, callable $closure, int $ttl = null)
 	{
 		if (!$cache = $this->get($key)) {
 			$cache = $closure();
@@ -142,9 +143,9 @@ class Cache extends CI_Cache {
 		/* are they using the window option? */
 		if ($use_window) {
 			/* let determine the window size based on there cache time to live length no more than 5 minutes */
-			$window = min(300,ceil($cache_ttl * .02));
+			$window = min(300, ceil($cache_ttl * .02));
 			/* add it to the cache_ttl to get our "new" cache time to live */
-			$cache_ttl += mt_rand(-$window,$window);
+			$cache_ttl += mt_rand(-$window, $window);
 		}
 
 		return (int)$cache_ttl;
@@ -172,7 +173,7 @@ class Cache extends CI_Cache {
 		/* determine if it's a array, period separated list of tags or multiple arguments */
 		if (is_array($args)) {
 			$tags = $args;
-		} elseif(strpos($args,'.') !== false) {
+		} elseif (strpos($args, '.') !== false) {
 			$tags = explode('.', $args);
 		} else {
 			$tags = func_get_args();
@@ -182,7 +183,7 @@ class Cache extends CI_Cache {
 		log_message('debug', 'delete_cache_by_tags '.implode(', ', $tags));
 
 		/* trigger a event incase somebody else needs to know send in our array of tags by reference */
-		$this->event->trigger('delete.cache.by.tags',$tags);
+		$this->event->trigger('delete.cache.by.tags', $tags);
 
 		/* get all of the currently loaded cache driver cache keys */
 		$cached_keys = $this->cache_info();
@@ -198,5 +199,4 @@ class Cache extends CI_Cache {
 		
 		return $this;
 	}
-
 } /* end class */

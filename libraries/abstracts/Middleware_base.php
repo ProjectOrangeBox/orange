@@ -22,7 +22,8 @@
  * @filesource
  *
  */
-abstract class Middleware_base {
+abstract class Middleware_base
+{
 	/**
 	 * reference to CodeIgniter Super Object
 	 *
@@ -39,14 +40,15 @@ abstract class Middleware_base {
 	 * @param $ci
 	 *
 	 */
-	public function __construct(&$ci) {
+	public function __construct(&$ci)
+	{
 		$this->ci = &$ci;
 	}
 
 	/**
 	 *
 	 * Called on request before the controller method is called
-	 * This method is overridden in the child class 
+	 * This method is overridden in the child class
 	 *
 	 * @access public
 	 *
@@ -60,7 +62,7 @@ abstract class Middleware_base {
 	/**
 	 *
 	 * Called on responds after the controller method is called
-	 * This method is overridden in the child class 
+	 * This method is overridden in the child class
 	 *
 	 * @access public
 	 *
@@ -89,5 +91,4 @@ abstract class Middleware_base {
 	{
 		return $this->ci->$name;
 	}
-
 } /* end class */

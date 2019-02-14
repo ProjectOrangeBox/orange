@@ -24,7 +24,8 @@
  * @throws Exception
  *
  */
-class Database_model extends MY_Model {
+class Database_model extends MY_Model
+{
 	/**
 	 * Database config to use for _database if other than default
 	 *
@@ -245,7 +246,7 @@ class Database_model extends MY_Model {
 		$this->object = strtolower($this->table);
 
 		/* setup the cache prefix for this model so we can flush the cache based on tags */
-		$this->cache_prefix = trim('database.'.$this->object.'.'.trim($this->additional_cache_tags,'.'),'.');
+		$this->cache_prefix = trim('database.'.$this->object.'.'.trim($this->additional_cache_tags, '.'), '.');
 
 		/* is a database group attached other than the default? */
 		$group_attach = false;
@@ -279,7 +280,7 @@ class Database_model extends MY_Model {
 
 		/* Is there are record entity attached? */
 		if ($this->entity) {
-			$this->entity_class = ci('load')->entity($this->entity,true);
+			$this->entity_class = ci('load')->entity($this->entity, true);
 
 			$this->default_return_on_single =& $this->entity_class;
 		} else {
@@ -306,11 +307,11 @@ class Database_model extends MY_Model {
 	 * @return Database_model
 	 *
 	 */
-	public function __call(string $name,array $arguments) : Database_model
+	public function __call(string $name, array $arguments) : Database_model
 	{
 		/* pass thru */
-		if (method_exists($this->_database,$name)) {
-			call_user_func_array([$this->_database,$name],$arguments);
+		if (method_exists($this->_database, $name)) {
+			call_user_func_array([$this->_database,$name], $arguments);
 		} else {
 			throw new Exception('Unknown method "'.$name.'".');
 		}
@@ -588,7 +589,7 @@ class Database_model extends MY_Model {
 		}
 
 		/* preform the validation if there are rules and skip rules is false only using the data input that has rules using the insert rule set */
-		$success = (!$this->skip_rules && count($this->rules)) ? $this->add_additional_rules()->only_columns($data,$this->rules)->add_rule_set_columns($data,'update')->validate($data) : true;
+		$success = (!$this->skip_rules && count($this->rules)) ? $this->add_additional_rules()->only_columns($data, $this->rules)->add_rule_set_columns($data, 'update')->validate($data) : true;
 
 		/* if the validation was successful then proceed */
 		if ($success) {
@@ -663,7 +664,7 @@ class Database_model extends MY_Model {
 	 * @return mixed - false on fail or the affected rows
 	 *
 	 */
-	public function update_by(array $data,array $where = [])
+	public function update_by(array $data, array $where = [])
 	{
 		/* switch to the write database if we are using 2 different connections */
 		$this->switch_database('write');
@@ -672,7 +673,7 @@ class Database_model extends MY_Model {
 		$data = (array)$data;
 
 		/* preform the validation if there are rules and skip rules is false only using the data input that has rules using the update rule set */
-		$success = (!$this->skip_rules && count($this->rules)) ? $this->add_additional_rules()->only_columns($data,$this->rules)->add_rule_set_columns($data,'update')->validate($data) : true;
+		$success = (!$this->skip_rules && count($this->rules)) ? $this->add_additional_rules()->only_columns($data, $this->rules)->add_rule_set_columns($data, 'update')->validate($data) : true;
 
 		/* always remove the primary key */
 		unset($data[$this->primary_key]);
@@ -723,7 +724,7 @@ class Database_model extends MY_Model {
 	 */
 	public function delete($arg)
 	{
-		$where = $this->create_where($arg,true);
+		$where = $this->create_where($arg, true);
 
 		return $this->delete_by($where);
 	}
@@ -742,7 +743,7 @@ class Database_model extends MY_Model {
 	 * @return mixed
 	 *
 	 */
-	public function delete_by(array $data,array $where = null)
+	public function delete_by(array $data, array $where = null)
 	{
 		/* switch to the write database if we are using 2 different connections */
 		$this->switch_database('write');
@@ -751,7 +752,7 @@ class Database_model extends MY_Model {
 		$where = ($where) ?? $data;
 
 		/* preform the validation if there are rules and skip rules is false only using the data input that has rules using the delete rule set */
-		$success = (!$this->skip_rules && count($this->rules)) ? $this->only_columns($data,$this->rules)->add_rule_set_columns($data,'delete')->validate($data) : true;
+		$success = (!$this->skip_rules && count($this->rules)) ? $this->only_columns($data, $this->rules)->add_rule_set_columns($data, 'delete')->validate($data) : true;
 
 		/* if the validation was successful then proceed */
 		if ($success) {
@@ -804,7 +805,7 @@ class Database_model extends MY_Model {
 				/* yes - ok let's return a entity, array, or object */
 				if ($this->entity && $this->temporary_return_as_array !== true) {
 					$result = $dbc->custom_row_object(0, $this->entity);
-				} elseif($this->temporary_return_as_array)  {
+				} elseif ($this->temporary_return_as_array) {
 					$result = $dbc->row_array();
 				} else {
 					$result = $dbc->row();
@@ -828,7 +829,7 @@ class Database_model extends MY_Model {
 	 * @return array records as objects
 	 *
 	 */
-	public function catalog(string $array_key = null,string $select_columns = null,array $where = null,string $order_by = null, $cache_key = null,bool $with_deleted = false) : Array
+	public function catalog(string $array_key = null, string $select_columns = null, array $where = null, string $order_by = null, $cache_key = null, bool $with_deleted = false) : array
 	{
 		/*
 		if they provide a cache key then we will cache the responds
@@ -862,7 +863,7 @@ class Database_model extends MY_Model {
 			$array_key = ($array_key) ? $array_key : $this->primary_key;
 
 			/* are the select columns a comma sep. array or array already? */
-			$select_columns = is_array($select_columns) ? implode(',',$select_columns) : $select_columns;
+			$select_columns = is_array($select_columns) ? implode(',', $select_columns) : $select_columns;
 
 			/* if select columns is null or * (all) then select is all */
 			if ($select_columns === null || $select_columns == '*') {
@@ -870,7 +871,7 @@ class Database_model extends MY_Model {
 			} else {
 				/* format the select to a comma sep list and add array key if needed */
 				$select = $array_key.','.$select_columns;
-				if (strpos($select_columns,',') === false) {
+				if (strpos($select_columns, ',') === false) {
 					$single_column = $select_columns;
 				}
 			}
@@ -886,11 +887,11 @@ class Database_model extends MY_Model {
 			/* does order by contain anything? if so apply it */
 			if ($order_by) {
 				$order_by = trim($order_by);
-				if (strpos($order_by,' ') === false) {
+				if (strpos($order_by, ' ') === false) {
 					$this->_database->order_by($order_by);
 				} else {
-					list($column,$direction) = explode(' ',$order_by,2);
-					$this->_database->order_by($column,$direction);
+					list($column, $direction) = explode(' ', $order_by, 2);
+					$this->_database->order_by($column, $direction);
 				}
 			}
 
@@ -907,9 +908,8 @@ class Database_model extends MY_Model {
 			}
 
 			if ($cache_key) {
-				ci('cache')->save($this->cache_prefix.'.'.$cache_key,$results);
+				ci('cache')->save($this->cache_prefix.'.'.$cache_key, $results);
 			}
-
 		}
 
 		return $results;
@@ -927,7 +927,7 @@ class Database_model extends MY_Model {
 	 * $success = ci('foo_model')->is_uniquem('Johnny Appleseed','name','id');
 	 *
 	 */
-	public function is_uniquem(string $field,string $column,string $form_key) : Bool
+	public function is_uniquem(string $field, string $column, string $form_key) : Bool
 	{
 		/**
 		 * run the query
@@ -1030,7 +1030,7 @@ class Database_model extends MY_Model {
 	 * @return mixed
 	 *
 	 */
-	public function index(string $order_by = null,int $limit = null,array $where = null,string $select = null)
+	public function index(string $order_by = null, int $limit = null, array $where = null, string $select = null)
 	{
 		if ($order_by) {
 			$this->_database->order_by($order_by);
@@ -1099,7 +1099,7 @@ class Database_model extends MY_Model {
 			/* build data array so add_fields_on_update can modify it if necessary */
 			$data = [$this->has['is_deleted'] => 0];
 
-			$this->add_fields_on_update($data)->_database->update($this->table, $data, $this->create_where($id,true));
+			$this->add_fields_on_update($data)->_database->update($this->table, $data, $this->create_where($id, true));
 
 			$this->delete_cache_by_tags()->log_last_query();
 
@@ -1119,7 +1119,7 @@ class Database_model extends MY_Model {
 	 * @return mixed
 	 *
 	 */
-	protected function _get(bool $as_array = true,string $table = null)
+	protected function _get(bool $as_array = true, string $table = null)
 	{
 		/* switch to the read database if we are using 2 different connections */
 		$this->switch_database('read');
@@ -1225,7 +1225,7 @@ class Database_model extends MY_Model {
 	 */
 	protected function switch_database(string $which) : Database_model
 	{
-		if (!in_array($which,['read','write'])) {
+		if (!in_array($which, ['read','write'])) {
 			throw new Exception('Cannot switch database connection '.__CLASS__.' '.$which);
 		}
 
@@ -1251,7 +1251,7 @@ class Database_model extends MY_Model {
 	 * @return Array
 	 *
 	 */
-	protected function create_where($arg,bool $primary_id_required=false) : Array
+	protected function create_where($arg, bool $primary_id_required=false) : array
 	{
 		if (is_scalar($arg)) {
 			$where = [$this->primary_key=>$arg];
@@ -1283,7 +1283,7 @@ class Database_model extends MY_Model {
 	{
 		if (!$this->ignore_read_role) {
 			if ($this->has['read_role']) {
-				$this->_database->where_in($this->has['read_role'],$this->get_user_roles());
+				$this->_database->where_in($this->has['read_role'], $this->get_user_roles());
 			}
 		}
 
@@ -1307,7 +1307,7 @@ class Database_model extends MY_Model {
 	{
 		if (!$this->ignore_edit_role) {
 			if ($this->has['edit_role']) {
-				$this->_database->where_in($this->has['edit_role'],$this->get_user_roles());
+				$this->_database->where_in($this->has['edit_role'], $this->get_user_roles());
 			}
 		}
 
@@ -1331,7 +1331,7 @@ class Database_model extends MY_Model {
 	{
 		if (!$this->ignore_delete_role) {
 			if ($this->has['delete_role']) {
-				$this->_database->where_in($this->has['delete_role'],$this->get_user_roles());
+				$this->_database->where_in($this->has['delete_role'], $this->get_user_roles());
 			}
 		}
 
@@ -1651,10 +1651,10 @@ class Database_model extends MY_Model {
 	 * @return Database_model
 	 *
 	 */
-	protected function add_rule_set_columns(array &$fields,string $rule_set) : Database_model
+	protected function add_rule_set_columns(array &$fields, string $rule_set) : Database_model
 	{
 		if (isset($this->rule_sets[$rule_set])) {
-			foreach (explode(',',$this->rule_sets[$rule_set]) as $fieldname) {
+			foreach (explode(',', $this->rule_sets[$rule_set]) as $fieldname) {
 				if (!isset($fields[$fieldname])) {
 					/* not in the fields set so add it as empty */
 					$fields[$fieldname] = '';
@@ -1681,7 +1681,7 @@ class Database_model extends MY_Model {
 		if ($this->debug) {
 			$query  = $this->_database->last_query();
 			$output = (is_array($query)) ? print_r($query, true) : $query;
-			file_put_contents(LOGPATH.'/model.'.get_called_class().'.log',$output.chr(10), FILE_APPEND);
+			file_put_contents(LOGPATH.'/model.'.get_called_class().'.log', $output.chr(10), FILE_APPEND);
 		}
 
 		return $this;
@@ -1720,7 +1720,7 @@ class Database_model extends MY_Model {
 		/* also handles unit testing hard coded timestamp */
 		$timestamp = (defined('PHPUNITTIMESTAMP')) ? PHPUNITTIMESTAMP : time();
 
-		return date($format,$timestamp);
+		return date($format, $timestamp);
 	}
 
 	/**
@@ -1736,5 +1736,4 @@ class Database_model extends MY_Model {
 	{
 		return ci('input')->ip_address();
 	}
-
 } /* end class */

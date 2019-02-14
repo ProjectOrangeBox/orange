@@ -20,7 +20,8 @@
  * @help contains anything other than alphabetical, underscore, dash characters.
  *
  */
-class Validate_alpha_dash extends Validate_base {
+class Validate_alpha_dash extends Validate_base
+{
 	public function validate(&$field, string $options = '') : bool
 	{
 		$this->error_string = '%s may only contain alpha characters, underscores, and dashes.';

@@ -20,7 +20,8 @@
  * @help contain a valid URL.
  *
  */
-class Validate_valid_url extends Validate_base {
+class Validate_valid_url extends Validate_base
+{
 	public function validate(&$field, string $options = '') : bool
 	{
 		$this->error_string = '%s must contain a valid URL.';
@@ -43,6 +44,6 @@ class Validate_valid_url extends Validate_base {
 			$field = substr_replace($field, strtr($host, ['_' => '-', '-' => '_']), 7, strlen($host));
 		}
 
-		return (bool)(filter_var($field, FILTER_VALIDATE_URL) !== FALSE);
+		return (bool)(filter_var($field, FILTER_VALIDATE_URL) !== false);
 	}
 }

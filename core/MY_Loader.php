@@ -12,7 +12,7 @@
  * Extension to CodeIgniter Load Class
  *
  * Overrides Model & library
- * Adds Entity, 
+ * Adds Entity,
  *
  * @package CodeIgniter / Orange
  * @author Don Myers
@@ -23,7 +23,8 @@
  * @filesource
  *
  */
-class MY_Loader extends CI_Loader {
+class MY_Loader extends CI_Loader
+{
 
 	/**
 	 *
@@ -52,7 +53,7 @@ class MY_Loader extends CI_Loader {
 	 * @return MY_Loader
 	 *
 	 */
-	public function library($library, $params = NULL, $object_name = NULL)
+	public function library($library, $params = null, $object_name = null)
 	{
 		if (is_array($library)) {
 			foreach ($library as $l) {
@@ -62,7 +63,7 @@ class MY_Loader extends CI_Loader {
 			return $this;
 		}
 
-		return $this->_init_object($library,$params,$object_name);
+		return $this->_init_object($library, $params, $object_name);
 	}
 
 	/**
@@ -78,25 +79,25 @@ class MY_Loader extends CI_Loader {
 	 * @return MY_Loader
 	 *
 	 */
-	public function model($model, $name = '', $db_conn = FALSE)
+	public function model($model, $name = '', $db_conn = false)
 	{
 		if (is_array($model)) {
 			foreach ($model as $m) {
-				$this->model($m,'',$db_conn);
+				$this->model($m, '', $db_conn);
 			}
 
 			return $this;
 		}
 
-		if ($db_conn !== FALSE && ! class_exists('CI_DB', FALSE)) {
-			if ($db_conn === TRUE) {
+		if ($db_conn !== false && ! class_exists('CI_DB', false)) {
+			if ($db_conn === true) {
 				$db_conn = '';
 			}
 
-			$this->database($db_conn, FALSE, TRUE);
+			$this->database($db_conn, false, true);
 		}
 
-		return $this->_init_object($model,null,$name);
+		return $this->_init_object($model, null, $name);
 	}
 
 	/**
@@ -112,9 +113,9 @@ class MY_Loader extends CI_Loader {
 	 */
 	public function entity(string $name)
 	{
-		$name = basename(strtolower($name),'.php');
+		$name = basename(strtolower($name), '.php');
 
-		if (!$object =& $this->instantiate($name,'',false)) {
+		if (!$object =& $this->instantiate($name, '', false)) {
 			throw new RuntimeException('Could not locate class entity '.$name);
 		}
 
@@ -134,18 +135,18 @@ class MY_Loader extends CI_Loader {
 	 * @return MY_Loader
 	 *
 	 */
-	protected function _init_object(string $name,array $params = null,string $object_name = null) : MY_Loader
+	protected function _init_object(string $name, array $params = null, string $object_name = null) : MY_Loader
 	{
-		$name = basename(strtolower($name),'.php');
+		$name = basename(strtolower($name), '.php');
 
-		$config = config($name,[]);
+		$config = config($name, []);
 
 		if (is_array($params)) {
-			$config = array_replace($config,$params);
+			$config = array_replace($config, $params);
 		}
 
-		if (!$this->instantiate($name,'',true,$config,$object_name)) {
-			if (!$this->instantiate($name,'ci_',true,$config,$object_name)) {
+		if (!$this->instantiate($name, '', true, $config, $object_name)) {
+			if (!$this->instantiate($name, 'ci_', true, $config, $object_name)) {
 				throw new RuntimeException('Could not locate class '.$name);
 			}
 		}
@@ -168,7 +169,7 @@ class MY_Loader extends CI_Loader {
 	 * @return bool | object if attach is false
 	 *
 	 */
-	protected function instantiate(string $name,string $prefix = '',bool $attach = false,array &$config=[],$object_name=null)
+	protected function instantiate(string $name, string $prefix = '', bool $attach = false, array &$config=[], $object_name=null)
 	{
 		$CI = get_instance();
 
@@ -178,7 +179,7 @@ class MY_Loader extends CI_Loader {
 		}
 
 		$find = $name;
-		$autoload = load_config('autoload','autoload');
+		$autoload = load_config('autoload', 'autoload');
 
 		$success = false;
 
@@ -199,7 +200,7 @@ class MY_Loader extends CI_Loader {
 
 			$this->loaded[$name] = $path;
 
-			$class_name = $prefix.basename(strtolower($path),'.php');
+			$class_name = $prefix.basename(strtolower($path), '.php');
 
 			if ($attach) {
 				$CI->$name = new $class_name($config);
@@ -213,5 +214,4 @@ class MY_Loader extends CI_Loader {
 
 		return $success;
 	}
-
 } /* end class */

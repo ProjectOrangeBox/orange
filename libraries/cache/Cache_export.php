@@ -36,7 +36,8 @@
  * @config cache_url `http://www.example.com/api/cache/`
  *
  */
-class Cache_export extends CI_Driver {
+class Cache_export extends CI_Driver
+{
 	/**
 	 * Configuration array
 	 *
@@ -73,7 +74,8 @@ class Cache_export extends CI_Driver {
 	 * @param Cache &$parent
 	 *
 	 */
-	public function __construct(array &$config,Cache &$parent) {
+	public function __construct(array &$config, Cache &$parent)
+	{
 		$this->config = &$config;
 		$this->parent = &$parent;
 
@@ -125,14 +127,14 @@ class Cache_export extends CI_Driver {
 	 * @return mixed
 	 *
 	 */
-	public function save(string $id,$data,int $ttl = null,bool $include = false)
+	public function save(string $id, $data, int $ttl = null, bool $include = false)
 	{
 		$ttl = ($ttl) ? $ttl : $this->parent->ttl();
 
 		if (is_array($data) || is_object($data)) {
-			$data = '<?php return '.str_replace('stdClass::__set_state','(object)',var_export($data, true)).';';
+			$data = '<?php return '.str_replace('stdClass::__set_state', '(object)', var_export($data, true)).';';
 		} elseif (is_scalar($data)) {
-			$data = '<?php return "'.str_replace('"','\"',$data).'";';
+			$data = '<?php return "'.str_replace('"', '\"', $data).'";';
 		} else {
 			throw new Exception('Cache export save unknown data type.');
 		}
@@ -176,7 +178,7 @@ class Cache_export extends CI_Driver {
 	 * @return bool
 	 *
 	 */
-	public function increment(string $id,int $offset = 1) : bool
+	public function increment(string $id, int $offset = 1) : bool
 	{
 		return false;
 	}
@@ -193,7 +195,7 @@ class Cache_export extends CI_Driver {
 	 * @return bool
 	 *
 	 */
-	public function decrement(string $id,int $offset = 1) : bool
+	public function decrement(string $id, int $offset = 1) : bool
 	{
 		return false;
 	}
@@ -209,7 +211,7 @@ class Cache_export extends CI_Driver {
 	 */
 	public function clean() : bool
 	{
-		array_map('unlink',glob($this->config['cache_path'].'*'.$this->suffix));
+		array_map('unlink', glob($this->config['cache_path'].'*'.$this->suffix));
 
 		return true;
 	}
@@ -228,7 +230,7 @@ class Cache_export extends CI_Driver {
 		$info = [];
 
 		foreach (glob($this->config['cache_path'].'*.meta'.$this->suffix) as $path) {
-			$id = basename($path,'.meta'.$this->suffix);
+			$id = basename($path, '.meta'.$this->suffix);
 			$metadata = $this->get_metadata($id);
 
 			$info[$id] = [
@@ -259,7 +261,7 @@ class Cache_export extends CI_Driver {
 	 */
 	public function get_metadata(string $id)
 	{
-		return (!is_file($this->config['cache_path'].$id.'.meta'.$this->suffix) || !is_file($this->config['cache_path'].$id.$this->suffix)) ? FALSE : include $this->config['cache_path'].$id.'.meta'.$this->suffix;
+		return (!is_file($this->config['cache_path'].$id.'.meta'.$this->suffix) || !is_file($this->config['cache_path'].$id.$this->suffix)) ? false : include $this->config['cache_path'].$id.'.meta'.$this->suffix;
 	}
 
 	/**
@@ -329,7 +331,7 @@ class Cache_export extends CI_Driver {
 	 * $cached = ci('cache')->export->cache('foobar',function(){ return 'cache me for 60 seconds!' },60);
 	 * ```
 	 */
-	public function cache(string $key,callable $closure,int $ttl = null)
+	public function cache(string $key, callable $closure, int $ttl = null)
 	{
 		if (!$cache = $this->get($key)) {
 			$ci = ci();
@@ -392,7 +394,7 @@ class Cache_export extends CI_Driver {
 		$mh = curl_multi_init();
 
 		foreach ($cache_servers as $idx=>$server) {
-			$url = 'http'.($this->config['cache_server_secure'] ? 's://' : '://').$server.'/'.trim( $this->config['cache_url'], '/').'/'.$hmac;
+			$url = 'http'.($this->config['cache_server_secure'] ? 's://' : '://').$server.'/'.trim($this->config['cache_url'], '/').'/'.$hmac;
 			$ch[$idx] = curl_init();
 			curl_setopt($ch[$idx], CURLOPT_URL, $url);
 			curl_setopt($ch[$idx], CURLOPT_HEADER, 0);
@@ -424,5 +426,4 @@ class Cache_export extends CI_Driver {
 
 		return true;
 	}
-
 } /* end class */

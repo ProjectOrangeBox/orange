@@ -20,7 +20,8 @@
  * @help contains a valid email address.
  *
  */
-class Validate_valid_email extends Validate_base {
+class Validate_valid_email extends Validate_base
+{
 	public function validate(&$field, string $options = '') : bool
 	{
 		$this->error_string = '%s must contain a valid email address.';

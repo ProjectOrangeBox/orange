@@ -22,7 +22,8 @@
  *
  */
 
-class MY_Model extends CI_Model {
+class MY_Model extends CI_Model
+{
 	/**
 	 * Formatted array of rules for this model
 	 * ['id' => ['field' => 'id', 'label' => 'Id', 'rules' => 'required|integer|max_length[10]|less_than[4294967295]|filter_int[10]']]
@@ -80,7 +81,7 @@ class MY_Model extends CI_Model {
 	 * @return Array
 	 *
 	 */
-	public function rules() : Array
+	public function rules() : array
 	{
 		return $this->rules;
 	}
@@ -130,7 +131,7 @@ class MY_Model extends CI_Model {
 	 *   then we use them verbatim
 	 * If rules is a string
 	 *   then we convert it to a array by separating the string on commas
-	 * 
+	 *
 	 * @access public
 	 *
 	 * @param Array &$data key value pairs to test
@@ -139,7 +140,7 @@ class MY_Model extends CI_Model {
 	 * @return Bool Success
 	 *
 	 */
-	public function validate(Array &$data, $rules = true) : Bool
+	public function validate(array &$data, $rules = true) : Bool
 	{
 		log_message('debug', 'MY_Model::validate');
 
@@ -156,7 +157,7 @@ class MY_Model extends CI_Model {
 				/**
 				 * if it's a string then see if it's a rule set if not treat as a comma sep list of field to validate
 				 */
-				$rules_names = explode(',',(isset($this->rule_sets[$rules]) ? $this->rule_sets[$rules] : $rules));
+				$rules_names = explode(',', (isset($this->rule_sets[$rules]) ? $this->rule_sets[$rules] : $rules));
 			}
 
 			/**
@@ -218,7 +219,7 @@ class MY_Model extends CI_Model {
 	 * @return MY_Model
 	 *
 	 */
-	public function remove_columns(Array &$data, $columns = []) : MY_Model 
+	public function remove_columns(array &$data, $columns = []) : MY_Model
 	{
 		log_message('debug', 'MY_Model::remove_columns');
 
@@ -230,7 +231,7 @@ class MY_Model extends CI_Model {
 		/**
 		 * remove any data "key" in columns array
 		 */
- 		$data = array_diff_key($data,array_combine($columns,$columns));
+		$data = array_diff_key($data, array_combine($columns, $columns));
 
 		return $this;
 	}
@@ -248,26 +249,26 @@ class MY_Model extends CI_Model {
 	 * @return MY_Model
 	 *
 	 */
-	public function only_columns(Array &$data, $columns = []) : MY_Model
+	public function only_columns(array &$data, $columns = []) : MY_Model
 	{
 		log_message('debug', 'MY_Model::only_columns');
 
 		/**
 		 * convert string with commas to array
 		 */
- 		$columns = (!is_array($columns)) ? explode(',', $columns) : $columns;
+		$columns = (!is_array($columns)) ? explode(',', $columns) : $columns;
 
 		/**
 		 * let' make sure the values are singular not an array if they are singular then create the key/value pair
 		 */
- 		if (!is_array(current($columns))) {
-			$columns = array_combine($columns,$columns);
+		if (!is_array(current($columns))) {
+			$columns = array_combine($columns, $columns);
 		}
 
 		/**
 		 * remove any data "key" not in columns array
 		 */
- 		$data = array_intersect_key($data,$columns);
+		$data = array_intersect_key($data, $columns);
 
 		return $this;
 	}
@@ -294,14 +295,14 @@ class MY_Model extends CI_Model {
 	 * ];
 	 *
 	 * $data = ['id'=>123,'key'=>'cookies','description'=>'The greatest show ever','group_test'=>'live'];
-	 * 
+	 *
 	 * $this->my_model->remap_columns($data,$rules);
 	 *
 	 * $data now contains ['id'=>123,'key'=>'cookies','description'=>'The greatest show ever','group'=>'live']
-	 * 
+	 *
 	 * ```
 	 */
-	public function remap_columns(Array &$data,Array $rules = []) : MY_Model
+	public function remap_columns(array &$data, array $rules = []) : MY_Model
 	{
 		log_message('debug', 'MY_Model::remap_columns');
 
@@ -317,10 +318,9 @@ class MY_Model extends CI_Model {
 			/**
 			 * reassign the new data to the data reference
 			 */
- 			$data = $remapped_data;
+			$data = $remapped_data;
 		}
 
 		return $this;
 	}
-
 } /* end class */

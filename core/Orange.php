@@ -19,7 +19,7 @@
  * ```
  */
 if (!function_exists('ci')) {
-	function &ci($class=null,&$object=null)
+	function &ci($class=null, &$object=null)
 	{
 		/* this function uses the "return on first match" */
 		$CI = get_instance();
@@ -78,11 +78,11 @@ if (!function_exists('load_class')) {
 
 		if (class_exists($subclass_prefix.$class)) {
 			$path = orange_locator::class($subclass_prefix.$class);
-			$class_name = basename(strtolower($path),'.php');
+			$class_name = basename(strtolower($path), '.php');
 			$name = $subclass_prefix.$class;
 		} elseif (class_exists($ci_prefix.$class)) {
 			$path = orange_locator::class($ci_prefix.$class);
-			$class_name = $ci_prefix.basename(strtolower($path),'.php');
+			$class_name = $ci_prefix.basename(strtolower($path), '.php');
 			$name = $ci_prefix.$class;
 		}
 
@@ -115,7 +115,7 @@ if (!function_exists('load_class')) {
  * ```
  */
 if (!function_exists('site_url')) {
-	function site_url(string $uri = '',bool $protocol = NULL) : string
+	function site_url(string $uri = '', bool $protocol = null) : string
 	{
 		if ($protocol !== false) {
 			/* Call CodeIgniter version first */
@@ -128,7 +128,7 @@ if (!function_exists('site_url')) {
 		/* are we in development mode or is the cache file missing */
 		if (ENVIRONMENT == 'development' || !file_exists($cache_file_path)) {
 			/* yes - then we need to generate it */
-			$paths = config('paths',[]);
+			$paths = config('paths', []);
 
 			/* build the array for easier access later */
 			foreach ($paths as $find => $replace) {
@@ -137,7 +137,7 @@ if (!function_exists('site_url')) {
 			}
 
 			/* save it */
-			atomic_file_put_contents($cache_file_path,'<?php return '.var_export($site_url,true).';');
+			atomic_file_put_contents($cache_file_path, '<?php return '.var_export($site_url, true).';');
 		}
 
 		/* include the cache file */
@@ -166,9 +166,9 @@ if (!function_exists('site_url')) {
  * ```
  */
 if (!function_exists('config')) {
-	function config(string $setting,$default='%%no_value%%')
+	function config(string $setting, $default='%%no_value%%')
 	{
-		$value = ci('config')->dot_item($setting,$default);
+		$value = ci('config')->dot_item($setting, $default);
 
 		/* only throw an error if nothing found and no default given */
 		if ($value === '%%no_value%%') {
@@ -185,14 +185,14 @@ if (!function_exists('config')) {
  *
  */
 if (!function_exists('filter')) {
-	function filter(string $rule,$value)
+	function filter(string $rule, $value)
 	{
 		/* add filter_ if it's not there */
-		foreach (explode('|',$rule) as $r) {
-			$a[] = 'filter_'.str_replace('filter_','',strtolower($r));
+		foreach (explode('|', $rule) as $r) {
+			$a[] = 'filter_'.str_replace('filter_', '', strtolower($r));
 		}
 
-		ci('validate')->single(implode('|',$a),$value);
+		ci('validate')->single(implode('|', $a), $value);
 
 		return $value;
 	}
@@ -206,9 +206,9 @@ if (!function_exists('filter')) {
  *
  */
 if (!function_exists('valid')) {
-	function valid(string $rule,$field) : bool
+	function valid(string $rule, $field) : bool
 	{
-		ci('validate')->single($rule,$field);
+		ci('validate')->single($rule, $field);
 
 		return (!ci('errors')->has());
 	}
@@ -261,7 +261,7 @@ if (!function_exists('e')) {
  * ```
  */
 if (!function_exists('env')) {
-	function env(string $key,$default=null)
+	function env(string $key, $default=null)
 	{
 		if (!isset($_ENV[$key]) && $default === null) {
 			throw new Exception('The environmental variable "'.$key.'" is not set and no default was provided.');
@@ -296,7 +296,7 @@ if (!function_exists('l')) {
 		}
 
 		/* write it to the log file */
-		return file_put_contents(LOGPATH.'/orange_debug.log',implode(chr(10),$log).chr(10),FILE_APPEND | LOCK_EX);
+		return file_put_contents(LOGPATH.'/orange_debug.log', implode(chr(10), $log).chr(10), FILE_APPEND | LOCK_EX);
 	}
 }
 
@@ -323,7 +323,7 @@ if (!function_exists('unlock_session')) {
  *
  */
 if (!function_exists('console')) {
-	function console($var,string $type = 'log') : void
+	function console($var, string $type = 'log') : void
 	{
 		echo '<script type="text/javascript">console.'.$type.'('.json_encode($var).')</script>';
 	}
@@ -343,10 +343,10 @@ if (!function_exists('console')) {
  *
  */
 if (!function_exists('view')) {
-	function view(string $_view,array $_data=[]) : string
+	function view(string $_view, array $_data=[]) : string
 	{
 		/* clean up the view path */
-		$_file = trim(str_replace('.php','',$_view),'/');
+		$_file = trim(str_replace('.php', '', $_view), '/');
 
 		/* get a list of all the found views */
 		if (!$_op = orange_locator::view($_file)) {
@@ -377,7 +377,7 @@ if (!function_exists('view')) {
  * @return int the number of bytes that were written to the file.
  */
 if (!function_exists('atomic_file_put_contents')) {
-	function atomic_file_put_contents(string $filepath,$content) : int
+	function atomic_file_put_contents(string $filepath, $content) : int
 	{
 		/* get the path where you want to save this file so we can put our file in the same file */
 		$dirname = dirname($filepath);
@@ -505,7 +505,7 @@ if (!function_exists('convert_to_string')) {
 		/* return on first match multiple exists */
 
 		if (is_array($value)) {
-			return str_replace('stdClass::__set_state','(object)',var_export($value, true));
+			return str_replace('stdClass::__set_state', '(object)', var_export($value, true));
 		}
 
 		if ($value === true) {
@@ -536,7 +536,7 @@ if (!function_exists('convert_to_string')) {
  *
  */
 if (!function_exists('simplify_array')) {
-	function simplify_array(array $array,string $key = 'id',string $value = null,string $sort = null) : array
+	function simplify_array(array $array, string $key = 'id', string $value = null, string $sort = null) : array
 	{
 		$value = ($value) ? $value : $key;
 		$new_array = [];
@@ -557,14 +557,14 @@ if (!function_exists('simplify_array')) {
 			}
 		}
 
-		switch($sort) {
+		switch ($sort) {
 			case 'desc':
 			case 'd':
-				krsort($new_array,SORT_NATURAL | SORT_FLAG_CASE);
+				krsort($new_array, SORT_NATURAL | SORT_FLAG_CASE);
 			break;
 			case 'asc':
 			case 'a':
-				ksort($new_array,SORT_NATURAL | SORT_FLAG_CASE);
+				ksort($new_array, SORT_NATURAL | SORT_FLAG_CASE);
 			break;
 		}
 
@@ -599,15 +599,15 @@ if (!function_exists('get_instance')) {
  *
  */
 if (!function_exists('_assert_handler')) {
-	function _assert_handler($file,$line,$code,$desc='') : void
+	function _assert_handler($file, $line, $code, $desc='') : void
 	{
 		/* CLI */
 		if (defined('STDIN')) {
-			echo json_encode(['file'=>$file,'line'=>$line,'description'=>$desc],JSON_PRETTY_PRINT);
+			echo json_encode(['file'=>$file,'line'=>$line,'description'=>$desc], JSON_PRETTY_PRINT);
 
 		/* AJAX */
 		} elseif (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') {
-			echo json_encode(['file'=>$file,'line'=>$line,'description'=>$desc],JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE | JSON_FORCE_OBJECT);
+			echo json_encode(['file'=>$file,'line'=>$line,'description'=>$desc], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE | JSON_FORCE_OBJECT);
 
 		/* HTML */
 		} else {
@@ -632,7 +632,7 @@ if (!function_exists('_assert_handler')) {
  *
  */
 if (!function_exists('load_config')) {
-	function load_config(string $name,string $variable='config') : array
+	function load_config(string $name, string $variable='config') : array
 	{
 		$$variable = [];
 
@@ -666,11 +666,11 @@ if (!function_exists('load_config')) {
  * ```
  */
 if (!function_exists('quick_merge')) {
-	function quick_merge(string $template,array $data=[]) : string
+	function quick_merge(string $template, array $data=[]) : string
 	{
-		if (preg_match_all('/{([^}]+)}/m',$template,$matches)) {
+		if (preg_match_all('/{([^}]+)}/m', $template, $matches)) {
 			foreach ($matches[1] as $key) {
-				$template = str_replace('{'.$key.'}',$data[$key],$template);
+				$template = str_replace('{'.$key.'}', $data[$key], $template);
 			}
 		}
 

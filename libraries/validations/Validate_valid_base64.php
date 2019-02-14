@@ -20,7 +20,8 @@
  * @help supplied string contains valid Base64 characters.
  *
  */
-class Validate_valid_base64 extends Validate_base {
+class Validate_valid_base64 extends Validate_base
+{
 	public function validate(&$field, string $options = '') : bool
 	{
 		$this->error_string = '%s is not valid Base64.';

@@ -22,8 +22,9 @@
  * @filesource
  *
  */
-class Filter_input extends Filter_base {
-	public function filter(&$field,string $options = '') : void
+class Filter_input extends Filter_base
+{
+	public function filter(&$field, string $options = '') : void
 	{
 		$this->field($field)->human()->length($options);
 	}

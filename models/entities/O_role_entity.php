@@ -18,25 +18,27 @@
  * functions:
  *
  */
-class O_role_entity extends model_entity {
+class O_role_entity extends model_entity
+{
 	public $id;
 	public $description;
 	public $name;
 
-/**
- * __get
- * Insert description here
- *
- * @param $name
- *
- * @return
- *
- * @access
- * @static
- * @throws
- * @example
- */
-	public function __get($name) {
+	/**
+	 * __get
+	 * Insert description here
+	 *
+	 * @param $name
+	 *
+	 * @return
+	 *
+	 * @access
+	 * @static
+	 * @throws
+	 * @example
+	 */
+	public function __get($name)
+	{
 		switch ($name) {
 			case 'users':
 				return $this->users();
@@ -47,69 +49,73 @@ class O_role_entity extends model_entity {
 		}
 	}
 
-/**
- * add_permission
- * Insert description here
- *
- * @param $permission
- *
- * @return
- *
- * @access
- * @static
- * @throws
- * @example
- */
-	public function add_permission($permission) {
+	/**
+	 * add_permission
+	 * Insert description here
+	 *
+	 * @param $permission
+	 *
+	 * @return
+	 *
+	 * @access
+	 * @static
+	 * @throws
+	 * @example
+	 */
+	public function add_permission($permission)
+	{
 		return ci()->o_role_model->add_permission((int)$this->id, $permission);
 	}
 
-/**
- * remove_permission
- * Insert description here
- *
- * @param $permission
- *
- * @return
- *
- * @access
- * @static
- * @throws
- * @example
- */
-	public function remove_permission($permission) {
+	/**
+	 * remove_permission
+	 * Insert description here
+	 *
+	 * @param $permission
+	 *
+	 * @return
+	 *
+	 * @access
+	 * @static
+	 * @throws
+	 * @example
+	 */
+	public function remove_permission($permission)
+	{
 		return ci()->o_role_model->remove_permission((int)$this->id, $permission);
 	}
 
-/**
- * permissions
- * Insert description here
- *
- *
- * @return
- *
- * @access
- * @static
- * @throws
- * @example
- */
-	public function permissions() {
+	/**
+	 * permissions
+	 * Insert description here
+	 *
+	 *
+	 * @return
+	 *
+	 * @access
+	 * @static
+	 * @throws
+	 * @example
+	 */
+	public function permissions()
+	{
 		return ci()->o_role_model->permissions((int)$this->id);
 	}
 
-/**
- * users
- * Insert description here
- *
- *
- * @return
- *
- * @access
- * @static
- * @throws
- * @example
- */
-	public function users() {
+	/**
+	 * users
+	 * Insert description here
+	 *
+	 *
+	 * @return
+	 *
+	 * @access
+	 * @static
+	 * @throws
+	 * @example
+	 */
+	public function users()
+	{
 		return ci()->o_role_model->users((int)$this->id);
 	}
 }

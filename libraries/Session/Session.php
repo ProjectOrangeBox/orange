@@ -18,11 +18,12 @@
  * @link https://github.com/ProjectOrangeBox
  * @version v2.0
  *
- * @uses # session - CodeIgniter Session 
+ * @uses # session - CodeIgniter Session
  *
  *
  */
-class Session extends CI_Session {
+class Session extends CI_Session
+{
 	
 	/**
 	 *
@@ -42,7 +43,7 @@ class Session extends CI_Session {
 	 * $name = ci('session')->userdata('name',true);
 	 * ```
 	 */
-	public function userdata($key = NULL,$remove = false)
+	public function userdata($key = null, $remove = false)
 	{
 		$data = parent::userdata($key);
 
@@ -71,7 +72,7 @@ class Session extends CI_Session {
 	 * $name = ci('session')->tempdata('name',true);
 	 * ```
 	 */
-	public function tempdata($key = NULL,$remove = false)
+	public function tempdata($key = null, $remove = false)
 	{
 		$data = parent::tempdata($key);
 
@@ -81,5 +82,4 @@ class Session extends CI_Session {
 
 		return $data;
 	}
-
 } /* end class */

@@ -33,7 +33,8 @@
  * @config errors view path `'/application/views/errors/'`
  *
  */
-class Errors {
+class Errors
+{
 	/**
 	 * errors configuration array
 	 *
@@ -262,7 +263,7 @@ class Errors {
 		log_message('debug', 'Errors::as::'.$request_type);
 
 		/* options include cli, ajax, html */
-		if (!in_array($request_type,['cli','ajax','json','html','array'])) {
+		if (!in_array($request_type, ['cli','ajax','json','html','array'])) {
 			throw new Exception(__METHOD__.' unknown type '.$request_type.'.');
 		}
 
@@ -289,7 +290,7 @@ class Errors {
 	{
 		log_message('debug', 'Errors::get');
 
-		switch($this->request_type) {
+		switch ($this->request_type) {
 			case 'html':
 				$output = $this->as_html();
 			break;
@@ -324,7 +325,7 @@ class Errors {
 	 * ```
 	 *
 	 */
-	public function add(string $msg,string $fieldname = null) : Errors
+	public function add(string $msg, string $fieldname = null) : Errors
 	{
 		log_message('debug', 'Errors::add::'.$msg.' '.$this->current_group);
 
@@ -469,14 +470,14 @@ class Errors {
 			if (is_array($group)) {
 				$groups = $group;
 			} else {
-				$groups = explode(',',$group);
+				$groups = explode(',', $group);
 			}
 
 			if (count($groups) > 1) {
 				/* multi leveled */
 				$multiple = [];
 
-				foreach($groups as $m) {
+				foreach ($groups as $m) {
 					$m = trim($m);
 
 					$multiple[$m] = $this->errors[$m];
@@ -505,7 +506,7 @@ class Errors {
 	 * @return string
 	 *
 	 */
-	public function as_html(string $prefix = null,string $suffix = null,string $group = null) : string
+	public function as_html(string $prefix = null, string $suffix = null, string $group = null) : string
 	{
 		log_message('debug', 'Errors::as_html::'.$group);
 
@@ -530,12 +531,12 @@ class Errors {
 				if (is_array($errors)) {
 					foreach ($errors as $val) {
 						if (!empty(trim($val))) {
-							$html .= str_replace($this->html_group_class,'error-group-'.$grouping,$prefix.trim($val).$suffix);
+							$html .= str_replace($this->html_group_class, 'error-group-'.$grouping, $prefix.trim($val).$suffix);
 						}
 					}
 				} else {
 					if (!empty(trim($errors))) {
-						$html .= str_replace($this->html_group_class,'error-group-'.$grouping,$prefix.trim($errors).$suffix);
+						$html .= str_replace($this->html_group_class, 'error-group-'.$grouping, $prefix.trim($errors).$suffix);
 					}
 				}
 			}
@@ -560,7 +561,7 @@ class Errors {
 		log_message('debug', 'Errors::as_cli::'.$group);
 
 		/* return as string with tabs and line-feeds */
-		return json_encode($this->as_array($group),JSON_PRETTY_PRINT).PHP_EOL;
+		return json_encode($this->as_array($group), JSON_PRETTY_PRINT).PHP_EOL;
 	}
 
 	/**
@@ -599,7 +600,7 @@ class Errors {
 	 * ```
 	 *
 	 */
-	public function die_on_error($view = 400,string $group = null) : Errors
+	public function die_on_error($view = 400, string $group = null) : Errors
 	{
 		$group = ($group) ? $group : $this->current_group;
 
@@ -630,10 +631,10 @@ class Errors {
 	 * ```
 	 *
 	 */
-	public function show(string $message, int $status_code = 500,string $heading = 'An Error Was Encountered') : void
+	public function show(string $message, int $status_code = 500, string $heading = 'An Error Was Encountered') : void
 	{
 		/* show the errors */
-		$this->display('general',['heading'=>$heading,'message'=>$message],$status_code);
+		$this->display('general', ['heading'=>$heading,'message'=>$message], $status_code);
 	}
 
 	/**
@@ -655,7 +656,7 @@ class Errors {
 	 * ```
 	 *
 	 */
-	public function display(string $view,array $data = [],int $status_code = 500,array $override = []) : void
+	public function display(string $view, array $data = [], int $status_code = 500, array $override = []) : void
 	{
 		log_message('debug', 'Errors::view::'.$view.' '.$status_code);
 
@@ -719,13 +720,13 @@ class Errors {
 
 		log_message('error', 'Error: '.$view_path.' '.$status_code.' '.json_encode($data));
 
-		$this->event->trigger('errors.display',$view_path,$data,$mime_type,$charset,$exit_status);
+		$this->event->trigger('errors.display', $view_path, $data, $mime_type, $charset, $exit_status);
 
 		$this->output
 			->enable_profiler(false)
 			->set_status_header($status_code)
 			->set_content_type($mime_type, $charset)
-			->set_output($this->error_view($view_path,$data))
+			->set_output($this->error_view($view_path, $data))
 			->_display();
 
 		$this->output->_exit($exit_status);
@@ -743,7 +744,7 @@ class Errors {
 	 * @return string
 	 *
 	 */
-	protected function error_view(string $_view,array $_data=[]) : string
+	protected function error_view(string $_view, array $_data=[]) : string
 	{
 		log_message('debug', 'Errors::error_view::'.$_view);
 
@@ -764,5 +765,4 @@ class Errors {
 		/* return the current buffer contents and delete current output buffer */
 		return ob_get_clean();
 	}
-
 } /* end class */

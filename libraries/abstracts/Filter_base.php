@@ -36,8 +36,7 @@ abstract class Filter_base extends Validate_base
 	 * @return void always returns true in the calling class
 	 *
 	 */
-	public function filter(&$field,string $options = '') : void
+	public function filter(&$field, string $options = '') : void
 	{
 	}
-
 } /* end class */

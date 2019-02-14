@@ -20,7 +20,8 @@
  * @help contains a natural number: 0, 1, 2, 3, etc.
  *
  */
-class Validate_is_natural extends Validate_base {
+class Validate_is_natural extends Validate_base
+{
 	public function validate(&$field, string $options = '') : bool
 	{
 		$this->error_string = '%s must only contain digits.';

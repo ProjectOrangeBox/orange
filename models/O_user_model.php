@@ -18,7 +18,8 @@
  * functions:
  *
  */
-class O_user_model extends Database_model {
+class O_user_model extends Database_model
+{
 	protected $table;
 	protected $additional_cache_tags = '.acl';
 	protected $has = [
@@ -48,19 +49,20 @@ class O_user_model extends Database_model {
 		'user_delete_role_id' => ['field' => 'user_delete_role_id', 'label' => 'User Delete Role', 'rules' => 'required|integer|max_length[10]|less_than[4294967295]|filter_int[10]'],
 	];
 
-/**
- * __construct
- * Insert description here
- *
- *
- * @return
- *
- * @access
- * @static
- * @throws
- * @example
- */
-	public function __construct() {
+	/**
+	 * __construct
+	 * Insert description here
+	 *
+	 *
+	 * @return
+	 *
+	 * @access
+	 * @static
+	 * @throws
+	 * @example
+	 */
+	public function __construct()
+	{
 		$this->table = config('auth.user table');
 
 		parent::__construct();
@@ -78,43 +80,45 @@ class O_user_model extends Database_model {
 		return $this->ignore_read_role()->get($user_identifier);
 	}
 
-/**
- * insert
- * Insert description here
- *
- * @param $data
- *
- * @return
- *
- * @access
- * @static
- * @throws
- * @example
- */
-	public function insert(array $data) {
-		$this->_password_check('insert',$data);
+	/**
+	 * insert
+	 * Insert description here
+	 *
+	 * @param $data
+	 *
+	 * @return
+	 *
+	 * @access
+	 * @static
+	 * @throws
+	 * @example
+	 */
+	public function insert(array $data)
+	{
+		$this->_password_check('insert', $data);
 
 		if (!ci('errors')->has()) {
 			return parent::insert($data);
 		}
 	}
 
-/**
- * update
- * Insert description here
- *
- * @param $data
- *
- * @return
- *
- * @access
- * @static
- * @throws
- * @example
- */
-	public function update(array $data) {
+	/**
+	 * update
+	 * Insert description here
+	 *
+	 * @param $data
+	 *
+	 * @return
+	 *
+	 * @access
+	 * @static
+	 * @throws
+	 * @example
+	 */
+	public function update(array $data)
+	{
 		if (!empty($data['password'])) {
-			$this->_password_check('update',$data);
+			$this->_password_check('update', $data);
 		} else {
 			unset($data['password']);
 		}
@@ -124,21 +128,22 @@ class O_user_model extends Database_model {
 		}
 	}
 
-/**
- * _password_check
- * Insert description here
- *
- * @param $which
- * @param $data
- *
- * @return
- *
- * @access
- * @static
- * @throws
- * @example
- */
-	protected function _password_check($which,&$data) {
+	/**
+	 * _password_check
+	 * Insert description here
+	 *
+	 * @param $which
+	 * @param $data
+	 *
+	 * @return
+	 *
+	 * @access
+	 * @static
+	 * @throws
+	 * @example
+	 */
+	protected function _password_check($which, &$data)
+	{
 		$password_info = password_get_info($data['password']);
 
 		if ($password_info['algo'] == 0) {
@@ -152,49 +157,51 @@ class O_user_model extends Database_model {
 				unset($data['id']);
 			}
 
-			$this->only_columns($data,$this->rules)->add_rule_set_columns($data,$which)->validate($data);
+			$this->only_columns($data, $this->rules)->add_rule_set_columns($data, $which)->validate($data);
 
 			$data['password'] = $this->hash_password($data['password']);
 		}
 	}
 
-/**
- * delete
- * Insert description here
- *
- * @param $user_id
- *
- * @return
- *
- * @access
- * @static
- * @throws
- * @example
- */
-	public function delete($user_id) {
+	/**
+	 * delete
+	 * Insert description here
+	 *
+	 * @param $user_id
+	 *
+	 * @return
+	 *
+	 * @access
+	 * @static
+	 * @throws
+	 * @example
+	 */
+	public function delete($user_id)
+	{
 		parent::delete($user_id);
 
 		if (!ci('errors')->has()) {
-			$this->update_by(['is_active'=>0],['id'=>$user_id]);
+			$this->update_by(['is_active'=>0], ['id'=>$user_id]);
 			$this->remove_role($user_id);
 		}
 	}
 
-/**
- * add_role
- * Insert description here
- *
- * @param $user_id
- * @param $role
- *
- * @return
- *
- * @access
- * @static
- * @throws
- * @example
- */
-	public function add_role($user_id, $role) {
+	/**
+	 * add_role
+	 * Insert description here
+	 *
+	 * @param $user_id
+	 * @param $role
+	 *
+	 * @return
+	 *
+	 * @access
+	 * @static
+	 * @throws
+	 * @example
+	 */
+	public function add_role($user_id, $role)
+	{
 		if ((int) $user_id < 0) {
 			throw new Exception(__METHOD__.' please provide a integer for the user id');
 		}
@@ -209,21 +216,22 @@ class O_user_model extends Database_model {
 		return $this->_database->replace(config('auth.user role table'), ['role_id' => (int) $this->_find_role_id($role), 'user_id' => (int) $user_id]);
 	}
 
-/**
- * remove_role
- * Insert description here
- *
- * @param $user_id
- * @param $role
- *
- * @return
- *
- * @access
- * @static
- * @throws
- * @example
- */
-	public function remove_role($user_id, $role = null) {
+	/**
+	 * remove_role
+	 * Insert description here
+	 *
+	 * @param $user_id
+	 * @param $role
+	 *
+	 * @return
+	 *
+	 * @access
+	 * @static
+	 * @throws
+	 * @example
+	 */
+	public function remove_role($user_id, $role = null)
+	{
 		if ((int) $user_id < 0) {
 			throw new Exception(__METHOD__.' please provide a integer for the user id');
 		}
@@ -243,20 +251,21 @@ class O_user_model extends Database_model {
 		return $this->_database->delete(config('auth.user role table'), ['user_id' => (int) $user_id, 'role_id' => (int) $this->_find_role_id($role)]);
 	}
 
-/**
- * roles
- * Insert description here
- *
- * @param $user_id
- *
- * @return
- *
- * @access
- * @static
- * @throws
- * @example
- */
-	public function roles($user_id) {
+	/**
+	 * roles
+	 * Insert description here
+	 *
+	 * @param $user_id
+	 *
+	 * @return
+	 *
+	 * @access
+	 * @static
+	 * @throws
+	 * @example
+	 */
+	public function roles($user_id)
+	{
 		$dbc = $this->_database
 			->from(config('auth.user role table'))
 			->join(config('auth.role table'), config('auth.role table').'.id = '.config('auth.user role table').'.role_id')
@@ -266,20 +275,21 @@ class O_user_model extends Database_model {
 		return ($dbc->num_rows() > 0) ? $dbc->result() : [];
 	}
 
-/**
- * hash_password
- * Insert description here
- *
- * @param $password
- *
- * @return
- *
- * @access
- * @static
- * @throws
- * @example
- */
-	public function hash_password($password) {
+	/**
+	 * hash_password
+	 * Insert description here
+	 *
+	 * @param $password
+	 *
+	 * @return
+	 *
+	 * @access
+	 * @static
+	 * @throws
+	 * @example
+	 */
+	public function hash_password($password)
+	{
 		$password_info = password_get_info($password);
 
 		if ($password_info['algo'] == 0) {
@@ -289,107 +299,113 @@ class O_user_model extends Database_model {
 		return $password;
 	}
 
-/**
- * get_user_by_login
- * Insert description here
- *
- * @param $login
- *
- * @return
- *
- * @access
- * @static
- * @throws
- * @example
- */
-	public function get_user_by_login($login) {
+	/**
+	 * get_user_by_login
+	 * Insert description here
+	 *
+	 * @param $login
+	 *
+	 * @return
+	 *
+	 * @access
+	 * @static
+	 * @throws
+	 * @example
+	 */
+	public function get_user_by_login($login)
+	{
 		return $this->where('LOWER(username)=', strtolower($login))->or_where('LOWER(email)=', strtolower($login))->on_empty_return(false)->_get(false);
 	}
 
-/**
- * get_user_by_username
- * Insert description here
- *
- * @param $username
- *
- * @return
- *
- * @access
- * @static
- * @throws
- * @example
- */
-	public function get_user_by_username($username) {
+	/**
+	 * get_user_by_username
+	 * Insert description here
+	 *
+	 * @param $username
+	 *
+	 * @return
+	 *
+	 * @access
+	 * @static
+	 * @throws
+	 * @example
+	 */
+	public function get_user_by_username($username)
+	{
 		return $this->where('LOWER(username)=', strtolower($username))->on_empty_return(false)->_get(false);
 	}
 
-/**
- * get_user_by_email
- * Insert description here
- *
- * @param $email
- *
- * @return
- *
- * @access
- * @static
- * @throws
- * @example
- */
-	public function get_user_by_email($email) {
+	/**
+	 * get_user_by_email
+	 * Insert description here
+	 *
+	 * @param $email
+	 *
+	 * @return
+	 *
+	 * @access
+	 * @static
+	 * @throws
+	 * @example
+	 */
+	public function get_user_by_email($email)
+	{
 		return $this->where('LOWER(email)=', strtolower($email))->on_empty_return(false)->_get(false);
 	}
 
-/**
- * password
- * Insert description here
- *
- * @param $password
- *
- * @return
- *
- * @access
- * @static
- * @throws
- * @example
- */
-	public function password($password) {
+	/**
+	 * password
+	 * Insert description here
+	 *
+	 * @param $password
+	 *
+	 * @return
+	 *
+	 * @access
+	 * @static
+	 * @throws
+	 * @example
+	 */
+	public function password($password)
+	{
 		$this->validate->single($this->rules['password']['rules'], $password);
 
 		return ci('errors')->has();
 	}
 
-/**
- * _find_role_id
- * Insert description here
- *
- * @param $role
- *
- * @return
- *
- * @access
- * @static
- * @throws
- * @example
- */
-	public function _find_role_id($role) {
+	/**
+	 * _find_role_id
+	 * Insert description here
+	 *
+	 * @param $role
+	 *
+	 * @return
+	 *
+	 * @access
+	 * @static
+	 * @throws
+	 * @example
+	 */
+	public function _find_role_id($role)
+	{
 		return (int) ((int) $role > 0) ? $role : $this->o_role_model->column('id')->get_by(['name' => $role]);
 	}
 
-/**
- * _find_permission_id
- * Insert description here
- *
- * @param $permission
- *
- * @return
- *
- * @access
- * @static
- * @throws
- * @example
- */
-	public function _find_permission_id($permission) {
+	/**
+	 * _find_permission_id
+	 * Insert description here
+	 *
+	 * @param $permission
+	 *
+	 * @return
+	 *
+	 * @access
+	 * @static
+	 * @throws
+	 * @example
+	 */
+	public function _find_permission_id($permission)
+	{
 		return (int) ((int) $permission > 0) ? $permission : $this->o_permission_model->column('id')->get_by(['key' => $permission]);
 	}
 }
