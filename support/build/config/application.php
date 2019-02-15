@@ -12,7 +12,7 @@ $config['Site Down Copy'] = 'We are busy updating the site<br>for you and will b
 
 $config['default date'] = 'n/d/y';
 
-$config['system email'] = 'johnnyappleseed@example.com';
+$config['system email'] = 'johnny@example.com';
 
 $config['ssl public key'] = ROOTPATH.'/support/keys/public.key';
 $config['ssl private key'] = ROOTPATH.'/support/keys/private.key';
