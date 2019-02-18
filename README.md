@@ -533,7 +533,7 @@ O_permission_entity.php
 O_role_entity.php
 O_user_entity.php
 
-models/Model_entity.php
+models/Database_model_entity.php
 provides the abstract base class for all model entities (just a basic placeholder)
 provides a save() method to have a entity save itself
 

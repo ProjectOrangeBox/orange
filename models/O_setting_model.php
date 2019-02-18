@@ -106,7 +106,7 @@ class O_setting_model extends Database_model
 		return (!$this->exists(['name'=>$name,'group'=>$group])) ? $this->insert($columns) : false;
 	}
 
-	public function migration_remove($migration=null)
+	public function migration_remove(string $migration=null) : bool
 	{
 		$this->skip_rules = true;
 

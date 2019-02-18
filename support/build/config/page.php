@@ -46,4 +46,4 @@ $config['page_'] = [
 	]
 ];
 
-$config['page_min'] = (env('SERVER_DEBUG') != 'development');
+$config['page_min'] = (env('DEBUG') != 'development');

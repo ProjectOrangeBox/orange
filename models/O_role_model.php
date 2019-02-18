@@ -232,18 +232,14 @@ class O_role_model extends Database_model
 	{
 		$this->skip_rules = true;
 
-		/* we already verified the key that's the "real" primary key */
+		/* we already verified the name that's the "real" primary key */
 		return (!$this->exists(['name'=>$name])) ? $this->insert(['name'=>$name,'description'=>$description,'migration'=>$migration]) : false;
 	}
 
-	public function migration_remove($where=null)
+	public function migration_remove(string $migration=null) : bool
 	{
 		$this->skip_rules = true;
 
-		if (!is_array($where)) {
-			$where = ['migration'=>$where];
-		}
-
-		return $this->delete_by($where);
+		return $this->delete_by(['migration'=>$migration]);
 	}
 }

@@ -18,40 +18,130 @@
  * functions:
  *
  */
-class O_user_entity extends model_entity
+class O_user_entity extends Database_model_entity
 {
+	/**
+	 * record id
+	 *
+	 * @var int
+	 */
 	public $id;
+
+	/**
+	 * record email
+	 *
+	 * @var string
+	 */
 	public $email;
+
+	/**
+	 * record username
+	 *
+	 * @var string
+	 */
 	public $username;
+
+	/**
+	 * record dashboard url
+	 * This can be used to override the default and take the user to a custom dashboard when they login
+	 *
+	 * @var string
+	 */
 	public $dashboard_url;
+
+	/**
+	 * record active / inactive status
+	 *
+	 * @var bool
+	 */
 	public $is_active;
 	
+	/**
+	 * records user read role id
+	 * when a record is created what read role should it have?
+	 *
+	 * @var int
+	 */
 	public $user_read_role_id;
+
+	/**
+	 * records user edit role id
+	 * when a record is created what edit role should it have?
+	 *
+	 * @var int
+	 */
 	public $user_edit_role_id;
+
+	/**
+	 * records user delete role id
+	 * when a record is created what delete role should it have?
+	 *
+	 * @var int
+	 */
 	public $user_delete_role_id;
 	
+	/**
+	 * records read role id
+	 * who can see this record
+	 *
+	 * @var int
+	 */
 	public $read_role_id;
+
+	/**
+	 * records edit role id
+	 * who can edit this record
+	 *
+	 * @var int
+	 */
 	public $edit_role_id;
+
+	/**
+	 * records delete role id
+	 * who can delete this record
+	 *
+	 * @var int
+	 */
 	public $delete_role_id;
 
+	/**
+	 * Entities roles
+	 *
+	 * @var array
+	 */
 	protected $roles       = [];
+
+	/**
+	 * Entities permissions
+	 *
+	 * @var array
+	 */
 	protected $permissions = [];
+
+	/**
+	 * tracks internally whether the roles and permissions have been attached
+	 *
+	 * @var bool
+	 */
 	protected $lazy_loaded = false;
 
 	/**
-	 * __get
-	 * Insert description here
 	 *
-	 * @param $name
+	 * Makes it possible to get roles or permissions as a variable
 	 *
-	 * @return
+	 * @access public
 	 *
-	 * @access
-	 * @static
+	 * @param string $name
+	 *
 	 * @throws
-	 * @example
+	 * @return 
+	 *
+	 * #### Example
+	 * ```
+	 *
+	 * ```
 	 */
-	public function __get($name)
+	public function __get(string $name)
 	{
 		switch ($name) {
 		case 'roles':
@@ -66,17 +156,15 @@ class O_user_entity extends model_entity
 	}
 
 	/**
-	 * add_role
-	 * Insert description here
+	 *
+	 * Add a role to this user
+	 *
+	 * @access public
 	 *
 	 * @param $role
 	 *
-	 * @return
+	 * @return 
 	 *
-	 * @access
-	 * @static
-	 * @throws
-	 * @example
 	 */
 	public function add_role($role)
 	{
@@ -84,17 +172,17 @@ class O_user_entity extends model_entity
 	}
 
 	/**
-	 * remove_role
-	 * Insert description here
+	 *
+	 * Remove a role from this user
+	 * This will try to remove the role even 
+	 * if the role doesn't exist for this user.
+	 *
+	 * @access public
 	 *
 	 * @param $role
 	 *
-	 * @return
+	 * @return 
 	 *
-	 * @access
-	 * @static
-	 * @throws
-	 * @example
 	 */
 	public function remove_role($role)
 	{
@@ -102,218 +190,201 @@ class O_user_entity extends model_entity
 	}
 
 	/**
-	 * roles
-	 * Insert description here
 	 *
+	 * Return the roles attach to this user
 	 *
-	 * @return
+	 * @access public
 	 *
-	 * @access
-	 * @static
-	 * @throws
-	 * @example
+	 * @return array
+	 *
 	 */
-	public function roles()
+	public function roles() : array
 	{
 		$this->_lazy_load();
+		
 		return $this->roles;
 	}
 
 	/**
-	 * has_role
-	 * Insert description here
+	 *
+	 * Returns Boolean whether the user has this role or not
+	 *
+	 * @access public
 	 *
 	 * @param $role_id
 	 *
-	 * @return
+	 * @return bool
 	 *
-	 * @access
-	 * @static
-	 * @throws
-	 * @example
 	 */
-	public function has_role($role_id)
+	public function has_role(int $role_id) : bool
 	{
 		$this->_lazy_load();
+		
 		return array_key_exists($role_id, $this->roles);
 	}
 
 	/**
-	 * can
-	 * Insert description here
 	 *
-	 * @param $resource
+	 * Returns Boolean whether the user had this permission 
 	 *
-	 * @return
+	 * @access public
 	 *
-	 * @access
-	 * @static
-	 * @throws
-	 * @example
+	 * @param string $resource
+	 *
+	 * @return bool
+	 *
 	 */
-	public function can($resource)
+	public function can(string $resource) : bool
 	{
 		$this->_lazy_load();
+		
 		return (in_array($resource, $this->permissions, true));
 	}
 
 	/**
-	 * permissions
-	 * Insert description here
 	 *
+	 * Return the permissions attach to this user
 	 *
-	 * @return
+	 * @access public
 	 *
-	 * @access
-	 * @static
-	 * @throws
-	 * @example
+	 * @return array
+	 *
 	 */
-	public function permissions()
+	public function permissions() : array
 	{
 		$this->_lazy_load();
+		
 		return $this->permissions;
 	}
 
 	/**
-	 * has_roles
-	 * Insert description here
 	 *
-	 * @param $role_ary
+	 * Determine if the user has ALL of the passed roles
 	 *
-	 * @return
+	 * @access public
 	 *
-	 * @access
-	 * @static
-	 * @throws
-	 * @example
+	 * @param array $roles
+	 *
+	 * @return bool
+	 *
 	 */
-	public function has_roles($role_ary = [])
+	public function has_roles(array $roles) : bool
 	{
-		foreach ((array) $roles_ary as $r) {
+		foreach ($roles as $r) {
 			if (!$this->has_role($r)) {
 				return false;
 			}
 		}
+		
 		return true;
 	}
 
 	/**
-	 * has_one_role_of
-	 * Insert description here
 	 *
-	 * @param $role_ary
+	 * Determine if the user has one of the passed roles
 	 *
-	 * @return
+	 * @access public
 	 *
-	 * @access
-	 * @static
-	 * @throws
-	 * @example
+	 * @param array $roles
+	 *
+	 * @return bool
+	 *
 	 */
-	public function has_one_role_of($role_ary = [])
+	public function has_one_role_of(array $roles) : bool
 	{
-		foreach ((array) $roles_ary as $r) {
+		foreach ((array) $roles as $r) {
 			if ($this->has_role($r)) {
 				return true;
 			}
 		}
+		
 		return false;
 	}
 
 	/**
-	 * has_permissions
-	 * Insert description here
 	 *
-	 * @param $permission_ary
+	 * Determine if the user has ALL of the passed permissions
 	 *
-	 * @return
+	 * @access public
 	 *
-	 * @access
-	 * @static
-	 * @throws
-	 * @example
+	 * @param array $permissions
+	 *
+	 * @return bool
+	 *
 	 */
-	public function has_permissions($permission_ary = [])
+	public function has_permissions(array $permissions) : bool
 	{
-		foreach ((array) $permission_ary as $p) {
+		foreach ($permissions as $p) {
 			if ($this->cannot($p)) {
 				return false;
 			}
 		}
+		
 		return true;
 	}
 
 	/**
-	 * has_one_permission_of
-	 * Insert description here
 	 *
-	 * @param $permission_ary
+	 * Determine if the user has one of the passed permissions
 	 *
-	 * @return
+	 * @access public
 	 *
-	 * @access
-	 * @static
-	 * @throws
-	 * @example
+	 * @param array $permissions
+	 *
+	 * @return bool
+	 *
 	 */
-	public function has_one_permission_of($permission_ary = [])
+	public function has_one_permission_of(array $permissions) : bool
 	{
-		foreach ((array) $permission_ary as $p) {
+		foreach ($permissions as $p) {
 			if ($this->can($p)) {
 				return true;
 			}
 		}
+		
 		return false;
 	}
 
 	/**
-	 * has_permission
-	 * Insert description here
 	 *
-	 * @param $resource
+	 * Determine if the user has the passed permission
 	 *
-	 * @return
+	 * @access public
 	 *
-	 * @access
-	 * @static
-	 * @throws
-	 * @example
+	 * @param string $resource
+	 *
+	 * @return bool
+	 *
 	 */
-	public function has_permission($resource)
+	public function has_permission(string $permission) : bool
 	{
-		return $this->can($resource);
+		return $this->can($permission);
 	}
 
 	/**
-	 * cannot
-	 * Insert description here
 	 *
-	 * @param $resource
+	 * Determine if the user does not have the passed permission
 	 *
-	 * @return
+	 * @access public
 	 *
-	 * @access
-	 * @static
-	 * @throws
-	 * @example
+	 * @param string $resource
+	 *
+	 * @return bool
+	 *
 	 */
-	public function cannot($resource)
+	public function cannot(string $permission) : bool
 	{
-		return !$this->can($resource);
+		return !$this->can($permission);
 	}
 
 	/**
-	 * logged_in
-	 * Insert description here
 	 *
+	 * Determine if the user is logged in
 	 *
-	 * @return
+	 * @access public
 	 *
-	 * @access
-	 * @static
-	 * @throws
-	 * @example
+	 * @return bool
+	 *
 	 */
 	public function logged_in()
 	{
@@ -321,35 +392,29 @@ class O_user_entity extends model_entity
 	}
 
 	/**
-	 * is_admin
-	 * Insert description here
 	 *
+	 * Determine if the user has the admin role
 	 *
-	 * @return
+	 * @access public
 	 *
-	 * @access
-	 * @static
-	 * @throws
-	 * @example
+	 * @return bool
+	 *
 	 */
-	public function is_admin()
+	public function is_admin() : bool
 	{
 		return $this->has_role(ADMIN_ROLE_ID);
 	}
 
 	/**
-	 * _lazy_load
-	 * Insert description here
 	 *
+	 * Internal lazy load the roles and permissions only after they have been called the first time.
 	 *
-	 * @return
+	 * @access protected
 	 *
-	 * @access
-	 * @static
-	 * @throws
-	 * @example
+	 * @return void
+	 *
 	 */
-	protected function _lazy_load()
+	protected function _lazy_load() : void
 	{
 		$user_id = (int)$this->id;
 		$cache_key = 'database.user_entity.'.$user_id.'.acl.php';
@@ -366,21 +431,20 @@ class O_user_entity extends model_entity
 	}
 
 	/**
-	 * _lazy_loader
-	 * Insert description here
+	 *
+	 * Used internally by _lazy_load
+	 *
+	 * @access protected
 	 *
 	 * @param $user_id
 	 *
-	 * @return
+	 * @return array
 	 *
-	 * @access
-	 * @static
-	 * @throws
-	 * @example
 	 */
-	protected function _internal_query($user_id)
+	protected function _internal_query(int $user_id) : array
 	{
 		$roles_permissions = [];
+		
 		$sql = "select
 			`user_id`,
 			`".config('auth.role table')."`.`id` `orange_roles_id`,
@@ -410,4 +474,5 @@ class O_user_entity extends model_entity
 		
 		return $roles_permissions;
 	}
-}
+
+} /* end class */

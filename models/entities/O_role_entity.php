@@ -1,43 +1,61 @@
 <?php
 /**
- * O_role_entity
- * Insert description here
+ * Orange
+ *
+ * An open source extensions for CodeIgniter 3.x
+ *
+ * This content is released under the MIT License (MIT)
+ * Copyright (c) 2014 - 2019, Project Orange Box
+ */
+
+/**
+ * Database Record Entity for a Role 
  *
  * @package CodeIgniter / Orange
  * @author Don Myers
- * @copyright 2018
+ * @copyright 2019
  * @license http://opensource.org/licenses/MIT MIT License
  * @link https://github.com/ProjectOrangeBox
- * @version v2.0
- *
- * required
- * core:
- * libraries:
- * models:
- * helpers:
- * functions:
+ * @version v2.0.0
+ * @filesource
  *
  */
-class O_role_entity extends model_entity
+
+class O_role_entity extends Database_model_entity
 {
+	/**
+	 * record id
+	 *
+	 * @var int
+	 */
 	public $id;
-	public $description;
+
+	/**
+	 * record name
+	 *
+	 * @var string
+	 */
 	public $name;
 
 	/**
-	 * __get
-	 * Insert description here
+	 * record description
 	 *
-	 * @param $name
-	 *
-	 * @return
-	 *
-	 * @access
-	 * @static
-	 * @throws
-	 * @example
+	 * @var string
 	 */
-	public function __get($name)
+	public $description;
+
+	/**
+	 *
+	 * Makes it possible to get roles or permissions as a variable
+	 *
+	 * @access public
+	 *
+	 * @param string $name
+	 *
+	 * @return mixed
+	 *
+	 */
+	public function __get(string $name)
 	{
 		switch ($name) {
 			case 'users':
@@ -50,17 +68,15 @@ class O_role_entity extends model_entity
 	}
 
 	/**
-	 * add_permission
-	 * Insert description here
+	 *
+	 * Add a permission to this entity
+	 *
+	 * @access public
 	 *
 	 * @param $permission
 	 *
-	 * @return
+	 * @return 
 	 *
-	 * @access
-	 * @static
-	 * @throws
-	 * @example
 	 */
 	public function add_permission($permission)
 	{
@@ -68,17 +84,20 @@ class O_role_entity extends model_entity
 	}
 
 	/**
-	 * remove_permission
-	 * Insert description here
+	 *
+	 * Description Here
+	 *
+	 * @access public
 	 *
 	 * @param $permission
 	 *
-	 * @return
-	 *
-	 * @access
-	 * @static
 	 * @throws
-	 * @example
+	 * @return 
+	 *
+	 * #### Example
+	 * ```
+	 *
+	 * ```
 	 */
 	public function remove_permission($permission)
 	{
@@ -86,16 +105,20 @@ class O_role_entity extends model_entity
 	}
 
 	/**
-	 * permissions
-	 * Insert description here
 	 *
+	 * Description Here
 	 *
-	 * @return
+	 * @access public
 	 *
-	 * @access
-	 * @static
+	 * @param 
+	 *
 	 * @throws
-	 * @example
+	 * @return 
+	 *
+	 * #### Example
+	 * ```
+	 *
+	 * ```
 	 */
 	public function permissions()
 	{
@@ -103,19 +126,24 @@ class O_role_entity extends model_entity
 	}
 
 	/**
-	 * users
-	 * Insert description here
 	 *
+	 * Description Here
 	 *
-	 * @return
+	 * @access public
 	 *
-	 * @access
-	 * @static
+	 * @param 
+	 *
 	 * @throws
-	 * @example
+	 * @return 
+	 *
+	 * #### Example
+	 * ```
+	 *
+	 * ```
 	 */
 	public function users()
 	{
 		return ci()->o_role_model->users((int)$this->id);
 	}
-}
+
+} /* end class */

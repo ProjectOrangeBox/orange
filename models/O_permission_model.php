@@ -124,7 +124,7 @@ class O_permission_model extends Database_model
 	 * @throws
 	 * @example
 	 */
-	public function insert($data)
+	public function insert(array $data)
 	{
 		$success = parent::insert($data);
 		$this->_refresh();
@@ -146,7 +146,7 @@ class O_permission_model extends Database_model
 	 * @throws
 	 * @example
 	 */
-	public function update($data)
+	public function update(array $data)
 	{
 		$success = parent::update($data);
 		$this->_refresh();
@@ -171,10 +171,12 @@ class O_permission_model extends Database_model
 	{
 		$records = $this->get_many();
 		
+		/* automatically adds permission to admin role */
 		foreach ($records as $record) {
 			ci('o_role_model')->add_permission(ADMIN_ROLE_ID, $record->id);
 		}
 		
+		/* makes sure nobody user has NO permissions */
 		ci('o_role_model')->remove_permission(NOBODY_USER_ID);
 	}
 
@@ -191,15 +193,11 @@ class O_permission_model extends Database_model
 		return $success;
 	}
 	
-	public function migration_remove($where=null)
+	public function migration_remove(string $migration=null) : bool
 	{
 		$this->skip_rules = true;
 
-		if (!is_array($where)) {
-			$where = ['migration'=>$where];
-		}
-
-		$success = $this->delete_by($where);
+		$success = $this->delete_by(['migration'=>$migration]);
 
 		$this->_refresh();
 		

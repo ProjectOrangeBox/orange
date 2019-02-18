@@ -1,44 +1,72 @@
 <?php
 /**
- * O_permission_entity
- * Insert description here
+ * Orange
+ *
+ * An open source extensions for CodeIgniter 3.x
+ *
+ * This content is released under the MIT License (MIT)
+ * Copyright (c) 2014 - 2019, Project Orange Box
+ */
+
+/**
+ * Database Record Entity for a Permissions 
  *
  * @package CodeIgniter / Orange
  * @author Don Myers
- * @copyright 2018
+ * @copyright 2019
  * @license http://opensource.org/licenses/MIT MIT License
  * @link https://github.com/ProjectOrangeBox
- * @version v2.0
- *
- * required
- * core:
- * libraries:
- * models:
- * helpers:
- * functions:
+ * @version v2.0.0
+ * @filesource
  *
  */
-class O_permission_entity extends model_entity
+
+class O_permission_entity extends Database_model_entity
 {
+	/**
+	 * record id
+	 *
+	 * @var int
+	 */
 	public $id;
+
+	/**
+	 * record key
+	 *
+	 * @var string
+	 */
 	public $key;
+
+	/**
+	 * record group
+	 *
+	 * @var string
+	 */
 	public $group;
+
+	/**
+	 * record description
+	 *
+	 * @var string
+	 */
 	public $description;
 
 	/**
-	 * __get
-	 * Insert description here
 	 *
-	 * @param $name
+	 * Makes it possible to get roles as a variable
 	 *
-	 * @return
+	 * @access public
 	 *
-	 * @access
-	 * @static
-	 * @throws
-	 * @example
+	 * @param string $name
+	 *
+	 * @return mixed
+	 *
+	 * #### Example
+	 * ```php
+	 * $roles = $record->roles;
+	 * ```
 	 */
-	public function __get($name)
+	public function __get(string $name)
 	{
 		switch ($name) {
 			case 'roles':
@@ -48,19 +76,18 @@ class O_permission_entity extends model_entity
 	}
 
 	/**
-	 * roles
-	 * Insert description here
 	 *
+	 * Get the roles using this Permission
 	 *
-	 * @return
+	 * @access public
 	 *
-	 * @access
-	 * @static
-	 * @throws
-	 * @example
+	 * @return array
+	 *
 	 */
-	public function roles()
+	public function roles() : array
 	{
 		return ci()->o_permission_model->roles($this->id);
 	}
-}
+
+} /* end class */
+
