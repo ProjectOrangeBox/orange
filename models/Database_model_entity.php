@@ -52,11 +52,11 @@ abstract class Database_model_entity
 	 */
 	public function __construct()
 	{
-		/* the model name should match the entity name */
+		/* strip off the _entity part and replace with _model */
 		if (!is_string($this->_model_name)) {
-			$this->_model_name = strtolower(get_called_class());
+			$this->_model_name = strtolower(substr(get_called_class(),0,-7).'_model');
 		}
-		
+
 		log_message('info', 'Database_model_entity Class Initialized');
 	}
 
@@ -73,10 +73,10 @@ abstract class Database_model_entity
 	{
 		/* get the model */
 		$model = ci()->{$this->_model_name};
-		
+
 		/* get the primary id */
 		$primary_id = $model->get_primary_key();
-		
+
 		/* if save columns is set then only use those properties */
 		if ($this->_save_columns) {
 			foreach ($this->_save_columns as $col) {
@@ -86,29 +86,29 @@ abstract class Database_model_entity
 			/* use all public properties */
 			$data = get_object_vars($this);
 		}
-		
+
 		/* default responds */
 		$success = false;
-		
+
 		/* if the primary id is empty then insert the entity */
 		if ($data[$primary_id] == null) {
 			/* make sure the primary id is not set */
 			unset($data[$primary_id]);
-			
+
 			/* insert the record and return the inserted record primary id */
 			$success = $model->insert($data);
-			
+
 			/* if success is not false (fail) then set the primary_id to success - inserted record primary id */
 			if ($success !== false) {
 				$this->$primary_id = $success;
-				
+
 				$success = true;
 			}
 		} else {
 			/* else it's a update */
 			$success = $model->update($data);
 		}
-		
+
 		/* return success */
 		return (bool)$success;
 	}

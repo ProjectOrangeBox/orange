@@ -155,38 +155,9 @@ class O_user_entity extends Database_model_entity
 		}
 	}
 
-	/**
-	 *
-	 * Add a role to this user
-	 *
-	 * @access public
-	 *
-	 * @param $role
-	 *
-	 * @return 
-	 *
-	 */
-	public function add_role($role)
+	public function refresh() : void
 	{
-		ci()->o_user_model->add_role($this->id, $role);
-	}
-
-	/**
-	 *
-	 * Remove a role from this user
-	 * This will try to remove the role even 
-	 * if the role doesn't exist for this user.
-	 *
-	 * @access public
-	 *
-	 * @param $role
-	 *
-	 * @return 
-	 *
-	 */
-	public function remove_role($role)
-	{
-		ci()->o_user_model->remove_role($this->id, $role);
+		$this->lazy_loaded = false;
 	}
 
 	/**

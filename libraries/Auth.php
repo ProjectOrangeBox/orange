@@ -134,15 +134,15 @@ class Auth
 		/* Are we in GUI mode? */
 		if (!is_cli()) {
 			/* yes - is there a user id in the session? */
-			$user_identifier = $this->session->userdata($this->session_key);
+			$user_primary_key = $this->session->userdata($this->session_key);
 
-			if (!empty($user_identifier)) {
+			if (!empty($user_primary_key)) {
 				/**
 				 * refresh the user based on the user identifier
 				 * but don't save to the session
 				 * because we already loaded it from the session
 				 */
-				$this->refresh_userdata($user_identifier, false);
+				$this->refresh_userdata($user_primary_key, false);
 			}
 		}
 
@@ -171,17 +171,17 @@ class Auth
 	 *
 	 * @access public
 	 *
-	 * @param string $user_identifier
+	 * @param string $user_primary_key
 	 * @param string $password
 	 *
 	 * @return Bool
 	 *
 	 */
-	public function login(string $user_identifier, string $password) : Bool
+	public function login(string $user_primary_key, string $password) : Bool
 	{
-		$success = $this->_login($user_identifier, $password);
+		$success = $this->_login($user_primary_key, $password);
 
-		$this->event->trigger('auth.login', $user_identifier, $success);
+		$this->event->trigger('auth.login', $user_primary_key, $success);
 
 		log_message('info', 'Auth Class login');
 
@@ -220,21 +220,21 @@ class Auth
 	 *
 	 * @access public
 	 *
-	 * @param String $user_identifier
+	 * @param String $user_primary_key
 	 * @param Bool $save_session true
 	 *
 	 * @return String
 	 *
 	 */
-	public function refresh_userdata(String $user_identifier, Bool $save_session) : Void
+	public function refresh_userdata(String $user_primary_key, Bool $save_session) : Void
 	{
-		log_message('debug', 'Auth::refresh_userdata::'.$user_identifier);
+		log_message('debug', 'Auth::refresh_userdata::'.$user_primary_key);
 
-		if (empty($user_identifier)) {
+		if (empty($user_primary_key)) {
 			throw new Exception('Auth session refresh user identifier empty.');
 		}
 
-		$profile = $this->user_model->get_by_user_identifier($user_identifier);
+		$profile = $this->user_model->get_by_primary_ignore_read_role($user_primary_key);
 
 		if ((int)$profile->is_active === 1 && $profile instanceof O_user_entity) {
 			/* no real need to have this floating around */

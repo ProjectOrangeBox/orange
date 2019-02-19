@@ -218,7 +218,7 @@ class Database_model extends MY_Model
 	 * @var integer
 	 */
 	protected $limit_to = false;
-	
+
 	/**
 	 * internal storage to soft deleted where clause
 	 *
@@ -248,34 +248,42 @@ class Database_model extends MY_Model
 		/* setup the cache prefix for this model so we can flush the cache based on tags */
 		$this->cache_prefix = trim('database.'.$this->object.'.'.trim($this->additional_cache_tags, '.'), '.');
 
-		/* is a database group attached other than the default? */
-		$group_attach = false;
-
 		/* is db group set? then that's the connection config we will use */
 		if (isset($this->db_group)) {
-			$this->_database = $this->load->database($this->db_group, true);
+			log_message('debug', 'Database Model using "'.$this->object.'::'.$this->db_group.'" connection.');
+		
+			/* use our specified connection */
+			$this->_database = &$this->load->database($this->db_group, true);
+			$this->read_database = &$this->_database;
+			$this->write_database = &$this->_database;
+		} else {
+			log_message('debug', 'Database Model using '.$this->object.'::default connection.');
 
-			$group_attach = true;
+			/* use default */
+			$this->_database = &$this->db;
+			$this->read_database = &$this->_database;
+			$this->write_database = &$this->_database;
 		}
 
 		/* is read db group set? then that's the connection config we will use for reads */
 		if (isset($this->read_db_group)) {
+			log_message('debug', 'Database Model using read "'.$this->object.'::'.$this->db_group.'" connection.');
+
 			$this->read_database = $this->load->database($this->read_db_group, true);
-			$group_attach = true;
 		}
 
 		/* is write db group set? then that's the connection config we will use for writes */
 		if (isset($this->write_db_group)) {
+			log_message('debug', 'Database Model using write "'.$this->object.'::'.$this->db_group.'" connection.');
+
 			$this->write_database = $this->load->database($this->write_db_group, true);
-			$group_attach = true;
 		}
 
-		/* if a group isn't attached then user the default database connection */
-		if (!$group_attach) {
-			$this->_database = $this->db;
+		if ((!isset($this->read_database) && !isset($this->write_database)) || !isset($this->_database)) {
+			throw new Exception('Database Model could not attach to database.');
 		}
-		
-		/* run Reset CodeIgniter Query Builder and our tools */
+
+		/* Reset Orange Database Model Query Builder and CodeIgniter Query Builder */
 		$this->reset_query();
 
 		/* Is there are record entity attached? */
@@ -343,7 +351,7 @@ class Database_model extends MY_Model
 		$this->ignore_delete_role = false;
 		$this->skip_rules = false;
 		$this->limit_to = false;
-		
+
 		$this->deleted_where_clause = [$this->has['is_deleted'] => 0];
 
 		return $this;
@@ -589,7 +597,7 @@ class Database_model extends MY_Model
 		}
 
 		/* preform the validation if there are rules and skip rules is false only using the data input that has rules using the insert rule set */
-		$success = (!$this->skip_rules && count($this->rules)) ? $this->add_additional_rules()->only_columns($data, $this->rules)->add_rule_set_columns($data, 'update')->validate($data) : true;
+		$success = (!$this->skip_rules && count($this->rules)) ? $this->add_additional_rules()->only_columns($data, $this->rules)->add_rule_set_columns($data, 'insert')->validate($data) : true;
 
 		/* if the validation was successful then proceed */
 		if ($success) {
@@ -610,16 +618,16 @@ class Database_model extends MY_Model
 			if (count($data)) {
 				/* yes - run the actual CodeIgniter Database insert */
 				$this->_database->insert($this->table, $data);
+
+				/**
+				 * set success to the insert id - if there is no auto generated primary if 0 is
+				 * returned so exact (===) should be used on the results to determine if it's "really" a error (false)
+				 */
+				$success = $this->_database->insert_id();
 			}
 
 			/* ok now delete any caches since we did a insert and log it if we need to */
 			$this->delete_cache_by_tags()->log_last_query();
-
-			/*
-			set success to the insert id - if there is no auto generated primary if 0 is
-			returned so exact (===) should be used on the results to determine if it's "really" a error (false)
-			 */
-			$success = (int) $this->_database->insert_id();
 		}
 
 		/* clear the temp stuff */
@@ -1553,10 +1561,10 @@ class Database_model extends MY_Model
 	protected function get_user_roles() : array
 	{
 		$roles = ci()->user->roles();
-		
+
 		/* we must return something for the in clause or every record will match which is not what we want */
 		$keys = [-1];
-		
+
 		if (is_array($roles)) {
 			if (count($roles) > 0) {
 				$keys = array_keys($roles);

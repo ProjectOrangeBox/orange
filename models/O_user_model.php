@@ -67,7 +67,7 @@ class O_user_model extends Database_model
 
 		parent::__construct();
 
-		$this->validate->attach('user_password', function (&$field, &$param, &$error_string, &$field_data, &$validate) {
+		ci('validate')->attach('user_password', function (&$field, &$param, &$error_string, &$field_data, &$validate) {
 			$error_string = 'Your password is not in the correct format.';
 			return (bool) preg_match(config('auth.password regex'), $field);
 		});
@@ -75,9 +75,9 @@ class O_user_model extends Database_model
 		log_message('info', 'o_user_model Class Initialized');
 	}
 
-	public function get_by_user_identifier($user_identifier)
+	public function get_by_primary_ignore_read_role($primary_key)
 	{
-		return $this->ignore_read_role()->get($user_identifier);
+		return $this->ignore_read_role()->get($primary_key);
 	}
 
 	/**
@@ -97,9 +97,13 @@ class O_user_model extends Database_model
 	{
 		$this->_password_check('insert', $data);
 
-		if (!ci('errors')->has()) {
-			return parent::insert($data);
+		$success = !ci('errors')->has();
+
+		if ($success) {
+			$success = parent::insert($data);
 		}
+
+		return $success;
 	}
 
 	/**
@@ -123,9 +127,13 @@ class O_user_model extends Database_model
 			unset($data['password']);
 		}
 
-		if (!ci('errors')->has()) {
-			return parent::update($data);
+		$success = !ci('errors')->has();
+
+		if ($success) {
+			$success = parent::update($data);
 		}
+
+		return $success;
 	}
 
 	/**
@@ -142,7 +150,7 @@ class O_user_model extends Database_model
 	 * @throws
 	 * @example
 	 */
-	protected function _password_check($which, &$data)
+	protected function _password_check(string $which,array &$data) : void
 	{
 		$password_info = password_get_info($data['password']);
 
@@ -180,10 +188,14 @@ class O_user_model extends Database_model
 	{
 		parent::delete($user_id);
 
-		if (!ci('errors')->has()) {
-			$this->update_by(['is_active'=>0], ['id'=>$user_id]);
+		$success = !ci('errors')->has();
+
+		if ($success) {
+			$this->update_by(['is_active'=>0],['id'=>$user_id]);
 			$this->remove_role($user_id);
 		}
+
+		return $success;
 	}
 
 	/**
@@ -200,16 +212,17 @@ class O_user_model extends Database_model
 	 * @throws
 	 * @example
 	 */
-	public function add_role($user_id, $role)
+	public function add_role(int $user_id, $role)
 	{
 		if ((int) $user_id < 0) {
-			throw new Exception(__METHOD__.' please provide a integer for the user id');
+			throw new Exception(__METHOD__.' please provide an integer for the user id');
 		}
 
 		if (is_array($role)) {
 			foreach ($role as $role_id) {
 				$this->add_role($user_id, $role_id);
 			}
+
 			return;
 		}
 
@@ -230,10 +243,10 @@ class O_user_model extends Database_model
 	 * @throws
 	 * @example
 	 */
-	public function remove_role($user_id, $role = null)
+	public function remove_role(int $user_id, $role = null)
 	{
 		if ((int) $user_id < 0) {
-			throw new Exception(__METHOD__.' please provide a integer for the user id');
+			throw new Exception(__METHOD__.' please provide an integer for the user id');
 		}
 
 		if (is_array($role)) {
@@ -243,12 +256,14 @@ class O_user_model extends Database_model
 			return;
 		}
 
+		/* delete all */
 		if ($role === null) {
-			$this->_database->delete(config('auth.user role table'), ['user_id' => (int) $user_id]);
-			return;
+			$success = $this->_database->delete(config('auth.user role table'), ['user_id' => (int) $user_id]);
+		} else {
+			$success = $this->_database->delete(config('auth.user role table'), ['user_id' => (int) $user_id, 'role_id' => (int) $this->_find_role_id($role)]);
 		}
 
-		return $this->_database->delete(config('auth.user role table'), ['user_id' => (int) $user_id, 'role_id' => (int) $this->_find_role_id($role)]);
+		return $success;
 	}
 
 	/**
@@ -264,7 +279,7 @@ class O_user_model extends Database_model
 	 * @throws
 	 * @example
 	 */
-	public function roles($user_id)
+	public function roles(int $user_id) : array
 	{
 		$dbc = $this->_database
 			->from(config('auth.user role table'))
@@ -288,7 +303,7 @@ class O_user_model extends Database_model
 	 * @throws
 	 * @example
 	 */
-	public function hash_password($password)
+	public function hash_password(string $password) : string
 	{
 		$password_info = password_get_info($password);
 
@@ -312,7 +327,7 @@ class O_user_model extends Database_model
 	 * @throws
 	 * @example
 	 */
-	public function get_user_by_login($login)
+	public function get_user_by_login(string $login)
 	{
 		return $this->where('LOWER(username)=', strtolower($login))->or_where('LOWER(email)=', strtolower($login))->on_empty_return(false)->_get(false);
 	}
@@ -330,7 +345,7 @@ class O_user_model extends Database_model
 	 * @throws
 	 * @example
 	 */
-	public function get_user_by_username($username)
+	public function get_user_by_username(string $username)
 	{
 		return $this->where('LOWER(username)=', strtolower($username))->on_empty_return(false)->_get(false);
 	}
@@ -348,7 +363,7 @@ class O_user_model extends Database_model
 	 * @throws
 	 * @example
 	 */
-	public function get_user_by_email($email)
+	public function get_user_by_email(string $email)
 	{
 		return $this->where('LOWER(email)=', strtolower($email))->on_empty_return(false)->_get(false);
 	}
@@ -366,7 +381,7 @@ class O_user_model extends Database_model
 	 * @throws
 	 * @example
 	 */
-	public function password($password)
+	public function password(string $password) : bool
 	{
 		$this->validate->single($this->rules['password']['rules'], $password);
 
@@ -386,9 +401,9 @@ class O_user_model extends Database_model
 	 * @throws
 	 * @example
 	 */
-	public function _find_role_id($role)
+	public function _find_role_id($role) : int
 	{
-		return (int) ((int) $role > 0) ? $role : $this->o_role_model->column('id')->get_by(['name' => $role]);
+		return (int) (is_numeric($role)) ? $role : ci('o_role_model')->column('id')->get_by(['name' => $role]);
 	}
 
 	/**
@@ -404,8 +419,8 @@ class O_user_model extends Database_model
 	 * @throws
 	 * @example
 	 */
-	public function _find_permission_id($permission)
+	public function _find_permission_id($permission) : int
 	{
-		return (int) ((int) $permission > 0) ? $permission : $this->o_permission_model->column('id')->get_by(['key' => $permission]);
+		return (int) (is_numeric($permission)) ? (int)$permission : ci('o_permission_model')->column('id')->get_by(['key' => $permission]);
 	}
 }

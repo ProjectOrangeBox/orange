@@ -282,7 +282,7 @@ if (!function_exists('env')) {
  *
  */
 if (!function_exists('l')) {
-	function l() : mixed
+	function l()
 	{
 		/* get the number of arguments passed */
 		$args = func_get_args();
