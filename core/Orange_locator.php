@@ -73,7 +73,7 @@ class Orange_locator
 		self::$folder_levels = $folder_levels;
 
 		/* if we are in development mode or the cache path is missing */
-		if (ENVIRONMENT == 'development' || !file_exists(self::$cache_path)) {
+		if (!file_exists(self::$cache_path)) {
 			/* load $autoload config variable */
 			$autoload = load_config('autoload', 'autoload');
 
@@ -161,7 +161,7 @@ class Orange_locator
 			'classes' => array_replace(
 				self::search('/libraries/', '(.*).php', 'filename'),
 				self::search('/middleware/', '(.*)Middleware.php', 'filename'),
-				self::search('/controllers/traits/', '(.*)_controller_trait.php', 'filename'),
+				self::search('/controllers/traits/', '(.*)_trait.php', 'filename'),
 				self::search('/models/', '(.*).php', 'filename'),
 				self::search('/core/', '(.*).php', 'filename'),
 				self::globr(BASEPATH, '(.*).php', 'class_name') /* add the CodeIgniter system folder */
@@ -192,8 +192,7 @@ class Orange_locator
 
 		foreach ($paths as $p) {
 			if (file_exists($p)) {
-				$it = new RecursiveDirectoryIterator($p);
-				foreach (new RecursiveIteratorIterator($it) as $file) {
+				foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator($p)) as $file) {
 					if (substr($file->getBasename(), -strlen($ends_with)) == $ends_with) {
 						$uri = str_replace(ROOTPATH, '', $file->getPathname());
 						$pos = strpos($uri, $path_section);

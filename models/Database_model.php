@@ -911,7 +911,7 @@ class Database_model extends MY_Model
 				if ($single_column) {
 					$results[$dbr->$array_key] = $dbr->$single_column;
 				} else {
-					$results[$dbr->$array_key] = $dbr;
+					$results[$dbr->$array_key] = (array)$dbr;
 				}
 			}
 
