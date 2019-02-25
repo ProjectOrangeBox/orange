@@ -67,20 +67,30 @@ class MY_Config extends CI_Config
 		/* have we loaded the config? */
 		$this->_load_config();
 
-		$key = false;
+		$value = $default;
+		$section = false;
 
 		if (strpos($setting, '.')) {
-			list($file, $key) = explode('.', strtolower($setting), 2);
+			list($file, $key) = explode('.',$setting, 2);
 		} else {
-			$file = strtolower($setting);
+			$file = $setting;
+			$key = false;
 		}
 
-		$file = str_replace(' ', '_', $file);
+		$file = $this->normalize_section($file);
+
+		if (isset($this->config[$file])) {
+			$section = $this->config[$file];
+		}
 
 		if ($key) {
-			$value = isset($this->config[$file], $this->config[$file][$key]) ? $this->config[$file][$key] : $default;
-		} else {
-			$value = isset($this->config[$file]) ? $this->config[$file] : $default;
+			$key = $this->normalize_key($key);
+
+			if (isset($section[$key])) {
+				$value = $section[$key];
+			}
+		} elseif($section) {
+			$value = $section;
 		}
 
 		return $value;
@@ -109,9 +119,9 @@ class MY_Config extends CI_Config
 		list($file, $key) = explode('.', strtolower($setting), 2);
 
 		if ($key) {
-			$this->config[$file][$key] = $value;
+			$this->config[$this->normalize_section($file)][$this->normalize_key($key)] = $value;
 		} else {
-			$this->config[$file] = $value;
+			$this->config[$this->normalize_section($file)] = $value;
 		}
 
 		/* allow chaining */
@@ -183,7 +193,7 @@ class MY_Config extends CI_Config
 
 				if (is_array($config)) {
 					foreach ($config as $key=>$value) {
-						$built_config[strtolower($basename)][strtolower($key)] = $value;
+						$built_config[$this->normalize_section($basename)][$this->normalize_key($key)] = $value;
 					}
 				}
 			}
@@ -194,7 +204,7 @@ class MY_Config extends CI_Config
 
 				if (is_array($db_configs)) {
 					foreach ($db_configs as $record) {
-						$built_config[strtolower($record->group)][strtolower($record->name)] = convert_to_real($record->value);
+						$built_config[$this->normalize_section($record->group)][$this->normalize_key($record->name)] = convert_to_real($record->value);
 					}
 				}
 			}
@@ -208,4 +218,15 @@ class MY_Config extends CI_Config
 
 		return $complete_config;
 	}
+
+	protected function normalize_section(string $string) : string
+	{
+		return str_replace(['_','-'],' ',strtolower($string));
+	}
+
+	protected function normalize_key(string $string) : string
+	{
+		return strtolower($string);
+	}
+
 } /* end class */
