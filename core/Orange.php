@@ -677,3 +677,71 @@ if (!function_exists('quick_merge')) {
 		return $template;
 	}
 }
+
+/**
+ *
+ * Get the registered packages
+ *
+ * @access global
+ *
+ * @param string $pre false
+ * @param string $post false
+ * @param bool $sort false
+ *
+ * @return array
+ *
+ * #### Example
+ * ```php
+ *
+ * ```
+ */
+if (!function_exists('get_packages')) {
+	function get_packages(string $pre = null,string $post = null,bool $sort = false)
+	{
+		$autoload = load_config('autoload', 'autoload');
+
+		$packages = $autoload['packages'];
+
+		/* de dup values */
+		$packages = array_unique($packages);
+
+		if ($pre) {
+			foreach (explode(',',strtolower($pre)) as $x) {
+				switch ($x) {
+					case 'root':
+						array_unshift($packages,'');
+					break;
+					case 'app':
+						array_unshift($packages,rtrim(APPPATH,'/'));
+					break;
+					case 'system':
+						array_unshift($packages,rtrim(BASEPATH,'/'));
+					break;
+				}
+			}
+		}
+
+		if ($post) {
+			foreach (explode(',',strtolower($post)) as $x) {
+				switch ($x) {
+					case 'root':
+						$packages[] = '';
+					break;
+					case 'app':
+						$packages[] = rtrim(APPPATH,'/');
+					break;
+					case 'system':
+						$packages[] = rtrim(BASEPATH,'/');
+					break;
+				}
+			}
+		}
+
+		/* do we need to sort this? */
+		if ($sort) {
+			sort($packages);
+		}
+
+		return $packages;
+	}
+}
