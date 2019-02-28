@@ -76,8 +76,10 @@ class Orange_locator
 		if (!file_exists(self::$cache_path)) {
 			/* load $autoload config variable */
 			$autoload = load_config('autoload', 'autoload');
+			
+			array_unshift($autoload['packages'],rtrim(APPPATH,'/'));
 
-			self::$paths = explode(PATH_SEPARATOR, rtrim(APPPATH, '/').PATH_SEPARATOR.implode(PATH_SEPARATOR, $autoload['packages']));
+			self::$paths = array_unique($autoload['packages']);
 
 			self::$array = self::build_cache($autoload);
 
