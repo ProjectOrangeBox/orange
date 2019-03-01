@@ -30,7 +30,7 @@
  *
  */
 
-class MY_Output extends CI_Output
+class MY_Output extends \CI_Output
 {
 	/**
 	 * JSON encoding for all json output

@@ -1,6 +1,6 @@
 <?php
 
-class MainController extends MY_Controller
+class MainController extends \MY_Controller
 {
 	public function indexAction()
 	{

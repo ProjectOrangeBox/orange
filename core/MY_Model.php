@@ -22,7 +22,7 @@
  *
  */
 
-class MY_Model extends CI_Model
+class MY_Model extends \CI_Model
 {
 	/**
 	 * Formatted array of rules for this model
@@ -99,7 +99,7 @@ class MY_Model extends CI_Model
 		log_message('debug', 'MY_Model::rule '.$key.' '.$section);
 
 		$rule = ($section) ? $this->rules[$key][$section] : $this->rules[$key];
-		
+
 		return ($rule === null) ? false : $rule;
 	}
 
@@ -314,7 +314,7 @@ class MY_Model extends CI_Model
 					$remapped_data[$rule['field']] = $data[$key];
 				}
 			}
-			
+
 			/**
 			 * reassign the new data to the data reference
 			 */

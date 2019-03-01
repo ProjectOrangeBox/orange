@@ -119,7 +119,6 @@ class Auth
 		$this->session = &ci('session');
 		$this->event = &ci('event');
 		$this->errors = &ci('errors');
-		$this->controller = &ci();
 
 		$this->user_model =& ci('o_user_model');
 
@@ -161,7 +160,7 @@ class Auth
 	public function switch_to_nobody() : Auth
 	{
 		$this->refresh_userdata($this->config['nobody user id'], false);
-		
+
 		return $this;
 	}
 
@@ -240,8 +239,8 @@ class Auth
 			/* no real need to have this floating around */
 			unset($profile->password);
 
-			/* update the CodeIgniter user object to the profile */
-			$this->controller->user = &$profile;
+			/* Attach profile object as user "service" */
+			ci('user',$profile);
 
 			/* should we save this profile id in the session? */
 			if ($save_session) {

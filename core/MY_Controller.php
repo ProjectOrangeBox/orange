@@ -31,7 +31,7 @@
  *
  */
 
-class MY_Controller extends CI_Controller
+class MY_Controller extends \CI_Controller
 {
 	/**
 	 * Cache the controllers output in seconds
@@ -99,7 +99,7 @@ class MY_Controller extends CI_Controller
 	 * @var string
 	 */
 	public $controller_model;
-	
+
 	public $user;
 
 	/**

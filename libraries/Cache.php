@@ -30,7 +30,7 @@
  * @config key_prefix `cache.`
  *
  */
-class Cache extends CI_Cache
+class Cache extends \CI_Cache
 {
 	/**
 	 * errors configuration array
@@ -196,7 +196,7 @@ class Cache extends CI_Cache
 				}
 			}
 		}
-		
+
 		return $this;
 	}
 } /* end class */

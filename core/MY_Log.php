@@ -33,7 +33,7 @@
  *
  */
 
-class MY_Log extends CI_Log
+class MY_Log extends \CI_Log
 {
 	/**
 	 * Local reference to monolog object
@@ -128,7 +128,7 @@ class MY_Log extends CI_Log
 
 			$this->bootstrap();
 		}
-		
+
 		return $this;
 	}
 
@@ -323,12 +323,12 @@ class MY_Log extends CI_Log
 	{
 		if (isset($this->config['log_threshold'])) {
 			$log_threshold = $this->config['log_threshold'];
-			
+
 			/* if they sent in a string split it into a array */
 			if (is_string($log_threshold)) {
 				$log_threshold = explode(',', $log_threshold);
 			}
-			
+
 			/* is the array empty? */
 			if (is_array($log_threshold)) {
 				if (count($log_threshold) == 0) {
@@ -349,7 +349,7 @@ class MY_Log extends CI_Log
 
 				foreach ($log_threshold as $t) {
 					$t = strtoupper($t);
-					
+
 					if (isset($this->psr_levels[$t])) {
 						$int += $this->psr_levels[$t];
 					}
@@ -359,7 +359,7 @@ class MY_Log extends CI_Log
 			}
 
 			$this->_threshold = (int)$log_threshold;
-			
+
 			$this->_enabled = ($this->_threshold > 0);
 		}
 

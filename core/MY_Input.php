@@ -37,7 +37,7 @@
  *
  */
 
-class MY_Input extends CI_Input
+class MY_Input extends \CI_Input
 {
 	/**
 	 * Contains the current POST or PUT or PATCH request data
@@ -481,9 +481,9 @@ class MY_Input extends CI_Input
 		if (!in_array($request_type, ['cli','ajax','html'])) {
 			throw new Exception(__METHOD__.' unknown type '.$request_type.'.');
 		}
-		
+
 		$this->request_type = $request_type;
-		
+
 		return $this;
 	}
 
@@ -542,10 +542,10 @@ class MY_Input extends CI_Input
 	{
 		/* read the stashed data if any */
 		$stashed = ci('session')->tempdata($this->stash_key);
-		
+
 		/* clear the stashed data */
 		ci('session')->unset_tempdata($this->stash_key);
-		
+
 		/* set the request to the stashed data or nothing is it's not an array */
 		$this->_request = (is_array($stashed)) ? $stashed : [];
 

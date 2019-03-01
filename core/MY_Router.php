@@ -36,7 +36,7 @@
  *
  */
 
-class MY_Router extends CI_Router
+class MY_Router extends \CI_Router
 {
 	/**
 	 * Storage for the clean version of the Controller Class without the Controller Suffix
@@ -58,7 +58,7 @@ class MY_Router extends CI_Router
 	 * @var Array
 	 */
 	protected $loaded_routes = [];
-	
+
 	/**
 	 * Storage for current route
 	 *

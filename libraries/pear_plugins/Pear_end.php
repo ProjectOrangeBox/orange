@@ -22,7 +22,7 @@
  *
  */
 
-class Pear_end extends Pear_plugin
+class Pear_end extends \Pear_plugin
 {
 	public function render()
 	{

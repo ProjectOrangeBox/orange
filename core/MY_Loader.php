@@ -23,7 +23,7 @@
  * @filesource
  *
  */
-class MY_Loader extends CI_Loader
+class MY_Loader extends \CI_Loader
 {
 
 	/**
@@ -171,18 +171,43 @@ class MY_Loader extends CI_Loader
 	 */
 	protected function instantiate(string $name, string $prefix = '', bool $attach = false, array &$config=[], $object_name=null)
 	{
+		/**
+		 * Warning multiple exits (6)
+		 */
 		$CI = get_instance();
 
 		/* is it already setup? */
 		if (isset($CI->$name)) {
+			/* exit 1 */
 			return $this;
 		}
 
 		$find = $name;
 		$autoload = load_config('autoload', 'autoload');
 
-		$success = false;
+		/* is this a service */
+		$services = $autoload['services'];
 
+		if (is_array($services)) {
+			if (isset($services[$name])) {
+				/* it's a service */
+				$namespaced_class = $services[$name];
+
+				if ($attach) {
+					$CI->$name = new $namespaced_class($config);
+
+					/* exit 2 */
+					return true;
+				} else {
+					/* create and return */
+
+					/* exit 3 */
+					return new $namespaced_class($config);
+				}
+			}
+		}
+
+		/* remap this? */
 		if (!$object_name) {
 			if (is_array($autoload['remap'])) {
 				$remap = array_reverse($autoload['remap'], true);
@@ -195,6 +220,7 @@ class MY_Loader extends CI_Loader
 			$find = $object_name;
 		}
 
+		/* old school locator */
 		if (class_exists($prefix.$find)) {
 			$path = orange_locator::class($prefix.$find);
 
@@ -205,13 +231,17 @@ class MY_Loader extends CI_Loader
 			if ($attach) {
 				$CI->$name = new $class_name($config);
 
-				$success = true;
+				/* exit 4 */
+				return true;
 			} else {
 				/* create and return */
+
+				/* exit 5 */
 				return new $class_name($config);
 			}
 		}
 
-		return $success;
+		/* exit 6 */
+		return false;
 	}
 } /* end class */

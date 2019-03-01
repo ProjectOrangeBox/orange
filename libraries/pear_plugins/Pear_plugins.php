@@ -22,7 +22,7 @@
  *
  */
 
-class Pear_plugins extends Pear_plugin
+class Pear_plugins extends \Pear_plugin
 {
 	public function render(string $input = null)
 	{

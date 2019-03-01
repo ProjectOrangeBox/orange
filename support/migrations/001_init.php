@@ -2,7 +2,7 @@
 
 /* 001_init.php */
 
-class Migration_001_init extends Migration_base
+class Migration_001_init extends \Migration_base
 {
 
 	/* example up function */

@@ -22,7 +22,7 @@
  *
  */
 
-class Pear_include extends Pear_plugin
+class Pear_include extends \Pear_plugin
 {
 	public function render(string $view = null, array $data = [], $name = true)
 	{

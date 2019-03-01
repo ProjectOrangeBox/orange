@@ -22,7 +22,7 @@
  *
  */
 
-class Pear_parent extends Pear_plugin
+class Pear_parent extends \Pear_plugin
 {
 	public function render(string $name = null)
 	{

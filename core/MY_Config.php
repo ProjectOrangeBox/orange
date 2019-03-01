@@ -34,7 +34,7 @@
  *
  */
 
-class MY_Config extends CI_Config
+class MY_Config extends \CI_Config
 {
 	/**
 	 * track if the combined cached configuration has been loaded
