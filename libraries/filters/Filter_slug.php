@@ -23,7 +23,7 @@
  *
  */
 
-class Filter_slug extends Filter_base
+class Filter_slug extends \Filter_base
 {
 	public function filter(&$field, string $options = '') : void
 	{

@@ -8,6 +8,8 @@
  * Copyright (c) 2014 - 2019, Project Orange Box
  */
 
+namespace projectorangebox\orange\libraries;
+
 /**
  * Validate class.
  *
@@ -256,7 +258,7 @@ class Validate
 	 * ci('validate')->attach('return_true',function(&$field, $options) { return true; });
 	 * ```
 	 */
-	public function attach(string $name, closure $closure) : Validate
+	public function attach(string $name, \closure $closure) : Validate
 	{
 		$this->attached[$this->_normalize_rule($name)] = $closure;
 
@@ -492,7 +494,7 @@ class Validate
 		} elseif (function_exists($short_rule)) {
 			$field = ($param) ? $short_rule($field, $param) : $short_rule($field);
 		} else {
-			throw new Exception('Could not filter '.$rule);
+			throw new \Exception('Could not filter '.$rule);
 		}
 
 		/* filters don't fail */
@@ -528,7 +530,7 @@ class Validate
 		} elseif (function_exists($short_rule)) {
 			$success = ($param) ? $short_rule($field, $param) : $short_rule($field);
 		} else {
-			throw new Exception('Could not validate '.$rule);
+			throw new \Exception('Could not validate '.$rule);
 		}
 
 		/* if success is really really false then it's a error */

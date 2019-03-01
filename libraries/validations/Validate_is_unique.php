@@ -21,7 +21,7 @@
  * @help Note: This rule requires Query Builder to be enabled in order to work.
  *
  */
-class Validate_is_unique extends Validate_base
+class Validate_is_unique extends \Validate_base
 {
 	public function validate(&$field, string $options = '') : bool
 	{

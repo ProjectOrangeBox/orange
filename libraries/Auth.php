@@ -230,7 +230,7 @@ class Auth
 		log_message('debug', 'Auth::refresh_userdata::'.$user_primary_key);
 
 		if (empty($user_primary_key)) {
-			throw new Exception('Auth session refresh user identifier empty.');
+			throw new \Exception('Auth session refresh user identifier empty.');
 		}
 
 		$profile = $this->user_model->get_by_primary_ignore_read_role($user_primary_key);

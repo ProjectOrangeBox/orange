@@ -8,6 +8,8 @@
  * Copyright (c) 2014 - 2019, Project Orange Box
  */
 
+namespace projectorangebox\orange\libraries;
+
 /**
  * Authorization class.
  *
@@ -112,7 +114,7 @@ class Wallet
 
 		/* set the view variable if any messages are available */
 		$current_messages = $this->session->flashdata($this->msg_key);
-		
+
 		if (is_array($current_messages)) {
 			$this->set_view_variable($current_messages);
 		}

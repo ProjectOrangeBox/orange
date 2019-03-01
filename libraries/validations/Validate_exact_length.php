@@ -20,7 +20,7 @@
  * @help is exactly the parameter value.
  *
  */
-class Validate_exact_length extends Validate_base
+class Validate_exact_length extends \Validate_base
 {
 	public function validate(&$field, string $options = '') : bool
 	{

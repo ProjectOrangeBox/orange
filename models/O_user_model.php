@@ -215,7 +215,7 @@ class O_user_model extends Database_model
 	public function add_role(int $user_id, $role)
 	{
 		if ((int) $user_id < 0) {
-			throw new Exception(__METHOD__.' please provide an integer for the user id');
+			throw new \Exception(__METHOD__.' please provide an integer for the user id');
 		}
 
 		if (is_array($role)) {
@@ -246,7 +246,7 @@ class O_user_model extends Database_model
 	public function remove_role(int $user_id, $role = null)
 	{
 		if ((int) $user_id < 0) {
-			throw new Exception(__METHOD__.' please provide an integer for the user id');
+			throw new \Exception(__METHOD__.' please provide an integer for the user id');
 		}
 
 		if (is_array($role)) {

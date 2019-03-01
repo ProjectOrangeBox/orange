@@ -22,7 +22,7 @@
  *
  */
 
-class Filter_visible extends Filter_base
+class Filter_visible extends \Filter_base
 {
 	public function filter(&$field, string $options = '') : void
 	{

@@ -239,7 +239,7 @@ class Database_model extends MY_Model
 		parent::__construct();
 
 		if (empty($this->table)) {
-			throw new Exception('Database model table not specified.');
+			throw new \Exception('Database model table not specified.');
 		}
 
 		/* models aren't always database tables so set the object name to the table name */
@@ -251,7 +251,7 @@ class Database_model extends MY_Model
 		/* is db group set? then that's the connection config we will use */
 		if (isset($this->db_group)) {
 			log_message('debug', 'Database Model using "'.$this->object.'::'.$this->db_group.'" connection.');
-		
+
 			/* use our specified connection */
 			$this->_database = &$this->load->database($this->db_group, true);
 			$this->read_database = &$this->_database;
@@ -280,7 +280,7 @@ class Database_model extends MY_Model
 		}
 
 		if ((!isset($this->read_database) && !isset($this->write_database)) || !isset($this->_database)) {
-			throw new Exception('Database Model could not attach to database.');
+			throw new \Exception('Database Model could not attach to database.');
 		}
 
 		/* Reset Orange Database Model Query Builder and CodeIgniter Query Builder */
@@ -321,7 +321,7 @@ class Database_model extends MY_Model
 		if (method_exists($this->_database, $name)) {
 			call_user_func_array([$this->_database,$name], $arguments);
 		} else {
-			throw new Exception('Unknown method "'.$name.'".');
+			throw new \Exception('Unknown method "'.$name.'".');
 		}
 
 		return $this;
@@ -654,7 +654,7 @@ class Database_model extends MY_Model
 		/* the primary key must be set to use this command */
 		if (!isset($data[$this->primary_key])) {
 			/* if not than throw error */
-			throw new Exception('Database Model update primary key missing');
+			throw new \Exception('Database Model update primary key missing');
 		}
 
 		/* call by using the primary key */
@@ -1167,7 +1167,7 @@ class Database_model extends MY_Model
 			} else {
 				/* more than 1 column found? this shouldn't be possible with the limit used above */
 				if (count($results) != 1) {
-					throw new Exception(count($results).' rows found when trying to use column(...). This only works when your query returns a single record.');
+					throw new \Exception(count($results).' rows found when trying to use column(...). This only works when your query returns a single record.');
 				}
 
 				/* ok we got a single column so return the column value */
@@ -1234,7 +1234,7 @@ class Database_model extends MY_Model
 	protected function switch_database(string $which) : Database_model
 	{
 		if (!in_array($which, ['read','write'])) {
-			throw new Exception('Cannot switch database connection '.__CLASS__.' '.$which);
+			throw new \Exception('Cannot switch database connection '.__CLASS__.' '.$which);
 		}
 
 		if ($which == 'read' && $this->read_database) {
@@ -1266,12 +1266,12 @@ class Database_model extends MY_Model
 		} elseif (is_array($arg)) {
 			$where = $arg;
 		} else {
-			throw new Exception('Unable to determine where clause in "'.__CLASS__.'"');
+			throw new \Exception('Unable to determine where clause in "'.__CLASS__.'"');
 		}
 
 		if ($primary_id_required) {
 			if (!isset($where[$this->primary_key])) {
-				throw new Exception('Unable to determine primary id where clause in "'.__CLASS__.'"');
+				throw new \Exception('Unable to determine primary id where clause in "'.__CLASS__.'"');
 			}
 		}
 

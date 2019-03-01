@@ -22,7 +22,7 @@
  * @filesource
  *
  */
-abstract class Filter_base extends Validate_base
+abstract class Filter_base extends \Validate_base
 {
 	/**
 	 *

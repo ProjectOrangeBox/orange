@@ -8,6 +8,8 @@
  * Copyright (c) 2014 - 2019, Project Orange Box
  */
 
+namespace projectorangebox\orange\libraries;
+
 /**
  * Unified Error collecting class.
  *
@@ -264,7 +266,7 @@ class Errors
 
 		/* options include cli, ajax, html */
 		if (!in_array($request_type, ['cli','ajax','json','html','array'])) {
-			throw new Exception(__METHOD__.' unknown type '.$request_type.'.');
+			throw new \Exception(__METHOD__.' unknown type '.$request_type.'.');
 		}
 
 		$this->request_type = $request_type;
@@ -750,7 +752,7 @@ class Errors
 
 		/* get a list of all the found views */
 		if (!$_file = realpath($this->errors_view_path.$_view.'.php')) {
-			throw new Exception('Could not locate error view "'.$this->errors_view_path.$_view.'"');
+			throw new \Exception('Could not locate error view "'.$this->errors_view_path.$_view.'"');
 		}
 
 		/* import variables into the current symbol table from an only prefix invalid/numeric variable names with _ 	*/

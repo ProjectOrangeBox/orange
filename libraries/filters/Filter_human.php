@@ -22,7 +22,7 @@
  * @filesource
  *
  */
-class Filter_human extends Filter_base
+class Filter_human extends \Filter_base
 {
 	public function filter(&$field, string $options = '') : void
 	{

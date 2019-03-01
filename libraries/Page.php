@@ -8,6 +8,8 @@
  * Copyright (c) 2014 - 2019, Project Orange Box
  */
 
+namespace projectorangebox\orange\libraries;
+
 /**
  * HTML Page Building
  *
@@ -184,7 +186,7 @@ class Page
 		$view = ($view) ?? $this->default_view;
 
 		if ($view == null) {
-			throw new Exception('No View provided for page render.');
+			throw new \Exception('No View provided for page render.');
 		}
 
 		/* called everytime - use with caution */
@@ -304,7 +306,7 @@ class Page
 	public function extend(string $template = null) : Page
 	{
 		if ($this->extending) {
-			throw new Exception('You are already extending "'.$this->extending.'" therefore we cannot extend "'.$name.'".');
+			throw new \Exception('You are already extending "'.$this->extending.'" therefore we cannot extend "'.$name.'".');
 		}
 
 		$this->extending = $template;
@@ -687,7 +689,7 @@ class Page
 			return $this->_var($arguments[0]);
 		}
 
-		throw new Exception('Page Method '.$name.' unsupported.');
+		throw new \Exception('Page Method '.$name.' unsupported.');
 	}
 
 	/**

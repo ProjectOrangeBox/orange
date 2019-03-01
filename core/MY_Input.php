@@ -341,7 +341,7 @@ class MY_Input extends \CI_Input
 			/* if it's a array then use what they sent in */
 			$request = $_request;
 		} else {
-			throw new Exception('Request Process input not an array or boolean.');
+			throw new \Exception('Request Process input not an array or boolean.');
 		}
 
 		$append_model = ($append_model === true) ? '_model' : $append_model;
@@ -479,7 +479,7 @@ class MY_Input extends \CI_Input
 	{
 		/* options include cli, ajax, html */
 		if (!in_array($request_type, ['cli','ajax','html'])) {
-			throw new Exception(__METHOD__.' unknown type '.$request_type.'.');
+			throw new \Exception(__METHOD__.' unknown type '.$request_type.'.');
 		}
 
 		$this->request_type = $request_type;

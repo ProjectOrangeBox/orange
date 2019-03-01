@@ -20,7 +20,7 @@
  * @help is shorter than the parameter value.
  *
  */
-class Validate_max_length extends Validate_base
+class Validate_max_length extends \Validate_base
 {
 	public function validate(&$field, string $options = '') : bool
 	{

@@ -20,7 +20,7 @@
  * @help value provided in a comma separated list are valid emails.
  *
  */
-class Validate_valid_emails extends Validate_base
+class Validate_valid_emails extends \Validate_base
 {
 	public function validate(&$field, string $options = '') : bool
 	{

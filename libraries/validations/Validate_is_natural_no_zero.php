@@ -20,7 +20,7 @@
  * @help contains a natural number, but not zero: 1, 2, 3, etc.
  *
  */
-class Validate_is_natural_no_zero extends Validate_base
+class Validate_is_natural_no_zero extends \Validate_base
 {
 	public function validate(&$field, string $options = '') : bool
 	{

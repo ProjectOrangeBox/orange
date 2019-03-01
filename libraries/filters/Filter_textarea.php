@@ -22,7 +22,7 @@
  *
  */
 
-class Filter_textarea extends Filter_base
+class Filter_textarea extends \Filter_base
 {
 	public function filter(&$field, string $options = '') : void
 	{

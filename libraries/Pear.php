@@ -85,7 +85,7 @@ class Pear
 				return call_user_func_array([self::$loaded_plugins[$name],'render'], $arguments);
 			}
 		}
-		
+
 		/* Are the CodeIgniter Helpers loaded? let's track this so we don't try over and over */
 		if (!self::$helpers_loaded) {
 			ci('load')->helper(['html','form','date','inflector','language','number','text']);
@@ -104,7 +104,7 @@ class Pear
 		}
 
 		/* beats me */
-		throw new Exception('Plugin missing "'.$name.'"');
+		throw new \Exception('Plugin missing "'.$name.'"');
 	}
 
 	/**
@@ -129,7 +129,7 @@ class Pear
 			if (class_exists($class_name, true)) {
 				self::$loaded_plugins[$name] = new $class_name;
 			} elseif ($throw_error) {
-				throw new Exception('Could not load "'.$class_name.'"');
+				throw new \Exception('Could not load "'.$class_name.'"');
 			}
 		}
 	}

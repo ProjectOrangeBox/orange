@@ -20,7 +20,7 @@
  * @help is less than the parameter value or not numeric.
  *
  */
-class Validate_less_than extends Validate_base
+class Validate_less_than extends \Validate_base
 {
 	public function validate(&$field, string $options = '') : bool
 	{

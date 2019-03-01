@@ -20,7 +20,7 @@
  * @help contains anything other than a decimal number.
  *
  */
-class Validate_decimal extends Validate_base
+class Validate_decimal extends \Validate_base
 {
 	public function validate(&$field, string $options = '') : bool
 	{

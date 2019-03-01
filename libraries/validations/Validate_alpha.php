@@ -20,7 +20,7 @@
  * @help contains anything other than alphabetical characters.
  *
  */
-class Validate_alpha extends Validate_base
+class Validate_alpha extends \Validate_base
 {
 	public function validate(&$field, string $options = '') : bool
 	{

@@ -20,7 +20,7 @@
  * @help contains anything other than alpha-numeric, space characters.
  *
  */
-class Validate_alpha_numeric_spaces extends Validate_base
+class Validate_alpha_numeric_spaces extends \Validate_base
 {
 	public function validate(&$field, string $options = '') : bool
 	{

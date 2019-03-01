@@ -20,7 +20,7 @@
  * @help is not empty.
  *
  */
-class Validate_required extends Validate_base
+class Validate_required extends \Validate_base
 {
 	public function validate(&$field, string $options = '') : bool
 	{

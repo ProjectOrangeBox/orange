@@ -22,7 +22,7 @@
  * @filesource
  *
  */
-class Filter_float extends Filter_base
+class Filter_float extends \Filter_base
 {
 	public function filter(&$field, string $options = '') : void
 	{

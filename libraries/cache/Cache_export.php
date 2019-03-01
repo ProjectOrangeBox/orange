@@ -58,7 +58,7 @@ class Cache_export extends CI_Driver
 	 * @var \Input
 	 */
 	protected $input;
-	
+
 	/**
 	 * suffix all export cache file have
 	 *
@@ -136,7 +136,7 @@ class Cache_export extends CI_Driver
 		} elseif (is_scalar($data)) {
 			$data = '<?php return "'.str_replace('"', '\"', $data).'";';
 		} else {
-			throw new Exception('Cache export save unknown data type.');
+			throw new \Exception('Cache export save unknown data type.');
 		}
 
 		atomic_file_put_contents($this->config['cache_path'].$id.'.meta'.$this->suffix, '<?php return '.var_export(['strlen' => strlen($data), 'time' => time(), 'ttl' => (int) $ttl, 'expire' => (time() + $ttl)], true).';');

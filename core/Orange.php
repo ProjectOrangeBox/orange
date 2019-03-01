@@ -88,7 +88,7 @@ if (!function_exists('load_class')) {
 
 		if ($name === false) {
 			set_status_header(503);
-			throw new Exception('Unable to locate the specified class: "'.$class.'.php"');
+			throw new \Exception('Unable to locate the specified class: "'.$class.'.php"');
 		}
 
 		is_loaded($class);
@@ -172,7 +172,7 @@ if (!function_exists('config')) {
 
 		/* only throw an error if nothing found and no default given */
 		if ($value === '%%no_value%%') {
-			throw new Exception('The config variable "'.$setting.'" is not set and no default was provided.');
+			throw new \Exception('The config variable "'.$setting.'" is not set and no default was provided.');
 		}
 
 		return $value;
@@ -264,7 +264,7 @@ if (!function_exists('env')) {
 	function env(string $key, $default=null)
 	{
 		if (!isset($_ENV[$key]) && $default === null) {
-			throw new Exception('The environmental variable "'.$key.'" is not set and no default was provided.');
+			throw new \Exception('The environmental variable "'.$key.'" is not set and no default was provided.');
 		}
 
 		return (isset($_ENV[$key])) ? $_ENV[$key] : $default;
@@ -351,7 +351,7 @@ if (!function_exists('view')) {
 		/* get a list of all the found views */
 		if (!$_op = orange_locator::view($_file)) {
 			/* Not Found */
-			throw new Exception('Could not locate view "'.$_file.'"');
+			throw new \Exception('Could not locate view "'.$_file.'"');
 		}
 
 		/* import variables into the current symbol table from an only prefix invalid/numeric variable names with _ 	*/
@@ -384,7 +384,7 @@ if (!function_exists('atomic_file_put_contents')) {
 
 		/* is the directory writeable */
 		if (!is_writable($dirname)) {
-			throw new Exception('atomic file put contents folder "'.$dirname.'" not writable');
+			throw new \Exception('atomic file put contents folder "'.$dirname.'" not writable');
 		}
 
 		/* create file with unique file name with prefix */
@@ -392,7 +392,7 @@ if (!function_exists('atomic_file_put_contents')) {
 
 		/* did we get a temporary filename */
 		if ($tmpfname === false) {
-			throw new Exception('atomic file put contents could not create temp file');
+			throw new \Exception('atomic file put contents could not create temp file');
 		}
 
 		/* write to the temporary file */
@@ -400,17 +400,17 @@ if (!function_exists('atomic_file_put_contents')) {
 
 		/* did we write anything? */
 		if ($bytes === false) {
-			throw new Exception('atomic file put contents could not file put contents');
+			throw new \Exception('atomic file put contents could not file put contents');
 		}
 
 		/* changes file permissions so I can read/write and everyone else read */
 		if (chmod($tmpfname, 0644) === false) {
-			throw new Exception('atomic file put contents could not change file mode');
+			throw new \Exception('atomic file put contents could not change file mode');
 		}
 
 		/* move it into place - this is the atomic function */
 		if (rename($tmpfname, $filepath) === false) {
-			throw new Exception('atomic file put contents could not make atomic switch');
+			throw new \Exception('atomic file put contents could not make atomic switch');
 		}
 
 		/* if it's cached we need to flush it out so the old one isn't loaded */

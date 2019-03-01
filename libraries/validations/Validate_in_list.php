@@ -20,7 +20,7 @@
  * @help is within a predetermined list.
  *
  */
-class Validate_in_list extends Validate_base
+class Validate_in_list extends \Validate_base
 {
 	public function validate(&$field, string $options = '') : bool
 	{

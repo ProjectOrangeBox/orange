@@ -20,7 +20,7 @@
  * @help matches the field in the parameter.
  *
  */
-class Validate_matches extends Validate_base
+class Validate_matches extends \Validate_base
 {
 	public function validate(&$field, string $options = '') : bool
 	{

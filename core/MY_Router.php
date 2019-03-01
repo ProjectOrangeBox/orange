@@ -355,7 +355,7 @@ class MY_Router extends \CI_Router
 	protected function _set_default_controller() : void
 	{
 		if (empty($this->default_controller)) {
-			throw new Exception('Unable to determine what should be displayed. A default route has not been specified in the routing file.');
+			throw new \Exception('Unable to determine what should be displayed. A default route has not been specified in the routing file.');
 		}
 
 		$segments = $this->controller_method($this->default_controller);
