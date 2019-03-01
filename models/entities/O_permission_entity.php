@@ -9,7 +9,7 @@
  */
 
 /**
- * Database Record Entity for a Permissions 
+ * Database Record Entity for a Permissions
  *
  * @package CodeIgniter / Orange
  * @author Don Myers
@@ -88,6 +88,4 @@ class O_permission_entity extends Database_model_entity
 	{
 		return ci()->o_permission_model->roles($this->id);
 	}
-
 } /* end class */
-

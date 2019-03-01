@@ -54,7 +54,7 @@ abstract class Database_model_entity
 	{
 		/* strip off the _entity part and replace with _model */
 		if (!is_string($this->_model_name)) {
-			$this->_model_name = strtolower(substr(get_called_class(),0,-7).'_model');
+			$this->_model_name = strtolower(substr(get_called_class(), 0, -7).'_model');
 		}
 
 		log_message('info', 'Database_model_entity Class Initialized');

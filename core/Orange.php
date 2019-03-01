@@ -696,7 +696,7 @@ if (!function_exists('quick_merge')) {
  * ```
  */
 if (!function_exists('get_packages')) {
-	function get_packages(string $pre = null,string $post = null,bool $sort = false)
+	function get_packages(string $pre = null, string $post = null, bool $sort = false)
 	{
 		$autoload = load_config('autoload', 'autoload');
 
@@ -706,32 +706,32 @@ if (!function_exists('get_packages')) {
 		$packages = array_unique($packages);
 
 		if ($pre) {
-			foreach (explode(',',strtolower($pre)) as $x) {
+			foreach (explode(',', strtolower($pre)) as $x) {
 				switch ($x) {
 					case 'root':
-						array_unshift($packages,'');
+						array_unshift($packages, '');
 					break;
 					case 'app':
-						array_unshift($packages,rtrim(APPPATH,'/'));
+						array_unshift($packages, rtrim(APPPATH, '/'));
 					break;
 					case 'system':
-						array_unshift($packages,rtrim(BASEPATH,'/'));
+						array_unshift($packages, rtrim(BASEPATH, '/'));
 					break;
 				}
 			}
 		}
 
 		if ($post) {
-			foreach (explode(',',strtolower($post)) as $x) {
+			foreach (explode(',', strtolower($post)) as $x) {
 				switch ($x) {
 					case 'root':
 						$packages[] = '';
 					break;
 					case 'app':
-						$packages[] = rtrim(APPPATH,'/');
+						$packages[] = rtrim(APPPATH, '/');
 					break;
 					case 'system':
-						$packages[] = rtrim(BASEPATH,'/');
+						$packages[] = rtrim(BASEPATH, '/');
 					break;
 				}
 			}

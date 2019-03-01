@@ -71,7 +71,7 @@ class MY_Config extends CI_Config
 		$section = false;
 
 		if (strpos($setting, '.')) {
-			list($file, $key) = explode('.',$setting, 2);
+			list($file, $key) = explode('.', $setting, 2);
 		} else {
 			$file = $setting;
 			$key = false;
@@ -89,7 +89,7 @@ class MY_Config extends CI_Config
 			if (isset($section[$key])) {
 				$value = $section[$key];
 			}
-		} elseif($section) {
+		} elseif ($section) {
 			$value = $section;
 		}
 
@@ -221,12 +221,11 @@ class MY_Config extends CI_Config
 
 	protected function normalize_section(string $string) : string
 	{
-		return str_replace(['_','-'],' ',strtolower($string));
+		return str_replace(['_','-'], ' ', strtolower($string));
 	}
 
 	protected function normalize_key(string $string) : string
 	{
 		return strtolower($string);
 	}
-
 } /* end class */

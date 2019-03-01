@@ -80,8 +80,8 @@ define('ROOTPATH', realpath(__DIR__.'/../'));
 /* absolute path to project orange box folder? */
 define('ORANGEPATH', ROOTPATH.'/packages/projectorangebox/orange');
 
-define('CACHEPATH',ROOTPATH.'/var/cache');
-define('LOGPATH',ROOTPATH.'/var/logs');
+define('CACHEPATH', ROOTPATH.'/var/cache');
+define('LOGPATH', ROOTPATH.'/var/logs');
 
 /* Changes PHP's current directory to directory */
 chdir(ROOTPATH);
@@ -93,17 +93,17 @@ if (!file_exists('.env')) {
 }
 
 /* bring in the system .env files */
-$_ENV = array_merge($_ENV,parse_ini_file('.env',true,INI_SCANNER_TYPED));
+$_ENV = array_merge($_ENV, parse_ini_file('.env', true, INI_SCANNER_TYPED));
 
 if (file_exists('.env.local')) {
-	$_ENV = array_merge($_ENV,parse_ini_file('.env.local',true,INI_SCANNER_TYPED));
+	$_ENV = array_merge($_ENV, parse_ini_file('.env.local', true, INI_SCANNER_TYPED));
 }
 
-if ($missing = array_diff_key(array_flip(['DEBUG','ENVIRONMENT']),$_ENV)) {
+if ($missing = array_diff_key(array_flip(['DEBUG','ENVIRONMENT']), $_ENV)) {
 	$in = ($method) ? ' in '.$method : '';
 	$s = (count($missing) > 1) ? 's are' : ' is';
 	
-	echo 'The following required value'.$s.' missing: '.implode(', ',array_flip($missing)).$in.'.';
+	echo 'The following required value'.$s.' missing: '.implode(', ', array_flip($missing)).$in.'.';
 	exit(1); // EXIT_ERROR
 }
 
@@ -157,15 +157,15 @@ switch ($_ENV['DEBUG']) {
 		assert_options(ASSERT_QUIET_EVAL, 1);
 	break;
 	default:
-		header('HTTP/1.1 503 Service Unavailable.', TRUE, 503);
+		header('HTTP/1.1 503 Service Unavailable.', true, 503);
 		echo 'The application environment is not set correctly.';
 		exit(1); // EXIT_ERROR
 }
 
-define('ENVIRONMENT',$_ENV['ENVIRONMENT']);
+define('ENVIRONMENT', $_ENV['ENVIRONMENT']);
 
 if (file_exists('.env.'.$_ENV['ENVIRONMENT'])) {
-	$_ENV = $_ENV + parse_ini_file('.env.'.$_ENV['ENVIRONMENT'],true,INI_SCANNER_TYPED);
+	$_ENV = $_ENV + parse_ini_file('.env.'.$_ENV['ENVIRONMENT'], true, INI_SCANNER_TYPED);
 }
 
 /*
@@ -243,7 +243,7 @@ $view_folder = $application_folder.'/views';
 
 // Is the system path correct?
 if (!$system_path = realpath($system_path)) {
-	header('HTTP/1.1 503 Service Unavailable.', TRUE, 503);
+	header('HTTP/1.1 503 Service Unavailable.', true, 503);
 	echo 'Your system folder path does not appear to be set correctly. Please open the following file and correct this: '.pathinfo(__FILE__, PATHINFO_BASENAME);
 	exit(3); // EXIT_CONFIG
 }
@@ -268,7 +268,7 @@ define('SYSDIR', basename(BASEPATH));
 
 
 if (!$application_folder = realpath($application_folder)) {
-	header('HTTP/1.1 503 Service Unavailable.', TRUE, 503);
+	header('HTTP/1.1 503 Service Unavailable.', true, 503);
 	echo 'Your application folder path does not appear to be set correctly. Please open the following file and correct this: '.SELF;
 	exit(3); // EXIT_CONFIG
 }
@@ -276,7 +276,7 @@ if (!$application_folder = realpath($application_folder)) {
 define('APPPATH', $application_folder.DIRECTORY_SEPARATOR);
 
 if (!$view_folder = realpath($view_folder)) {
-	header('HTTP/1.1 503 Service Unavailable.', TRUE, 503);
+	header('HTTP/1.1 503 Service Unavailable.', true, 503);
 	echo 'Your view folder path does not appear to be set correctly. Please open the following file and correct this: '.SELF;
 	exit(3); // EXIT_CONFIG
 }

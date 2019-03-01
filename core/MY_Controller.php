@@ -174,7 +174,7 @@ class MY_Controller extends CI_Controller
 	 */
 	public function indexCliAction()
 	{
-		if (method_exists($this,'helpCliAction')) {
+		if (method_exists($this, 'helpCliAction')) {
 			$this->helpCliAction();
 		}
 	}

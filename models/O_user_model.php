@@ -150,7 +150,7 @@ class O_user_model extends Database_model
 	 * @throws
 	 * @example
 	 */
-	protected function _password_check(string $which,array &$data) : void
+	protected function _password_check(string $which, array &$data) : void
 	{
 		$password_info = password_get_info($data['password']);
 
@@ -191,7 +191,7 @@ class O_user_model extends Database_model
 		$success = !ci('errors')->has();
 
 		if ($success) {
-			$this->update_by(['is_active'=>0],['id'=>$user_id]);
+			$this->update_by(['is_active'=>0], ['id'=>$user_id]);
 			$this->remove_role($user_id);
 		}
 

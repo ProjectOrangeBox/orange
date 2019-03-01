@@ -77,7 +77,7 @@ class Orange_locator
 			/* load $autoload config variable */
 			$autoload = load_config('autoload', 'autoload');
 			
-			array_unshift($autoload['packages'],rtrim(APPPATH,'/'));
+			array_unshift($autoload['packages'], rtrim(APPPATH, '/'));
 
 			self::$paths = array_unique($autoload['packages']);
 

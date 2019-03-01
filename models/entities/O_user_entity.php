@@ -134,7 +134,7 @@ class O_user_entity extends Database_model_entity
 	 * @param string $name
 	 *
 	 * @throws
-	 * @return 
+	 * @return
 	 *
 	 * #### Example
 	 * ```
@@ -196,7 +196,7 @@ class O_user_entity extends Database_model_entity
 
 	/**
 	 *
-	 * Returns Boolean whether the user had this permission 
+	 * Returns Boolean whether the user had this permission
 	 *
 	 * @access public
 	 *
@@ -445,5 +445,4 @@ class O_user_entity extends Database_model_entity
 		
 		return $roles_permissions;
 	}
-
 } /* end class */

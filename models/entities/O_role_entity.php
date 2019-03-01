@@ -9,7 +9,7 @@
  */
 
 /**
- * Database Record Entity for a Role 
+ * Database Record Entity for a Role
  *
  * @package CodeIgniter / Orange
  * @author Don Myers
@@ -75,7 +75,7 @@ class O_role_entity extends Database_model_entity
 	 *
 	 * @param $permission
 	 *
-	 * @return 
+	 * @return
 	 *
 	 */
 	public function add_permission($permission)
@@ -92,7 +92,7 @@ class O_role_entity extends Database_model_entity
 	 * @param $permission
 	 *
 	 * @throws
-	 * @return 
+	 * @return
 	 *
 	 * #### Example
 	 * ```
@@ -110,10 +110,10 @@ class O_role_entity extends Database_model_entity
 	 *
 	 * @access public
 	 *
-	 * @param 
+	 * @param
 	 *
 	 * @throws
-	 * @return 
+	 * @return
 	 *
 	 * #### Example
 	 * ```
@@ -131,10 +131,10 @@ class O_role_entity extends Database_model_entity
 	 *
 	 * @access public
 	 *
-	 * @param 
+	 * @param
 	 *
 	 * @throws
-	 * @return 
+	 * @return
 	 *
 	 * #### Example
 	 * ```
@@ -145,5 +145,4 @@ class O_role_entity extends Database_model_entity
 	{
 		return ci()->o_role_model->users((int)$this->id);
 	}
-
 } /* end class */
