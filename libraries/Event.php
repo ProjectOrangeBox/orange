@@ -15,8 +15,6 @@
  * @link	https://codeigniter.com
  */
 
-namespace projectorangebox\orange\libraries;
-
 /**
  * Manage Events in your Application
  *

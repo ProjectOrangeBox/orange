@@ -8,8 +8,6 @@
  * Copyright (c) 2014 - 2019, Project Orange Box
  */
 
-namespace projectorangebox\orange\libraries;
-
 /**
  * Authorization class.
  *
