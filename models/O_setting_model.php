@@ -40,6 +40,7 @@ class O_setting_model extends Database_model
 		'enabled'        => ['field' => 'enabled', 'label' => 'Enabled', 'rules' => 'if_empty[0]|in_list[0,1]|filter_int[1]|max_length[1]|less_than[2]'],
 		'help'           => ['field' => 'help', 'label' => 'Help', 'rules' => 'max_length[255]|filter_input[255]'],
 		'options'        => ['field' => 'options', 'label' => 'Options', 'rules' => 'max_length[16384]|filter_textarea[16384]'],
+		'migration'			 => ['field' => 'migration', 'label' => 'Migration', 'rules' => 'max_length[255]'],
 	];
 
 	/**
@@ -77,7 +78,7 @@ class O_setting_model extends Database_model
 
 		return parent::delete_cache_by_tags();
 	}
-	
+
 	/* migration */
 	public function migration_add($name=null, $group=null, $value=null, $help=null, $options=null, $migration=null, $optional=[])
 	{
@@ -96,7 +97,7 @@ class O_setting_model extends Database_model
 		];
 
 		$columns = array_merge($defaults, ['name'=>$name,'group'=>$group,'value'=>$value,'help'=>$help,'options'=>$options,'migration'=>$migration]);
-		
+
 		/* these override everything */
 		foreach ($optional as $key=>$val) {
 			$columns[$key] = $val;
@@ -109,6 +110,8 @@ class O_setting_model extends Database_model
 	public function migration_remove(string $migration=null) : bool
 	{
 		$this->skip_rules = true;
+
+		unset($this->has['delete_role']);
 
 		return $this->delete_by(['migration'=>$migration]);
 	}

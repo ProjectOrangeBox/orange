@@ -828,7 +828,7 @@ class Database_model extends MY_Model
 	 * Catalog provides a simple way and interface to make a simple query
 	 *
 	 * @param string $array_key
-	 * @param string $select_columns table columns names | * (all) | null (all)
+	 * @param mixed $select_columns table columns names | * (all) | null (all)
 	 * @param array $where CodeIgniter Database Where key=>value
 	 * @param string $order_by CodeIgniter table column name | column name and direction
 	 * @param mixed $cache_key if provided cache output string or array
@@ -837,7 +837,7 @@ class Database_model extends MY_Model
 	 * @return array records as objects
 	 *
 	 */
-	public function catalog(string $array_key = null, string $select_columns = null, array $where = null, string $order_by = null, $cache_key = null, bool $with_deleted = false) : array
+	public function catalog(string $array_key = null, $select_columns = null, array $where = null, string $order_by = null, $cache_key = null, bool $with_deleted = false) : array
 	{
 		/*
 		if they provide a cache key then we will cache the responds

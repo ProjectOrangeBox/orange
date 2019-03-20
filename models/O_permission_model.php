@@ -28,6 +28,7 @@ class O_permission_model extends Database_model
 		'key'         => ['field' => 'key', 'label' => 'Key', 'rules' => 'required|strtolower|max_length[255]|filter_input[255]|is_uniquem[o_permission_model.key.id]'],
 		'description' => ['field' => 'description', 'label' => 'Description', 'rules' => 'required|max_length[255]|filter_input[255]|is_uniquem[o_permission_model.description.id]'],
 		'group'       => ['field' => 'group', 'label' => 'Group', 'rules' => 'required|max_length[255]|filter_input[255]'],
+		'migration'   => ['field' => 'migration', 'label' => 'Migration', 'rules' => 'max_length[255]'],
 	];
 
 	/**
@@ -71,7 +72,7 @@ class O_permission_model extends Database_model
 			->join(config('auth.role table'), config('auth.role table').'.id = '.config('auth.role permission table').'.role_id')
 			->where(['permission_id' => (int) $role_id])
 			->get();
-		
+
 		return ($this->_database->num_rows() > 0) ? $dbc->result() : [];
 	}
 
@@ -129,7 +130,7 @@ class O_permission_model extends Database_model
 		$success = parent::insert($data);
 		$this->_refresh();
 		$this->delete_cache_by_tags();
-		
+
 		return $success;
 	}
 
@@ -151,7 +152,7 @@ class O_permission_model extends Database_model
 		$success = parent::update($data);
 		$this->_refresh();
 		$this->delete_cache_by_tags();
-		
+
 		return $success;
 	}
 
@@ -170,12 +171,12 @@ class O_permission_model extends Database_model
 	public function _refresh()
 	{
 		$records = $this->get_many();
-		
+
 		/* automatically adds permission to admin role */
 		foreach ($records as $record) {
 			ci('o_role_model')->add_permission(ADMIN_ROLE_ID, $record->id);
 		}
-		
+
 		/* makes sure nobody user has NO permissions */
 		ci('o_role_model')->remove_permission(NOBODY_USER_ID);
 	}
@@ -187,20 +188,22 @@ class O_permission_model extends Database_model
 
 		/* we already verified the key that's the "real" primary key */
 		$success = (!$this->exists(['key'=>$key])) ? $this->insert(['key'=>$key,	'group'=>$group,'description'=>$description,'migration'=>$migration]) : false;
-		
+
 		$this->_refresh();
-		
+
 		return $success;
 	}
-	
+
 	public function migration_remove(string $migration=null) : bool
 	{
 		$this->skip_rules = true;
 
+		unset($this->has['delete_role']);
+
 		$success = $this->delete_by(['migration'=>$migration]);
 
 		$this->_refresh();
-		
+
 		return $success;
 	}
 }

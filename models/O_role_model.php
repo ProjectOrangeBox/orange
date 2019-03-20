@@ -27,6 +27,7 @@ class O_role_model extends Database_model
 		'id'          => ['field' => 'id', 'label' => 'Id', 'rules' => 'required|integer|max_length[10]|less_than[4294967295]|filter_int[10]'],
 		'name'        => ['field' => 'name', 'label' => 'Name', 'rules' => 'required|is_uniquem[o_role_model.name.id]|max_length[64]|filter_input[64]|is_uniquem[o_role_model.name.id]'],
 		'description' => ['field' => 'description', 'label' => 'Description', 'rules' => 'max_length[255]|filter_input[255]|is_uniquem[o_role_model.description.id]'],
+		'migration'   => ['field' => 'migration', 'label' => 'Migration', 'rules' => 'max_length[255]'],
 	];
 
 	/**
@@ -239,6 +240,8 @@ class O_role_model extends Database_model
 	public function migration_remove(string $migration=null) : bool
 	{
 		$this->skip_rules = true;
+
+		unset($this->has['delete_role']);
 
 		return $this->delete_by(['migration'=>$migration]);
 	}
