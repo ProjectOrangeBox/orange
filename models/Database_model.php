@@ -83,8 +83,7 @@ class Database_model extends MY_Model
 	protected $additional_cache_tags = '';
 
 	/**
-	 * If a boolean true is provided the models name will be used to try to automatically attach and use the matching entity name
-	 * If a string name is provided it will be used to automatically attach and use the matching entity name
+	 * String name of Entity in entities folder in models folder
 	 *
 	 * @var mixed
 	 */
@@ -288,7 +287,7 @@ class Database_model extends MY_Model
 
 		/* Is there are record entity attached? */
 		if ($this->entity) {
-			$this->entity_class = ci('load')->entity($this->entity, true);
+			$this->entity_class = ci('load')->entity($this->entity, $this);
 
 			$this->default_return_on_single =& $this->entity_class;
 		} else {

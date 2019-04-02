@@ -28,7 +28,7 @@
 abstract class Database_model_entity
 {
 	/**
-	 * The name of the model this entity is attached to
+	 * The string name of the model this entity is attached to
 	 * this is used to call the insert or update method on
 	 * if left blank on the entity it will try to determine the model name it self.
 	 *
@@ -37,9 +37,16 @@ abstract class Database_model_entity
 	protected $_model_name = null;
 
 	/**
-	 * errors configuration array
+	 * Reference to the parent model class
 	 *
-	 * @var {{}}
+	 * @var null
+	 */
+	protected $_model_ref = null;
+
+	/**
+	 * Save only these columns
+	 *
+	 * @var null
 	 */
 	protected $_save_columns = null;
 
@@ -50,11 +57,15 @@ abstract class Database_model_entity
 	 * @access public
 	 *
 	 */
-	public function __construct()
+	public function __construct(&$config=[])
 	{
-		/* strip off the _entity part and replace with _model */
-		if (!is_string($this->_model_name)) {
-			$this->_model_name = strtolower(substr(get_called_class(), 0, -7).'_model');
+		if (isset($config['model'])) {
+			$this->_model_ref = &$config['model'];
+		} else {
+			/* if nothing provided on the child entity strip off the _entity part and replace with _model */
+			$model_name = (!is_string($this->_model_name)) ? strtolower(substr(get_called_class(), 0, -7).'_model') : $this->_model_name;
+
+			$this->_model_ref = &ci($model_name);
 		}
 
 		log_message('info', 'Database_model_entity Class Initialized');
@@ -71,11 +82,8 @@ abstract class Database_model_entity
 	 */
 	public function save() : bool
 	{
-		/* get the model */
-		$model = ci()->{$this->_model_name};
-
-		/* get the primary id */
-		$primary_id = $model->get_primary_key();
+		/* get the primary key */
+		$primary_id = $this->_model_ref->get_primary_key();
 
 		/* if save columns is set then only use those properties */
 		if ($this->_save_columns) {
@@ -96,7 +104,7 @@ abstract class Database_model_entity
 			unset($data[$primary_id]);
 
 			/* insert the record and return the inserted record primary id */
-			$success = $model->insert($data);
+			$success = $this->_model_ref->insert($data);
 
 			/* if success is not false (fail) then set the primary_id to success - inserted record primary id */
 			if ($success !== false) {
@@ -106,7 +114,7 @@ abstract class Database_model_entity
 			}
 		} else {
 			/* else it's a update */
-			$success = $model->update($data);
+			$success = $this->_model_ref->update($data);
 		}
 
 		/* return success */
