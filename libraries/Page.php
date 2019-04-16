@@ -184,7 +184,7 @@ class Page
 		$view = ($view) ?? $this->default_view;
 
 		if ($view == null) {
-			throw new \Exception('No View provided for page render.');
+			throw new \Exception('No View provided for page::render.');
 		}
 
 		/* called everytime - use with caution */
@@ -304,7 +304,7 @@ class Page
 	public function extend(string $template = null) : Page
 	{
 		if ($this->extending) {
-			throw new \Exception('You are already extending "'.$this->extending.'" therefore we cannot extend "'.$name.'".');
+			throw new \Exception('You are already extending "'.$this->extending.'" therefore we cannot extend "'.$template.'".');
 		}
 
 		$this->extending = $template;
@@ -754,4 +754,18 @@ class Page
 
 		return $this;
 	}
+
+	/**
+	 * json (wrapper)
+	 *
+	 * @param mixed $data
+	 * @param mixed $val
+	 * @param mixed $raw
+	 * @return void
+	 */
+	public function json($data = null, $val = null, $raw = false) : void
+	{
+		$this->output->json($data,$val,$raw);
+	}
+
 } /* end page */
