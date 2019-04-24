@@ -1116,6 +1116,11 @@ class Database_model extends MY_Model
 		return (int)$rows;
 	}
 
+	public function empty_record()
+	{
+		return ($this->entity_class) ? $this->entity_class : array_fill_keys(explode(',',$this->rule_sets['insert']),'');
+	}
+
 	/**
 	 * Preform the actual SQL select
 	 *
