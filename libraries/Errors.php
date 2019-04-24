@@ -375,7 +375,7 @@ class Errors
 
 	/**
 	 *
-	 * Returns wiether the specified group or current group has any errors (true)
+	 * Returns whether the specified group or current group has any errors (true)
 	 *
 	 * @access public
 	 *
