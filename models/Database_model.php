@@ -24,7 +24,7 @@
  * @throws Exception
  *
  */
-class Database_model extends MY_Model
+class Database_model extends \MY_Model
 {
 	/**
 	 * Database config to use for _database if other than default
@@ -836,12 +836,18 @@ class Database_model extends MY_Model
 	 * @return array records as objects
 	 *
 	 */
-	public function catalog(string $array_key = null, $select_columns = null, array $where = null, string $order_by = null, $cache_key = null, bool $with_deleted = false) : array
+	public function catalog(string $array_key = null, $select_columns = null, array $where = null, string $order_by = null, $cache_key = null, bool $with_deleted = false, bool $ignore_read) : array
 	{
-		/*
-		if they provide a cache key then we will cache the responds
-		Note: roles may affect the select statement so that must be taken into account
+		/**
+		 * if they provide a cache key then we will cache the responds
+		 * Note: roles may affect the select statement so that must be taken into account
 		 */
+		$has_read_role = $this->has['read_role'];
+
+		if ($ignore_read) {
+			$this->has['read_role'] = false;
+		}
+
 		$is_cached = false;
 
 		if (is_array($cache_key)) {
@@ -918,6 +924,8 @@ class Database_model extends MY_Model
 				ci('cache')->save($this->cache_prefix.'.'.$cache_key, $results);
 			}
 		}
+
+		$this->has['read_role'] = $has_read_role;
 
 		return $results;
 	}
