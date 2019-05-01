@@ -132,35 +132,15 @@ class MY_Controller extends \CI_Controller
 			}
 		}
 
-		$this->router->handle_requests($this);
+		/* request middleware */
+		$this->input->handle_requests();
+
+		if ($this->cache_page_for) {
+			$this->output->cache($this->cache_page_for);
+		}
 
 		/* trigger our start up event */
 		ci('event')->trigger('ci.controller.startup', $this);
-	}
-
-	/**
-	 *
-	 * Final output
-	 *
-	 * @access public
-	 *
-	 * @param $output
-	 *
-	 * @return void
-	 *
-	 */
-	public function _output($output) : void
-	{
-		/**
-		 * CodeIgniter sends in null if nothing has been sent for output
-		 * lets normalize it
-		 */
-		$output = ($output) ?? '';
-
-		echo $this->router->handle_responds($this, $output);
-
-		/* trigger our output event */
-		ci('event')->trigger('ci.controller.output', $this, $output);
 	}
 
 	/**

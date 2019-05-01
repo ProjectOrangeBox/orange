@@ -134,16 +134,16 @@ class MY_Router extends \CI_Router
 	 *
 	 * @access public
 	 *
-	 * @param &$ci
-	 *
 	 * @return void
 	 *
 	 */
-	public function handle_requests(&$ci) : void
+	public function handle_requests(array &$request) : array
 	{
 		foreach ($this->requests as $middleware) {
-			(new $middleware($ci))->request();
+			$request = (new $middleware())->request($request);
 		}
+
+		return $request;
 	}
 
 	/**
@@ -152,19 +152,18 @@ class MY_Router extends \CI_Router
 	 *
 	 * @access public
 	 *
-	 * @param &$ci
 	 * @param string $output
 	 *
 	 * @return string
 	 *
 	 */
-	public function handle_responds(&$ci, string $output) : string
+	public function handle_responses(string &$response) : string
 	{
 		foreach ($this->responds as $middleware) {
-			$output = (new $middleware($ci))->responds($output);
+			$response = (new $middleware())->response($response);
 		}
 
-		return $output;
+		return $response;
 	}
 
 	/**

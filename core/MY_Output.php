@@ -40,6 +40,29 @@ class MY_Output extends \CI_Output
 	protected $json_options = JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE;
 
 	/**
+	 * _display
+	 *
+	 * Adding middleware for the way out - Responds
+	 *
+	 * @param mixed $output
+	 * @return void
+	 */
+	public function _display($output = '') {
+		/* Set the output data
+		 * taken from the parent class so this
+		 * will never fail in the parent
+		 * because I already did it here
+		 * but at least we don't need to break core
+		 */
+		if ($output === '') {
+			$output =& $this->final_output;
+		}
+
+		/* give the responds middleware a chance to run on the output */
+		return parent::_display(ci('router')->handle_responses($output));
+	}
+
+	/**
 	 * Send a JSON responds
 	 *
 	 * @access public

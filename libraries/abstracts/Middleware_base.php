@@ -25,27 +25,6 @@
 abstract class Middleware_base
 {
 	/**
-	 * reference to CodeIgniter Super Object
-	 *
-	 * @var Object
-	 */
-	protected $ci;
-
-	/**
-	 *
-	 * Constructor
-	 *
-	 * @access public
-	 *
-	 * @param $ci
-	 *
-	 */
-	public function __construct(&$ci)
-	{
-		$this->ci = &$ci;
-	}
-
-	/**
 	 *
 	 * Called on request before the controller method is called
 	 * This method is overridden in the child class
@@ -55,8 +34,9 @@ abstract class Middleware_base
 	 * @return void
 	 *
 	 */
-	public function request() : void
+	public function request(array $request) : array
 	{
+		return $request;
 	}
 
 	/**
@@ -71,24 +51,9 @@ abstract class Middleware_base
 	 * @return string
 	 *
 	 */
-	public function responds(string $output = '') : string
+	public function response(string $output = '') : string
 	{
 		return $output;
 	}
 
-	/**
-	 *
-	 * Magic Method to allow $this to work in middleware
-	 *
-	 * @access public
-	 *
-	 * @param string $name
-	 *
-	 * @return mixed
-	 *
-	 */
-	public function __get(string $name)
-	{
-		return $this->ci->$name;
-	}
 } /* end class */

@@ -102,6 +102,17 @@ class MY_Input extends \CI_Input
 	}
 
 	/**
+	 * handle the middleware requests - input
+	 *
+	 * @return void
+	 */
+	public function handle_requests() : void
+	{
+		/* middleware on the way in - request */
+		$this->_request = ci('router')->handle_requests($this->_request);
+	}
+
+	/**
 	 *
 	 * Fetch post or put data
 	 *
