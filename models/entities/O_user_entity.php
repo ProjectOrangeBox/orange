@@ -18,7 +18,7 @@
  * functions:
  *
  */
-class O_user_entity extends Database_model_entity
+class O_user_entity extends \Database_model_entity
 {
 	/**
 	 * record id
@@ -55,7 +55,7 @@ class O_user_entity extends Database_model_entity
 	 * @var bool
 	 */
 	public $is_active;
-	
+
 	/**
 	 * records user read role id
 	 * when a record is created what read role should it have?
@@ -79,7 +79,7 @@ class O_user_entity extends Database_model_entity
 	 * @var int
 	 */
 	public $user_delete_role_id;
-	
+
 	/**
 	 * records read role id
 	 * who can see this record
@@ -172,7 +172,7 @@ class O_user_entity extends Database_model_entity
 	public function roles() : array
 	{
 		$this->_lazy_load();
-		
+
 		return $this->roles;
 	}
 
@@ -190,7 +190,7 @@ class O_user_entity extends Database_model_entity
 	public function has_role(int $role_id) : bool
 	{
 		$this->_lazy_load();
-		
+
 		return array_key_exists($role_id, $this->roles);
 	}
 
@@ -208,7 +208,7 @@ class O_user_entity extends Database_model_entity
 	public function can(string $resource) : bool
 	{
 		$this->_lazy_load();
-		
+
 		return (in_array($resource, $this->permissions, true));
 	}
 
@@ -224,7 +224,7 @@ class O_user_entity extends Database_model_entity
 	public function permissions() : array
 	{
 		$this->_lazy_load();
-		
+
 		return $this->permissions;
 	}
 
@@ -246,7 +246,7 @@ class O_user_entity extends Database_model_entity
 				return false;
 			}
 		}
-		
+
 		return true;
 	}
 
@@ -268,7 +268,7 @@ class O_user_entity extends Database_model_entity
 				return true;
 			}
 		}
-		
+
 		return false;
 	}
 
@@ -290,7 +290,7 @@ class O_user_entity extends Database_model_entity
 				return false;
 			}
 		}
-		
+
 		return true;
 	}
 
@@ -312,7 +312,7 @@ class O_user_entity extends Database_model_entity
 				return true;
 			}
 		}
-		
+
 		return false;
 	}
 
@@ -415,7 +415,7 @@ class O_user_entity extends Database_model_entity
 	protected function _internal_query(int $user_id) : array
 	{
 		$roles_permissions = [];
-		
+
 		$sql = "select
 			`user_id`,
 			`".config('auth.role table')."`.`id` `orange_roles_id`,
@@ -442,7 +442,7 @@ class O_user_entity extends Database_model_entity
 				}
 			}
 		}
-		
+
 		return $roles_permissions;
 	}
 } /* end class */

@@ -35,7 +35,7 @@
  * @config cache_url `http://www.example.com/api/cache/`
  *
  */
-class Cache_request extends CI_Driver
+class Cache_request extends \CI_Driver
 {
 	/**
 	 * Cache storage
@@ -224,7 +224,7 @@ class Cache_request extends CI_Driver
 	public function get_metadata(string $id)
 	{
 		$value = $this->get($id);
-		
+
 		return ($value) ? gettype($value) : false;
 	}
 
@@ -268,7 +268,7 @@ class Cache_request extends CI_Driver
 			$cache = $closure($ci);
 			$this->save($key, $cache, $ttl);
 		}
-		
+
 		return $cache;
 	}
 } /* end class */

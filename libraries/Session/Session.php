@@ -22,9 +22,9 @@
  *
  *
  */
-class Session extends CI_Session
+class Session extends \CI_Session
 {
-	
+
 	/**
 	 *
 	 * Wrapper for session userdata reading with new optional remove option

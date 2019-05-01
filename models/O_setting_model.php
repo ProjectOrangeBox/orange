@@ -18,7 +18,7 @@
  * functions:
  *
  */
-class O_setting_model extends Database_model
+class O_setting_model extends \Database_model
 {
 	protected $table = 'orange_settings';
 	protected $has = [

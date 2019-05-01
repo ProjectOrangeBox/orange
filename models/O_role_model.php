@@ -18,7 +18,7 @@
  * functions:
  *
  */
-class O_role_model extends Database_model
+class O_role_model extends \Database_model
 {
 	protected $table;
 	protected $additional_cache_tags = '.acl';

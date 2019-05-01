@@ -21,7 +21,7 @@
  *
  */
 
-class O_permission_entity extends Database_model_entity
+class O_permission_entity extends \Database_model_entity
 {
 	/**
 	 * record id

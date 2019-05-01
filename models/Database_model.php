@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Orange
  *
@@ -826,47 +827,50 @@ class Database_model extends \MY_Model
 	/**
 	 * Catalog provides a simple way and interface to make a simple query
 	 *
-	 * @param string $array_key
+	 * @param string $array_key - column name to use for the catalog arrays associate key
 	 * @param mixed $select_columns table columns names | * (all) | null (all)
 	 * @param array $where CodeIgniter Database Where key=>value
 	 * @param string $order_by CodeIgniter table column name | column name and direction
-	 * @param mixed $cache_key if provided cache output string or array
-	 * @param bool $with_deleted [false]
+	 * @param mixed $cache_key if provided cache output string or array or bool (true) to auto create a key based on the passed parameters
+	 * @param bool $with_deleted [false] with the soft deleted records?
+	 * @param bool $ignore_read [false] should we ignore row level read permissions?
 	 *
 	 * @return array records as objects
 	 *
 	 */
-	public function catalog(string $array_key = null, $select_columns = null, array $where = null, string $order_by = null, $cache_key = null, bool $with_deleted = false, bool $ignore_read) : array
+	public function catalog(string $array_key = null, $select_columns = null, array $where = null, string $order_by = null, $cache_key = null, bool $with_deleted = false, bool $ignore_read = false) : array
 	{
 		/**
 		 * if they provide a cache key then we will cache the responds
 		 * Note: roles may affect the select statement so that must be taken into account
 		 */
-		$has_read_role = $this->has['read_role'];
+		$results = false;
 
-		if ($ignore_read) {
-			$this->has['read_role'] = false;
+		/* if cache key is really really true */
+		if ($cache_key === true) {
+			$cache_key = func_get_args();
 		}
 
-		$is_cached = false;
-
+		/* if it's a array from above or sent in directly */
 		if (is_array($cache_key)) {
 			$cache_key = md5(json_encode($cache_key));
 		}
 
+		/* if it's a string from above or sent in directly */
 		if (is_string($cache_key)) {
 			$results = ci('cache')->get($this->cache_prefix.'.'.$cache_key);
-
-			if (is_array($results)) {
-				$is_cached = true;
-			}
 		}
 
-		if (!$is_cached) {
-			$results = [];
-
+		/* if we didn't then we need to run the catalog query */
+		if (!is_array($results)) {
 			if ($with_deleted) {
 				$this->with_deleted();
+			}
+
+			$has_read_role = $this->has['read_role'];
+
+			if ($ignore_read) {
+				$this->has['read_role'] = false;
 			}
 
 			/* we aren't looking for a single column by default */
@@ -923,9 +927,9 @@ class Database_model extends \MY_Model
 			if ($cache_key) {
 				ci('cache')->save($this->cache_prefix.'.'.$cache_key, $results);
 			}
-		}
 
-		$this->has['read_role'] = $has_read_role;
+			$this->has['read_role'] = $has_read_role;
+		}
 
 		return $results;
 	}

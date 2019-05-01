@@ -21,7 +21,7 @@
  *
  */
 
-class O_role_entity extends Database_model_entity
+class O_role_entity extends \Database_model_entity
 {
 	/**
 	 * record id

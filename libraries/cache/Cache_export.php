@@ -36,7 +36,7 @@
  * @config cache_url `http://www.example.com/api/cache/`
  *
  */
-class Cache_export extends CI_Driver
+class Cache_export extends \CI_Driver
 {
 	/**
 	 * Configuration array
