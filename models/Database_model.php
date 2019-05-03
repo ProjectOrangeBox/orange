@@ -844,7 +844,7 @@ class Database_model extends \MY_Model
 		 * if they provide a cache key then we will cache the responds
 		 * Note: roles may affect the select statement so that must be taken into account
 		 */
-		$results = false;
+		$results = [];
 
 		/* if cache key is really really true */
 		if ($cache_key === true) {
