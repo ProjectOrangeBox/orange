@@ -58,6 +58,8 @@ class MY_Output extends \CI_Output
 			$output =& $this->final_output;
 		}
 
+		$output = (string)$output;
+
 		/* give the responds middleware a chance to run on the output */
 		return parent::_display(ci('router')->handle_responses($output));
 	}
