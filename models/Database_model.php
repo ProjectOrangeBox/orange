@@ -844,7 +844,7 @@ class Database_model extends \MY_Model
 		 * if they provide a cache key then we will cache the responds
 		 * Note: roles may affect the select statement so that must be taken into account
 		 */
-		$results = [];
+		$results = false;
 
 		/* if cache key is really really true */
 		if ($cache_key === true) {
@@ -861,7 +861,7 @@ class Database_model extends \MY_Model
 			$results = ci('cache')->get($this->cache_prefix.'.'.$cache_key);
 		}
 
-		/* if we didn't then we need to run the catalog query */
+		/* if we didn't get results as a array then we need to run the catalog query */
 		if (!is_array($results)) {
 			if ($with_deleted) {
 				$this->with_deleted();
@@ -929,6 +929,11 @@ class Database_model extends \MY_Model
 			}
 
 			$this->has['read_role'] = $has_read_role;
+		}
+
+		/* results MUST be a array even if it's empty */
+		if (!is_array($results)) {
+			$results = [];
 		}
 
 		return $results;
