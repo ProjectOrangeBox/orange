@@ -115,10 +115,10 @@ class Page
 		$this->output = &ci('output');
 		$this->event = &ci('event');
 
-		$page_min = $this->config['page_min'];
+		$page_min = $this->config['pageMin'];
 
 		if (is_bool($page_min)) {
-			$page_min = ($page_min == true) ? '.min' : '';
+			$page_min = ($page_min) ? '.min' : '';
 		}
 
 		/* if it's true then use the default else use what's in page_min config */
