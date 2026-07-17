@@ -9,5 +9,13 @@
     },
     "require": {
         "php": ">=8.4"
+    },
+    "scripts": {
+        "test:orange": "cd unittest && sh runUnitTests.sh",
+        "test:orangeCoverage": "cd unittest && sh runCoverage.sh"
+    },
+    "scripts-descriptions": {
+        "test:orange": "Run the Orange Framework core unit tests (unittest/runUnitTests.sh).",
+        "test:orangeCoverage": "Run the Orange Framework core unit tests with code coverage (unittest/runCoverage.sh)."
     }
 }

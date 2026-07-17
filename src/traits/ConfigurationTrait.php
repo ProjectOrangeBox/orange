@@ -47,12 +47,11 @@ trait ConfigurationTrait
 
         $typeCheck = $this->changeableTypeCheck[$name];
 
-        if (function_exists($typeCheck)) {
-            if (!$typeCheck($value)) {
-                throw new InvalidValue($value . ' is not ' . $typeCheck);
-            }
-        } elseif (!$value instanceof $typeCheck) {
-            throw new InvalidValue($value . ' is not ' . $typeCheck);
+        $isValid = function_exists($typeCheck) ? $typeCheck($value) : $value instanceof $typeCheck;
+
+        if (!$isValid) {
+            // objects and arrays are not stringable so describe them by type
+            throw new InvalidValue((is_scalar($value) ? (string)$value : get_debug_type($value)) . ' is not ' . $typeCheck);
         }
 
         $method = 'set' . $this->camelize($name, true);
@@ -287,7 +286,7 @@ trait ConfigurationTrait
     protected function validateConfig(array $config, array $rules): void
     {
         logMsg('INFO', __METHOD__);
-        logMsg('DEBUG', __METHOD__ . ['config' => $config, 'rules' => $rules]);
+        logMsg('DEBUG', __METHOD__, ['config' => $config, 'rules' => $rules]);
 
         $errors = [];
 

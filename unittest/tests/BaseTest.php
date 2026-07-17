@@ -4,9 +4,26 @@ declare(strict_types=1);
 
 use orange\framework\base\ArrayObject;
 use orange\framework\base\SingletonArrayObject;
+use orange\framework\exceptions\container\CannotCloneSingleton;
+use orange\framework\exceptions\container\CannotUnserializeSingleton;
 
 final class BaseTest extends UnitTestHelper
 {
+    public function testCloningIsForbidden(): void
+    {
+        $this->expectException(CannotCloneSingleton::class);
+
+        $object = ArrayObject::getInstance([]);
+        clone $object;
+    }
+
+    public function testWakeupIsForbidden(): void
+    {
+        $this->expectException(CannotUnserializeSingleton::class);
+
+        ArrayObject::getInstance([])->__wakeup();
+    }
+
     public function testArrayObject(): void
     {
         $arrayObject = ArrayObject::getInstance([]);

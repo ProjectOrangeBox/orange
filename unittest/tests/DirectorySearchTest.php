@@ -40,6 +40,68 @@ final class DirectorySearchTest extends UnitTestHelper
         $this->instance->flushDirectories()->flushResources();
     }
 
+    public function testAddDirectoryWhenLockedThrows(): void
+    {
+        $this->instance->lock();
+
+        $this->expectException(\orange\framework\exceptions\ClassLocked::class);
+        $this->instance->addDirectory($this->d1);
+    }
+
+    public function testFindMissingResourceThrowsWhenNotQuiet(): void
+    {
+        $this->setPrivatePublic('quiet', false);
+        $this->instance->addDirectory($this->d2);
+
+        $this->expectException(\orange\framework\exceptions\ResourceNotFound::class);
+        $this->instance->find('no-such-resource');
+    }
+
+    public function testAddMissingDirectoryThrowsWhenNotQuiet(): void
+    {
+        $this->setPrivatePublic('quiet', false);
+
+        $this->expectException(\orange\framework\exceptions\filesystem\DirectoryNotFound::class);
+        $this->instance->addDirectory('/does/not/exist/anywhere');
+    }
+
+    public function testDirectoryExists(): void
+    {
+        $this->instance->addDirectory($this->d1);
+
+        $this->assertTrue($this->instance->directoryExists($this->d1));
+        $this->assertFalse($this->instance->directoryExists('/no/such/dir'));
+    }
+
+    public function testExistsFindsResource(): void
+    {
+        $this->instance->addDirectory($this->d2);
+
+        $this->assertTrue($this->instance->exists('bar'));
+        $this->assertFalse($this->instance->exists('does-not-exist'));
+    }
+
+    public function testLockUnlockIsLocked(): void
+    {
+        $this->assertFalse($this->instance->isLocked());
+
+        $this->assertInstanceOf(DirectorySearchInterface::class, $this->instance->lock());
+        $this->assertTrue($this->instance->isLocked());
+
+        $this->instance->unlock();
+        $this->assertFalse($this->instance->isLocked());
+    }
+
+    public function testDebugInfoReportsResourcesAndDirectories(): void
+    {
+        $this->instance->addDirectory($this->d2);
+
+        $debug = $this->instance->__debugInfo();
+
+        $this->assertArrayHasKey('resources', $debug);
+        $this->assertArrayHasKey('directories', $debug);
+    }
+
     public function testAddDirectory(): void
     {
         $this->assertInstanceOf(DirectorySearchInterface::class, $this->instance->addDirectory($this->d1));

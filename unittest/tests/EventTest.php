@@ -148,4 +148,72 @@ final class EventTest extends UnitTestHelper
 
         $this->assertFalse($this->instance->has('open.file'));
     }
+
+    public function testConstructorRegistersConfiguredEvents(): void
+    {
+        $event = Event::newInstance([
+            'boot.event' => [
+                [function (&$payload) {
+                    $payload[] = 'configured';
+                }, Event::PRIORITY_NORMAL],
+            ],
+        ]);
+
+        $this->assertTrue($event->has('boot.event'));
+    }
+
+    public function testTriggerStopsWhenListenerReturnsFalse(): void
+    {
+        $this->instance->register('chain', function (&$payload) {
+            $payload[] = 'first';
+            return false; // halt propagation
+        }, Event::PRIORITY_HIGH);
+
+        $this->instance->register('chain', function (&$payload) {
+            $payload[] = 'second';
+        }, Event::PRIORITY_LOW);
+
+        $payload = [];
+        $this->instance->trigger('chain', $payload);
+
+        $this->assertEquals(['first'], $payload);
+    }
+
+    public function testUnregisterReturnsFalseForUnknownId(): void
+    {
+        $this->assertFalse($this->instance->unregister(999999));
+    }
+
+    public function testUnregisterAllWithoutTriggerClearsEverything(): void
+    {
+        $this->instance->register('a.event', fn(&$p) => null);
+        $this->instance->register('b.event', fn(&$p) => null);
+
+        $this->assertTrue($this->instance->unregisterAll());
+        $this->assertEquals([], $this->instance->triggers());
+    }
+
+    public function testUnregisterAllUnknownTriggerReturnsFalse(): void
+    {
+        $this->assertFalse($this->instance->unregisterAll('never.registered'));
+    }
+
+    public function testDisableStopsTriggersAndEnableResumesThem(): void
+    {
+        $this->instance->register('some.event', function (&$payload) {
+            $payload[] = 'fired';
+        });
+
+        $payload = [];
+
+        // disabled: the listener must not run
+        $this->instance->disable();
+        $this->instance->trigger('some.event', $payload);
+        $this->assertEquals([], $payload);
+
+        // re-enabled: the listener runs again
+        $this->instance->enable();
+        $this->instance->trigger('some.event', $payload);
+        $this->assertEquals(['fired'], $payload);
+    }
 }

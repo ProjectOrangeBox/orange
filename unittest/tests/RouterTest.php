@@ -159,4 +159,62 @@ final class RouterTest extends UnitTestHelper
 
         Router::newInstance(['site url' => ''], Input::newInstance([]));
     }
+
+    public function testAddRouteThenMatch(): void
+    {
+        $this->instance->addRoute(['method' => 'get', 'name' => 'extra', 'url' => '/extra/([a-z]+)', 'callback' => $this->callback]);
+
+        $this->instance->match('/extra/hello', 'get');
+
+        $this->assertEquals('extra', $this->instance->getMatched('name'));
+    }
+
+    public function testAddRoutes(): void
+    {
+        $this->instance->addRoutes([
+            ['method' => 'get', 'name' => 'r1', 'url' => '/r1', 'callback' => $this->callback],
+            ['method' => 'get', 'name' => 'r2', 'url' => '/r2', 'callback' => $this->callback],
+        ]);
+
+        $this->instance->match('/r2', 'get');
+
+        $this->assertEquals('r2', $this->instance->getMatched('name'));
+    }
+
+    public function testGetMatchedReturnsWholeArray(): void
+    {
+        $this->instance->match('/getter/abc/123', 'get');
+
+        $matched = $this->instance->getMatched();
+
+        $this->assertIsArray($matched);
+        $this->assertEquals('productg', $matched['name']);
+        $this->assertEquals(['abc', '123'], $matched['argv']);
+    }
+
+    public function testGetRouterCallback(): void
+    {
+        $this->instance->match('/getter/abc/123', 'get');
+
+        $callback = $this->instance->getRouterCallback();
+
+        $this->assertInstanceOf(\orange\framework\property\RouterCallback::class, $callback);
+        $this->assertEquals($this->callback[0], $callback->controller);
+        $this->assertEquals('index', $callback->method);
+        $this->assertEquals(['abc', '123'], $callback->arguments);
+    }
+
+    public function testGetRouterCallbackWithoutCallbackThrows(): void
+    {
+        // the 'product' route has no callback defined
+        $this->instance->match('/product/abc/123', 'get');
+
+        $this->expectException(InvalidValue::class);
+        $this->instance->getRouterCallback();
+    }
+
+    public function testSiteUrlWithoutPrefixReturnsBareUrl(): void
+    {
+        $this->assertEquals('www.example.com', $this->instance->siteUrl(false));
+    }
 }

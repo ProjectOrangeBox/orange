@@ -179,4 +179,25 @@ final class OutputTest extends UnitTestHelper
         $this->assertEmpty($this->getPrivatePublic('headers'));
         $this->assertEquals('', $this->getPrivatePublic('output'));
     }
+
+    public function testToStringReturnsOutput(): void
+    {
+        $this->instance->write('the body');
+
+        $this->assertEquals('the body', (string)$this->instance);
+    }
+
+    public function testGetContentType(): void
+    {
+        $this->instance->contentType('application/json');
+
+        $this->assertEquals('application/json', $this->instance->getContentType());
+    }
+
+    public function testGetCharSet(): void
+    {
+        $this->instance->charSet('iso-8859-1');
+
+        $this->assertEquals('iso-8859-1', $this->instance->getCharSet());
+    }
 }

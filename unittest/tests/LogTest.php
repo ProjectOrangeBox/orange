@@ -80,6 +80,57 @@ final class LogTest extends UnitTestHelper
         $this->assertStringNotContainsString('This is an notice 222', file_get_contents($this->config['filepath']));
     }
 
+    public function testAllPsr3LevelMethodsWrite(): void
+    {
+        $this->instance->changeThreshold(255);
+
+        $this->instance->emergency('lvl-emergency');
+        $this->instance->alert('lvl-alert');
+        $this->instance->critical('lvl-critical');
+        $this->instance->error('lvl-error');
+        $this->instance->warning('lvl-warning');
+        $this->instance->notice('lvl-notice');
+        $this->instance->info('lvl-info');
+        $this->instance->debug('lvl-debug');
+
+        $contents = file_get_contents($this->config['filepath']);
+
+        foreach (['emergency', 'alert', 'critical', 'error', 'warning', 'notice', 'info', 'debug'] as $lvl) {
+            $this->assertStringContainsString('lvl-' . $lvl, $contents);
+        }
+    }
+
+    public function testLogWritesContext(): void
+    {
+        $this->instance->changeThreshold(255);
+
+        $this->instance->error('with context', ['user' => 'johnny', 'id' => 42]);
+
+        $contents = file_get_contents($this->config['filepath']);
+
+        $this->assertStringContainsString('with context', $contents);
+        $this->assertStringContainsString('johnny', $contents);
+    }
+
+    public function testWriteWithStringLevel(): void
+    {
+        $this->instance->changeThreshold(255);
+
+        $this->instance->write('error', 'string level message');
+
+        $this->assertStringContainsString('string level message', file_get_contents($this->config['filepath']));
+    }
+
+    public function testDisabledLevelIsNotWritten(): void
+    {
+        // threshold 0 disables logging entirely
+        $this->instance->changeThreshold(0);
+
+        $this->instance->emergency('should not appear');
+
+        $this->assertFileDoesNotExist($this->config['filepath']);
+    }
+
     public function testMonoLoggerException(): void
     {
         $this->expectException(IncorrectInterface::class);

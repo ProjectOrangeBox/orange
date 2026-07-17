@@ -63,4 +63,44 @@ final class ConfigTest extends UnitTestHelper
 
         $this->assertEquals($config, []);
     }
+
+    public function testOffsetGet(): void
+    {
+        $config = $this->instance['aaa'];
+
+        $this->assertEquals('blue', $config['color']);
+    }
+
+    public function testOffsetExists(): void
+    {
+        $this->assertTrue(isset($this->instance['aaa']));
+    }
+
+    public function testGetWithDefaultReturnsDefaultForMissingKey(): void
+    {
+        $this->assertEquals('fallback', $this->instance->get('aaa.doesNotExist', 'fallback'));
+    }
+
+    public function testGetWithDefaultReturnsValueWhenKeyPresent(): void
+    {
+        $this->assertEquals('blue', $this->instance->get('aaa.color', 'fallback'));
+    }
+
+    public function testLoadThrowsWhenConfigFileDoesNotReturnArray(): void
+    {
+        $badFile = WORKINGDIR . '/config/notarrayconfig.php';
+        file_put_contents($badFile, "<?php\nreturn 'not an array';\n");
+
+        try {
+            $config = Config::newInstance([
+                'config separator' => '.',
+                'config directories' => [WORKINGDIR . '/config'],
+            ]);
+
+            $this->expectException(\orange\framework\exceptions\config\ConfigFileDidNotReturnAnArray::class);
+            $config->get('notarrayconfig');
+        } finally {
+            unlink($badFile);
+        }
+    }
 }

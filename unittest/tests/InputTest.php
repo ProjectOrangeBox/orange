@@ -151,4 +151,35 @@ final class InputTest extends UnitTestHelper
             'age' => 24,
         ], $instance->request());
     }
+
+    public function testInputStreamReturnsRawInput(): void
+    {
+        $instance = Input::newInstance([
+            'input' => 'raw body payload',
+            'server' => ['request_method' => 'post'],
+        ]);
+
+        $this->assertEquals('raw body payload', $instance->inputStream());
+    }
+
+    public function testRequestReturnsDefaultForMissingKey(): void
+    {
+        $this->assertEquals('fallback', $this->instance->request('doesNotExist', 'fallback'));
+    }
+
+    public function testQueryReturnsWholeArrayWhenNoKey(): void
+    {
+        $this->assertEquals(['name' => 'Jenny Appleseed', 'age' => 25], $this->instance->query());
+    }
+
+    public function testIsHttpsRequestAsString(): void
+    {
+        // setUp server has https => 'on'
+        $this->assertEquals('https', $this->instance->isHttpsRequest(true));
+    }
+
+    public function testUriSegmentOutOfRangeReturnsEmpty(): void
+    {
+        $this->assertEquals('', $this->instance->uriSegment(99));
+    }
 }

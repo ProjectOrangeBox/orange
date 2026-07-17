@@ -334,7 +334,8 @@ if (!function_exists('isAssociative')) {
      */
     function isAssociative(array $array): bool
     {
-        return array_keys($array) !== range(0, count($array) - 1);
+        // an empty array is not associative; guard against range(0, -1) returning [0, -1]
+        return $array !== [] && array_keys($array) !== range(0, count($array) - 1);
     }
 }
 

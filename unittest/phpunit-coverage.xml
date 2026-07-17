@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         bootstrap="bootstrap.php"
+         processIsolation="true"
+         colors="true"
+         cacheDirectory=".phpunit.cache"
+         failOnWarning="false"
+         beStrictAboutOutputDuringTests="false">
+    <testsuites>
+        <testsuite name="orange">
+            <directory>tests</directory>
+        </testsuite>
+    </testsuites>
+    <source>
+        <include>
+            <directory suffix=".php">../src</directory>
+        </include>
+        <exclude>
+            <!-- configuration arrays, view templates and stub files are data, not testable logic -->
+            <directory>../src/config</directory>
+            <directory>../src/views</directory>
+            <directory>../src/stubs</directory>
+        </exclude>
+    </source>
+</phpunit>
