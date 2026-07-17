@@ -97,13 +97,24 @@ class Security extends Singleton implements SecurityInterface
      * Validates file paths, ensures directories are writable, and prevents
      * overwriting existing key files.
      *
+     * @param bool $restrictOwnership When true (the default), the private key and auth
+     *                                key files also have their ownership set to the
+     *                                current process user/group, in addition to the
+     *                                chmod(0600) that always applies. This closes a gap
+     *                                where chmod(0600) alone only protects the file
+     *                                against users other than whoever happens to OWN
+     *                                it - if that owner isn't actually the current user
+     *                                (e.g. an unexpected deploy/build step created the
+     *                                file), the restriction wouldn't protect against the
+     *                                right user. Requires the posix extension; silently
+     *                                skipped when unavailable (e.g. Windows).
      * @return bool Returns true if all keys are successfully created.
      *
      * @throws ConfigNotFound If key paths are missing from the configuration.
      * @throws DirectoryNotWritable If the directories for keys are not writable.
      * @throws FileAlreadyExists If key files already exist.
      */
-    public function createKeys(): bool
+    public function createKeys(bool $restrictOwnership = true): bool
     {
         foreach (['public key', 'private key', 'auth key'] as $key) {
             if (!isset($this->config[$key])) {
@@ -121,7 +132,13 @@ class Security extends Singleton implements SecurityInterface
         $privateKey = sodium_crypto_box_keypair();
 
         // try to write the private and public keys
+        // secret key material is restricted to owner read/write (0600) so it is not
+        // exposed to other users via the umask default (often world-readable)
         $success1 = file_put_contents($this->config['private key'], $privateKey);
+        chmod($this->config['private key'], 0600);
+        if ($restrictOwnership) {
+            $this->restrictToCurrentUser($this->config['private key']);
+        }
         // Get an X25519 public key from an X25519 keypair
         $success2 = file_put_contents($this->config['public key'], sodium_crypto_box_publickey($privateKey));
 
@@ -131,13 +148,39 @@ class Security extends Singleton implements SecurityInterface
         // Get random bytes for key
         $authKey = sodium_crypto_auth_keygen();
 
-        // write the auth key salt
+        // write the auth key salt (also secret; restrict to owner)
         $success3 = file_put_contents($this->config['auth key'], $authKey);
+        chmod($this->config['auth key'], 0600);
+        if ($restrictOwnership) {
+            $this->restrictToCurrentUser($this->config['auth key']);
+        }
 
         // Overwrite a string with NUL characters
         sodium_memzero($authKey);
 
-        return $success1 > 0 && $success2 > 0 && $success3 > 0;
+        return $success1 !== false && $success2 !== false && $success3 !== false;
+    }
+
+    /**
+     * Best-effort: set a file's owner and group to the current process's
+     * effective user/group, so a chmod(0600) alongside it actually restricts
+     * access to whoever is running this code right now - not just whoever
+     * happens to already own the file.
+     *
+     * Requires the posix extension (unavailable on Windows); a no-op if it's
+     * missing. Ownership changes are silently ignored on failure (e.g. not
+     * running as the file's current owner/root) since this is a hardening
+     * best-effort, not a hard requirement - chmod(0600) has already run either way.
+     *
+     * @param string $file
+     * @return void
+     */
+    protected function restrictToCurrentUser(string $file): void
+    {
+        if (function_exists('posix_geteuid') && function_exists('posix_getegid')) {
+            @chown($file, posix_geteuid());
+            @chgrp($file, posix_getegid());
+        }
     }
 
     /**
@@ -181,12 +224,17 @@ class Security extends Singleton implements SecurityInterface
         // Get the private key
         $key = file_get_contents($this->getKeyFilePath('private'));
 
-        // Anonymous public-key encryption (decrypt)
+        // Anonymous public-key encryption (decrypt); returns false if the
+        // ciphertext was forged, truncated, or encrypted for a different key
         $decrypt = sodium_crypto_box_seal_open($data, $key);
 
         // Overwrite a string with NUL characters
         sodium_memzero($data);
         sodium_memzero($key);
+
+        if ($decrypt === false) {
+            throw new SecurityException('Unable to decrypt data.');
+        }
 
         return $decrypt;
     }

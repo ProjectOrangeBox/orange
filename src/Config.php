@@ -161,9 +161,12 @@ class Config extends SingletonArrayObject implements ConfigInterface
     {
         logMsg('INFO', __METHOD__ . ' ' . $filename);
 
-        $this->load($filename);
-
-        return count($this->foundConfigFiles[$filename]) > 0;
+        // isset() should be a cheap, side-effect-free existence check: don't call
+        // load() here - it would parse/merge the config file (and can throw
+        // ConfigFileDidNotReturnAnArray) just to answer an isset(). A filename with no
+        // discovered files at all isn't in $foundConfigFiles, and count(null) is a
+        // TypeError under PHP 8, so guard with ?? [].
+        return count($this->foundConfigFiles[$filename] ?? []) > 0;
     }
 
     /**

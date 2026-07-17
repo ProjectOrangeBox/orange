@@ -183,6 +183,25 @@ class Router extends Singleton implements RouterInterface
         $this->getRoutes();
 
         // setup the "empty" matched
+        $this->resetMatched();
+    }
+
+    /**
+     * Reset $this->matched to its "no match yet" shape.
+     *
+     * Called from the constructor and at the start of match(): without resetting
+     * here, a match() call that fails to find a route would leave the previous
+     * successful match's data in place - the "every route has a url" falsy check in
+     * match() would then see that stale truthy url, skip throwing RouteNotFound, and
+     * silently leave a prior, unrelated request's routing data active. This matters
+     * whenever the same Router instance handles more than one match() call - e.g. a
+     * long-running worker process (Swoole/RoadRunner) reusing the singleton across
+     * requests, not just the single-match-per-request classic PHP-FPM lifecycle.
+     *
+     * @return void
+     */
+    protected function resetMatched(): void
+    {
         $this->matched = [
             'request method' => null,
             'request uri' => null,
@@ -280,6 +299,10 @@ class Router extends Singleton implements RouterInterface
     public function match(string $requestUri, string $requestMethod): self
     {
         logMsg('DEBUG', __METHOD__, compact('requestUri', 'requestMethod'));
+
+        // clear any previous match so a failed match here can never inherit a prior
+        // successful match's (truthy) url and skip throwing RouteNotFound below
+        $this->resetMatched();
 
         // Normalize the request method
         $requestMethodUpper = mb_strtoupper($requestMethod);

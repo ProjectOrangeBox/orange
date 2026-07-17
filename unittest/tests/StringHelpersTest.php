@@ -187,4 +187,31 @@ final class StringHelpersTest extends UnitTestHelper
     {
         $this->assertFalse(isAssociative([]));
     }
+
+    /* sanitizeDownloadFilename() */
+
+    public function testSanitizeDownloadFilenamePassesThroughSafeName(): void
+    {
+        $this->assertEquals('report.pdf', sanitizeDownloadFilename('report.pdf'));
+    }
+
+    public function testSanitizeDownloadFilenameStripsDirectoryComponent(): void
+    {
+        $this->assertEquals('passwd', sanitizeDownloadFilename('/etc/passwd'));
+        $this->assertEquals('report.pdf', sanitizeDownloadFilename('../../report.pdf'));
+    }
+
+    public function testSanitizeDownloadFilenameEscapesQuotesAndBackslashes(): void
+    {
+        // a raw double quote would close the quoted-string early and let an attacker
+        // inject additional Content-Disposition parameters
+        $this->assertEquals('evil\\"; filename=other.txt', sanitizeDownloadFilename('evil"; filename=other.txt'));
+        $this->assertEquals('back\\\\slash.txt', sanitizeDownloadFilename('back\\slash.txt'));
+    }
+
+    public function testSanitizeDownloadFilenameStripsControlCharacters(): void
+    {
+        $this->assertEquals('evil.txt', sanitizeDownloadFilename("evil\r\n.txt"));
+        $this->assertEquals('evil.txt', sanitizeDownloadFilename("ev\x00il.txt"));
+    }
 }

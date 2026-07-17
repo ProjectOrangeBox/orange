@@ -189,4 +189,23 @@ final class ErrorTest extends UnitTestHelper
         $this->assertStringNotContainsString('File:', $raw);
         $this->assertStringNotContainsString('Line:', $raw);
     }
+
+    public function testViewRawBuildHtmlEscapesUntrustedFields(): void
+    {
+        // exception message/file can carry attacker-controlled input (e.g. a bad route
+        // or header echoed back in a validation message) - it must never reach the
+        // response unescaped
+        $data = [
+            'message' => '<script>alert(1)</script>',
+            'file' => '"><img src=x onerror=alert(1)>',
+            'options' => ['bad' => '<b>bold</b>'],
+        ];
+
+        $raw = $this->callMethod('viewRawBuildHtml', ['', $data]);
+
+        $this->assertStringNotContainsString('<script>', $raw);
+        $this->assertStringContainsString('&lt;script&gt;', $raw);
+        $this->assertStringNotContainsString('<img', $raw);
+        $this->assertStringNotContainsString('<b>bold</b>', $raw);
+    }
 }

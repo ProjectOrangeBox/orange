@@ -308,7 +308,9 @@ abstract class ViewAbstract extends Singleton implements ViewInterface
         // convert 'Shipping Carrier' to 'shippingCarrier'
         $typeCheckFunction = $this->changeableTypeCheck[$name];
         if (!$typeCheckFunction($value)) {
-            throw new InvalidValue($value . ' is not ' . $typeCheckFunction);
+            // arrays trigger an "Array to string conversion" warning and non-Stringable
+            // objects fatal outright if concatenated directly - describe by type instead
+            throw new InvalidValue((is_scalar($value) ? (string)$value : get_debug_type($value)) . ' is not ' . $typeCheckFunction);
         }
 
         // convert a human readable name to a variable name
@@ -366,8 +368,11 @@ abstract class ViewAbstract extends Singleton implements ViewInterface
         // If the directory doesn't exist, attempt to create it
         if (!file_exists($dir)) {
             try {
-                // Create the directory recursively with permissions
-                mkdir($dir, 0777, true);
+                // 0755, not 0777: this directory holds compiled string-templates that
+                // get require()'d as executable PHP (see renderString()), so a
+                // world-writable cache dir would let any other local user on a
+                // permissive-umask host plant code that gets executed on next render
+                mkdir($dir, 0755, true);
             } catch (Throwable $e) {
                 throw new DirectoryNotWritable($dir);
             }

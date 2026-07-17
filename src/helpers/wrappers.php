@@ -48,13 +48,21 @@ if (!function_exists('config')) {
 
         try {
             if ($configInstance === null) {
+                // container()->config already IS the Config service - not a container
+                // holding a nested "config" service
                 $configInstance = container()->config;
             }
 
-            if ($filename === null && $key === null && $default === null) {
-                $config = $configInstance->config;
+            if ($filename === null) {
+                // no filename given - return the whole config service so the caller can
+                // chain ->get()/->someFile themselves
+                $config = $configInstance;
+            } elseif ($key === null) {
+                // filename only - return the entire config file as an array
+                $config = $configInstance->get($filename, $default);
             } else {
-                $config = $configInstance->config->get($filename . '.' . $key, $default);
+                // filename + key
+                $config = $configInstance->get($filename . '.' . $key, $default);
             }
         } catch (Throwable $e) {
             // config not setup?

@@ -11,6 +11,7 @@ use orange\framework\exceptions\dispatcher\MethodNotFound;
 use orange\framework\exceptions\InvalidValue;
 use orange\framework\interfaces\DispatcherInterface;
 use orange\framework\property\RouterCallback;
+use ReflectionMethod;
 
 /**
  * Overview of Dispatcher.php
@@ -99,6 +100,13 @@ class Dispatcher extends Singleton implements DispatcherInterface
 
         // let's make sure the controller has this method
         if (!method_exists($routerCallback->controller, $routerCallback->method)) {
+            throw new MethodNotFound($routerCallback->controller . '::' . $routerCallback->method);
+        }
+
+        // method_exists() doesn't check visibility - calling a private/protected method
+        // from here would throw an uncaught fatal Error instead of a clean MethodNotFound,
+        // so treat non-public methods the same as missing ones
+        if (!(new ReflectionMethod($routerCallback->controller, $routerCallback->method))->isPublic()) {
             throw new MethodNotFound($routerCallback->controller . '::' . $routerCallback->method);
         }
 

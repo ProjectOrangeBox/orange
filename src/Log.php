@@ -173,9 +173,8 @@ class Log extends Singleton implements LogInterface, LoggerInterface
 
             $this->handler = $this->config['handler'];
         } else {
+            // isFileWritable() already ran for this filepath via changeThreshold() above
             $this->handler = $this;
-
-            $this->isFileWritable($this->config['filepath']);
         }
     }
 
@@ -193,7 +192,11 @@ class Log extends Singleton implements LogInterface, LoggerInterface
 
         $this->enabled = $this->threshold !== 0;
 
-        $this->isFileWritable($this->config['filepath']);
+        // only the internal file-based handler needs a writable log directory; a custom
+        // PSR-3 handler manages its own storage and shouldn't require 'filepath' to exist
+        if (!isset($this->config['handler'])) {
+            $this->isFileWritable($this->config['filepath']);
+        }
 
         return $this;
     }

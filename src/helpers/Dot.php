@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace orange\framework\helpers;
 
+use orange\framework\exceptions\InvalidValue;
+
 /**
  * Work with arrays using dot notation
  *
@@ -96,16 +98,17 @@ class Dot
             $keys = explode(static::$delimiter, $key);
 
             // Traverse each key part, updating $data to the nested value
-            foreach ($keys as $key) {
+            // (named $segment, not $key, so it doesn't shadow the method's $key parameter)
+            foreach ($keys as $segment) {
                 if (is_array($data)) {
-                    if (isset($data[$key])) {
-                        $data = $data[$key];
+                    if (isset($data[$segment])) {
+                        $data = $data[$segment];
                     } else {
                         return $default;
                     }
                 } elseif (is_object($data)) {
-                    if (isset($data->$key)) {
-                        $data = $data->$key;
+                    if (isset($data->$segment)) {
+                        $data = $data->$segment;
                     } else {
                         return $default;
                     }
@@ -129,7 +132,13 @@ class Dot
      */
     public static function isset(array|\StdClass  &$data, string $key): bool
     {
-        return static::get($data, $key, UNDEFINED) !== UNDEFINED;
+        // a freshly created object is a safe "not found" marker: nothing stored in
+        // $data can ever be === to it. This class is documented as standalone/
+        // self-contained, so it shouldn't depend on the orange\framework Application
+        // bootstrap having already run and defined the global UNDEFINED constant.
+        $notFound = new \stdClass();
+
+        return static::get($data, $key, $notFound) !== $notFound;
     }
 
     /**
@@ -232,6 +241,14 @@ class Dot
                     if ($k == 0) {
                         // Skip the first dot since it's already set
                         continue;
+                    }
+
+                    // A prior key in this same input may have already set this exact
+                    // path to a scalar/object leaf (e.g. 'a' => 'x' alongside
+                    // 'a.b' => 'y') - nesting under that would otherwise crash with a
+                    // cryptic native "Cannot access offset of type string on string"
+                    if (isset($last) && !is_array($last)) {
+                        throw new InvalidValue('Cannot expand "' . $key . '": "' . implode(static::$delimiter, array_slice($dots, 0, $k)) . '" is already set to a non-array value.');
                     }
 
                     // Navigate deeper into the array

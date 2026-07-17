@@ -118,6 +118,12 @@ class Event extends Singleton implements EventInterface
     protected bool $disabled = false;
 
     /**
+     * Per-process strictly-increasing counter used to keep generated event IDs
+     * collision-free; see registerClosureEvent().
+     */
+    private static int $sequence = 0;
+
+    /**
      * Constructor is protected to enforce Singleton usage.
      *
      * @param array $config Configuration array.
@@ -354,8 +360,9 @@ class Event extends Singleton implements EventInterface
 
     /**
      * Register a closure event listener.
-     * This method generates a unique event ID based on the priority and current time.
-     * It stores the closure in the events array under the normalized trigger name.
+     * This method generates a unique event ID based on the priority and a per-process
+     * sequence number, and stores the closure in the events array under the
+     * normalized trigger name.
      *
      * @param string $trigger
      * @param Closure $callable
@@ -364,7 +371,20 @@ class Event extends Singleton implements EventInterface
      */
     protected function registerClosureEvent(string $trigger, \Closure $callable, int $priority): int
     {
-        $eventId = \intval((string)$priority . (string)\hrtime(true));
+        // Priority occupies the high-order digits so krsort() in listeners() sorts
+        // purely by array key and still ends up highest-priority-first; the low
+        // twelve digits are a strictly increasing per-process sequence number so two
+        // registrations - even at identical priority - never collide.
+        //
+        // Previously this concatenated $priority with hrtime(true) as strings and cast
+        // the result with intval(). hrtime(true) grows without bound as the process/
+        // system keeps running, and once the combined digit count passed PHP_INT_MAX
+        // (~19 digits), intval() silently clamped every subsequent ID to the same
+        // value - collapsing distinct listeners onto the same array key and silently
+        // dropping earlier ones. The sequence counter here is bounded by how many
+        // events get registered, not by wall-clock/uptime, so it can't drift into an
+        // overflow the way a raw timestamp can.
+        $eventId = ($priority * 1_000_000_000_000) + (self::$sequence++ % 1_000_000_000_000);
 
         $this->events[$this->normalize($trigger)][$eventId] = $callable;
 

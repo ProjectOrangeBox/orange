@@ -44,6 +44,22 @@ final class ViewerTest extends UnitTestHelper
         $this->assertEquals('<h1>Hello World</h1>', $this->instance->renderString('<h1><?=$hello ?></h1>', ['hello' => 'Hello World']));
     }
 
+    public function testRenderStringCacheDirectoryIsNotGroupOrWorldWritable(): void
+    {
+        // regression guard: this directory holds compiled string-templates that get
+        // require()'d as executable PHP - it must never come out world/group-writable,
+        // which mkdir($dir, 0777, true) used to risk on a permissive umask
+        $string = '<h1>unique-' . uniqid() . '</h1>';
+
+        $this->instance->renderString($string);
+
+        $subPath = substr(sha1($string, false), 0, $this->getPrivatePublic('subPathSize'));
+        $dir = sys_get_temp_dir() . DIRECTORY_SEPARATOR . $subPath;
+
+        $this->assertDirectoryExists($dir);
+        $this->assertEquals(0, fileperms($dir) & 0022);
+    }
+
     public function testAddPath(): void
     {
         // path added above let's test for it.
@@ -126,6 +142,17 @@ final class ViewerTest extends UnitTestHelper
 
         // debug expects is_bool
         $this->instance->change('debug', 'not a bool');
+    }
+
+    public function testChangeWrongTypeWithArrayValueDoesNotWarn(): void
+    {
+        // regression guard: the exception message used to concatenate $value directly,
+        // which triggers "Array to string conversion" for an array (or a fatal error for
+        // a non-Stringable object) instead of cleanly reporting the mismatch
+        $this->expectException(\orange\framework\exceptions\InvalidValue::class);
+        $this->expectExceptionMessage('array is not is_bool');
+
+        $this->instance->change('debug', ['not', 'a', 'bool']);
     }
 
     public function testRenderMergesViewLevelData(): void

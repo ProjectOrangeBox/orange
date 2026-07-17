@@ -76,6 +76,13 @@ final class ConfigTest extends UnitTestHelper
         $this->assertTrue(isset($this->instance['aaa']));
     }
 
+    public function testOffsetExistsFalseForUnknownConfigDoesNotThrow(): void
+    {
+        // a filename with no discovered config files at all isn't in $foundConfigFiles;
+        // count(null) is a TypeError under PHP 8, so this must not crash
+        $this->assertFalse(isset($this->instance['thisConfigFileDoesNotExistAnywhere']));
+    }
+
     public function testGetWithDefaultReturnsDefaultForMissingKey(): void
     {
         $this->assertEquals('fallback', $this->instance->get('aaa.doesNotExist', 'fallback'));

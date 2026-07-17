@@ -364,10 +364,10 @@ trait ConfigurationTrait
                             }
                             break;
                         case 'count':
-                            if (count($value) != $option) {
-                                $errors[] = $key . ' count is not ' . $option;
-                            } else {
+                            if ($type !== 'array') {
                                 $errors[] = 'can not use count on ' . $type;
+                            } elseif (count($value) != $option) {
+                                $errors[] = $key . ' count is not ' . $option;
                             }
                             break;
                         case 'size':

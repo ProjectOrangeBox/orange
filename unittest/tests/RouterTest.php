@@ -132,6 +132,21 @@ final class RouterTest extends UnitTestHelper
         $this->instance->getUrl('product', ['abc', 'xyz'], false);
     }
 
+    public function testMatchAfterSuccessfulMatchStillThrowsWhenNoRouteFound(): void
+    {
+        // regression guard: match() must reset any previous match's data before
+        // trying again. Without that, a failed match here would inherit the prior
+        // successful match's (truthy) url, silently skip RouteNotFound, and leave
+        // the OLD, unrelated match active - relevant to any long-running process
+        // that reuses the same Router instance across more than one request.
+        $this->instance->match('/product/abc/123', 'get');
+        $this->assertEquals('product', $this->instance->getMatched('name'));
+
+        $this->expectException(RouteNotFound::class);
+
+        $this->instance->match('/this/matches/nothing', 'get');
+    }
+
     public function testMatchRouteNotFoundException1(): void
     {
         $this->expectException(RouteNotFound::class);

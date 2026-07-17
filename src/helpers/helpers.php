@@ -339,6 +339,30 @@ if (!function_exists('isAssociative')) {
     }
 }
 
+if (!function_exists('sanitizeDownloadFilename')) {
+    /**
+     * Makes a filename safe to embed in a quoted Content-Disposition filename
+     * parameter. Strips any directory component and control characters
+     * (including CR/LF), then escapes backslashes/quotes so the value can't
+     * break out of the quoted string and inject additional header parameters.
+     *
+     * @param string $filename
+     * @return string
+     */
+    function sanitizeDownloadFilename(string $filename): string
+    {
+        // only the bare filename ever belongs in this header - drop any directory component
+        $filename = basename($filename);
+
+        // strip control characters, including CR/LF (header() already blocks embedded
+        // newlines, but don't rely on that alone)
+        $filename = preg_replace('/[\x00-\x1F\x7F]/', '', $filename);
+
+        // escape backslash and double quote so the value can't close the quoted-string early
+        return addcslashes($filename, '\\"');
+    }
+}
+
 if (!function_exists('forceDownload')) {
     /**
      * Forces the download of a file or data by setting appropriate headers and outputting the content.
@@ -365,7 +389,7 @@ if (!function_exists('forceDownload')) {
             $outputService->contentType($contentType, 'bin');
         }
 
-        $outputService->header('Content-Disposition: attachment; filename="' . $filename . '"');
+        $outputService->header('Content-Disposition: attachment; filename="' . sanitizeDownloadFilename($filename) . '"');
         $outputService->header('Content-Transfer-Encoding: binary');
         $outputService->header('Expires: 0');
         $outputService->header('Pragma: no-cache');

@@ -25,4 +25,9 @@ class mockController
     {
         return $one . '+' . $two;
     }
+
+    protected function secret()
+    {
+        return 'should not be reachable via routing';
+    }
 }

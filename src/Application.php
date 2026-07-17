@@ -320,13 +320,13 @@ class Application
             include_once $helperFileRealPath;
         }
 
-        // now errorHandler() & errorHandler() should be setup
+        // now errorHandler() & exceptionHandler() should be setup
         // try to attach the exception and error handler
         if (function_exists('errorHandler')) {
             set_error_handler('errorHandler');
         }
 
-        if (function_exists('errorHandler')) {
+        if (function_exists('exceptionHandler')) {
             set_exception_handler('exceptionHandler');
         }
 
@@ -361,13 +361,19 @@ class Application
             throw new IncorrectInterface('Container services not a closure.');
         }
 
-        // now get the empty container and save a copy in our object
-        $this->container = $services['container']($services);
+        // call the closure into a plain local first - $this->container is typed
+        // ContainerInterface, so assigning straight into it would let PHP throw a raw
+        // TypeError for a bad return value before we get a chance to throw our own
+        // IncorrectInterface with a useful message
+        $container = $services['container']($services);
 
         // make sure the container is an instance of the ContainerInterface
-        if (!$this->container instanceof ContainerInterface) {
+        if (!$container instanceof ContainerInterface) {
             throw new IncorrectInterface('The service "container" did not return an object using the container interface.');
         }
+
+        // now save the validated container
+        $this->container = $container;
     }
 
     /**

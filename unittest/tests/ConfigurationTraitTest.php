@@ -369,6 +369,32 @@ final class ConfigurationTraitTest extends UnitTestHelper
         $this->callMethod('validateConfig', [['list' => [1, 2, 3]], ['list' => 'max[2]']]);
     }
 
+    public function testValidateConfigCountRule(): void
+    {
+        // NOTE: previously inverted - the valid (matching count) case raised "can not use
+        // count on X" while the mismatch case was the only one that stayed silent, so
+        // this rule always threw regardless of the actual count. Fixed.
+        $this->callMethod('validateConfig', [['list' => [1, 2, 3]], ['list' => 'count[3]']]);
+
+        $this->assertTrue(true);
+    }
+
+    public function testValidateConfigCountRuleMismatchThrows(): void
+    {
+        $this->expectException(InvalidValue::class);
+        $this->expectExceptionMessage('list count is not 2');
+
+        $this->callMethod('validateConfig', [['list' => [1, 2, 3]], ['list' => 'count[2]']]);
+    }
+
+    public function testValidateConfigCountRuleOnNonArrayThrows(): void
+    {
+        $this->expectException(InvalidValue::class);
+        $this->expectExceptionMessage('can not use count on string');
+
+        $this->callMethod('validateConfig', [['name' => 'abcd'], ['name' => 'count[3]']]);
+    }
+
     public function testValidateConfigSizeRule(): void
     {
         $this->callMethod('validateConfig', [

@@ -136,7 +136,24 @@ final class ContainerAdvancedTest extends UnitTestHelper
         $service = $this->instance->get('service');
 
         $this->assertInstanceOf(autowireGetInstanceMock::class, $service);
+        // the #[AutoWire('foo')] is on getInstance() itself, not the private
+        // constructor - it's the method the container actually invokes
         $this->assertEquals('bar', $service->injected);
+    }
+
+    public function testAutoWireAttributeOnUnusedConstructorDoesNotLeakIntoGetInstance(): void
+    {
+        // regression guard: previously, AutoWire attributes were always read off
+        // __construct even when a private constructor was bypassed in favor of
+        // getInstance(), so its resolved args got passed positionally into
+        // getInstance() by coincidence. getInstance() has no AutoWire attributes of
+        // its own here, so it must run with its own default, untouched by the
+        // constructor's attribute.
+        $this->instance->set('^service', autowireAttributeOnUnusedConstructorMock::class);
+
+        $service = $this->instance->get('service');
+
+        $this->assertEquals('getinstance-default', $service->injected);
     }
 
     public function testAutoWirePlainClassWithNoAttributes(): void

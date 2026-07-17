@@ -467,24 +467,27 @@ class Error extends Singleton
 
         $finalOutput .= '<pre>';
 
+        // exception messages, file paths, and trace data can echo back attacker-controlled
+        // input (a bad route, a bad header, a validation message quoting the request value),
+        // so every field is HTML-escaped before being embedded in this raw fallback view
         if (isset($finalData['code'])) {
-            $finalOutput .= $finalData['code'] . PHP_EOL;
+            $finalOutput .= htmlspecialchars((string)$finalData['code'], ENT_QUOTES) . PHP_EOL;
         }
 
         if (isset($finalData['message'])) {
-            $finalOutput .= $finalData['message'] . PHP_EOL;
+            $finalOutput .= htmlspecialchars((string)$finalData['message'], ENT_QUOTES) . PHP_EOL;
         }
 
         if (isset($finalData['file'])) {
-            $finalOutput .= 'File: ' . $finalData['file'] . PHP_EOL;
+            $finalOutput .= 'File: ' . htmlspecialchars((string)$finalData['file'], ENT_QUOTES) . PHP_EOL;
         }
 
         if (isset($finalData['line'])) {
-            $finalOutput .= 'Line: ' . $finalData['line'] . PHP_EOL;
+            $finalOutput .= 'Line: ' . htmlspecialchars((string)$finalData['line'], ENT_QUOTES) . PHP_EOL;
         }
 
         if (isset($finalData['options'])) {
-            $finalOutput .= print_r($finalData['options'], true) . PHP_EOL;
+            $finalOutput .= htmlspecialchars(print_r($finalData['options'], true), ENT_QUOTES) . PHP_EOL;
         }
 
         $finalOutput .= '</pre>';

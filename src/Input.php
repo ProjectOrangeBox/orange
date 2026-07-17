@@ -411,7 +411,7 @@ class Input extends Singleton implements InputInterface
     /**
      * Set the Application globals array
      *
-     * @param array $userGlobals
+     * @param array $globals Overrides merged over the captured superglobals.
      * @return array
      */
     public static function setGlobals(array $globals = []): array
@@ -512,12 +512,14 @@ class Input extends Singleton implements InputInterface
             parse_str($inputStream, $request);
             // no files attached
         } elseif (strpos($contentType, 'text/plain', 0) !== false) {
-            // use raw stream
-            $request = $inputStream;
+            // raw text has no key/value structure; the body is still available via
+            // inputStream(). fall back to whatever was posted so $request stays an array
+            $request = $postedRequest;
             // no files attached
         } elseif (strpos($contentType, 'application/json', 0) !== false) {
-            // use stream and convert to json
-            $request = json_decode($inputStream, true);
+            // use stream and convert to json; guard against malformed json (json_decode
+            // returns null) so $request is always an array
+            $request = json_decode($inputStream, true) ?? [];
             // no files attached
         } else {
             // fall back to what was sent in

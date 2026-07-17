@@ -539,9 +539,8 @@ class DirectorySearch implements DirectorySearchInterface
             // do directory scan for resources append new resources
             foreach (array_keys($this->directories) as $directory) {
                 if ($searchPath = realpath(rtrim($directory, DIRECTORY_SEPARATOR))) {
-                    // search up to a maximum of 8 levels deep
                     if ($this->recursive) {
-                        $this->addMatches($searchPath, glob($searchPath . '/{,*/,*/*/,*/*/*/,*/*/*/*/,*/*/*/*/*/,*/*/*/*/*/*/,*/*/*/*/*/*/*/,*/*/*/*/*/*/*/*/}' . $this->match, GLOB_BRACE));
+                        $this->addMatches($searchPath, $this->recursiveGlob($searchPath, $this->match));
                     } else {
                         $this->addMatches($searchPath, glob($searchPath . '/' . $this->match));
                     }
@@ -554,6 +553,46 @@ class DirectorySearch implements DirectorySearchInterface
 
             $this->rescan = false;
         }
+    }
+
+    /**
+     * Recursively find files under $searchPath matching a glob-style filename
+     * pattern (e.g. star-dot-php), at any depth.
+     *
+     * Previously this used a single glob() call with an 8-level GLOB_BRACE
+     * expansion (comma-separated star-slash alternatives) to fake recursion,
+     * since glob() itself has no recursive mode. That pattern forced the C
+     * glob() implementation to run up to 8 separate directory-tree scans from
+     * the search root per call (one per brace alternative) and silently missed
+     * anything nested more than 8 levels deep. A single RecursiveDirectoryIterator
+     * pass walks the tree once, with no depth limit, and is both faster (one
+     * tree walk instead of up to eight) and more correct.
+     *
+     * @param string $searchPath
+     * @param string $pattern
+     * @return array
+     */
+    protected function recursiveGlob(string $searchPath, string $pattern): array
+    {
+        $matches = [];
+
+        $iterator = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator($searchPath, \FilesystemIterator::SKIP_DOTS),
+            \RecursiveIteratorIterator::LEAVES_ONLY
+        );
+
+        foreach ($iterator as $file) {
+            if ($file->isFile() && fnmatch($pattern, $file->getFilename())) {
+                $matches[] = $file->getPathname();
+            }
+        }
+
+        // glob() returns matches sorted alphabetically by default; match that so
+        // insertion order (and therefore findFirst()/findLast() behavior) stays
+        // the same regardless of filesystem directory-entry order
+        sort($matches);
+
+        return $matches;
     }
 
     /**
@@ -596,12 +635,18 @@ class DirectorySearch implements DirectorySearchInterface
     /**
      * normalize the resource key
      *
+     * This runs on every add/find/exists/remove call (not just at scan time), so
+     * it's a hot path. mb_detect_encoding() runs a heuristic scan of the string on
+     * every call to guess its encoding - resource keys are file/view names, which
+     * are UTF-8 (or plain ASCII, a UTF-8 subset) in every realistic case, so a
+     * fixed encoding is passed directly instead of re-detecting it each time.
+     *
      * @param string $key
      * @return string
      */
     protected function normalizeKey(string $key): string
     {
-        $newKey = ($this->normalizeKeys) ? mb_convert_case($key, MB_CASE_LOWER, mb_detect_encoding($key)) : $key;
+        $newKey = ($this->normalizeKeys) ? mb_convert_case($key, MB_CASE_LOWER, 'UTF-8') : $key;
 
         return $this->hashKeys ? sha1($newKey, false) : $newKey;
     }

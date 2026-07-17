@@ -71,7 +71,11 @@ final class HelpersTest extends UnitTestHelper
     public function testConfig(): void
     {
         // setup config
-        $config = Config::getInstance([WORKINGDIR . '/env']);
+        // NOTE: this was previously passed as a plain list ([WORKINGDIR . '/env']) instead
+        // of ['config directories' => [...]], so Config had zero search directories and
+        // could never find configExample2.php - masked by the config() bug below, which
+        // always threw and returned $default regardless.
+        $config = Config::getInstance(['config directories' => [WORKINGDIR . '/env']]);
 
         // get an instance of container
         $container = Container::getInstance();
@@ -80,8 +84,14 @@ final class HelpersTest extends UnitTestHelper
         $container->set('config', $config);
 
         // test away!
-        #$this->assertEquals('Jenny Appleseed', config('configexample2', 'name'));
-        $this->assertEquals('', config('configexample2', 'dummy'));
-        $this->assertEquals('bar', config('configexample2', 'foo', 'bar'));
+        // NOTE: previously commented out - config() called $configInstance->config
+        // (Config::__get('config'), a nonexistent config file returning []) instead of
+        // $configInstance itself, so ->get() on that empty array threw and every call
+        // silently fell back to $default. Fixed - this now returns the real value.
+        $this->assertEquals('Jenny Appleseed', config('configExample2', 'name'));
+        $this->assertEquals('', config('configExample2', 'dummy'));
+        $this->assertEquals('bar', config('configExample2', 'foo', 'bar'));
+        $this->assertEquals(['name' => 'Jenny Appleseed'], config('configExample2'));
+        $this->assertInstanceOf(Config::class, config());
     }
 }

@@ -128,6 +128,21 @@ final class ApplicationBootstrapTest extends \UnitTestHelper
         }
     }
 
+    /* preContainer() */
+
+    public function testPreContainerRegistersErrorAndExceptionHandlers(): void
+    {
+        // errorHandler()/exceptionHandler() are already declared by unittest bootstrap.php
+        $this->setPrivatePublic('config', ['helpers' => [], 'required helpers' => []]);
+
+        $this->callMethod('preContainer');
+
+        // passing null restores the previous handler and returns its name, letting us
+        // confirm what was actually registered without leaving the handler installed
+        $this->assertEquals('errorHandler', set_error_handler(null));
+        $this->assertEquals('exceptionHandler', set_exception_handler(null));
+    }
+
     /* bootstrapContainer() */
 
     public function testBootstrapContainerBuildsContainerFromClosure(): void
@@ -162,10 +177,8 @@ final class ApplicationBootstrapTest extends \UnitTestHelper
 
     public function testBootstrapContainerClosureReturningNonContainerThrows(): void
     {
-        // NOTE: the typed property assignment ($this->container = ...) rejects a
-        // non-container with a TypeError before the explicit instanceof check on
-        // Application.php:368 is reached, so that guard is currently dead code.
-        $this->expectException(\TypeError::class);
+        $this->expectException(IncorrectInterface::class);
+        $this->expectExceptionMessage('did not return an object using the container interface');
 
         $this->callMethod('bootstrapContainer', [['container' => fn($s) => new stdClass()]]);
     }

@@ -46,6 +46,34 @@ final class SecurityTest extends UnitTestHelper
         $this->assertFileExists($this->authKeyFile);
     }
 
+    public function testCreateKeysSetsPrivateAndAuthKeyPermissionsToOwnerOnly(): void
+    {
+        $this->assertEquals(0600, fileperms($this->privateKeyFile) & 0777);
+        $this->assertEquals(0600, fileperms($this->authKeyFile) & 0777);
+    }
+
+    public function testCreateKeysWithRestrictOwnershipFalseStillSucceeds(): void
+    {
+        $this->tearDown();
+
+        $this->assertTrue($this->instance->createKeys(false));
+        $this->assertFileExists($this->privateKeyFile);
+        // chmod(0600) always applies regardless of the restrictOwnership flag
+        $this->assertEquals(0600, fileperms($this->privateKeyFile) & 0777);
+    }
+
+    public function testCreateKeysRestrictsOwnershipToCurrentUser(): void
+    {
+        if (!function_exists('posix_geteuid') || !function_exists('posix_getegid')) {
+            $this->markTestSkipped('posix extension not available');
+        }
+
+        $this->assertEquals(posix_geteuid(), fileowner($this->privateKeyFile));
+        $this->assertEquals(posix_getegid(), filegroup($this->privateKeyFile));
+        $this->assertEquals(posix_geteuid(), fileowner($this->authKeyFile));
+        $this->assertEquals(posix_getegid(), filegroup($this->authKeyFile));
+    }
+
     public function testEncrypt(): void
     {
         $text = 'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry\'s standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.';

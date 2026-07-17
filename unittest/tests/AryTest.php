@@ -96,6 +96,22 @@ class AryTest extends TestCase
         $this->assertEquals([2 => 'Bob', 1 => 'Alice'], $result);
     }
 
+    public function testMakeAssociatedWithSortAndExplicitFlags(): void
+    {
+        // makeAssociated() used to call $sortFunction() a second time unconditionally
+        // after the if/else already sorted once, passing the raw $flags (-1 when none
+        // was given) as an invalid sort flag - remove the double call and this must
+        // still sort correctly with an explicit flag
+        $array = [
+            ['id' => 10, 'name' => 'Bob'],
+            ['id' => 2, 'name' => 'Alice'],
+        ];
+
+        $result = Ary::makeAssociated($array, 'id', 'name', 'asc', SORT_STRING);
+
+        $this->assertEquals([10 => 'Bob', 2 => 'Alice'], $result);
+    }
+
     public function testElement(): void
     {
         $array = ['a' => 'value', 'b' => 'other'];

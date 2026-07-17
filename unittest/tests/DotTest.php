@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use PHPUnit\Framework\TestCase;
 use orange\framework\helpers\Dot;
+use orange\framework\exceptions\InvalidValue;
 
 class DotTest extends TestCase
 {
@@ -185,6 +186,36 @@ class DotTest extends TestCase
                 ]
             ]
         ], Dot::expand($data));
+    }
+
+    public function testExpandConflictingScalarAndNestedKeyThrows(): void
+    {
+        // regression guard: expanding a flat key ('a') alongside a nested key that
+        // wants to nest under that same prefix ('a.b') used to crash with a cryptic
+        // native TypeError ("Cannot access offset of type string on string")
+        // instead of a clear, catchable error.
+        $this->expectException(InvalidValue::class);
+
+        Dot::expand([
+            'a' => 'scalar',
+            'a.b' => 'nested',
+        ]);
+    }
+
+    public function testIssetHandlesFalsyStoredValues(): void
+    {
+        // Dot is documented as a standalone helper, so isset() must not rely on the
+        // orange\framework Application bootstrap having defined the global
+        // UNDEFINED constant. This also confirms the sentinel-based rewrite still
+        // correctly distinguishes falsy-but-present values (0, false, '') from an
+        // actually-missing key.
+        $data = ['zero' => 0, 'false' => false, 'empty' => '', 'b' => 'value'];
+
+        $this->assertTrue(Dot::isset($data, 'zero'));
+        $this->assertTrue(Dot::isset($data, 'false'));
+        $this->assertTrue(Dot::isset($data, 'empty'));
+        $this->assertTrue(Dot::isset($data, 'b'));
+        $this->assertFalse(Dot::isset($data, 'missing'));
     }
 
     public function testRoundTripFlattenExpand(): void

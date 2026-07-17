@@ -39,6 +39,16 @@ final class DispatcherTest extends UnitTestHelper
         $this->assertNull($this->instance->call(new RouterCallback('mockController','foobar',[])));
     }
 
+    public function testProtectedMethodThrowsMethodNotFound(): void
+    {
+        // method_exists() doesn't check visibility - a route pointing at a
+        // protected/private method must be treated as not found, not left to
+        // fatal with an uncaught Error when actually invoked
+        $this->expectException(MethodNotFound::class);
+
+        $this->instance->call(new RouterCallback('mockController', 'secret', []));
+    }
+
     public function testMethodPassOne(): void
     {
         $this->assertEquals('one', $this->instance->call(new RouterCallback('mockController','passone',['one'])));

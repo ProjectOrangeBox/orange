@@ -135,6 +135,31 @@ final class EventTest extends UnitTestHelper
         $this->assertFalse($this->instance->has('open.file'));
     }
 
+    public function testSamePriorityRegistrationsGetDistinctIdsAndBothFire(): void
+    {
+        // regression guard: event IDs used to be priority + hrtime(true), which can
+        // collide once hrtime() grows large enough to overflow PHP_INT_MAX when
+        // concatenated - silently dropping one listener. Two same-priority
+        // registrations back-to-back must always get distinct IDs and both must fire.
+        $payload = [];
+
+        $idOne = $this->instance->register('same.priority', function (&$p) {
+            $p[] = 'first';
+        }, Event::PRIORITY_NORMAL);
+
+        $idTwo = $this->instance->register('same.priority', function (&$p) {
+            $p[] = 'second';
+        }, Event::PRIORITY_NORMAL);
+
+        $this->assertNotEquals($idOne, $idTwo);
+
+        $this->instance->trigger('same.priority', $payload);
+
+        $this->assertCount(2, $payload);
+        $this->assertContains('first', $payload);
+        $this->assertContains('second', $payload);
+    }
+
     public function testUnregisterAll(): void
     {
         $this->instance->register('open.file', function (&$payload) {

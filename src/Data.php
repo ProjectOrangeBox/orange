@@ -36,6 +36,9 @@ class Data extends SingletonArrayObject implements DataInterface
     {
         logMsg('INFO', __METHOD__);
 
-        parent::__construct($this->buildArrayObjects($data), \ArrayObject::ARRAY_AS_PROPS);
+        // SingletonArrayObject's inherited constructor (base\ArrayObject::__construct)
+        // takes only $input and already hardcodes ARRAY_AS_PROPS itself - a second
+        // argument here would silently be discarded
+        parent::__construct($this->buildArrayObjects($data));
     }
 }

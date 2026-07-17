@@ -142,19 +142,14 @@ class Output extends Singleton implements OutputInterface
         logMsg('INFO', __METHOD__);
 
         // merge the provided config with the default config
+        // ($input is promoted on the constructor signature; force https and accepts-type detection use it)
         $this->config = $this->mergeConfigWith($config);
-
-        // we need the input for things like force https and detecting accepts type
-        $this->input = $input;
 
         // if force https is enabled in the config then we need to check if the request is https and if not redirect to the https version of the url
         if ($this->config['force https']) {
             $this->forceHttps();
         }
 
-        // initialize properties
-        $this->output = '';
-        $this->headers = [];
         // create a mapping of string keys to response codes for easy lookup
         $this->responseCodesInternalStringKeys = array_change_key_case(array_flip($this->config['status codes']), CASE_LOWER);
 
@@ -200,8 +195,39 @@ class Output extends Singleton implements OutputInterface
         logMsg('INFO', __METHOD__);
 
         if (!$this->input->isHttpsRequest()) {
-            $this->redirect('https://' . $this->input->server('http_host') . $this->input->server('request_uri', $this->config['force http response code']));
+            // The Host header is client-supplied; reflecting it straight into the redirect
+            // target is a host-header-injection open redirect. Only ever redirect to a host
+            // we explicitly recognise. Redirect to the same URI over https using the
+            // configured redirect status code.
+            $host = $this->resolveTrustedHost($this->input->server('http_host', ''));
+
+            $this->redirect('https://' . $host . $this->input->server('request_uri', ''), $this->config['force http response code']);
         }
+    }
+
+    /**
+     * Resolve a host that is safe to place in a Location header.
+     *
+     * The incoming Host header is attacker-controllable, so it is only honored when it
+     * appears in the configured "allowed hosts" allowlist. Otherwise the first allowed
+     * host is used as the canonical redirect target. An empty allowlist means no host can
+     * be trusted, so forcing https would be an open redirect — that fails closed.
+     *
+     * @param string $requestedHost The Host header from the request.
+     * @return string A host that is safe to redirect to.
+     * @throws OutputException If no allowed hosts are configured.
+     */
+    protected function resolveTrustedHost(string $requestedHost): string
+    {
+        $allowedHosts = $this->config['allowed hosts'] ?? [];
+
+        if (empty($allowedHosts)) {
+            throw new OutputException('Cannot force https safely: configure "allowed hosts" so the redirect never reflects the client-supplied Host header (open redirect).');
+        }
+
+        // honor the request host only when it is explicitly allowed; otherwise fall back
+        // to the canonical (first) allowed host
+        return in_array($requestedHost, $allowedHosts, true) ? $requestedHost : $allowedHosts[0];
     }
 
     /**

@@ -326,6 +326,9 @@ class Container extends Singleton implements ContainerInterface
     {
         $service = $this->registeredServices[$serviceName];
 
+        // TYPE and REFERENCE are array-key constants (row indexes), not possible values
+        // of $service[self::TYPE] - only CLOSURE/ALIAS/VALUE/OBJECT/AUTOWIRECLASS are
+        // ever attach()'d as a type tag, so only those belong in this switch.
         switch ($service[self::TYPE]) {
             case self::AUTOWIRECLASS:
                 $isA = 'autowired fully qualifed classname';
@@ -338,9 +341,6 @@ class Container extends Singleton implements ContainerInterface
                 break;
             case self::ALIAS:
                 $isA = 'alias';
-                break;
-            case self::REFERENCE:
-                $isA = 'reference';
                 break;
             case self::VALUE:
                 $isA = gettype($service[self::REFERENCE]);
@@ -555,25 +555,14 @@ class Container extends Singleton implements ContainerInterface
         // Use reflection to analyze the class and its constructor
         $classReflection = new ReflectionClass($fullyQualifiedClass);
 
-        // This will hold the arguments to pass to the constructor or getInstance method
-        $args = [];
-
         // These will hold the reflection methods if they exist
         $reflectionConstructMethod = null;
         $reflectionGetInstanceMethod = null;
 
-        // Check if the class has a constructor and if it does, check for AutoWire attributes
+        // Check if the class has a public constructor we can use
         if ($classReflection->hasMethod('__construct')) {
-            // If the class has a constructor, we will check for AutoWire attributes to determine what services to inject
             $reflectionConstructMethod = $classReflection->getMethod('__construct');
 
-            // Loop through all AutoWire attributes on the constructor and resolve the corresponding services from the container
-            foreach ($reflectionConstructMethod->getAttributes(AutoWire::class) as $attribute) {
-                // try to get services - this can also throw exceptions
-                $args[] = $this->get($attribute->getArguments()[0]);
-            }
-
-            // If the constructor is public, we will use it to create the instance
             if (!$reflectionConstructMethod->isPublic()) {
                 // If the constructor is not public, we cannot use it to create the instance, so we will set it to null and check for a getInstance method instead
                 $reflectionConstructMethod = null;
@@ -582,10 +571,8 @@ class Container extends Singleton implements ContainerInterface
 
         // If the class does not have a public constructor, we will check if it has a public static getInstance method that we can use instead
         if ($reflectionConstructMethod == null && $classReflection->hasMethod('getInstance')) {
-            // If the class has a getInstance method, we will check for AutoWire attributes on it to determine what services to inject
             $reflectionGetInstanceMethod = $classReflection->getMethod('getInstance');
-            
-            // If getInstance is public, we will use it to create the instance
+
             if (!$reflectionGetInstanceMethod->isPublic()) {
                 // If the getInstance method is not public, we cannot use it to create the instance, so we will set it to null
                 $reflectionGetInstanceMethod = null;
@@ -593,11 +580,14 @@ class Container extends Singleton implements ContainerInterface
         }
 
         if ($reflectionConstructMethod) {
-            // use the constructor to create the instance, passing in the resolved services as arguments
-            $service = $classReflection->newInstanceArgs($args);
+            // AutoWire attributes belong on whichever method actually builds the
+            // instance - read them from the constructor since that's the one being used
+            $service = $classReflection->newInstanceArgs($this->resolveAutoWireArgs($reflectionConstructMethod));
         } elseif ($reflectionGetInstanceMethod) {
-            // Use the public static getInstance method to create the instance, passing in the resolved services as arguments
-            $service =  $reflectionGetInstanceMethod->invokeArgs(null, $args);
+            // same rule: getInstance() is the entry point here, so its own AutoWire
+            // attributes are what determine the injected arguments (not __construct's,
+            // which either doesn't exist or isn't public and so is never called)
+            $service = $reflectionGetInstanceMethod->invokeArgs(null, $this->resolveAutoWireArgs($reflectionGetInstanceMethod));
         } else {
             // If the class does not have a public constructor or a public static getInstance method, we cannot create an instance of it and we will throw an exception
             throw new FailedToAutoWire($fullyQualifiedClass . ' could not find __construct or getInstance');
@@ -608,5 +598,24 @@ class Container extends Singleton implements ContainerInterface
 
         // return service
         return $service;
+    }
+
+    /**
+     * Resolve the services requested by #[AutoWire] attributes on a constructor or
+     * getInstance method, in declaration order, ready to pass to newInstanceArgs()/invokeArgs().
+     *
+     * @param \ReflectionMethod $method
+     * @return array
+     */
+    protected function resolveAutoWireArgs(\ReflectionMethod $method): array
+    {
+        $args = [];
+
+        foreach ($method->getAttributes(AutoWire::class) as $attribute) {
+            // try to get services - this can also throw exceptions
+            $args[] = $this->get($attribute->getArguments()[0]);
+        }
+
+        return $args;
     }
 }

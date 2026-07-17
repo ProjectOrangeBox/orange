@@ -72,11 +72,10 @@ final class HttpExceptionsTest extends UnitTestHelper
         $e = new \orange\framework\exceptions\http\Http302('/redirect-target');
 
         $this->assertInstanceOf(Http301::class, $e);
-        // KNOWN BUG: Http302 extends Http301 whose constructor defaults $code = 301,
-        // and the Http base only derives the code from the class name when $code == 0,
-        // so Http302 currently reports 301. Left as a characterization test for the
-        // code-cleanup pass; fix the constructor and update this assertion to 302.
-        $this->assertEquals(301, $e->getCode());
+        // Http301's constructor now defaults $code to 0, so the Http base derives the
+        // status from the class name: Http302 correctly reports 302.
+        $this->assertEquals(302, $e->getCode());
+        $this->assertEquals(302, $e->getHttpCode());
     }
 
     public function testHttp301DecorateSetsLocationHeader(): void

@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Psr\Log\NullLogger;
 use orange\framework\Log;
 use orange\framework\exceptions\IncorrectInterface;
 
@@ -129,6 +130,22 @@ final class LogTest extends UnitTestHelper
         $this->instance->emergency('should not appear');
 
         $this->assertFileDoesNotExist($this->config['filepath']);
+    }
+
+    public function testCustomHandlerDoesNotRequireWritableFilepath(): void
+    {
+        // an unwritable/nonexistent filepath must not matter when a custom PSR-3
+        // handler is configured - changeThreshold() used to validate it unconditionally
+        $config = $this->config;
+        $config['handler'] = new NullLogger();
+        $config['filepath'] = '/this/path/does/not/exist/and/is/not/creatable/log.txt';
+
+        $instance = Log::newInstance($config);
+        $instance->changeThreshold(255);
+
+        $instance->emergency('should not throw');
+
+        $this->assertFileDoesNotExist($config['filepath']);
     }
 
     public function testMonoLoggerException(): void

@@ -38,8 +38,8 @@ class Output extends RealOutput implements OutputInterface
     protected function phpHeader(string $header, bool $replace = false): void
     {
         if ($replace) {
-            foreach (array_keys($this->test['header']) as $key) {
-                unset($this->test['header'][$key]);
+            foreach (array_keys($this->test['headers'] ?? []) as $key) {
+                unset($this->test['headers'][$key]);
             }
         }
 

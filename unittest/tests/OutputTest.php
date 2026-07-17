@@ -169,6 +169,37 @@ final class OutputTest extends UnitTestHelper
         $this->assertEquals('', $output);
     }
 
+    public function testResolveTrustedHostHonorsAllowedHost(): void
+    {
+        $instance = Output::newInstance([
+            'contentType' => 'text/html',
+            'charSet' => 'utf-8',
+            'allowed hosts' => ['example.com', 'www.example.com'],
+        ], Input::getInstance([]));
+
+        $this->assertEquals('www.example.com', $this->callMethod('resolveTrustedHost', ['www.example.com'], $instance));
+    }
+
+    public function testResolveTrustedHostRejectsSpoofedHost(): void
+    {
+        $instance = Output::newInstance([
+            'contentType' => 'text/html',
+            'charSet' => 'utf-8',
+            'allowed hosts' => ['example.com', 'www.example.com'],
+        ], Input::getInstance([]));
+
+        // a spoofed Host header must not be reflected; fall back to the canonical (first) allowed host
+        $this->assertEquals('example.com', $this->callMethod('resolveTrustedHost', ['evil.com'], $instance));
+    }
+
+    public function testResolveTrustedHostFailsClosedWithoutAllowlist(): void
+    {
+        // default config has an empty 'allowed hosts', so forcing https can't be done safely
+        $this->expectException(OutputException::class);
+
+        $this->callMethod('resolveTrustedHost', ['anything.com']);
+    }
+
     public function testFlushAll(): void
     {
         $this->instance->header('Content-Type: text/html; charset=utf-8');

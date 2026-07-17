@@ -111,8 +111,6 @@ class Ary
             } else {
                 $sortFunction($associativeArray, $flags);
             }
-
-            $sortFunction($associativeArray, $flags);
         }
 
         return $associativeArray;

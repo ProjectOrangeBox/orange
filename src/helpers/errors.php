@@ -100,8 +100,13 @@ if (!function_exists('errorHandler')) {
 if (!function_exists('exceptionHandler')) {
     function exceptionHandler(Throwable $exception): void
     {
-        // if they are passing a http error already then just let it pass through to the error handler
-        if (!is_a($exception, \orange\framework\exceptions\http\Http::class) && error_reporting() == 0) {
+        // Http exceptions (Http404, Http403, etc.) are deliberate control flow - e.g.
+        // thrown by show404() - not unexpected failures, so they always get the full
+        // Error-page treatment below regardless of error_reporting. A non-Http
+        // exception is a genuinely unexpected failure; if error_reporting has been
+        // fully silenced (0) - a common production hardening setting - skip building
+        // a detailed error page and just fail generically instead.
+        if (!($exception instanceof \orange\framework\exceptions\http\Http) && error_reporting() == 0) {
             http_response_code(500);
             exit(1);
         }
@@ -110,7 +115,10 @@ if (!function_exists('exceptionHandler')) {
         // override this function if you want to use your own class
         \orange\framework\Error::getInstance([], container(), $exception);
 
-        // exit with error safety
+        // Error::getInstance()'s constructor always ends by calling sendOutput(),
+        // which always exit()s - so under normal circumstances this line never
+        // actually runs. Kept as a fail-safe in case that ever changes, so an
+        // uncaught exception can never fall through this handler silently.
         exit(1);
     }
 }

@@ -110,7 +110,12 @@ class ArrayObject extends PHPArrayObject
     }
 
     /**
-     * build a recursive array of ArrayObject's
+     * Shallow-copies the given array for exchangeArray()/the constructor.
+     *
+     * NOTE: despite the name, this does NOT recursively wrap nested arrays into
+     * ArrayObject instances - nested values are kept as plain arrays on purpose, so
+     * merge() can keep using array_replace_recursive()/array_merge_recursive() on
+     * them (those only recurse into plain arrays, not ArrayObject instances).
      *
      * @param array $data
      * @return array
