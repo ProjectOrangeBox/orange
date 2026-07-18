@@ -404,7 +404,7 @@ class Output extends Singleton implements OutputInterface
             $prefixLength = strlen($prefix);
 
             foreach ($this->headers as $index => $headerValue) {
-                if (substr(strtolower($headerValue), 0, $prefixLength) == $prefix) {
+                if (substr(strtolower((string) $headerValue), 0, $prefixLength) == $prefix) {
                     unset($this->headers[$index]);
                 }
             }
@@ -504,9 +504,9 @@ class Output extends Singleton implements OutputInterface
     {
         if ($this->config['auto detect accepts type']) {
             if (!empty($accepts = $this->input->header('accept'))) {
-                if (strpos($accepts, 'application/json', 0) !== false || strpos($accepts, 'text/javascript', 0) !== false) {
+                if (str_contains($accepts, 'application/json') || str_contains($accepts, 'text/javascript')) {
                     $responseType = 'application/json';
-                } elseif (strpos($accepts, 'text/html', 0) !== false || strpos($accepts, 'application/xhtml+xml', 0) !== false) {
+                } elseif (str_contains($accepts, 'text/html') || str_contains($accepts, 'application/xhtml+xml')) {
                     $responseType = 'text/html';
                 }
             }

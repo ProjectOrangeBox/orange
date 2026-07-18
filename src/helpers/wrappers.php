@@ -33,7 +33,7 @@ if (!function_exists('logMsg')) {
             }
 
             $logInstance->log($level, $msg, $context);
-        } catch (Throwable $e) {
+        } catch (Throwable) {
             // good chance the container or log isn't setup yet
             // so we can't do anything yet
         }
@@ -64,7 +64,7 @@ if (!function_exists('config')) {
                 // filename + key
                 $config = $configInstance->get($filename . '.' . $key, $default);
             }
-        } catch (Throwable $e) {
+        } catch (Throwable) {
             // config not setup?
             // fallback to default
             $config = $default;

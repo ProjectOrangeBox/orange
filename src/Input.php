@@ -255,7 +255,7 @@ class Input extends Singleton implements InputInterface
 
         $parseUrl = $this->server('request_uri', '');
 
-        return $component == null ? $parseUrl : parse_url($parseUrl, $component);
+        return $component == null ? $parseUrl : parse_url((string) $parseUrl, $component);
     }
 
     /**
@@ -269,7 +269,7 @@ class Input extends Singleton implements InputInterface
         // "http://example.com") and false when the URI is malformed - neither is
         // a valid `string` return value under strict_types, so both collapse to
         // '' the same way a genuinely missing request_uri already does
-        $uri = (string) parse_url($this->server('request_uri', ''), self::PATH);
+        $uri = (string) parse_url((string) $this->server('request_uri', ''), self::PATH);
 
         logMsg('INFO', __METHOD__ . ' ' . $uri);
 
@@ -305,7 +305,7 @@ class Input extends Singleton implements InputInterface
 
         logMsg('DEBUG', __METHOD__ . $type);
 
-        return $asLowercase ? strtolower($type) : strtoupper($type);
+        return $asLowercase ? strtolower((string) $type) : strtoupper((string) $type);
     }
 
     /**
@@ -337,7 +337,7 @@ class Input extends Singleton implements InputInterface
 
         logMsg('DEBUG', __METHOD__ . $method);
 
-        return $asLowercase ? strtolower($method) : strtoupper($method);
+        return $asLowercase ? strtolower((string) $method) : strtoupper((string) $method);
     }
 
     /**
@@ -350,7 +350,7 @@ class Input extends Singleton implements InputInterface
     public function requestType(bool $asLowercase = true): string
     {
         // determine the request type
-        if (($this->server('http_x_requested_with', '') == 'xmlhttprequest') || (strpos($this->server('http_accept', ''), 'application/json') !== false)) {
+        if (($this->server('http_x_requested_with', '') == 'xmlhttprequest') || (str_contains((string) $this->server('http_accept', ''), 'application/json'))) {
             $requestType = 'ajax';
         } elseif (strtolower($this->config['php_sapi'] ?? '') === 'cli' || ($this->config['stdin'] ?? false) === true) {
             $requestType = 'cli';
@@ -475,7 +475,7 @@ class Input extends Singleton implements InputInterface
             $server[$normalizedKey] = $value;
 
             // CONTENT_* are not prefixed with HTTP_
-            if (strpos($key, 'HTTP_') === 0 || in_array($key, ['CONTENT_LENGTH', 'CONTENT_MD5', 'CONTENT_TYPE'])) {
+            if (str_starts_with((string) $key, 'HTTP_') || in_array($key, ['CONTENT_LENGTH', 'CONTENT_MD5', 'CONTENT_TYPE'])) {
                 $headers[$normalizedKey] = $value;
             }
         }
@@ -507,20 +507,20 @@ class Input extends Singleton implements InputInterface
         if (empty($contentType)) {
             // just use what was sent in from request
             $request = $postedRequest;
-        } elseif (strpos($contentType, 'multipart/form-data', 0) !== false) {
+        } elseif (str_contains($contentType, 'multipart/form-data')) {
             // use $_POST
             $request = $postedRequest;
             // files in $_FILES
-        } elseif (strpos($contentType, 'application/x-www-form-urlencoded', 0) !== false) {
+        } elseif (str_contains($contentType, 'application/x-www-form-urlencoded')) {
             // use stream
             parse_str($inputStream, $request);
             // no files attached
-        } elseif (strpos($contentType, 'text/plain', 0) !== false) {
+        } elseif (str_contains($contentType, 'text/plain')) {
             // raw text has no key/value structure; the body is still available via
             // inputStream(). fall back to whatever was posted so $request stays an array
             $request = $postedRequest;
             // no files attached
-        } elseif (strpos($contentType, 'application/json', 0) !== false) {
+        } elseif (str_contains($contentType, 'application/json')) {
             // use stream and convert to json; guard against malformed json (json_decode
             // returns null) so $request is always an array
             $request = json_decode($inputStream, true) ?? [];

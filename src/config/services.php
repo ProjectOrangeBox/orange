@@ -53,7 +53,7 @@ return [
     '@response' => 'output',
 
     '$mimes' => include_once __DIR__ . '/mimes.php',
-    'container' => fn(array $services): ContainerInterface => Container::getInstance($services),
+    'container' => Container::getInstance(...),
     'config' => fn(ContainerInterface $container): ConfigInterface => Config::getInstance($container->get('$application')),
     'log' => fn(ContainerInterface $container): LogInterface => Log::getInstance($container->config->log),
     'events' => fn(ContainerInterface $container): EventInterface => Event::getInstance($container->config->event),
@@ -62,5 +62,5 @@ return [
     'router' => fn(ContainerInterface $container): RouterInterface => Router::getInstance($container->config->routes, $container->input),
     'data' => fn(ContainerInterface $container): DataInterface => Data::getInstance($container->config->data),
     'view' => fn(ContainerInterface $container): ViewInterface => View::getInstance($container->config->view, $container->data, $container->router),
-    'dispatcher' => fn(ContainerInterface $container): DispatcherInterface => Dispatcher::getInstance($container),
+    'dispatcher' => Dispatcher::getInstance(...),
 ];

@@ -151,23 +151,15 @@ class Container extends Singleton implements ContainerInterface
         }
 
         // Determine how to return the service based on its type
-        switch ($this->registeredServices[$normalizedName][self::TYPE]) {
-            case self::VALUE:
-            case self::OBJECT:
-                // If this is a value or object, return it directly
-                $service = $this->registeredServices[$normalizedName][self::REFERENCE];
-                break;
-            case self::AUTOWIRECLASS:
-                // If this is a Class Name then try to autowire the arguments
-                $service = $this->autoWire($normalizedName, $this->registeredServices[$normalizedName][self::REFERENCE]);
-                break;
-            case self::CLOSURE:
-                $service = $this->callClosure($normalizedName, $this->registeredServices[$normalizedName][self::REFERENCE]);
-                break;
-            default:
-                // Handle unknown service types
-                throw new ServiceNotFound('Unknown Service Type: ' . $this->registeredServices[$normalizedName][self::TYPE]);
-        }
+        $service = match ($this->registeredServices[$normalizedName][self::TYPE]) {
+            // If this is a value or object, return it directly
+            self::VALUE, self::OBJECT => $this->registeredServices[$normalizedName][self::REFERENCE],
+            // If this is a Class Name then try to autowire the arguments
+            self::AUTOWIRECLASS => $this->autoWire($normalizedName, $this->registeredServices[$normalizedName][self::REFERENCE]),
+            self::CLOSURE => $this->callClosure($normalizedName, $this->registeredServices[$normalizedName][self::REFERENCE]),
+            // Handle unknown service types
+            default => throw new ServiceNotFound('Unknown Service Type: ' . $this->registeredServices[$normalizedName][self::TYPE]),
+        };
 
         return $service;
     }
@@ -198,10 +190,10 @@ class Container extends Singleton implements ContainerInterface
      */
     public function set(string $serviceName, mixed $arg = null): void
     {
-        if (substr($serviceName, 0, 1) == '@') {
+        if (str_starts_with($serviceName, '@')) {
             // If it service name starts with @, it is an alias
             $this->addAlias(substr($serviceName, 1), $arg);
-        } elseif (substr($serviceName, 0, 1) == '^') {
+        } elseif (str_starts_with($serviceName, '^')) {
             // if the service value starts with * it's a fully qualified class name and should be auto wired
             $this->addAutoWireClass(substr($serviceName, 1), $arg);
         } elseif ($arg instanceof Closure) {
@@ -329,25 +321,14 @@ class Container extends Singleton implements ContainerInterface
         // TYPE and REFERENCE are array-key constants (row indexes), not possible values
         // of $service[self::TYPE] - only CLOSURE/ALIAS/VALUE/OBJECT/AUTOWIRECLASS are
         // ever attach()'d as a type tag, so only those belong in this switch.
-        switch ($service[self::TYPE]) {
-            case self::AUTOWIRECLASS:
-                $isA = 'autowired fully qualifed classname';
-                break;
-            case self::CLOSURE:
-                $isA = 'closure';
-                break;
-            case self::OBJECT:
-                $isA = 'object';
-                break;
-            case self::ALIAS:
-                $isA = 'alias';
-                break;
-            case self::VALUE:
-                $isA = gettype($service[self::REFERENCE]);
-                break;
-            default:
-                throw new NotFound('Unknown service type [' . $service[self::TYPE] . '].');
-        }
+        $isA = match ($service[self::TYPE]) {
+            self::AUTOWIRECLASS => 'autowired fully qualifed classname',
+            self::CLOSURE => 'closure',
+            self::OBJECT => 'object',
+            self::ALIAS => 'alias',
+            self::VALUE => gettype($service[self::REFERENCE]),
+            default => throw new NotFound('Unknown service type [' . $service[self::TYPE] . '].'),
+        };
 
         return $isA;
     }

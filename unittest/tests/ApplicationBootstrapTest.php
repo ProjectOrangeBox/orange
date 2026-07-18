@@ -138,10 +138,14 @@ final class ApplicationBootstrapTest extends \UnitTestHelper
 
         $this->callMethod('preContainer');
 
-        // passing null restores the previous handler and returns its name, letting us
-        // confirm what was actually registered without leaving the handler installed
-        $this->assertEquals('errorHandler', set_error_handler(null));
-        $this->assertEquals('exceptionHandler', set_exception_handler(null));
+        // preContainer() registers these via first-class callable syntax (errorHandler(...)),
+        // which wraps them in a Closure - passing null restores the previous (built-in) handler
+        // and returns what was registered, so reflect on it to confirm which function it wraps
+        $errorHandler = set_error_handler(null);
+        $exceptionHandler = set_exception_handler(null);
+
+        $this->assertEquals('errorHandler', (new ReflectionFunction($errorHandler))->getName());
+        $this->assertEquals('exceptionHandler', (new ReflectionFunction($exceptionHandler))->getName());
     }
 
     public function testPreContainerThrowsFileNotFoundForMissingHelper(): void

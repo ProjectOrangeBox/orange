@@ -373,7 +373,7 @@ abstract class ViewAbstract extends Singleton implements ViewInterface
                 // world-writable cache dir would let any other local user on a
                 // permissive-umask host plant code that gets executed on next render
                 mkdir($dir, 0755, true);
-            } catch (Throwable $e) {
+            } catch (Throwable) {
                 throw new DirectoryNotWritable($dir);
             }
         }
@@ -439,10 +439,10 @@ abstract class ViewAbstract extends Singleton implements ViewInterface
         $methodString = $prefix . 'm';
 
         // Retrieve controller and method from the router's matched callback
-        list($controller, $method) = $this->router->getMatched('callback');
+        [$controller, $method] = $this->router->getMatched('callback');
 
         // Check if placeholders exist or if the view string is dynamic
-        if (strpos($view, $prefix) !== false || strpos($view, '*') !== false || $view === '') {
+        if (str_contains($view, $prefix) || str_contains($view, '*') || $view === '') {
             // Handle default controller and method placeholders
             if ($view == '') {
                 $view = $controllerString . '/' . $methodString;
@@ -455,7 +455,7 @@ abstract class ViewAbstract extends Singleton implements ViewInterface
             }
 
             // Replace method placeholder
-            if (strpos($view, $methodString) !== false) {
+            if (str_contains($view, $methodString)) {
                 if (!isset($method)) {
                     throw new InvalidValue('Missing Method and therefore cannot generate dynamic view.');
                 }
@@ -463,13 +463,13 @@ abstract class ViewAbstract extends Singleton implements ViewInterface
             }
 
             // Replace controller placeholder and namespace segments
-            if (strpos($view, $prefix) !== false) {
+            if (str_contains($view, $prefix)) {
                 if (!isset($controller)) {
                     throw new InvalidValue('Missing Controller and therefore cannot generate dynamic view.');
                 }
 
                 // Normalize the controller string
-                $namespacedController = mb_strtolower($controller);
+                $namespacedController = mb_strtolower((string) $controller);
 
                 // Remove "controller" suffix if it exists
                 if (str_ends_with($namespacedController, 'controller')) {

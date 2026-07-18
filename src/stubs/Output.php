@@ -25,16 +25,19 @@ class Output extends RealOutput implements OutputInterface
     // you can then read test if needed
     public array $test = [];
 
+    #[\Override]
     protected function phpEcho(string $string): void
     {
         $this->test['echo'][] = $string;
     }
 
+    #[\Override]
     protected function phpExit(int $status = 0): void
     {
         $this->test['exit'][] = $status;
     }
 
+    #[\Override]
     protected function phpHeader(string $header, bool $replace = false): void
     {
         if ($replace) {

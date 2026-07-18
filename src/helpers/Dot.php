@@ -38,7 +38,7 @@ class Dot
     public static function set(array|\StdClass &$data, string $key, mixed $value): void
     {
         // Check if the key contains the delimiter; if not, treat as simple key
-        if (strpos($key, static::$delimiter) === false) {
+        if (!str_contains($key, static::$delimiter)) {
             if (is_object($data)) {
                 $data->$key = $value;
             } else {
@@ -79,7 +79,7 @@ class Dot
     public static function get(array|\StdClass $data, string $key, mixed $default = null): mixed
     {
         // Check if the key is simple (no delimiter)
-        if (strpos($key, static::$delimiter) === false) {
+        if (!str_contains($key, static::$delimiter)) {
             if (is_object($data)) {
                 if (isset($data->$key)) {
                     $data = $data->$key;
@@ -151,7 +151,7 @@ class Dot
     public static function unset(array|\StdClass &$data, string $key): void
     {
         // Check if the key is simple (no delimiter)
-        if (strpos($key, static::$delimiter) === false) {
+        if (!str_contains($key, static::$delimiter)) {
             if (is_object($data)) {
                 unset($data->$key);
             } else {
@@ -231,7 +231,7 @@ class Dot
         $iterable = is_object($array) ? (array) $array : $array;
 
         foreach ($iterable as $key => $value) {
-            $dots = explode(static::$delimiter, $key);
+            $dots = explode(static::$delimiter, (string) $key);
 
             if (count($dots) > 1) {
                 // For dot-notated keys, build the nested structure

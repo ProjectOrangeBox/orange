@@ -13,7 +13,7 @@ class Http extends OrangeException
     {
         if ($code == 0) {
             // get the last 3 digits of the class name ie. Http304
-            $code = (int)substr(get_class($this), -3);
+            $code = (int)substr(static::class, -3);
 
             // if the code is still 0 then just use 500
             if ($code == 0) {

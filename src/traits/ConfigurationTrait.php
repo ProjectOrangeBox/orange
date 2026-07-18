@@ -142,7 +142,7 @@ trait ConfigurationTrait
 
         [$filename, $defaultShortName] = self::$configPathFilenameCache[$class];
         $shortName = empty($arg) ? $defaultShortName : $arg;
-        $dir = dirname($filename);
+        $dir = dirname((string) $filename);
 
         $path = $dir . '/config/' . $shortName . '.php';
 
@@ -245,7 +245,7 @@ trait ConfigurationTrait
      */
     protected function camelize(string $str, bool $ucFirst = false)
     {
-        $converted = mb_strtolower($str[0]) . substr(str_replace(' ', '', ucwords(preg_replace('/[\s_]+/', ' ', $str))), 1);
+        $converted = mb_strtolower($str[0]) . substr(str_replace(' ', '', ucwords((string) preg_replace('/[\s_]+/', ' ', $str))), 1);
 
         return $ucFirst ? ucfirst($converted) : $converted;
     }
@@ -274,7 +274,7 @@ trait ConfigurationTrait
      */
     protected function humanize(string $str, string $separator = '_')
     {
-        return ucwords(preg_replace('/[' . preg_quote($separator, '/') . ']+/', ' ', mb_strtolower($str)));
+        return ucwords((string) preg_replace('/[' . preg_quote($separator, '/') . ']+/', ' ', mb_strtolower($str)));
     }
 
     /**
@@ -337,7 +337,7 @@ trait ConfigurationTrait
                             $err = ' min is not ';
                             switch ($type) {
                                 case 'string':
-                                    if (strlen($value) < $option) {
+                                    if (strlen((string) $value) < $option) {
                                         $errors[] = $key . $err . $option;
                                     }
                                     break;
@@ -359,7 +359,7 @@ trait ConfigurationTrait
                             $err = ' max is not ';
                             switch ($type) {
                                 case 'string':
-                                    if (strlen($value) > $option) {
+                                    if (strlen((string) $value) > $option) {
                                         $errors[] = $key . $err . $option;
                                     }
                                     break;
@@ -392,7 +392,7 @@ trait ConfigurationTrait
                                     }
                                     break;
                                 case 'string':
-                                    if (strlen($value) != $option) {
+                                    if (strlen((string) $value) != $option) {
                                         $errors[] = $key . ' size does not match ' . $option;
                                     }
                                     break;

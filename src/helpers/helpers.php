@@ -132,7 +132,7 @@ if (!function_exists('convertLabel')) {
             case 'camel':
             case 'pascal':
                 $value = preg_replace('/([a-z])([A-Z])/', '\\1 \\2', $value);
-                $value = preg_replace('@[^a-zA-Z0-9\-_ ]+@', '', $value);
+                $value = preg_replace('@[^a-zA-Z0-9\-_ ]+@', '', (string) $value);
                 $value = str_replace(['-', '_'], ' ', $value);
                 $value = str_replace(' ', '', ucwords(convertLabel($value, 'lower')));
                 $value = substr(convertLabel($value, 'lower'), 0, 1) . substr($value, 1);
@@ -140,12 +140,12 @@ if (!function_exists('convertLabel')) {
                 break;
             case 'snake':
                 $value = preg_replace('@[^a-zA-Z0-9\-_ ]+@', '', $value);
-                $value = mb_convert_case($value, MB_CASE_LOWER, mb_detect_encoding($value));
+                $value = mb_convert_case((string) $value, MB_CASE_LOWER, mb_detect_encoding((string) $value));
                 $value = str_replace([' ', '-'], '_', $value);
                 break;
             case 'slug':
                 $value = preg_replace('/[^a-zA-Z0-9 -]/', '', $value);
-                $value = mb_strtolower(str_replace(' ', '-', trim($value)));
+                $value = mb_strtolower(str_replace(' ', '-', trim((string) $value)));
                 $value = preg_replace('/-+/', '-', $value);
                 break;
             default:
@@ -190,7 +190,7 @@ if (!function_exists('e')) {
                     $input[$key] = e($input[$key], $flags, $encoding, $doubleEncode);
                 }
             } else {
-                $input = htmlspecialchars($input, $flags, $encoding, $doubleEncode);
+                $input = htmlspecialchars((string) $input, $flags, $encoding, $doubleEncode);
             }
         }
 
@@ -218,7 +218,7 @@ if (!function_exists('strContains')) {
      */
     function strContains(string $haystack, string $needle): bool
     {
-        return empty($needle) || strpos($haystack, $needle) !== false;
+        return empty($needle) || str_contains($haystack, $needle);
     }
 }
 
@@ -359,7 +359,7 @@ if (!function_exists('sanitizeDownloadFilename')) {
         $filename = preg_replace('/[\x00-\x1F\x7F]/', '', $filename);
 
         // escape backslash and double quote so the value can't close the quoted-string early
-        return addcslashes($filename, '\\"');
+        return addcslashes((string) $filename, '\\"');
     }
 }
 

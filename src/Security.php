@@ -342,7 +342,7 @@ class Security extends Singleton implements SecurityInterface
 
         do {
             // Perform a regular expression search and replace
-            $string = preg_replace($nonDisplayables, '', $string, -1, $count);
+            $string = preg_replace($nonDisplayables, '', (string) $string, -1, $count);
         } while ($count);
 
         return $string;

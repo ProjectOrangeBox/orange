@@ -331,17 +331,17 @@ class Application
         // now errorHandler() & exceptionHandler() should be setup
         // try to attach the exception and error handler
         if (function_exists('errorHandler')) {
-            set_error_handler('errorHandler');
+            set_error_handler(errorHandler(...));
         }
 
         if (function_exists('exceptionHandler')) {
-            set_exception_handler('exceptionHandler');
+            set_exception_handler(exceptionHandler(...));
         }
 
         // load the constants and apply them
         foreach ($this->loadConfigFile('constants') as $name => $value) {
             // Constants should all be uppercase - not an option!
-            $name = strtoupper($name);
+            $name = strtoupper((string) $name);
             // If the constant is not already defined, define it
             if (!defined($name)) {
                 define($name, $value);

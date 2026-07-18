@@ -235,7 +235,7 @@ class Log extends Singleton implements LogInterface, LoggerInterface
 
             $data = str_replace(
                 ['%timestamp', '%level', '%message', '%context'],
-                [date($this->config['timestamp format']), strtoupper($this->convert2($level, 'string')), $message, $contextString],
+                [date($this->config['timestamp format']), strtoupper((string) $this->convert2($level, 'string')), $message, $contextString],
                 $this->config['line format']
             );
 
@@ -360,7 +360,7 @@ class Log extends Singleton implements LogInterface, LoggerInterface
             if (!file_exists($dir)) {
                 try {
                     mkdir($dir, 0777, true);
-                } catch (Throwable $e) {
+                } catch (Throwable) {
                     throw new DirectoryNotWritable($dir);
                 }
             }

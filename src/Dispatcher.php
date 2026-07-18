@@ -106,7 +106,7 @@ class Dispatcher extends Singleton implements DispatcherInterface
         // method_exists() doesn't check visibility - calling a private/protected method
         // from here would throw an uncaught fatal Error instead of a clean MethodNotFound,
         // so treat non-public methods the same as missing ones
-        if (!(new ReflectionMethod($routerCallback->controller, $routerCallback->method))->isPublic()) {
+        if (!new ReflectionMethod($routerCallback->controller, $routerCallback->method)->isPublic()) {
             throw new MethodNotFound($routerCallback->controller . '::' . $routerCallback->method);
         }
 
@@ -119,20 +119,18 @@ class Dispatcher extends Singleton implements DispatcherInterface
             // this protects the developer from accidentally using named capture groups
             $routerCallback->arguments = array_filter(
                 $routerCallback->arguments,
-                function ($key) {
-                    return is_int($key);
-                },
+                is_int(...),
                 ARRAY_FILTER_USE_KEY
             );
 
-            $output = (new $routerCallback->controller())->{$routerCallback->method}(...$routerCallback->arguments);
+            $output = new $routerCallback->controller()->{$routerCallback->method}(...$routerCallback->arguments);
         } catch (\ArgumentCountError $e) {
             // if we get an argument count error it means the method is missing a required argument which means the route is not properly defined so throw a method not found exception
             throw new ArgumentMissMatch($routerCallback->controller . '::' . $routerCallback->method . ' is missing required arguments. ' . $e->getMessage());
         }
 
         // if they didn't return anything set output to an empty string
-        $output = $output ?? '';
+        $output ??= '';
 
         // make sure they returned a string
         if (!is_string($output)) {

@@ -44,13 +44,13 @@ abstract class BaseController
      */
     public function __construct()
     {
-        $this->reflection = new ReflectionClass(get_class($this));
+        $this->reflection = new ReflectionClass(static::class);
 
         // auto attach services defined with the #[AttachService] Attribute
         $this->autoAttachService();
 
         // path to the parent directory of the parent class
-        $parentPath = dirname(dirname($this->reflection->getFileName()));
+        $parentPath = dirname($this->reflection->getFileName(), 2);
 
         // try to load (local to extending controller) libraries
         foreach ($this->libraries as $library) {
@@ -86,7 +86,7 @@ abstract class BaseController
             $attribute = $property->getAttributes(AttachService::class);
 
             if (isset($attribute[0])) {
-                logMsg('DEBUG', 'Attach ' . $attribute[0]->getArguments()[0] . ' to ' . $property->getName() . ' property of ' . get_class($this));
+                logMsg('DEBUG', 'Attach ' . $attribute[0]->getArguments()[0] . ' to ' . $property->getName() . ' property of ' . static::class);
 
                 $this->{$property->getName()} = container()->get($attribute[0]->getArguments()[0]);
             }

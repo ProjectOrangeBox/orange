@@ -117,7 +117,7 @@ class DirectorySearch implements DirectorySearchInterface
         // should we throw an exception?
         $this->ifLockedThrowException();
 
-        $pend = $pend ?? $this->pend;
+        $pend ??= $this->pend;
 
         if ($found = realpath(rtrim($directory, DIRECTORY_SEPARATOR))) {
             if ($pend == self::PREPEND) {
@@ -150,7 +150,7 @@ class DirectorySearch implements DirectorySearchInterface
      */
     public function addDirectories(array $directories, ?int $pend = null, bool $asBlock = true): self
     {
-        $pend = $pend ?? $this->pend;
+        $pend ??= $this->pend;
 
         // pre pend as a block in this exact order
         if ($pend == self::PREPEND && $asBlock) {
@@ -188,7 +188,7 @@ class DirectorySearch implements DirectorySearchInterface
             // matching against the directory requires walking that inner map too
             foreach ($this->resources as $resource => $paths) {
                 foreach ($paths as $path => $null) {
-                    if (substr($path, 0, $dirLength) == $directory) {
+                    if (substr((string) $path, 0, $dirLength) == $directory) {
                         unset($this->resources[$resource][$path]);
                     }
                 }
@@ -547,7 +547,7 @@ class DirectorySearch implements DirectorySearchInterface
         if ($this->rescan) {
             // do directory scan for resources append new resources
             foreach (array_keys($this->directories) as $directory) {
-                if ($searchPath = realpath(rtrim($directory, DIRECTORY_SEPARATOR))) {
+                if ($searchPath = realpath(rtrim((string) $directory, DIRECTORY_SEPARATOR))) {
                     if ($this->recursive) {
                         $this->addMatches($searchPath, $this->recursiveGlob($searchPath, $this->match));
                     } else {
@@ -616,7 +616,7 @@ class DirectorySearch implements DirectorySearchInterface
     {
         if (is_array($matches)) {
             foreach ($matches as $file) {
-                $fileInfo = pathinfo($file);
+                $fileInfo = pathinfo((string) $file);
                 $fileInfo['searchpath'] = $searchPath;
                 $closureFunction = $this->keyClosure;
                 // extract the key based on the function you chose
@@ -637,7 +637,7 @@ class DirectorySearch implements DirectorySearchInterface
     protected function ifLockedThrowException(): void
     {
         if ($this->locked) {
-            throw new ClassLocked(__CLASS__);
+            throw new ClassLocked(self::class);
         }
     }
 
@@ -685,7 +685,7 @@ class DirectorySearch implements DirectorySearchInterface
         // is a callback registered?
         if (!empty($this->callback)) {
             if (!is_object($this->callback[0]) || !method_exists($this->callback[0], $this->callback[1])) {
-                throw new NotFound('Could not call Directory Search Callback ' . $action . ' because method ' . $this->callback[1] . ' does not exist on class ' . (is_object($this->callback[0]) ? get_class($this->callback[0]) : $this->callback[0]));
+                throw new NotFound('Could not call Directory Search Callback ' . $action . ' because method ' . $this->callback[1] . ' does not exist on class ' . (is_object($this->callback[0]) ? $this->callback[0]::class : $this->callback[0]));
             }
 
             // call the callback and pass the action and this object
@@ -722,52 +722,22 @@ class DirectorySearch implements DirectorySearchInterface
             $this->keyClosure = $config['resource key style'];
         } else {
             // or use one of the built in resource key extractor based on the complete resource file path
-            switch ($config['resource key style']) {
-                case 'filename':
-                case 'config':
-                    // The key will be the filename ie. uploadForm
-                    $this->keyClosure = function ($fileInfo) {
-                        return $fileInfo['filename'];
-                    };
-                    break;
-                case 'basename':
-                    // The key will be the basename ie. uploadForm.php
-                    $this->keyClosure = function ($fileInfo) {
-                        return $fileInfo['basename'];
-                    };
-                    break;
-                case 'fullpath':
-                    // The key will be the dirname + basename ie. /home/johnnyAppleseed/Sites/orange/application/welcome/views/test/uploadForm.php
-                    $this->keyClosure = function ($fileInfo) {
-                        return $fileInfo['dirname'] . DIRECTORY_SEPARATOR . $fileInfo['basename'];
-                    };
-                    break;
-                case 'localpath':
-                    // The key will be the dirname + basename - the search path ie. test/uploadForm.php
-                    $this->keyClosure = function ($fileInfo) {
-                        return substr($fileInfo['dirname'] . DIRECTORY_SEPARATOR . $fileInfo['basename'], strlen($fileInfo['searchpath']) + 1);
-                    };
-                    break;
-                case 'apppath':
-                    // The key will be the dirname + basename - the search path ie. /application/welcome/views/test/uploadForm.php
-                    $this->keyClosure = function ($fileInfo) {
-                        return substr($fileInfo['dirname'] . DIRECTORY_SEPARATOR . $fileInfo['basename'], strlen(__ROOT__));
-                    };
-                    break;
-                case 'wwwpath':
-                    // The key will be the dirname + basename - the search path ie. /application/welcome/views/test/uploadForm.php
-                    $this->keyClosure = function ($fileInfo) {
-                        return substr($fileInfo['dirname'] . DIRECTORY_SEPARATOR . $fileInfo['basename'], strlen(__WWW__));
-                    };
-                    break;
-                case 'view':
-                default:
-                    // The key will be the dirname + basename - the search path - the extension ie. test/uploadForm
-                    $this->keyClosure = function ($fileInfo) {
-                        return substr($fileInfo['dirname'] . DIRECTORY_SEPARATOR . $fileInfo['basename'], strlen($fileInfo['searchpath']) + 1, -strlen($fileInfo['extension']) - 1);
-                    };
-                    break;
-            }
+            $this->keyClosure = match ($config['resource key style']) {
+                // The key will be the filename ie. uploadForm
+                'filename', 'config' => fn($fileInfo) => $fileInfo['filename'],
+                // The key will be the basename ie. uploadForm.php
+                'basename' => fn($fileInfo) => $fileInfo['basename'],
+                // The key will be the dirname + basename ie. /home/johnnyAppleseed/Sites/orange/application/welcome/views/test/uploadForm.php
+                'fullpath' => fn($fileInfo) => $fileInfo['dirname'] . DIRECTORY_SEPARATOR . $fileInfo['basename'],
+                // The key will be the dirname + basename - the search path ie. test/uploadForm.php
+                'localpath' => fn($fileInfo) => substr($fileInfo['dirname'] . DIRECTORY_SEPARATOR . $fileInfo['basename'], strlen($fileInfo['searchpath']) + 1),
+                // The key will be the dirname + basename - the search path ie. /application/welcome/views/test/uploadForm.php
+                'apppath' => fn($fileInfo) => substr($fileInfo['dirname'] . DIRECTORY_SEPARATOR . $fileInfo['basename'], strlen(__ROOT__)),
+                // The key will be the dirname + basename - the search path ie. /application/welcome/views/test/uploadForm.php
+                'wwwpath' => fn($fileInfo) => substr($fileInfo['dirname'] . DIRECTORY_SEPARATOR . $fileInfo['basename'], strlen(__WWW__)),
+                // The key will be the dirname + basename - the search path - the extension ie. test/uploadForm
+                default => fn($fileInfo) => substr($fileInfo['dirname'] . DIRECTORY_SEPARATOR . $fileInfo['basename'], strlen($fileInfo['searchpath']) + 1, -strlen($fileInfo['extension']) - 1),
+            };
         }
     }
 }

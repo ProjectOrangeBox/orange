@@ -176,7 +176,7 @@ class Router extends Singleton implements RouterInterface
         // Set the cache if provided
         if ($this->cacheService) {
             // Set the cache key
-            $this->cacheKey = ENVIRONMENT . '\\' . __CLASS__;
+            $this->cacheKey = ENVIRONMENT . '\\' . self::class;
         }
 
         // Load the routes
@@ -235,7 +235,7 @@ class Router extends Singleton implements RouterInterface
 
                 // for each method add it to the appropriate array for quicker access
                 foreach ($methods as $method) {
-                    $upperMethod = strtoupper($method);
+                    $upperMethod = strtoupper((string) $method);
 
                     if (!isset($this->routes[$upperMethod])) {
                         throw new HttpMethodNotSupported($method);
@@ -438,7 +438,7 @@ class Router extends Singleton implements RouterInterface
                     }
 
                     // replace the segment with the passed argument
-                    $matchedUrl = preg_replace('/' . preg_quote($match[0], '/') . '/', $value, $matchedUrl, 1);
+                    $matchedUrl = preg_replace('/' . preg_quote($match[0], '/') . '/', $value, (string) $matchedUrl, 1);
                 }
             }
 

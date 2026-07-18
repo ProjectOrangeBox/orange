@@ -347,9 +347,9 @@ class Event extends Singleton implements EventInterface
           //
           // [\app\libraries\Middleware::class.'::before']
             $eventId = $this->registerClosureEvent($trigger, function (&...$arguments) use ($callable) {
-                list($className, $methodName) = explode('::', $callable, 2);
+                [$className, $methodName] = explode('::', $callable, 2);
 
-                return (new $className())->$methodName(...$arguments);
+                return new $className()->$methodName(...$arguments);
             }, $priority);
         } elseif (count($callable) == 2) {
           //
@@ -357,9 +357,9 @@ class Event extends Singleton implements EventInterface
           //
           // [\app\libraries\Middleware::class,'before']
             $eventId = $this->registerClosureEvent($trigger, function (&...$arguments) use ($callable) {
-                list($className, $methodName) = $callable;
+                [$className, $methodName] = $callable;
 
-                return (new $className())->$methodName(...$arguments);
+                return new $className()->$methodName(...$arguments);
             }, $priority);
         } else {
             throw new InvalidValue(__METHOD__ . ' trigger "' . $trigger . '"');

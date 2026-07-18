@@ -18,7 +18,7 @@ class OrangeException extends \Exception
     public function __construct($message = '', $code = 0, ?Throwable $previous = null)
     {
         /* since we must pass an array by ref into array_pop we need to put it into a variable */
-        $this->namespacedClass = get_class($this);
+        $this->namespacedClass = static::class;
 
         $segments = explode('\\', $this->namespacedClass);
         $this->className = array_pop($segments);

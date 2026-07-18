@@ -187,7 +187,7 @@ class Error extends Singleton
         $this->errorViewDirectory = $this->config['error view directory'];
 
         // assume worst case it's production - also make lowercase because we use this as a directory in the path
-        $this->envDirectory = defined('ENVIRONMENT') ? mb_strtolower(ENVIRONMENT) : 'production';
+        $this->envDirectory = defined('ENVIRONMENT') ? mb_strtolower((string) ENVIRONMENT) : 'production';
 
         // let's try to determine the output type
         // the output class will auto convert this to a mime type for output
@@ -445,18 +445,11 @@ class Error extends Singleton
         $finalData = (array)$this->data;
 
         // fall back to hard coded response format
-        switch ($this->requestType) {
-            case 'json':
-                $finalOutput = json_encode($finalData, JSON_PRETTY_PRINT);
-                break;
-            case 'html':
-                $finalOutput = $this->viewRawBuildHtml($finalOutput, $finalData);
-                break;
-            case 'cli':
-            default:
-                $finalOutput = print_r($finalData, true) . PHP_EOL;
-                break;
-        }
+        $finalOutput = match ($this->requestType) {
+            'json' => json_encode($finalData, JSON_PRETTY_PRINT),
+            'html' => $this->viewRawBuildHtml($finalOutput, $finalData),
+            default => print_r($finalData, true) . PHP_EOL,
+        };
 
         return $finalOutput;
     }

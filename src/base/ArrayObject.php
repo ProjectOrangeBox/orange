@@ -41,8 +41,8 @@ class ArrayObject extends PHPArrayObject
      */
     public function __call(string $name, array $arguments)
     {
-        if (!is_callable($name) || substr($name, 0, 6) !== 'array_') {
-            throw new MagicMethodNotFound(__CLASS__ . '->' . $name);
+        if (!is_callable($name) || !str_starts_with($name, 'array_')) {
+            throw new MagicMethodNotFound(self::class . '->' . $name);
         }
 
         return call_user_func_array($name, array_merge([$this->getArrayCopy()], $arguments));
@@ -80,7 +80,7 @@ class ArrayObject extends PHPArrayObject
      */
     public function get(string $name, mixed $default): mixed
     {
-        return isset($this[$name]) ? $this[$name] : $default;
+        return $this[$name] ?? $default;
     }
 
     /**

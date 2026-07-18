@@ -128,7 +128,7 @@ class Config extends SingletonArrayObject implements ConfigInterface
 
         if ($cacheService) {
             // cache key
-            $cacheKey = ENVIRONMENT . '\\' . __CLASS__;
+            $cacheKey = ENVIRONMENT . '\\' . self::class;
 
             if ($cached = $cacheService->get($cacheKey)) {
                 $this->foundConfigFiles = $cached;
@@ -146,6 +146,7 @@ class Config extends SingletonArrayObject implements ConfigInterface
      * @param string $filename Name of the configuration file (without extension).
      * @return mixed Configuration data or null if not found.
      */
+    #[\Override]
     public function __get(string $filename): mixed
     {
         return $this->get($filename);
@@ -190,6 +191,7 @@ class Config extends SingletonArrayObject implements ConfigInterface
      * @param mixed $defaultValue Default value if the key does not exist.
      * @return mixed Configuration value or default value if key not found.
      */
+    #[\Override]
     public function get(string $filenameKey, mixed $defaultValue = null): mixed
     {
         logMsg('INFO', __METHOD__ . ' ' . $filenameKey);
@@ -197,8 +199,8 @@ class Config extends SingletonArrayObject implements ConfigInterface
         $filename = $filenameKey;
         $key = null;
 
-        if (strpos($filenameKey, $this->separator) !== false) {
-            list($filename, $key) = explode($this->separator, $filenameKey, 2);
+        if (str_contains($filenameKey, $this->separator)) {
+            [$filename, $key] = explode($this->separator, $filenameKey, 2);
         }
 
         // Load the configuration file

@@ -20,7 +20,8 @@
         "lint:fix": "../../bin/phpcbf",
         "lint:phpmd": "../../bin/phpmd src text phpmd.xml",
         "analyze:deptrac": "../../bin/deptrac analyse",
-        "analyze:rector": "../../bin/rector process --dry-run"
+        "analyze:rector": "../../bin/rector process --dry-run",
+        "analyze:rectorFix": "../../bin/rector process"
     },
     "scripts-descriptions": {
         "test:orange": "Run the Orange Framework core unit tests (unittest/runUnitTests.sh).",
@@ -32,6 +33,7 @@
         "lint:fix": "Auto-fix PSR-12 coding standard violations in src/ using the root project's vendor/bin/phpcbf.",
         "lint:phpmd": "Check src/ for code smells, complexity and unused code with PHP Mess Detector.",
         "analyze:deptrac": "Check src/ for architectural layer violations with Deptrac (see deptrac.yaml).",
-        "analyze:rector": "Preview automated refactoring/modernization suggestions with Rector (dry-run, does not modify files)."
+        "analyze:rector": "Preview automated refactoring/modernization suggestions with Rector (dry-run, does not modify files).",
+        "analyze:rectorFix": "Automated refactoring/modernization suggestions with Rector."
     }
 }
