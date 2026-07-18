@@ -2,6 +2,10 @@
 
 declare(strict_types=1);
 
+namespace config;
+
+use ReflectionClass;
+use ReflectionMethod;
 use orange\framework\attributes\Route;
 
 /**
