@@ -16,6 +16,7 @@ return [
     // Host header, so it is only reflected back when it appears in this allowlist. This prevents a
     // Host-header-injection open redirect. When empty the request Host is never trusted.
     'allowed hosts' => [],
+    'enable cors' => false,
     'allowed cors' => [],
     // Send "Access-Control-Allow-Credentials: true" for allowed origins. Off by
     // default: only enable for cookie / HTTP-auth based cross-origin APIs. Token

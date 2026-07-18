@@ -9,5 +9,10 @@
 
     <file>src</file>
 
-    <rule ref="PSR12"/>
+    <rule ref="PSR12">
+        <!-- Drop PSR-12 §2.3's 120-character soft line-length limit; every other
+             PSR-12 sniff still applies. -->
+        <exclude name="Generic.Files.LineLength.TooLong"/>
+    </rule>
+
 </ruleset>

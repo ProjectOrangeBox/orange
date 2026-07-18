@@ -157,7 +157,7 @@ trait ConfigurationTrait
             }
         }
 
-        if ($path === '') {
+        if ($path == '') {
             throw new ConfigFileNotFound($filename . '~' . $shortName);
         }
 
