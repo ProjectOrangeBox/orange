@@ -7,7 +7,9 @@ use orange\framework\exceptions\InvalidValue;
 use orange\framework\exceptions\MissingRequired;
 use orange\framework\exceptions\router\RouteNotFound;
 use orange\framework\exceptions\router\RouterNameNotFound;
+use orange\framework\exceptions\router\HttpMethodNotSupported;
 use orange\framework\Input;
+use orange\framework\interfaces\CacheInterface;
 
 final class RouterTest extends UnitTestHelper
 {
@@ -231,5 +233,96 @@ final class RouterTest extends UnitTestHelper
     public function testSiteUrlWithoutPrefixReturnsBareUrl(): void
     {
         $this->assertEquals('www.example.com', $this->instance->siteUrl(false));
+    }
+
+    public function testConstructorFallsBackToHttpHostWhenSiteUrlNotConfigured(): void
+    {
+        $instance = Router::newInstance(
+            ['404' => [], 'home' => [], 'routes' => []],
+            Input::newInstance(['force https' => false, 'server' => ['HTTP_HOST' => 'fallback.example.com']]),
+        );
+
+        $this->assertEquals('fallback.example.com', $instance->siteUrl(false));
+    }
+
+    public function testAddRouteThrowsHttpMethodNotSupported(): void
+    {
+        $this->expectException(HttpMethodNotSupported::class);
+
+        $this->instance->addRoute(['method' => 'FOOBAR', 'url' => '/whatever']);
+    }
+
+    public function testGetUrlThrowsRouterNameNotFoundWhenResolvedUrlIsEmpty(): void
+    {
+        // a route registered with an empty url string resolves to an empty
+        // matchedUrl with no argument placeholders, hitting the "matchedUrl is
+        // still empty after processing" guard at the end of getUrl()
+        $this->instance->addRoute(['method' => 'get', 'name' => 'blank', 'url' => '']);
+
+        $this->expectException(RouterNameNotFound::class);
+
+        $this->instance->getUrl('blank');
+    }
+
+    public function testConstructorSetsCacheKeyAndUpdateCacheWritesThroughIt(): void
+    {
+        $cache = $this->createMock(CacheInterface::class);
+        $cache->method('get')->willReturn(null);
+        $cache->expects($this->atLeastOnce())->method('set');
+
+        $instance = Router::newInstance(
+            ['site url' => 'www.example.com', '404' => [], 'home' => [], 'routes' => []],
+            Input::newInstance(['force https' => false]),
+            $cache,
+        );
+
+        // addRoute() -> updateCache() writes through to the cache service
+        $instance->addRoute(['method' => 'get', 'name' => 'cached', 'url' => '/cached', 'callback' => $this->callback]);
+    }
+
+    public function testGetRoutesLoadsFromValidCache(): void
+    {
+        $cachedRoutes = Router::newInstance(
+            ['site url' => 'www.example.com', '404' => [], 'home' => [], 'routes' => []],
+            Input::newInstance(['force https' => false]),
+        );
+        $cachedRoutes->addRoute(['method' => 'get', 'name' => 'fromcache', 'url' => '/fromcache', 'callback' => $this->callback]);
+
+        $cache = $this->createMock(CacheInterface::class);
+        $cache->method('get')->willReturn([
+            'routes' => $this->getPrivatePublic('routes', $cachedRoutes),
+            'routesByName' => $this->getPrivatePublic('routesByName', $cachedRoutes),
+        ]);
+
+        $instance = Router::newInstance(
+            ['site url' => 'www.example.com', '404' => [], 'home' => [], 'routes' => []],
+            Input::newInstance(['force https' => false]),
+            $cache,
+        );
+
+        $instance->match('/fromcache', 'get');
+        $this->assertEquals('fromcache', $instance->getMatched('name'));
+    }
+
+    public function testGetRoutesFallsBackToConfigWhenCacheInvalid(): void
+    {
+        $cache = $this->createMock(CacheInterface::class);
+        $cache->method('get')->willReturn('not-a-valid-cache-array');
+
+        $instance = Router::newInstance(
+            [
+                'site url' => 'www.example.com',
+                '404' => [],
+                'home' => [],
+                'routes' => [
+                    ['method' => 'get', 'name' => 'configfallback', 'url' => '/configfallback', 'callback' => $this->callback],
+                ],
+            ],
+            Input::newInstance(['force https' => false]),
+            $cache,
+        );
+
+        $instance->match('/configfallback', 'get');
+        $this->assertEquals('configfallback', $instance->getMatched('name'));
     }
 }

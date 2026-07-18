@@ -296,4 +296,150 @@ final class DirectorySearchTest extends UnitTestHelper
         $this->assertIsArray($result);
         $this->assertContains('bar/bar', $result);
     }
+
+    public function testRemoveDirectoryAlsoRemovesMatchingResources(): void
+    {
+        $this->instance->addDirectory($this->d2);
+
+        // force a scan so $this->resources actually gets populated with paths
+        // under d2, giving removeDirectory() something to match against
+        $this->instance->list();
+        $this->assertNotEmpty($this->instance->__debugInfo()['resources']);
+
+        $this->instance->removeDirectory($this->d2, true);
+
+        $this->assertEquals([], $this->instance->__debugInfo()['resources']);
+    }
+
+    public function testScanDirectoriesNonRecursiveUsesGlobAndLocksAfterScan(): void
+    {
+        $instance = new DirectorySearch([
+            'match' => '*.php',
+            'quiet' => true,
+            'recursive' => false,
+            'lock after scan' => true,
+        ]);
+
+        $this->assertFalse($instance->isLocked());
+
+        $instance->addDirectory($this->d2);
+
+        // non-recursive glob() only sees files directly in d2, not aaa/bbb subdirs
+        $this->assertTrue($instance->exists('bar'));
+        $this->assertFalse($instance->exists('aaa/bar'));
+
+        // 'lock after scan' locks the instance the first time scanDirectories() runs
+        $this->assertTrue($instance->isLocked());
+    }
+
+    public function testCallbackInvokesRegisteredCallback(): void
+    {
+        $recorder = new class {
+            public array $calls = [];
+            public function record($args): void
+            {
+                $this->calls[] = $args[0];
+            }
+        };
+
+        $instance = new DirectorySearch([
+            'quiet' => true,
+            'callback' => [$recorder, 'record'],
+        ]);
+
+        $instance->addDirectory($this->d1);
+
+        $this->assertContains('addDirectory', $recorder->calls);
+    }
+
+    public function testCallbackThrowsNotFoundWhenMethodMissing(): void
+    {
+        $recorder = new class {
+        };
+
+        // the constructor itself calls flushDirectories() -> callback(), so the
+        // bad callback throws during construction, before addDirectory() runs
+        $this->expectException(\orange\framework\exceptions\NotFound::class);
+
+        new DirectorySearch([
+            'quiet' => true,
+            'callback' => [$recorder, 'noSuchMethod'],
+        ]);
+    }
+
+    /* resource key styles */
+
+    public function testResourceKeyStyleFilename(): void
+    {
+        $instance = new DirectorySearch([
+            'match' => 'bar.php',
+            'quiet' => true,
+            'recursive' => false,
+            'resource key style' => 'filename',
+        ]);
+        $instance->addDirectory($this->d2);
+
+        $this->assertEquals(['bar'], $instance->list());
+        $this->assertEquals($this->r1, $instance->findFirst('bar'));
+    }
+
+    public function testResourceKeyStyleBasename(): void
+    {
+        $instance = new DirectorySearch([
+            'match' => 'bar.php',
+            'quiet' => true,
+            'recursive' => false,
+            'resource key style' => 'basename',
+        ]);
+        $instance->addDirectory($this->d2);
+
+        $this->assertEquals(['bar.php'], $instance->list());
+    }
+
+    public function testResourceKeyStyleFullpath(): void
+    {
+        $instance = new DirectorySearch([
+            'match' => 'bar.php',
+            'quiet' => true,
+            'recursive' => false,
+            'normalize keys' => false,
+            'resource key style' => 'fullpath',
+        ]);
+        $instance->addDirectory($this->d2);
+
+        $this->assertEquals([$this->r1], $instance->list());
+    }
+
+    public function testResourceKeyStyleLocalpath(): void
+    {
+        $instance = new DirectorySearch([
+            'match' => 'bar.php',
+            'quiet' => true,
+            'recursive' => false,
+            'resource key style' => 'localpath',
+        ]);
+        $instance->addDirectory($this->d2);
+
+        $this->assertEquals(['bar.php'], $instance->list());
+    }
+
+    public function testResourceKeyStyleApppath(): void
+    {
+        $instance = new DirectorySearch([
+            'match' => 'bar.php',
+            'quiet' => true,
+            'recursive' => false,
+            'normalize keys' => false,
+            'resource key style' => 'apppath',
+        ]);
+        $instance->addDirectory($this->d2);
+
+        $expected = substr($this->r1, strlen(__ROOT__));
+        $this->assertEquals([$expected], $instance->list());
+    }
+
+    // 'wwwpath' style (which needs a valid __WWW__ constant, i.e. a real htdocs
+    // directory under __ROOT__) isn't exercised: this checkout's __ROOT__ has no
+    // htdocs directory, so __WWW__ is false in every test process here, and the
+    // style's closure (DirectorySearch.php:751) would crash calling strlen(false).
 }

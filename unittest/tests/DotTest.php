@@ -218,6 +218,74 @@ class DotTest extends TestCase
         $this->assertFalse(Dot::isset($data, 'missing'));
     }
 
+    public function testGetObjectSimpleKeyMissingReturnsDefault(): void
+    {
+        $data = new \stdClass();
+        $data->a = 'value';
+
+        $this->assertEquals('default', Dot::get($data, 'missing', 'default'));
+    }
+
+    public function testGetObjectNestedKeyMissingReturnsDefault(): void
+    {
+        $data = new \stdClass();
+        $data->a = new \stdClass();
+        $data->a->b = 'value';
+
+        $this->assertEquals('default', Dot::get($data, 'a.missing', 'default'));
+    }
+
+    public function testGetNestedKeyOnScalarValueReturnsDefault(): void
+    {
+        // once traversal reaches a plain scalar it's neither array nor object,
+        // so continuing to dot deeper into it must fall back to the default
+        $data = ['a' => 'scalar'];
+
+        $this->assertEquals('default', Dot::get($data, 'a.b', 'default'));
+    }
+
+    public function testUnsetObjectSimpleKey(): void
+    {
+        $data = new \stdClass();
+        $data->key = 'value';
+
+        Dot::unset($data, 'key');
+
+        $this->assertFalse(isset($data->key));
+    }
+
+    public function testUnsetObjectNestedKey(): void
+    {
+        $data = new \stdClass();
+        $data->a = new \stdClass();
+        $data->a->b = 'value';
+        $data->a->c = 'othervalue';
+
+        Dot::unset($data, 'a.b');
+
+        $this->assertFalse(isset($data->a->b));
+        $this->assertTrue(isset($data->a->c));
+    }
+
+    public function testUnsetMissingIntermediateArrayPathIsNoop(): void
+    {
+        $data = ['a' => 'value'];
+
+        Dot::unset($data, 'missing.deep');
+
+        $this->assertEquals(['a' => 'value'], $data);
+    }
+
+    public function testUnsetMissingIntermediateObjectPathIsNoop(): void
+    {
+        $data = new \stdClass();
+        $data->a = 'value';
+
+        Dot::unset($data, 'missing.deep');
+
+        $this->assertEquals('value', $data->a);
+    }
+
     public function testRoundTripFlattenExpand(): void
     {
         $original = [

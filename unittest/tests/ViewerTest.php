@@ -7,6 +7,9 @@ use orange\framework\View;
 use orange\framework\Input;
 use orange\framework\Router;
 use orange\framework\exceptions\view\ViewNotFound;
+use orange\framework\exceptions\filesystem\Directory;
+use orange\framework\exceptions\filesystem\FileNotWritable;
+use orange\framework\exceptions\filesystem\DirectoryNotWritable;
 
 final class ViewerTest extends UnitTestHelper
 {
@@ -227,5 +230,153 @@ final class ViewerTest extends UnitTestHelper
 
         $this->expectException(\orange\framework\exceptions\InvalidValue::class);
         $this->callMethod('resolveDynamicView', ['$c']);
+    }
+
+    public function testResolveDynamicViewEndsWithStarStar(): void
+    {
+        $this->useCallback(['HomeController', 'index']);
+
+        // 'foo/*/*' -> 'foo/$c/$m' -> 'foo/home/index'
+        $this->assertEquals('foo/home/index', $this->callMethod('resolveDynamicView', ['foo/*/*']));
+    }
+
+    /* constructor */
+
+    public function testConstructorThrowsWhenTempDirectoryMissing(): void
+    {
+        $this->expectException(Directory::class);
+
+        View::newInstance([
+            'view paths' => [WORKINGDIR . '/views'],
+            'view aliases' => [],
+            'temp directory' => WORKINGDIR . '/definitely/not/a/real/directory/xyz',
+            'debug' => false,
+        ], Data::getInstance([]));
+    }
+
+    public function testConstructorAddsResources(): void
+    {
+        $instance = View::newInstance([
+            'view paths' => [WORKINGDIR . '/views'],
+            'view aliases' => [],
+            'temp directory' => sys_get_temp_dir(),
+            'debug' => false,
+            'resources' => ['extraViews' => WORKINGDIR . '/views'],
+        ], Data::getInstance([]));
+
+        $this->assertTrue(in_array(WORKINGDIR . '/views', $instance->search->listDirectories()));
+    }
+
+    /* render() dynamic view resolution */
+
+    public function testRenderResolvesDynamicViewWhenEnabledWithRouter(): void
+    {
+        $router = $this->createMock(\orange\framework\interfaces\RouterInterface::class);
+        $router->method('getMatched')->willReturn(['TestController', 'render']);
+
+        $this->setPrivatePublic('router', $router);
+        $this->instance->change('allowDynamicViews', true);
+
+        // '$c' -> 'test' (controller suffix stripped, lowercased), which matches
+        // the existing working/views/test.php fixture used by testRender()
+        $this->assertEquals('<h1>Hello World</h1>', $this->instance->render('$c', ['hello' => 'Hello World']));
+    }
+
+    /* generate() */
+
+    public function testGenerateThrowsViewNotFoundForMissingFile(): void
+    {
+        $this->expectException(ViewNotFound::class);
+
+        $this->callMethod('generate', [WORKINGDIR . '/views/does-not-exist.php', []]);
+    }
+
+    /* isFileWritable() */
+
+    public function testIsFileWritableCreatesMissingDirectory(): void
+    {
+        $newDir = WORKINGDIR . '/viewdircreated';
+
+        if (is_dir($newDir)) {
+            rmdir($newDir);
+        }
+
+        try {
+            $this->assertTrue($this->callMethod('isFileWritable', [$newDir . '/view.php']));
+            $this->assertDirectoryExists($newDir);
+        } finally {
+            if (is_dir($newDir)) {
+                rmdir($newDir);
+            }
+        }
+    }
+
+    public function testIsFileWritableThrowsWhenDirectoryCreationFails(): void
+    {
+        $blockerFile = WORKINGDIR . '/viewblocker';
+        file_put_contents($blockerFile, '');
+
+        set_error_handler(function ($errno, $errstr) {
+            throw new \ErrorException($errstr);
+        });
+
+        try {
+            $this->expectException(DirectoryNotWritable::class);
+
+            $this->callMethod('isFileWritable', [$blockerFile . '/subdir/view.php']);
+        } finally {
+            restore_error_handler();
+            unlink($blockerFile);
+        }
+    }
+
+    public function testIsFileWritableThrowsWhenDirectoryNotWritable(): void
+    {
+        $readOnlyDir = WORKINGDIR . '/viewreadonlydir';
+
+        if (!is_dir($readOnlyDir)) {
+            mkdir($readOnlyDir);
+        }
+        chmod($readOnlyDir, 0555);
+
+        try {
+            $this->expectException(FileNotWritable::class);
+
+            $this->callMethod('isFileWritable', [$readOnlyDir . '/view.php']);
+        } finally {
+            chmod($readOnlyDir, 0755);
+            rmdir($readOnlyDir);
+        }
+    }
+
+    /* renderString() atomic write failure */
+
+    public function testRenderStringThrowsFileNotWritableWhenAtomicWriteFails(): void
+    {
+        $string = '<h1>atomic-fail-' . uniqid() . '</h1>';
+        $filename = sha1($string, false);
+        $subPathSize = $this->getPrivatePublic('subPathSize');
+        $tempDirectory = $this->getPrivatePublic('tempDirectory');
+        $subPath = $subPathSize > 0 ? DIRECTORY_SEPARATOR . substr($filename, 0, $subPathSize) : '';
+        $templatePath = $tempDirectory . $subPath . DIRECTORY_SEPARATOR . $filename . '.php';
+
+        // pre-create the exact target path as a directory so the atomic rename()
+        // inside file_put_contents_atomic() fails (renaming a file onto an
+        // existing directory), forcing renderString() down its write-failure path
+        mkdir($templatePath, 0755, true);
+
+        $this->instance->change('debug', true);
+
+        try {
+            $this->expectException(FileNotWritable::class);
+
+            // the underlying rename() is expected to fail here (that's the point of
+            // the test) and emits a PHP warning we don't care about; suppress it so
+            // the test output stays focused on the exception being asserted
+            @$this->instance->renderString($string);
+        } finally {
+            rmdir($templatePath);
+            $this->instance->change('debug', false);
+        }
     }
 }

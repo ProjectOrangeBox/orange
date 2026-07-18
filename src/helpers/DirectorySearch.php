@@ -183,8 +183,17 @@ class DirectorySearch implements DirectorySearchInterface
         if ($directory && $removeFoundResources) {
             $dirLength = strlen($directory);
 
-            foreach ($this->resources as $resource => $path) {
-                if (substr($path, 0, $dirLength) == $directory) {
+            // $this->resources is keyed by resource name, and each entry is itself
+            // a map of path => null (a resource name can match multiple files), so
+            // matching against the directory requires walking that inner map too
+            foreach ($this->resources as $resource => $paths) {
+                foreach ($paths as $path => $null) {
+                    if (substr($path, 0, $dirLength) == $directory) {
+                        unset($this->resources[$resource][$path]);
+                    }
+                }
+
+                if (empty($this->resources[$resource])) {
                     unset($this->resources[$resource]);
                 }
             }

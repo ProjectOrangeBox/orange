@@ -77,4 +77,24 @@ final class ArrayObjectTest extends UnitTestHelper
 
         $this->assertEquals(['blue', 'red'], $this->instance['color']);
     }
+
+    public function testMagicSetMethodDirectly(): void
+    {
+        // parent ArrayObject::ARRAY_AS_PROPS handles `->prop = x` at the SPL level,
+        // so it never actually reaches this class's __set() override; call it
+        // directly (a public method like any other) to exercise its body.
+        $this->instance->__set('direct', 'value');
+
+        $this->assertEquals('value', $this->instance['direct']);
+    }
+
+    public function testMagicGetMethodDirectly(): void
+    {
+        // same story as __set(): ARRAY_AS_PROPS intercepts `->prop` reads before
+        // they'd ever reach this override, so call it directly.
+        $this->instance['direct2'] = 'value2';
+
+        $this->assertEquals('value2', $this->instance->__get('direct2'));
+        $this->assertNull($this->instance->__get('missingKey'));
+    }
 }

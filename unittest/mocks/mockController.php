@@ -26,6 +26,16 @@ class mockController
         return $one . '+' . $two;
     }
 
+    public function returnsArray()
+    {
+        return ['not', 'a', 'string'];
+    }
+
+    public function namedArgsFiltered(string $one = 'default', string $two = 'default')
+    {
+        return $one . '+' . $two;
+    }
+
     protected function secret()
     {
         return 'should not be reachable via routing';

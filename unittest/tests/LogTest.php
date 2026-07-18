@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 use Psr\Log\NullLogger;
 use orange\framework\Log;
+use orange\framework\exceptions\InvalidValue;
 use orange\framework\exceptions\IncorrectInterface;
+use orange\framework\exceptions\filesystem\DirectoryNotWritable;
 
 final class LogTest extends UnitTestHelper
 {
@@ -155,5 +157,89 @@ final class LogTest extends UnitTestHelper
         $this->config['handler'] = new stdClass();
 
         Log::newInstance($this->config);
+    }
+
+    public function testConstructorThrowsWhenHandlerIsNotObject(): void
+    {
+        $this->expectException(InvalidValue::class);
+
+        $config = $this->config;
+        $config['handler'] = 'not-an-object';
+
+        Log::newInstance($config);
+    }
+
+    public function testConvert2ThrowsForUnknownStringLevel(): void
+    {
+        $this->expectException(InvalidValue::class);
+
+        $this->callMethod('convert2', ['bogus', 'string']);
+    }
+
+    public function testConvert2ThrowsForUnknownIntLevel(): void
+    {
+        $this->expectException(InvalidValue::class);
+
+        $this->callMethod('convert2', [999999, 'int']);
+    }
+
+    public function testIsFileWritableCreatesMissingDirectory(): void
+    {
+        $newDir = WORKINGDIR . '/logdircreated';
+
+        if (is_dir($newDir)) {
+            rmdir($newDir);
+        }
+
+        try {
+            $this->assertTrue($this->callMethod('isFileWritable', [$newDir . '/log.txt']));
+            $this->assertDirectoryExists($newDir);
+        } finally {
+            if (is_dir($newDir)) {
+                rmdir($newDir);
+            }
+        }
+    }
+
+    public function testIsFileWritableThrowsWhenDirectoryCreationFails(): void
+    {
+        // point the "directory" at a path that can never be created because a
+        // regular file already occupies that path segment, forcing mkdir() to
+        // fail; a temporary error handler upgrades the resulting PHP warning to
+        // a Throwable so isFileWritable()'s try/catch around mkdir() is exercised
+        $blockerFile = WORKINGDIR . '/logblocker';
+        file_put_contents($blockerFile, '');
+
+        set_error_handler(function ($errno, $errstr) {
+            throw new \ErrorException($errstr);
+        });
+
+        try {
+            $this->expectException(DirectoryNotWritable::class);
+
+            $this->callMethod('isFileWritable', [$blockerFile . '/subdir/log.txt']);
+        } finally {
+            restore_error_handler();
+            unlink($blockerFile);
+        }
+    }
+
+    public function testIsFileWritableThrowsWhenDirectoryNotWritable(): void
+    {
+        $readOnlyDir = WORKINGDIR . '/logreadonlydir';
+
+        if (!is_dir($readOnlyDir)) {
+            mkdir($readOnlyDir);
+        }
+        chmod($readOnlyDir, 0555);
+
+        try {
+            $this->expectException(DirectoryNotWritable::class);
+
+            $this->callMethod('isFileWritable', [$readOnlyDir . '/log.txt']);
+        } finally {
+            chmod($readOnlyDir, 0755);
+            rmdir($readOnlyDir);
+        }
     }
 }

@@ -6,6 +6,7 @@ use orange\framework\Dispatcher;
 use orange\framework\exceptions\dispatcher\ArgumentMissMatch;
 use orange\framework\exceptions\dispatcher\ControllerClassNotFound;
 use orange\framework\exceptions\dispatcher\MethodNotFound;
+use orange\framework\exceptions\InvalidValue;
 use orange\framework\property\RouterCallback;
 
 final class DispatcherTest extends UnitTestHelper
@@ -69,5 +70,25 @@ final class DispatcherTest extends UnitTestHelper
         $this->expectException(ArgumentMissMatch::class);
 
         $this->assertEquals('+', $this->instance->call(new RouterCallback('mockController','passtwo',[])));
+    }
+
+    public function testNonStringReturnThrowsInvalidValue(): void
+    {
+        // call() must enforce that controller methods return a string;
+        // anything else (array, int, bool, object, ...) is a contract violation
+        $this->expectException(InvalidValue::class);
+
+        $this->instance->call(new RouterCallback('mockController', 'returnsArray', []));
+    }
+
+    public function testNamedCaptureGroupArgumentsAreFilteredOut(): void
+    {
+        // named route capture groups produce string keys in the arguments array;
+        // call() must strip them before unpacking so only positional (int-keyed)
+        // arguments reach the controller method
+        $this->assertEquals(
+            'one+default',
+            $this->instance->call(new RouterCallback('mockController', 'namedArgsFiltered', ['name' => 'ignored', 0 => 'one']))
+        );
     }
 }

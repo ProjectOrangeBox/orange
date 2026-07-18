@@ -9,6 +9,7 @@ use orange\framework\exceptions\InvalidValue;
 use orange\framework\exceptions\IncorrectInterface;
 use orange\framework\exceptions\filesystem\FileNotFound;
 use orange\framework\exceptions\config\ConfigFileDidNotReturnAnArray;
+use orange\framework\exceptions\config\InvalidConfigurationValue;
 
 /**
  * Exercises the individual bootstrap helpers of Application without running the
@@ -141,6 +142,78 @@ final class ApplicationBootstrapTest extends \UnitTestHelper
         // confirm what was actually registered without leaving the handler installed
         $this->assertEquals('errorHandler', set_error_handler(null));
         $this->assertEquals('exceptionHandler', set_exception_handler(null));
+    }
+
+    public function testPreContainerThrowsFileNotFoundForMissingHelper(): void
+    {
+        $this->setPrivatePublic('config', ['helpers' => ['/does/not/exist/helper.php'], 'required helpers' => []]);
+
+        $this->expectException(FileNotFound::class);
+
+        $this->callMethod('preContainer');
+    }
+
+    public function testPreContainerIncludesConfiguredHelperFiles(): void
+    {
+        $helperFile = WORKINGDIR . '/env/preContainerHelper.php';
+        file_put_contents($helperFile, "<?php\n// intentionally empty test helper\n");
+
+        $this->setPrivatePublic('config', ['helpers' => [$helperFile], 'required helpers' => []]);
+
+        try {
+            $this->callMethod('preContainer');
+
+            // reaching here without an exception means realpath()+include_once succeeded
+            $this->addToAssertionCount(1);
+        } finally {
+            // preContainer() installs global error/exception handlers as a side effect;
+            // restore the previous ones immediately so they can't interfere with the
+            // rest of this process (same technique as the handlers test above)
+            set_error_handler(null);
+            set_exception_handler(null);
+            unlink($helperFile);
+        }
+    }
+
+    public function testPreContainerLoadsConstantsFromConfig(): void
+    {
+        $configDir = WORKINGDIR . '/config/precontainerconstants';
+        @mkdir($configDir, 0777, true);
+        file_put_contents($configDir . '/constants.php', "<?php\nreturn ['APP_BOOTSTRAP_TEST_CONSTANT' => 'hello'];\n");
+
+        $this->setPrivatePublic('config', ['helpers' => [], 'required helpers' => []]);
+        $this->setPrivatePublic('configDirectories', [$configDir]);
+
+        try {
+            $this->callMethod('preContainer');
+
+            set_error_handler(null);
+            set_exception_handler(null);
+
+            $this->assertTrue(defined('APP_BOOTSTRAP_TEST_CONSTANT'));
+            $this->assertEquals('hello', APP_BOOTSTRAP_TEST_CONSTANT);
+        } finally {
+            unlink($configDir . '/constants.php');
+            rmdir($configDir);
+        }
+    }
+
+    /* loadEnvironmentFile() */
+
+    public function testLoadEnvironmentFileInvalidFormatThrows(): void
+    {
+        $badIni = WORKINGDIR . '/env/malformed.ini';
+        // deliberately invalid INI syntax (unterminated section header) so
+        // parse_ini_file() returns false instead of an array
+        file_put_contents($badIni, "[unterminated\nFOO=bar");
+
+        try {
+            $this->expectException(InvalidConfigurationValue::class);
+
+            @$this->callMethod('loadEnvironmentFile', [$badIni]);
+        } finally {
+            unlink($badIni);
+        }
     }
 
     /* bootstrapContainer() */

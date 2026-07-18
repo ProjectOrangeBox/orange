@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace orange\framework\abstract;
 
-use Directory;
 use Throwable;
 use orange\framework\base\Singleton;
 use orange\framework\exceptions\InvalidValue;
+use orange\framework\exceptions\filesystem\Directory;
 use orange\framework\helpers\DirectorySearch;
 use orange\framework\interfaces\DataInterface;
 use orange\framework\interfaces\ViewInterface;

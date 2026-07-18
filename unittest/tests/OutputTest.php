@@ -12,6 +12,8 @@ final class OutputTest extends UnitTestHelper
 
     protected function setUp(): void
     {
+        include_once MOCKDIR . '/testableOutput.php';
+
         $this->instance = Output::getInstance([
             'contentType' => 'text/html',
             'charSet' => 'utf-8',
@@ -230,5 +232,80 @@ final class OutputTest extends UnitTestHelper
         $this->instance->charSet('iso-8859-1');
 
         $this->assertEquals('iso-8859-1', $this->instance->getCharSet());
+    }
+
+    public function testConstructorForceHttpsRedirectsAndExits(): void
+    {
+        // drives __construct() -> forceHttps() -> redirect() -> send() end to end
+        // through a non-cli, non-https request; TestableOutput records the
+        // would-be header()/exit() calls instead of performing them for real
+        $instance = TestableOutput::newInstance([
+            'contentType' => 'text/html',
+            'charSet' => 'utf-8',
+            'force https' => true,
+            'allowed hosts' => ['example.com'],
+        ], Input::newInstance([
+            'php_sapi' => 'apache2handler',
+            'stdin' => false,
+            'server' => [
+                'HTTP_HOST' => 'example.com',
+                'REQUEST_URI' => '/foo',
+            ],
+        ]));
+
+        $this->assertEquals([0], $instance->phpExitCalls);
+
+        $locationHeaders = array_filter($instance->phpHeaderCalls, function ($call) {
+            return str_starts_with($call[0], 'Location:');
+        });
+
+        $this->assertNotEmpty($locationHeaders);
+        $this->assertStringContainsString('https://example.com/foo', array_values($locationHeaders)[0][0]);
+        $this->assertEquals(301, $instance->getResponseCode());
+    }
+
+    public function testContentTypeFallsBackToMimeLookupOfFallbackKey(): void
+    {
+        $this->instance->contentType('bogus-type-xyz', 'dot');
+
+        $this->assertEquals('text/vnd.graphviz', $this->instance->getContentType());
+    }
+
+    public function testContentTypeAcceptsRawFallbackMimeValue(): void
+    {
+        $this->instance->contentType('bogus-type-xyz2', 'text/vnd.graphviz');
+
+        $this->assertEquals('text/vnd.graphviz', $this->instance->getContentType());
+    }
+
+    public function testContentTypeThrowsWhenTypeAndFallbackAreUnknown(): void
+    {
+        $this->expectException(OutputException::class);
+
+        $this->instance->contentType('totally-bogus-type', 'totally-bogus-fallback');
+    }
+
+    public function testDetectAcceptsTypeSwitchesToJsonForJsonAccept(): void
+    {
+        $instance = Output::newInstance([
+            'contentType' => 'text/html',
+            'charSet' => 'utf-8',
+        ], Input::newInstance([
+            'server' => ['HTTP_ACCEPT' => 'application/json, text/plain'],
+        ]));
+
+        $this->assertEquals('application/json', $instance->getContentType());
+    }
+
+    public function testDetectAcceptsTypeSwitchesToHtmlForHtmlAccept(): void
+    {
+        $instance = Output::newInstance([
+            'contentType' => 'application/json',
+            'charSet' => 'utf-8',
+        ], Input::newInstance([
+            'server' => ['HTTP_ACCEPT' => 'text/html, */*'],
+        ]));
+
+        $this->assertEquals('text/html', $instance->getContentType());
     }
 }

@@ -3,6 +3,12 @@
 declare(strict_types=1);
 
 use orange\framework\Security;
+use orange\framework\exceptions\InvalidValue;
+use orange\framework\exceptions\config\ConfigNotFound;
+use orange\framework\exceptions\filesystem\FileNotFound;
+use orange\framework\exceptions\filesystem\FileAlreadyExists;
+use orange\framework\exceptions\filesystem\DirectoryNotWritable;
+use orange\framework\exceptions\security\Security as SecurityException;
 
 final class SecurityTest extends UnitTestHelper
 {
@@ -123,5 +129,103 @@ final class SecurityTest extends UnitTestHelper
 
         $this->assertTrue($this->instance->verifyPassword($savedInDb, $password));
         $this->assertFalse($this->instance->verifyPassword($savedInDb, 'foobar'));
+    }
+
+    public function testCreateKeysThrowsConfigNotFoundWhenKeyPathMissing(): void
+    {
+        $this->tearDown();
+
+        $instance = Security::newInstance([
+            'public key' => $this->publicKeyFile,
+            // 'private key' intentionally omitted
+            'auth key' => $this->authKeyFile,
+        ]);
+
+        $this->expectException(ConfigNotFound::class);
+
+        $instance->createKeys();
+    }
+
+    public function testCreateKeysThrowsDirectoryNotWritableWhenDirectoryNotWritable(): void
+    {
+        $this->tearDown();
+
+        $unwritableDir = WORKINGDIR . '/unwritablekeys';
+
+        if (!is_dir($unwritableDir)) {
+            mkdir($unwritableDir);
+        }
+        chmod($unwritableDir, 0555);
+
+        $instance = Security::newInstance([
+            'public key' => $unwritableDir . '/public.key',
+            'private key' => $unwritableDir . '/private.key',
+            'auth key' => $unwritableDir . '/auth.key',
+        ]);
+
+        try {
+            $this->expectException(DirectoryNotWritable::class);
+
+            $instance->createKeys();
+        } finally {
+            chmod($unwritableDir, 0755);
+            rmdir($unwritableDir);
+        }
+    }
+
+    public function testCreateKeysThrowsFileAlreadyExistsWhenKeyFileExists(): void
+    {
+        // setUp() already created all three key files via createKeys()
+        $this->expectException(FileAlreadyExists::class);
+
+        $this->instance->createKeys();
+    }
+
+    public function testDecryptThrowsOnNonHexData(): void
+    {
+        $this->expectException(SecurityException::class);
+
+        $this->instance->decrypt('not-hex-data!!');
+    }
+
+    public function testDecryptThrowsOnForgedData(): void
+    {
+        $this->expectException(SecurityException::class);
+
+        // valid hex, but not a real sealed box for our key
+        $this->instance->decrypt(bin2hex('this is definitely not encrypted data'));
+    }
+
+    public function testGetKeyFilePathThrowsInvalidValueForUnknownType(): void
+    {
+        $this->expectException(InvalidValue::class);
+
+        $this->callMethod('getKeyFilePath', ['bogus']);
+    }
+
+    public function testGetKeyFilePathThrowsConfigNotFoundWhenMissingFromConfig(): void
+    {
+        $this->tearDown();
+
+        $instance = Security::newInstance([
+            'public key' => $this->publicKeyFile,
+            'private key' => $this->privateKeyFile,
+            // 'auth key' intentionally omitted
+        ]);
+
+        $this->expectException(ConfigNotFound::class);
+
+        $this->callMethod('getKeyFilePath', ['auth'], $instance);
+    }
+
+    public function testGetKeyFilePathThrowsFileNotFoundWhenFileMissing(): void
+    {
+        // key files exist from setUp(), but delete the public key file so its
+        // path is still configured yet points at nothing on disk
+        unlink($this->publicKeyFile);
+
+        $this->expectException(FileNotFound::class);
+
+        $this->callMethod('getKeyFilePath', ['public']);
     }
 }
