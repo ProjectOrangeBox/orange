@@ -1,1 +1,4 @@
 /unittest/.phpunit.cache/
+/unittest/infection.log
+/unittest/coverage/
+/.deptrac.cache

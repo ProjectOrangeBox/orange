@@ -1,0 +1,125 @@
+deptrac:
+  paths:
+    - ./src
+  exclude_files:
+    - '#^src/views/.*#'
+  layers:
+    - name: Interfaces
+      collectors:
+        - type: directory
+          value: src/interfaces/.*
+    - name: Exceptions
+      collectors:
+        - type: directory
+          value: src/exceptions/.*
+    - name: Attributes
+      collectors:
+        - type: directory
+          value: src/attributes/.*
+    - name: Helpers
+      collectors:
+        - type: directory
+          value: src/helpers/.*
+    - name: Base
+      collectors:
+        - type: directory
+          value: src/base/.*
+    - name: Traits
+      collectors:
+        - type: directory
+          value: src/traits/.*
+    - name: Property
+      collectors:
+        - type: directory
+          value: src/property/.*
+    - name: Stubs
+      collectors:
+        - type: directory
+          value: src/stubs/.*
+    - name: Abstract
+      collectors:
+        - type: directory
+          value: src/abstract/.*
+    - name: Controllers
+      collectors:
+        - type: directory
+          value: src/controllers/.*
+    # every exception extends OrangeException, whose decorate(Error $error)
+    # hook is the one legitimate, framework-wide reason to reach into Core -
+    # split it out so that dependency doesn't force Exceptions to allow all of Core
+    - name: Error
+      collectors:
+        - type: directory
+          value: src/Error\.php
+    - name: Core
+      collectors:
+        - type: directory
+          value: src/(?!Error\.php)[^/]+\.php
+  ruleset:
+    # pure contracts: must not depend on anything else in the framework,
+    # except the plain value objects they type-hint (e.g. RouterCallback)
+    Interfaces:
+      - Property
+    # exceptions carry only messages/context, plus the Error decorate() hook
+    # inherited from OrangeException
+    Exceptions:
+      - Error
+    # PHP attribute value objects: plain data holders
+    Attributes: ~
+    Helpers:
+      - Exceptions
+      - Interfaces
+      - Traits
+      # container(), env(), exceptionHandler() and friends in helpers/wrappers.php
+      # and helpers/errors.php are global bridges into the framework's core objects
+      - Core
+      - Error
+    Base:
+      - Exceptions
+      - Interfaces
+    Traits:
+      - Exceptions
+      - Interfaces
+      - Helpers
+    Property:
+      - Exceptions
+      - Interfaces
+    Stubs:
+      # dev/test stand-ins that extend the real Core Log/Output classes
+      - Exceptions
+      - Interfaces
+      - Base
+      - Traits
+      - Core
+    Abstract:
+      - Exceptions
+      - Interfaces
+      - Traits
+      - Helpers
+      - Property
+      - Base
+    Controllers:
+      - Exceptions
+      - Interfaces
+      - Attributes
+      - Helpers
+      - Core
+    Error:
+      # Error extends the Singleton/config pattern like Abstract does
+      - Exceptions
+      - Interfaces
+      - Base
+      - Traits
+      - Helpers
+    Core:
+      - Exceptions
+      - Interfaces
+      - Attributes
+      - Helpers
+      - Base
+      - Traits
+      - Property
+      - Stubs
+      - Abstract
+      - Controllers
+      - Error

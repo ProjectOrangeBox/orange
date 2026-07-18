@@ -13,15 +13,25 @@
     "scripts": {
         "test:orange": "cd unittest && sh runUnitTests.sh",
         "test:orangeCoverage": "cd unittest && sh runCoverage.sh",
+        "test:orangeMutation": "../../bin/infection",
         "type-check": "../../bin/phpstan analyse",
+        "type-check:psalm": "../../bin/psalm",
         "lint": "../../bin/phpcs",
-        "lint:fix": "../../bin/phpcbf"
+        "lint:fix": "../../bin/phpcbf",
+        "lint:phpmd": "../../bin/phpmd src text phpmd.xml",
+        "analyze:deptrac": "../../bin/deptrac analyse",
+        "analyze:rector": "../../bin/rector process --dry-run"
     },
     "scripts-descriptions": {
         "test:orange": "Run the Orange Framework core unit tests (unittest/runUnitTests.sh).",
         "test:orangeCoverage": "Run the Orange Framework core unit tests with code coverage (unittest/runCoverage.sh).",
+        "test:orangeMutation": "Run mutation testing against src/ with Infection, using unittest/phpunit.xml.dist.",
         "type-check": "Run PHPStan static type analysis on the framework src/ using the root project's vendor/bin/phpstan.",
+        "type-check:psalm": "Run Psalm static analysis on src/ (baseline in psalm-baseline.xml covers pre-existing findings).",
         "lint": "Check src/ against the PSR-12 coding standard using the root project's vendor/bin/phpcs.",
-        "lint:fix": "Auto-fix PSR-12 coding standard violations in src/ using the root project's vendor/bin/phpcbf."
+        "lint:fix": "Auto-fix PSR-12 coding standard violations in src/ using the root project's vendor/bin/phpcbf.",
+        "lint:phpmd": "Check src/ for code smells, complexity and unused code with PHP Mess Detector.",
+        "analyze:deptrac": "Check src/ for architectural layer violations with Deptrac (see deptrac.yaml).",
+        "analyze:rector": "Preview automated refactoring/modernization suggestions with Rector (dry-run, does not modify files)."
     }
 }

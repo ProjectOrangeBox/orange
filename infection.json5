@@ -1,0 +1,24 @@
+{
+    "$schema": "../../infection/infection/resources/schema.json",
+    "source": {
+        "directories": [
+            "src"
+        ],
+        "excludes": [
+            // configuration arrays, view templates and stub files are data, not testable logic
+            "config",
+            "views",
+            "stubs"
+        ]
+    },
+    "logs": {
+        "text": "unittest/infection.log"
+    },
+    "phpUnit": {
+        "configDir": "unittest",
+        "customPath": "../../bin/phpunit"
+    },
+    "mutators": {
+        "@default": true
+    }
+}
