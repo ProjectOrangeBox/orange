@@ -19,8 +19,8 @@
         "lint:fix": "../../bin/phpcbf",
         "lint:phpmd": "../../bin/phpmd src text phpmd.xml",
         "analyze:deptrac": "../../bin/deptrac analyse",
-        "analyze:rector": "../../bin/rector process --dry-run",
-        "analyze:rectorFix": "../../bin/rector process"
+        "rector": "../../bin/rector process --dry-run",
+        "rector:fix": "../../bin/rector process"
     },
     "scripts-descriptions": {
         "test:orange": "Run the Orange Framework core unit tests (unittest/runUnitTests.sh).",
