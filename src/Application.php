@@ -230,10 +230,14 @@ class Application
     protected function bootstrap(string $mode, array $config): ContainerInterface
     {
         // set a undefined value which is not NULL
-        define('UNDEFINED', chr(0));
+        if (!defined('UNDEFINED')) {
+            define('UNDEFINED', chr(0));
+        }
 
         // setup a constant to indicate how this application was started
-        define('RUN_MODE', mb_strtolower($mode));
+        if (!defined('RUN_MODE')) {
+            define('RUN_MODE', mb_strtolower($mode));
+        }
 
         // let's make sure they setup __ROOT__
         if (!defined('__ROOT__')) {
@@ -273,7 +277,9 @@ class Application
         // Set internal encoding.
         ini_set('default_charset', $this->config['encoding']);
         mb_internal_encoding($this->config['encoding']);
-        define('CHARSET', $this->config['encoding']);
+        if (!defined('CHARSET')) {
+            define('CHARSET', $this->config['encoding']);
+        }
 
         // set umask to a known state
         umask($this->config['umask']);

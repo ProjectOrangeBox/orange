@@ -56,7 +56,7 @@ return [
     'container' => fn(array $services): ContainerInterface => Container::getInstance($services),
     'config' => fn(ContainerInterface $container): ConfigInterface => Config::getInstance($container->get('$application')),
     'log' => fn(ContainerInterface $container): LogInterface => Log::getInstance($container->config->log),
-    'events' => fn(ContainerInterface $container): EventInterface => Event::getInstance($container->config->events),
+    'events' => fn(ContainerInterface $container): EventInterface => Event::getInstance($container->config->event),
     'input' => fn(ContainerInterface $container): InputInterface => Input::getInstance($container->config->input),
     'output' => fn(ContainerInterface $container): OutputInterface => Output::getInstance($container->config->output, $container->input),
     'router' => fn(ContainerInterface $container): RouterInterface => Router::getInstance($container->config->routes, $container->input),

@@ -56,7 +56,7 @@
             <li class="success">Make returns singleton instance</li>
             <li class="success">Load environment loads ini values</li>
             <li class="success">Make sets config directories</li>
-            <li class="defect">Run bootstraps cli application using framework defaults</li>
+            <li class="success">Run bootstraps cli application using framework defaults</li>
         </ul>
         <h2>Application Bootstrap</h2>
         <ul>
@@ -83,7 +83,7 @@
         </ul>
         <h2>Application Http</h2>
         <ul>
-            <li class="defect">Http runs full request lifecycle</li>
+            <li class="success">Http runs full request lifecycle</li>
         </ul>
         <h2>Array Object</h2>
         <ul>
@@ -501,6 +501,12 @@
             <li class="success">Content type throws when type and fallback are unknown</li>
             <li class="success">Detect accepts type switches to json for json accept</li>
             <li class="success">Detect accepts type switches to html for html accept</li>
+            <li class="success">Handle cors allowed origin sets vary and allow origin</li>
+            <li class="success">Handle cors omits credentials by default</li>
+            <li class="success">Handle cors sends credentials when enabled</li>
+            <li class="success">Handle cors disallowed origin omits allow origin and exits</li>
+            <li class="success">Handle cors without origin leaves headers untouched</li>
+            <li class="success">Handle cors preflight sets methods and reflects requested headers</li>
         </ul>
         <h2>Router</h2>
         <ul>

@@ -104,45 +104,45 @@ use orange\framework\traits\ConfigurationTrait;
  */
 class Event extends Singleton implements EventInterface
 {
-    /** include ConfigurationTrait methods */
+  /** include ConfigurationTrait methods */
     use ConfigurationTrait;
 
-    /**
-     * Stores all registered events grouped by triggers.
-     */
+  /**
+   * Stores all registered events grouped by triggers.
+   */
     protected array $events = [];
 
-    /**
-     * Indicates whether the event manager is disabled.
-     */
+  /**
+   * Indicates whether the event manager is disabled.
+   */
     protected bool $disabled = false;
 
-    /**
-     * Per-process strictly-increasing counter used to keep generated event IDs
-     * collision-free; see registerClosureEvent().
-     */
+  /**
+   * Per-process strictly-increasing counter used to keep generated event IDs
+   * collision-free; see registerClosureEvent().
+   */
     private static int $sequence = 0;
 
-    /**
-     * Constructor is protected to enforce Singleton usage.
-     *
-     * @param array $config Configuration array.
-     */
+  /**
+   * Constructor is protected to enforce Singleton usage.
+   *
+   * @param array $config Configuration array.
+   */
     protected function __construct(array $config)
     {
         logMsg('INFO', __METHOD__);
 
-        // Merge provided configuration with default configuration.
+      // Merge provided configuration with default configuration.
         $this->config = $this->mergeConfigWith($config);
 
         $this->disabled = $this->config['disabled'] ?? $this->disabled;
 
-        // Prevent 'disabled' key from being used as an event.
+      // Prevent 'disabled' key from being used as an event.
         unset($this->config['disabled']);
 
         $this->events = [];
 
-        // Register all configured events
+      // Register all configured events
         foreach ($this->config as $trigger => $events) {
             foreach ($events as $options) {
                 // option[0] is either a Closure or a string containing the class name and method separated by :: (double colons)
@@ -152,32 +152,32 @@ class Event extends Singleton implements EventInterface
         }
     }
 
-    /**
-     * Disable all event triggers.
-     */
+  /**
+   * Disable all event triggers.
+   */
     public function disable(): void
     {
         logMsg('INFO', __METHOD__);
         $this->disabled = true;
     }
 
-    /**
-     * Enable all event triggers.
-     */
+  /**
+   * Enable all event triggers.
+   */
     public function enable(): void
     {
         logMsg('INFO', __METHOD__);
         $this->disabled = false;
     }
 
-    /**
-     * Register a single event listener.
-     *
-     * @param string $trigger Event trigger name.
-     * @param \Closure|array $callable Event callback (closure or class-method pair).
-     * @param int $priority Priority of the event listener.
-     * @return int Event ID for reference.
-     */
+  /**
+   * Register a single event listener.
+   *
+   * @param string $trigger Event trigger name.
+   * @param \Closure|array $callable Event callback (closure or class-method pair).
+   * @param int $priority Priority of the event listener.
+   * @return int Event ID for reference.
+   */
     public function register(string $trigger, \Closure|array $callable, int $priority = self::PRIORITY_NORMAL): int
     {
         logMsg('INFO', __METHOD__);
@@ -186,13 +186,13 @@ class Event extends Singleton implements EventInterface
         return $this->registerEvent($trigger, $callable, $priority);
     }
 
-    /**
-     * Register multiple event listeners at once.
-     *
-     * @param array $multiple Array of event trigger => callable pairs.
-     * @param int $priority Priority for all listeners.
-     * @return array Array of registered event IDs.
-     */
+  /**
+   * Register multiple event listeners at once.
+   *
+   * @param array $multiple Array of event trigger => callable pairs.
+   * @param int $priority Priority for all listeners.
+   * @return array Array of registered event IDs.
+   */
     public function registerMultiple(array $multiple, int $priority = self::PRIORITY_NORMAL): array
     {
         $registered = [];
@@ -204,13 +204,13 @@ class Event extends Singleton implements EventInterface
         return $registered;
     }
 
-    /**
-     * Trigger an event.
-     *
-     * @param string $trigger Event trigger name.
-     * @param mixed ...$arguments Arguments passed to event listeners.
-     * @return self Fluent interface.
-     */
+  /**
+   * Trigger an event.
+   *
+   * @param string $trigger Event trigger name.
+   * @param mixed ...$arguments Arguments passed to event listeners.
+   * @return self Fluent interface.
+   */
     public function trigger(string $trigger, &...$arguments): self
     {
         logMsg('INFO', __METHOD__ . ' ' . $trigger);
@@ -232,12 +232,12 @@ class Event extends Singleton implements EventInterface
         return $this;
     }
 
-    /**
-     * Check if any listeners exist for a specific event trigger.
-     *
-     * @param string $trigger Event trigger name.
-     * @return bool True if listeners exist, false otherwise.
-     */
+  /**
+   * Check if any listeners exist for a specific event trigger.
+   *
+   * @param string $trigger Event trigger name.
+   * @return bool True if listeners exist, false otherwise.
+   */
     public function has(string $trigger): bool
     {
         logMsg('DEBUG', __METHOD__, ['trigger' => $trigger]);
@@ -245,11 +245,11 @@ class Event extends Singleton implements EventInterface
         return isset($this->events[$this->normalize($trigger)]);
     }
 
-    /**
-     * Retrieve all registered event triggers.
-     *
-     * @return array List of all registered event triggers.
-     */
+  /**
+   * Retrieve all registered event triggers.
+   *
+   * @return array List of all registered event triggers.
+   */
     public function triggers(): array
     {
         logMsg('DEBUG', __METHOD__, array_keys($this->events));
@@ -257,12 +257,12 @@ class Event extends Singleton implements EventInterface
         return array_keys($this->events);
     }
 
-    /**
-     * Unregister a specific event listener by its ID.
-     *
-     * @param int $eventId Event ID to remove.
-     * @return bool True if removed successfully, false otherwise.
-     */
+  /**
+   * Unregister a specific event listener by its ID.
+   *
+   * @param int $eventId Event ID to remove.
+   * @return bool True if removed successfully, false otherwise.
+   */
     public function unregister(int $eventId): bool
     {
         logMsg('DEBUG', __METHOD__, ['eventId' => $eventId]);
@@ -281,17 +281,17 @@ class Event extends Singleton implements EventInterface
         return false;
     }
 
-    /**
-     * Unregister all event listeners, optionally for a specific trigger.
-     *
-     * @param string|null $trigger Event trigger name (optional).
-     * @return bool True if listeners were removed.
-     */
+  /**
+   * Unregister all event listeners, optionally for a specific trigger.
+   *
+   * @param string|null $trigger Event trigger name (optional).
+   * @return bool True if listeners were removed.
+   */
     public function unregisterAll(?string $trigger = null): bool
     {
         logMsg('DEBUG', __METHOD__, ['trigger' => $trigger]);
 
-        // this exits on the first successful removal
+      // this exits on the first successful removal
         if ($trigger) {
             $trigger = $this->normalize($trigger);
 
@@ -307,45 +307,55 @@ class Event extends Singleton implements EventInterface
         return false;
     }
 
-    /**
-     * Retrieve listeners for a given trigger, sorted by priority.
-     *
-     * @param string $trigger Event trigger name.
-     * @return array Sorted array of listeners.
-     */
+  /**
+   * Retrieve listeners for a given trigger, sorted by priority.
+   *
+   * @param string $trigger Event trigger name.
+   * @return array Sorted array of listeners.
+   */
     protected function listeners(string $trigger): array
     {
         $trigger = $this->normalize($trigger);
-        // Sort by priority (highest first)
+      // Sort by priority (highest first)
         krsort($this->events[$trigger]);
         return $this->events[$trigger];
     }
 
-    /**
-     * Register an event listener.
-     *
-     * @param string $trigger Event trigger name.
-     * @param \Closure|array $callable Callback.
-     * @param int $priority Priority level.
-     * @return int Event ID.
-     */
-    protected function registerEvent(string $trigger, \Closure|array $callable, int $priority): int
+  /**
+   * Register an event listener.
+   *
+   * @param string $trigger Event trigger name.
+   * @param \Closure|array $callable Callback.
+   * @param int $priority Priority level.
+   * @return int Event ID.
+   */
+    protected function registerEvent(string $trigger, \Closure|array|string $callable, int $priority): int
     {
         $eventId = 0;
 
         if ($callable instanceof \Closure) {
-            // register a closure
-            //
-            // function(&$var) {
-            //   $var = 'Hello ' . $var. ' how are you?';
-            // }
-            //
+          // register a closure
+          //
+          // function(&$var) {
+          //   $var = 'Hello ' . $var. ' how are you?';
+          // }
+          //
             $eventId = $this->registerClosureEvent($trigger, $callable, $priority);
+        } elseif (is_string($callable)) {
+          //
+          // register a class::method
+          //
+          // [\app\libraries\Middleware::class.'::before']
+            $eventId = $this->registerClosureEvent($trigger, function (&...$arguments) use ($callable) {
+                list($className, $methodName) = explode('::', $callable, 2);
+
+                return (new $className())->$methodName(...$arguments);
+            }, $priority);
         } elseif (count($callable) == 2) {
-            //
-            // register a class & method
-            //
-            // [\app\libraries\Middleware::class,'before']
+          //
+          // register a class & method
+          //
+          // [\app\libraries\Middleware::class,'before']
             $eventId = $this->registerClosureEvent($trigger, function (&...$arguments) use ($callable) {
                 list($className, $methodName) = $callable;
 
@@ -358,32 +368,32 @@ class Event extends Singleton implements EventInterface
         return $eventId;
     }
 
-    /**
-     * Register a closure event listener.
-     * This method generates a unique event ID based on the priority and a per-process
-     * sequence number, and stores the closure in the events array under the
-     * normalized trigger name.
-     *
-     * @param string $trigger
-     * @param Closure $callable
-     * @param int $priority
-     * @return int
-     */
+  /**
+   * Register a closure event listener.
+   * This method generates a unique event ID based on the priority and a per-process
+   * sequence number, and stores the closure in the events array under the
+   * normalized trigger name.
+   *
+   * @param string $trigger
+   * @param Closure $callable
+   * @param int $priority
+   * @return int
+   */
     protected function registerClosureEvent(string $trigger, \Closure $callable, int $priority): int
     {
-        // Priority occupies the high-order digits so krsort() in listeners() sorts
-        // purely by array key and still ends up highest-priority-first; the low
-        // twelve digits are a strictly increasing per-process sequence number so two
-        // registrations - even at identical priority - never collide.
-        //
-        // Previously this concatenated $priority with hrtime(true) as strings and cast
-        // the result with intval(). hrtime(true) grows without bound as the process/
-        // system keeps running, and once the combined digit count passed PHP_INT_MAX
-        // (~19 digits), intval() silently clamped every subsequent ID to the same
-        // value - collapsing distinct listeners onto the same array key and silently
-        // dropping earlier ones. The sequence counter here is bounded by how many
-        // events get registered, not by wall-clock/uptime, so it can't drift into an
-        // overflow the way a raw timestamp can.
+      // Priority occupies the high-order digits so krsort() in listeners() sorts
+      // purely by array key and still ends up highest-priority-first; the low
+      // twelve digits are a strictly increasing per-process sequence number so two
+      // registrations - even at identical priority - never collide.
+      //
+      // Previously this concatenated $priority with hrtime(true) as strings and cast
+      // the result with intval(). hrtime(true) grows without bound as the process/
+      // system keeps running, and once the combined digit count passed PHP_INT_MAX
+      // (~19 digits), intval() silently clamped every subsequent ID to the same
+      // value - collapsing distinct listeners onto the same array key and silently
+      // dropping earlier ones. The sequence counter here is bounded by how many
+      // events get registered, not by wall-clock/uptime, so it can't drift into an
+      // overflow the way a raw timestamp can.
         $eventId = ($priority * 1_000_000_000_000) + (self::$sequence++ % 1_000_000_000_000);
 
         $this->events[$this->normalize($trigger)][$eventId] = $callable;

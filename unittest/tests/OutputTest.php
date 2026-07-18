@@ -308,4 +308,130 @@ final class OutputTest extends UnitTestHelper
 
         $this->assertEquals('text/html', $instance->getContentType());
     }
+
+    /* handleCors() */
+
+    /**
+     * Build a TestableOutput wired to the given CORS config and request headers.
+     * TestableOutput records phpHeader()/phpExit() instead of performing them, so
+     * handleCors() - including its send(true) short-circuits - runs end to end.
+     */
+    private function makeCorsOutput(array $config, array $server): TestableOutput
+    {
+        return TestableOutput::newInstance(array_merge([
+            'contentType' => 'text/html',
+            'charSet' => 'utf-8',
+        ], $config), Input::newInstance([
+            'php_sapi' => 'apache2handler',
+            'stdin' => false,
+            'server' => $server,
+        ]));
+    }
+
+    public function testHandleCorsAllowedOriginSetsVaryAndAllowOrigin(): void
+    {
+        $instance = $this->makeCorsOutput(
+            ['allowed cors' => ['http://good.example']],
+            ['HTTP_ORIGIN' => 'http://good.example', 'REQUEST_METHOD' => 'GET']
+        );
+
+        $instance->handleCors();
+
+        $headers = $instance->getHeaders();
+
+        // the validated origin is reflected and marked as cache-varying
+        $this->assertContains('Vary: Origin', $headers);
+        $this->assertContains('Access-Control-Allow-Origin: http://good.example', $headers);
+        $this->assertContains('Access-Control-Max-Age: 86400', $headers);
+        // an allowed, non-preflight request must not short-circuit/exit
+        $this->assertEmpty($instance->phpExitCalls);
+    }
+
+    public function testHandleCorsOmitsCredentialsByDefault(): void
+    {
+        $instance = $this->makeCorsOutput(
+            ['allowed cors' => ['http://good.example']],
+            ['HTTP_ORIGIN' => 'http://good.example', 'REQUEST_METHOD' => 'GET']
+        );
+
+        $instance->handleCors();
+
+        // credentials are off unless the app explicitly opts in
+        $this->assertNotContains('Access-Control-Allow-Credentials: true', $instance->getHeaders());
+    }
+
+    public function testHandleCorsSendsCredentialsWhenEnabled(): void
+    {
+        $instance = $this->makeCorsOutput(
+            [
+                'allowed cors' => ['http://good.example'],
+                'access-control-allow-credentials' => true,
+            ],
+            ['HTTP_ORIGIN' => 'http://good.example', 'REQUEST_METHOD' => 'GET']
+        );
+
+        $instance->handleCors();
+
+        $this->assertContains('Access-Control-Allow-Credentials: true', $instance->getHeaders());
+    }
+
+    public function testHandleCorsDisallowedOriginOmitsAllowOriginAndExits(): void
+    {
+        $instance = $this->makeCorsOutput(
+            ['allowed cors' => ['http://good.example']],
+            ['HTTP_ORIGIN' => 'http://evil.example', 'REQUEST_METHOD' => 'GET']
+        );
+
+        ob_start();
+        $instance->handleCors();
+        ob_get_clean();
+
+        // a disallowed origin never gets an Access-Control-Allow-Origin header...
+        $allowOrigin = array_filter($instance->getHeaders(), function ($header) {
+            return str_starts_with($header, 'Access-Control-Allow-Origin');
+        });
+        $this->assertEmpty($allowOrigin);
+        // ...and the request is sent and terminated
+        $this->assertEquals([0], $instance->phpExitCalls);
+    }
+
+    public function testHandleCorsWithoutOriginLeavesHeadersUntouched(): void
+    {
+        $instance = $this->makeCorsOutput(
+            ['allowed cors' => ['http://good.example']],
+            ['REQUEST_METHOD' => 'GET']
+        );
+
+        $before = $instance->getHeaders();
+        $instance->handleCors();
+
+        $this->assertEquals($before, $instance->getHeaders());
+        $this->assertEmpty($instance->phpExitCalls);
+    }
+
+    public function testHandleCorsPreflightSetsMethodsAndReflectsRequestedHeaders(): void
+    {
+        $instance = $this->makeCorsOutput(
+            ['allowed cors' => ['http://good.example']],
+            [
+                'HTTP_ORIGIN' => 'http://good.example',
+                'REQUEST_METHOD' => 'OPTIONS',
+                'HTTP_ACCESS_CONTROL_REQUEST_METHOD' => 'POST',
+                'HTTP_ACCESS_CONTROL_REQUEST_HEADERS' => 'Authorization, Content-Type',
+            ]
+        );
+
+        ob_start();
+        $instance->handleCors();
+        ob_get_clean();
+
+        $headers = $instance->getHeaders();
+
+        $this->assertContains('Access-Control-Allow-Origin: http://good.example', $headers);
+        $this->assertContains('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS', $headers);
+        // the requested headers are reflected back for the (already validated) origin
+        $this->assertContains('Access-Control-Allow-Headers: Authorization, Content-Type', $headers);
+        // a preflight request always ends by sending and terminating
+        $this->assertEquals([0], $instance->phpExitCalls);
+    }
 }

@@ -423,6 +423,12 @@ Output
  [x] Content type throws when type and fallback are unknown
  [x] Detect accepts type switches to json for json accept
  [x] Detect accepts type switches to html for html accept
+ [x] Handle cors allowed origin sets vary and allow origin
+ [x] Handle cors omits credentials by default
+ [x] Handle cors sends credentials when enabled
+ [x] Handle cors disallowed origin omits allow origin and exits
+ [x] Handle cors without origin leaves headers untouched
+ [x] Handle cors preflight sets methods and reflects requested headers
 
 Router
  [x] Match 1
