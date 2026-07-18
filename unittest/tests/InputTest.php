@@ -182,4 +182,23 @@ final class InputTest extends UnitTestHelper
     {
         $this->assertEquals('', $this->instance->uriSegment(99));
     }
+
+    public function testRequestUriReturnsEmptyStringWhenUrlHasNoPath(): void
+    {
+        // regression guard: parse_url() returns null (not a string) when the URI
+        // has no path component - under strict_types that used to throw a
+        // TypeError out of requestUri() instead of falling back to ''
+        $instance = Input::newInstance(['server' => ['request_uri' => 'http://example.com']]);
+
+        $this->assertEquals('', $instance->requestUri());
+    }
+
+    public function testRequestUriReturnsEmptyStringForMalformedUrl(): void
+    {
+        // regression guard: parse_url() returns false (not a string) for a
+        // malformed URI - same TypeError risk as the no-path case above
+        $instance = Input::newInstance(['server' => ['request_uri' => 'http://[invalid']]);
+
+        $this->assertEquals('', $instance->requestUri());
+    }
 }

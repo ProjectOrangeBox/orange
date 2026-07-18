@@ -51,6 +51,199 @@
         </style>
     </head>
     <body>
+        <h2>Application</h2>
+        <ul>
+            <li class="success">Make returns singleton instance</li>
+            <li class="success">Load environment loads ini values</li>
+            <li class="success">Make sets config directories</li>
+            <li class="defect">Run bootstraps cli application using framework defaults</li>
+        </ul>
+        <h2>Application Bootstrap</h2>
+        <ul>
+            <li class="success">Get returns same instance as make</li>
+            <li class="success">Env returns default for missing key</li>
+            <li class="success">Env returns null default when unset</li>
+            <li class="success">Env reads loaded values</li>
+            <li class="success">Load environment file missing throws</li>
+            <li class="success">Load environment file merges ini values</li>
+            <li class="success">Set config directories prepends orange config</li>
+            <li class="success">Load config file returns merged array</li>
+            <li class="success">Load config file unknown returns empty array</li>
+            <li class="success">Load config file non array throws</li>
+            <li class="success">Pre container registers error and exception handlers</li>
+            <li class="success">Pre container throws file not found for missing helper</li>
+            <li class="success">Pre container includes configured helper files</li>
+            <li class="success">Pre container loads constants from config</li>
+            <li class="success">Load environment file invalid format throws</li>
+            <li class="success">Bootstrap container builds container from closure</li>
+            <li class="success">Bootstrap container missing service throws</li>
+            <li class="success">Bootstrap container non closure throws</li>
+            <li class="success">Bootstrap container closure returning non container throws</li>
+            <li class="success">Post container exposes application config</li>
+        </ul>
+        <h2>Application Http</h2>
+        <ul>
+            <li class="defect">Http runs full request lifecycle</li>
+        </ul>
+        <h2>Array Object</h2>
+        <ul>
+            <li class="success">Has</li>
+            <li class="success">Get returns value</li>
+            <li class="success">Get returns default when missing</li>
+            <li class="success">Magic get returns value</li>
+            <li class="success">Magic set</li>
+            <li class="success">Call forwards to array function</li>
+            <li class="success">Call unknown method throws</li>
+            <li class="success">Merge recursive replaces</li>
+            <li class="success">Merge non replace keeps both with array merge</li>
+            <li class="success">Magic set method directly</li>
+            <li class="success">Magic get method directly</li>
+        </ul>
+        <h2>Ary</h2>
+        <ul>
+            <li class="success">Remap key</li>
+            <li class="success">Remap value</li>
+            <li class="success">Wrap array</li>
+            <li class="success">Make associated with arrays</li>
+            <li class="success">Make associated with objects</li>
+            <li class="success">Make associated with asterisk</li>
+            <li class="success">Make associated with sort</li>
+            <li class="success">Make associated with sort desc</li>
+            <li class="success">Make associated with sort and explicit flags</li>
+            <li class="success">Element</li>
+            <li class="success">Random element</li>
+            <li class="success">Elements</li>
+        </ul>
+        <h2>Attributes</h2>
+        <ul>
+            <li class="success">Route stores constructor values</li>
+            <li class="success">Route accepts string method</li>
+            <li class="success">Route defaults</li>
+            <li class="success">Route is readable via reflection</li>
+            <li class="success">Auto wire stores service</li>
+            <li class="success">Auto wire is readable via reflection</li>
+            <li class="success">Attach service stores service</li>
+            <li class="success">Attach service is readable via reflection</li>
+            <li class="success">Router callback stores constructor values</li>
+            <li class="success">Router callback accepts empty arguments</li>
+        </ul>
+        <h2>Base</h2>
+        <ul>
+            <li class="success">Cloning is forbidden</li>
+            <li class="success">Wakeup is forbidden</li>
+            <li class="success">Array object</li>
+            <li class="success">Array object different</li>
+            <li class="success">Factory</li>
+            <li class="success">Singleton</li>
+            <li class="success">Singleton array object</li>
+        </ul>
+        <h2>Config</h2>
+        <ul>
+            <li class="success">Get</li>
+            <li class="success">Get key</li>
+            <li class="success">M M Get</li>
+            <li class="success">Invalid config file</li>
+            <li class="success">Offset get</li>
+            <li class="success">Offset exists</li>
+            <li class="success">Offset exists false for unknown config does not throw</li>
+            <li class="success">Get with default returns default for missing key</li>
+            <li class="success">Get with default returns value when key present</li>
+            <li class="success">Load throws when config file does not return array</li>
+        </ul>
+        <h2>Configuration Trait</h2>
+        <ul>
+            <li class="success">Change option sets property</li>
+            <li class="success">Change option returns self for chaining</li>
+            <li class="success">Change option accepts human readable name</li>
+            <li class="success">Change option prefers setter over property</li>
+            <li class="success">Change option checks type with function</li>
+            <li class="success">Change option checks type with instance of</li>
+            <li class="success">Change option instance of mismatch throws</li>
+            <li class="success">Change option unknown name throws</li>
+            <li class="success">Change option without property or setter throws</li>
+            <li class="success">Change option without type check property throws</li>
+            <li class="success">Change option with non array type check throws</li>
+            <li class="success">Merge config with explicit path</li>
+            <li class="success">Merge config with auto detects path from class name</li>
+            <li class="success">Merge config with recursive keeps sibling keys</li>
+            <li class="success">Merge config with non recursive replaces whole key</li>
+            <li class="success">Merge config with boolean as path is treated as recursive flag</li>
+            <li class="success">Merge config with file not returning array throws</li>
+            <li class="success">Get config file merges like merge config with</li>
+            <li class="success">Determine config path finds file by name</li>
+            <li class="success">Determine config path not found throws</li>
+            <li class="success">Set from config calls matching setter</li>
+            <li class="success">Set from config ignores unknown keys by default</li>
+            <li class="success">Set from config throws on unknown key when requested</li>
+            <li class="success">Assign from config sets matching property</li>
+            <li class="success">Assign from config camelizes keys</li>
+            <li class="success">Assign from config ignores unknown keys by default</li>
+            <li class="success">Assign from config throws on unknown key when requested</li>
+            <li class="success">Normalize</li>
+            <li class="success">Camelize</li>
+            <li class="success">Camelize uc first</li>
+            <li class="success">Underscore</li>
+            <li class="success">Humanize</li>
+            <li class="success">Humanize with separator</li>
+            <li class="success">Validate config passing type rules</li>
+            <li class="success">Validate config int is normalized to integer</li>
+            <li class="success">Validate config ignores keys without rules</li>
+            <li class="success">Validate config type mismatch throws</li>
+            <li class="success">Validate config collects multiple errors</li>
+            <li class="success">Validate config min rule</li>
+            <li class="success">Validate config min rule fails on short string</li>
+            <li class="success">Validate config min rule fails on small integer</li>
+            <li class="success">Validate config min rule on unsupported type throws</li>
+            <li class="success">Validate config max rule fails on long string</li>
+            <li class="success">Validate config max rule fails on large array</li>
+            <li class="success">Validate config count rule</li>
+            <li class="success">Validate config count rule mismatch throws</li>
+            <li class="success">Validate config count rule on non array throws</li>
+            <li class="success">Validate config size rule</li>
+            <li class="success">Validate config size rule mismatch throws</li>
+            <li class="success">Validate config class rule</li>
+            <li class="success">Validate config class rule mismatch throws</li>
+            <li class="success">Validate config chained rules</li>
+            <li class="success">Validate config unknown rule throws</li>
+        </ul>
+        <h2>Container</h2>
+        <ul>
+            <li class="success">get</li>
+            <li class="success">Get</li>
+            <li class="success">set</li>
+            <li class="success">Set</li>
+            <li class="success">isset</li>
+            <li class="success">Isset</li>
+            <li class="success">Has</li>
+            <li class="success">unset</li>
+            <li class="success">Unset</li>
+            <li class="success">Remove</li>
+            <li class="success">Service not found exception</li>
+        </ul>
+        <h2>Container Advanced</h2>
+        <ul>
+            <li class="success">Container registers itself</li>
+            <li class="success">Get services lists registered names</li>
+            <li class="success">Debug info reports service types</li>
+            <li class="success">Magic debug info matches debug info</li>
+            <li class="success">Alias resolves to target</li>
+            <li class="success">Alias chain resolves</li>
+            <li class="success">Alias loop throws invalid value</li>
+            <li class="success">Closure returning non singleton is not promoted</li>
+            <li class="success">Closure returning singleton is promoted</li>
+            <li class="success">Auto wire via public constructor</li>
+            <li class="success">Auto wire via get instance</li>
+            <li class="success">Auto wire attribute on unused constructor does not leak into get instance</li>
+            <li class="success">Auto wire plain class with no attributes</li>
+            <li class="success">Auto wire impossible class throws</li>
+            <li class="success">Auto wire class without explicit constructor throws</li>
+            <li class="success">Unknown service type throws</li>
+        </ul>
+        <h2>Data</h2>
+        <ul>
+            <li class="success">Data</li>
+            <li class="success">Merge</li>
+        </ul>
         <h2>Directory Search</h2>
         <ul>
             <li class="success">Add directory when locked throws</li>
@@ -86,6 +279,349 @@
             <li class="success">Resource key style fullpath</li>
             <li class="success">Resource key style localpath</li>
             <li class="success">Resource key style apppath</li>
+        </ul>
+        <h2>Dispatcher</h2>
+        <ul>
+            <li class="success">Call</li>
+            <li class="success">Controller class not found exception</li>
+            <li class="success">Method not found exception</li>
+            <li class="success">Protected method throws method not found</li>
+            <li class="success">Method pass one</li>
+            <li class="success">Method pass two</li>
+            <li class="success">Method pass one null</li>
+            <li class="success">Method pass two empty</li>
+            <li class="success">Non string return throws invalid value</li>
+            <li class="success">Named capture group arguments are filtered out</li>
+        </ul>
+        <h2>Dot</h2>
+        <ul>
+            <li class="success">Change delimiter</li>
+            <li class="success">Set and get with array</li>
+            <li class="success">Set and get with object</li>
+            <li class="success">Get with default</li>
+            <li class="success">Isset</li>
+            <li class="success">Unset</li>
+            <li class="success">Flatten with array</li>
+            <li class="success">Flatten with object</li>
+            <li class="success">Expand with array</li>
+            <li class="success">Expand with object</li>
+            <li class="success">Expand conflicting scalar and nested key throws</li>
+            <li class="success">Isset handles falsy stored values</li>
+            <li class="success">Get object simple key missing returns default</li>
+            <li class="success">Get object nested key missing returns default</li>
+            <li class="success">Get nested key on scalar value returns default</li>
+            <li class="success">Unset object simple key</li>
+            <li class="success">Unset object nested key</li>
+            <li class="success">Unset missing intermediate array path is noop</li>
+            <li class="success">Unset missing intermediate object path is noop</li>
+            <li class="success">Round trip flatten expand</li>
+        </ul>
+        <h2>Error</h2>
+        <ul>
+            <li class="success">Send response code prefers http code</li>
+            <li class="success">Send response code falls back to code</li>
+            <li class="success">Send response code defaults to 500</li>
+            <li class="success">Send response code skipped for cli</li>
+            <li class="success">Send mime type ajax is json</li>
+            <li class="success">Send mime type html is html</li>
+            <li class="success">View raw json</li>
+            <li class="success">View raw html</li>
+            <li class="success">View raw cli</li>
+            <li class="success">View raw unknown request type falls back to cli format</li>
+            <li class="success">View raw build html includes all known fields</li>
+            <li class="success">View raw build html omits missing fields</li>
+            <li class="success">View raw build html escapes untrusted fields</li>
+        </ul>
+        <h2>Error Advanced</h2>
+        <ul>
+            <li class="success">Find view locates request type view</li>
+            <li class="success">Find view returns empty when not found</li>
+            <li class="success">Render view based on code renders found template</li>
+            <li class="success">Render view based on code uses http code when provided</li>
+            <li class="success">Render view based on code falls back to raw when no template</li>
+            <li class="success">Get service returns from container when registered</li>
+            <li class="success">Get service falls back to orange class</li>
+        </ul>
+        <h2>Error Constructor</h2>
+        <ul>
+            <li class="success">Constructor without thrown renders default view</li>
+            <li class="success">Constructor with thrown exception uses all decoration hooks</li>
+            <li class="success">Show renders and records send output</li>
+        </ul>
+        <h2>Errors</h2>
+        <ul>
+            <li class="success">Show 400 throws http 400</li>
+            <li class="success">Show 401 throws http 401</li>
+            <li class="success">Show 403 throws http 403</li>
+            <li class="success">Show 404 throws http 404</li>
+            <li class="success">Show 422 throws http 422</li>
+            <li class="success">Show 429 throws http 429</li>
+            <li class="success">Show 500 throws http 500</li>
+            <li class="success">Show 503 throws http 503</li>
+            <li class="success">Redirect 301 throws http 301</li>
+            <li class="success">Error handler throws error exception</li>
+            <li class="success">Error handler ignores when reporting zero</li>
+        </ul>
+        <h2>Event</h2>
+        <ul>
+            <li class="success">Register closure</li>
+            <li class="success">Register class method</li>
+            <li class="success">Register event unknown callable exception</li>
+            <li class="success">Register event array count exception</li>
+            <li class="success">Register event called array exception</li>
+            <li class="success">Register multiple</li>
+            <li class="success">Trigger</li>
+            <li class="success">Trigger class method</li>
+            <li class="success">Unregister</li>
+            <li class="success">Same priority registrations get distinct ids and both fire</li>
+            <li class="success">Unregister all</li>
+            <li class="success">Constructor registers configured events</li>
+            <li class="success">Trigger stops when listener returns false</li>
+            <li class="success">Unregister returns false for unknown id</li>
+            <li class="success">Unregister all without trigger clears everything</li>
+            <li class="success">Unregister all unknown trigger returns false</li>
+            <li class="success">Disable stops triggers and enable resumes them</li>
+        </ul>
+        <h2>Helpers</h2>
+        <ul>
+            <li class="success">Container</li>
+            <li class="success">Log msg</li>
+            <li class="success">File put contents atomic</li>
+            <li class="success">Concat</li>
+            <li class="success">Config</li>
+        </ul>
+        <h2>Http Exceptions</h2>
+        <ul>
+            <li class="success">Http 404 derives code from class name</li>
+            <li class="success">Http 500 derives code from class name</li>
+            <li class="success">Explicit message is kept</li>
+            <li class="success">Base http with unknown code falls back to 500</li>
+            <li class="success">Base http with explicit unknown code</li>
+            <li class="success">Http 301 requires url and reports code</li>
+            <li class="success">Http 302 requires url</li>
+            <li class="success">Http 301 decorate sets location header</li>
+            <li class="success">Every http status class instantiates with data set "Http200"</li>
+            <li class="success">Every http status class instantiates with data set "Http201"</li>
+            <li class="success">Every http status class instantiates with data set "Http202"</li>
+            <li class="success">Every http status class instantiates with data set "Http204"</li>
+            <li class="success">Every http status class instantiates with data set "Http304"</li>
+            <li class="success">Every http status class instantiates with data set "Http400"</li>
+            <li class="success">Every http status class instantiates with data set "Http401"</li>
+            <li class="success">Every http status class instantiates with data set "Http403"</li>
+            <li class="success">Every http status class instantiates with data set "Http404"</li>
+            <li class="success">Every http status class instantiates with data set "Http405"</li>
+            <li class="success">Every http status class instantiates with data set "Http406"</li>
+            <li class="success">Every http status class instantiates with data set "Http409"</li>
+            <li class="success">Every http status class instantiates with data set "Http410"</li>
+            <li class="success">Every http status class instantiates with data set "Http418"</li>
+            <li class="success">Every http status class instantiates with data set "Http422"</li>
+            <li class="success">Every http status class instantiates with data set "Http423"</li>
+            <li class="success">Every http status class instantiates with data set "Http429"</li>
+            <li class="success">Every http status class instantiates with data set "Http500"</li>
+            <li class="success">Every http status class instantiates with data set "Http501"</li>
+            <li class="success">Every http status class instantiates with data set "Http503"</li>
+            <li class="success">Orange exception builds human readable class message</li>
+            <li class="success">Decorate is a no op by default</li>
+        </ul>
+        <h2>Input</h2>
+        <ul>
+            <li class="success">Get url</li>
+            <li class="success">Request uri</li>
+            <li class="success">Uri segment</li>
+            <li class="success">Content type</li>
+            <li class="success">Request method</li>
+            <li class="success">Request type</li>
+            <li class="success">Is ajax request</li>
+            <li class="success">Is cli request</li>
+            <li class="success">Is https request</li>
+            <li class="success">Request</li>
+            <li class="success">Query</li>
+            <li class="success">Cookie</li>
+            <li class="success">Server</li>
+            <li class="success">Header</li>
+            <li class="success">File</li>
+            <li class="success">Json request</li>
+            <li class="success">Input stream returns raw input</li>
+            <li class="success">Request returns default for missing key</li>
+            <li class="success">Query returns whole array when no key</li>
+            <li class="success">Is https request as string</li>
+            <li class="success">Uri segment out of range returns empty</li>
+            <li class="success">Request uri returns empty string when url has no path</li>
+            <li class="success">Request uri returns empty string for malformed url</li>
+        </ul>
+        <h2>Log</h2>
+        <ul>
+            <li class="success">Change threshold</li>
+            <li class="success">Get threshold</li>
+            <li class="success">Is enabled</li>
+            <li class="success">call</li>
+            <li class="success">All psr 3 level methods write</li>
+            <li class="success">Log writes context</li>
+            <li class="success">Write with string level</li>
+            <li class="success">Disabled level is not written</li>
+            <li class="success">Custom handler does not require writable filepath</li>
+            <li class="success">Mono logger exception</li>
+            <li class="success">Constructor throws when handler is not object</li>
+            <li class="success">Convert 2 throws for unknown string level</li>
+            <li class="success">Convert 2 throws for unknown int level</li>
+            <li class="success">Is file writable creates missing directory</li>
+            <li class="success">Is file writable throws when directory creation fails</li>
+            <li class="success">Is file writable throws when directory not writable</li>
+        </ul>
+        <h2>Output</h2>
+        <ul>
+            <li class="success">Flush</li>
+            <li class="success">Set output</li>
+            <li class="success">Append output</li>
+            <li class="success">Get output</li>
+            <li class="success">Header</li>
+            <li class="success">Get headers</li>
+            <li class="success">Send headers</li>
+            <li class="success">Flush headers</li>
+            <li class="success">Content type</li>
+            <li class="success">Get content type short hand</li>
+            <li class="success">Char set</li>
+            <li class="success">Response code int</li>
+            <li class="success">Response code string</li>
+            <li class="success">Response code invalid</li>
+            <li class="success">Response code invalid int</li>
+            <li class="success">Get response code</li>
+            <li class="success">Send</li>
+            <li class="success">Redirect</li>
+            <li class="success">Resolve trusted host honors allowed host</li>
+            <li class="success">Resolve trusted host rejects spoofed host</li>
+            <li class="success">Resolve trusted host fails closed without allowlist</li>
+            <li class="success">Flush all</li>
+            <li class="success">To string returns output</li>
+            <li class="success">Get content type</li>
+            <li class="success">Get char set</li>
+            <li class="success">Constructor force https redirects and exits</li>
+            <li class="success">Content type falls back to mime lookup of fallback key</li>
+            <li class="success">Content type accepts raw fallback mime value</li>
+            <li class="success">Content type throws when type and fallback are unknown</li>
+            <li class="success">Detect accepts type switches to json for json accept</li>
+            <li class="success">Detect accepts type switches to html for html accept</li>
+        </ul>
+        <h2>Router</h2>
+        <ul>
+            <li class="success">Match 1</li>
+            <li class="success">Match 2</li>
+            <li class="success">Match 3</li>
+            <li class="success">Match 4</li>
+            <li class="success">Match 5</li>
+            <li class="success">Get url</li>
+            <li class="success">Site url</li>
+            <li class="success">Get matched invalid value exception</li>
+            <li class="success">Get url invalid value exception</li>
+            <li class="success">Get url parameter invalid value exception</li>
+            <li class="success">Match after successful match still throws when no route found</li>
+            <li class="success">Match route not found exception 1</li>
+            <li class="success">Match route not found exception 2</li>
+            <li class="success">Get url router name not found</li>
+            <li class="success">Config not found exception</li>
+            <li class="success">Add route then match</li>
+            <li class="success">Add routes</li>
+            <li class="success">Get matched returns whole array</li>
+            <li class="success">Get router callback</li>
+            <li class="success">Get router callback without callback throws</li>
+            <li class="success">Site url without prefix returns bare url</li>
+            <li class="success">Constructor falls back to http host when site url not configured</li>
+            <li class="success">Add route throws http method not supported</li>
+            <li class="success">Get url throws router name not found when resolved url is empty</li>
+            <li class="success">Constructor sets cache key and update cache writes through it</li>
+            <li class="success">Get routes loads from valid cache</li>
+            <li class="success">Get routes falls back to config when cache invalid</li>
+        </ul>
+        <h2>Security</h2>
+        <ul>
+            <li class="success">Create keys sets private and auth key permissions to owner only</li>
+            <li class="success">Create keys with restrict ownership false still succeeds</li>
+            <li class="success">Create keys restricts ownership to current user</li>
+            <li class="success">Encrypt</li>
+            <li class="success">Auth</li>
+            <li class="success">Remove invisible characters</li>
+            <li class="success">Clean filename</li>
+            <li class="success">Password hash</li>
+            <li class="success">Create keys throws config not found when key path missing</li>
+            <li class="success">Create keys throws directory not writable when directory not writable</li>
+            <li class="success">Create keys throws file already exists when key file exists</li>
+            <li class="success">Decrypt throws on non hex data</li>
+            <li class="success">Decrypt throws on forged data</li>
+            <li class="success">Get key file path throws invalid value for unknown type</li>
+            <li class="success">Get key file path throws config not found when missing from config</li>
+            <li class="success">Get key file path throws file not found when file missing</li>
+        </ul>
+        <h2>String Helpers</h2>
+        <ul>
+            <li class="success">Is closure true for closure</li>
+            <li class="success">Is closure false for string</li>
+            <li class="success">Element builds standard tag</li>
+            <li class="success">Element self closing tag has no closing tag</li>
+            <li class="success">Element escapes content by default</li>
+            <li class="success">Element does not escape when disabled</li>
+            <li class="success">Convert label camel</li>
+            <li class="success">Convert label pascal</li>
+            <li class="success">Convert label snake</li>
+            <li class="success">Convert label slug</li>
+            <li class="success">Convert label normalize strips non alnum</li>
+            <li class="success">Convert label invalid case throws</li>
+            <li class="success">Esc escapes double quotes</li>
+            <li class="success">E escapes html in string</li>
+            <li class="success">E recurses into arrays</li>
+            <li class="success">E leaves empty input untouched</li>
+            <li class="success">Str contains finds needle</li>
+            <li class="success">Str contains missing needle</li>
+            <li class="success">Str contains empty needle is true</li>
+            <li class="success">Nthfield returns requested field</li>
+            <li class="success">Nthfield out of range returns null</li>
+            <li class="success">After</li>
+            <li class="success">Before</li>
+            <li class="success">Between</li>
+            <li class="success">Left</li>
+            <li class="success">Right</li>
+            <li class="success">Mid is one based</li>
+            <li class="success">Is associative false for list</li>
+            <li class="success">Is associative true for map</li>
+            <li class="success">Is associative false for empty array</li>
+            <li class="success">Sanitize download filename passes through safe name</li>
+            <li class="success">Sanitize download filename strips directory component</li>
+            <li class="success">Sanitize download filename escapes quotes and backslashes</li>
+            <li class="success">Sanitize download filename strips control characters</li>
+        </ul>
+        <h2>Viewer</h2>
+        <ul>
+            <li class="success">Render</li>
+            <li class="success">Render string</li>
+            <li class="success">Render string cache directory is not group or world writable</li>
+            <li class="success">Add path</li>
+            <li class="success">Add paths</li>
+            <li class="success">Render view not found exception</li>
+            <li class="success">Change option</li>
+            <li class="success">Recursive</li>
+            <li class="success">Search method returns directory search</li>
+            <li class="success">Add alias resolves on render</li>
+            <li class="success">Change valid option</li>
+            <li class="success">Change returns self</li>
+            <li class="success">Change unknown option throws</li>
+            <li class="success">Change wrong type throws</li>
+            <li class="success">Change wrong type with array value does not warn</li>
+            <li class="success">Render merges view level data</li>
+            <li class="success">Resolve dynamic view empty uses controller and method</li>
+            <li class="success">Resolve dynamic view replaces placeholders</li>
+            <li class="success">Resolve dynamic view replaces method only</li>
+            <li class="success">Resolve dynamic view ends with slash star</li>
+            <li class="success">Resolve dynamic view namespaced controller segments</li>
+            <li class="success">Resolve dynamic view missing method throws</li>
+            <li class="success">Resolve dynamic view missing controller throws</li>
+            <li class="success">Resolve dynamic view ends with star star</li>
+            <li class="success">Constructor throws when temp directory missing</li>
+            <li class="success">Constructor adds resources</li>
+            <li class="success">Render resolves dynamic view when enabled with router</li>
+            <li class="success">Generate throws view not found for missing file</li>
+            <li class="success">Is file writable creates missing directory</li>
+            <li class="success">Is file writable throws when directory creation fails</li>
+            <li class="success">Is file writable throws when directory not writable</li>
+            <li class="success">Render string throws file not writable when atomic write fails</li>
         </ul>
     </body>
 </html>

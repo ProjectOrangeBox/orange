@@ -265,7 +265,11 @@ class Input extends Singleton implements InputInterface
      */
     public function requestUri(): string
     {
-        $uri = parse_url($this->server('request_uri', ''), self::PATH);
+        // parse_url() returns null when the URI has no path component (e.g. just
+        // "http://example.com") and false when the URI is malformed - neither is
+        // a valid `string` return value under strict_types, so both collapse to
+        // '' the same way a genuinely missing request_uri already does
+        $uri = (string) parse_url($this->server('request_uri', ''), self::PATH);
 
         logMsg('INFO', __METHOD__ . ' ' . $uri);
 

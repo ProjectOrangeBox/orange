@@ -1,3 +1,184 @@
+Application
+ [x] Make returns singleton instance
+ [x] Load environment loads ini values
+ [x] Make sets config directories
+ [x] Run bootstraps cli application using framework defaults
+
+Application Bootstrap
+ [x] Get returns same instance as make
+ [x] Env returns default for missing key
+ [x] Env returns null default when unset
+ [x] Env reads loaded values
+ [x] Load environment file missing throws
+ [x] Load environment file merges ini values
+ [x] Set config directories prepends orange config
+ [x] Load config file returns merged array
+ [x] Load config file unknown returns empty array
+ [x] Load config file non array throws
+ [x] Pre container registers error and exception handlers
+ [x] Pre container throws file not found for missing helper
+ [x] Pre container includes configured helper files
+ [x] Pre container loads constants from config
+ [x] Load environment file invalid format throws
+ [x] Bootstrap container builds container from closure
+ [x] Bootstrap container missing service throws
+ [x] Bootstrap container non closure throws
+ [x] Bootstrap container closure returning non container throws
+ [x] Post container exposes application config
+
+Application Http
+ [x] Http runs full request lifecycle
+
+Array Object
+ [x] Has
+ [x] Get returns value
+ [x] Get returns default when missing
+ [x] Magic get returns value
+ [x] Magic set
+ [x] Call forwards to array function
+ [x] Call unknown method throws
+ [x] Merge recursive replaces
+ [x] Merge non replace keeps both with array merge
+ [x] Magic set method directly
+ [x] Magic get method directly
+
+Ary
+ [x] Remap key
+ [x] Remap value
+ [x] Wrap array
+ [x] Make associated with arrays
+ [x] Make associated with objects
+ [x] Make associated with asterisk
+ [x] Make associated with sort
+ [x] Make associated with sort desc
+ [x] Make associated with sort and explicit flags
+ [x] Element
+ [x] Random element
+ [x] Elements
+
+Attributes
+ [x] Route stores constructor values
+ [x] Route accepts string method
+ [x] Route defaults
+ [x] Route is readable via reflection
+ [x] Auto wire stores service
+ [x] Auto wire is readable via reflection
+ [x] Attach service stores service
+ [x] Attach service is readable via reflection
+ [x] Router callback stores constructor values
+ [x] Router callback accepts empty arguments
+
+Base
+ [x] Cloning is forbidden
+ [x] Wakeup is forbidden
+ [x] Array object
+ [x] Array object different
+ [x] Factory
+ [x] Singleton
+ [x] Singleton array object
+
+Config
+ [x] Get
+ [x] Get key
+ [x] M M Get
+ [x] Invalid config file
+ [x] Offset get
+ [x] Offset exists
+ [x] Offset exists false for unknown config does not throw
+ [x] Get with default returns default for missing key
+ [x] Get with default returns value when key present
+ [x] Load throws when config file does not return array
+
+Configuration Trait
+ [x] Change option sets property
+ [x] Change option returns self for chaining
+ [x] Change option accepts human readable name
+ [x] Change option prefers setter over property
+ [x] Change option checks type with function
+ [x] Change option checks type with instance of
+ [x] Change option instance of mismatch throws
+ [x] Change option unknown name throws
+ [x] Change option without property or setter throws
+ [x] Change option without type check property throws
+ [x] Change option with non array type check throws
+ [x] Merge config with explicit path
+ [x] Merge config with auto detects path from class name
+ [x] Merge config with recursive keeps sibling keys
+ [x] Merge config with non recursive replaces whole key
+ [x] Merge config with boolean as path is treated as recursive flag
+ [x] Merge config with file not returning array throws
+ [x] Get config file merges like merge config with
+ [x] Determine config path finds file by name
+ [x] Determine config path not found throws
+ [x] Set from config calls matching setter
+ [x] Set from config ignores unknown keys by default
+ [x] Set from config throws on unknown key when requested
+ [x] Assign from config sets matching property
+ [x] Assign from config camelizes keys
+ [x] Assign from config ignores unknown keys by default
+ [x] Assign from config throws on unknown key when requested
+ [x] Normalize
+ [x] Camelize
+ [x] Camelize uc first
+ [x] Underscore
+ [x] Humanize
+ [x] Humanize with separator
+ [x] Validate config passing type rules
+ [x] Validate config int is normalized to integer
+ [x] Validate config ignores keys without rules
+ [x] Validate config type mismatch throws
+ [x] Validate config collects multiple errors
+ [x] Validate config min rule
+ [x] Validate config min rule fails on short string
+ [x] Validate config min rule fails on small integer
+ [x] Validate config min rule on unsupported type throws
+ [x] Validate config max rule fails on long string
+ [x] Validate config max rule fails on large array
+ [x] Validate config count rule
+ [x] Validate config count rule mismatch throws
+ [x] Validate config count rule on non array throws
+ [x] Validate config size rule
+ [x] Validate config size rule mismatch throws
+ [x] Validate config class rule
+ [x] Validate config class rule mismatch throws
+ [x] Validate config chained rules
+ [x] Validate config unknown rule throws
+
+Container
+ [x] get
+ [x] Get
+ [x] set
+ [x] Set
+ [x] isset
+ [x] Isset
+ [x] Has
+ [x] unset
+ [x] Unset
+ [x] Remove
+ [x] Service not found exception
+
+Container Advanced
+ [x] Container registers itself
+ [x] Get services lists registered names
+ [x] Debug info reports service types
+ [x] Magic debug info matches debug info
+ [x] Alias resolves to target
+ [x] Alias chain resolves
+ [x] Alias loop throws invalid value
+ [x] Closure returning non singleton is not promoted
+ [x] Closure returning singleton is promoted
+ [x] Auto wire via public constructor
+ [x] Auto wire via get instance
+ [x] Auto wire attribute on unused constructor does not leak into get instance
+ [x] Auto wire plain class with no attributes
+ [x] Auto wire impossible class throws
+ [x] Auto wire class without explicit constructor throws
+ [x] Unknown service type throws
+
+Data
+ [x] Data
+ [x] Merge
+
 Directory Search
  [x] Add directory when locked throws
  [x] Find missing resource throws when not quiet
@@ -32,4 +213,331 @@ Directory Search
  [x] Resource key style fullpath
  [x] Resource key style localpath
  [x] Resource key style apppath
+
+Dispatcher
+ [x] Call
+ [x] Controller class not found exception
+ [x] Method not found exception
+ [x] Protected method throws method not found
+ [x] Method pass one
+ [x] Method pass two
+ [x] Method pass one null
+ [x] Method pass two empty
+ [x] Non string return throws invalid value
+ [x] Named capture group arguments are filtered out
+
+Dot
+ [x] Change delimiter
+ [x] Set and get with array
+ [x] Set and get with object
+ [x] Get with default
+ [x] Isset
+ [x] Unset
+ [x] Flatten with array
+ [x] Flatten with object
+ [x] Expand with array
+ [x] Expand with object
+ [x] Expand conflicting scalar and nested key throws
+ [x] Isset handles falsy stored values
+ [x] Get object simple key missing returns default
+ [x] Get object nested key missing returns default
+ [x] Get nested key on scalar value returns default
+ [x] Unset object simple key
+ [x] Unset object nested key
+ [x] Unset missing intermediate array path is noop
+ [x] Unset missing intermediate object path is noop
+ [x] Round trip flatten expand
+
+Error
+ [x] Send response code prefers http code
+ [x] Send response code falls back to code
+ [x] Send response code defaults to 500
+ [x] Send response code skipped for cli
+ [x] Send mime type ajax is json
+ [x] Send mime type html is html
+ [x] View raw json
+ [x] View raw html
+ [x] View raw cli
+ [x] View raw unknown request type falls back to cli format
+ [x] View raw build html includes all known fields
+ [x] View raw build html omits missing fields
+ [x] View raw build html escapes untrusted fields
+
+Error Advanced
+ [x] Find view locates request type view
+ [x] Find view returns empty when not found
+ [x] Render view based on code renders found template
+ [x] Render view based on code uses http code when provided
+ [x] Render view based on code falls back to raw when no template
+ [x] Get service returns from container when registered
+ [x] Get service falls back to orange class
+
+Error Constructor
+ [x] Constructor without thrown renders default view
+ [x] Constructor with thrown exception uses all decoration hooks
+ [x] Show renders and records send output
+
+Errors
+ [x] Show 400 throws http 400
+ [x] Show 401 throws http 401
+ [x] Show 403 throws http 403
+ [x] Show 404 throws http 404
+ [x] Show 422 throws http 422
+ [x] Show 429 throws http 429
+ [x] Show 500 throws http 500
+ [x] Show 503 throws http 503
+ [x] Redirect 301 throws http 301
+ [x] Error handler throws error exception
+ [x] Error handler ignores when reporting zero
+
+Event
+ [x] Register closure
+ [x] Register class method
+ [x] Register event unknown callable exception
+ [x] Register event array count exception
+ [x] Register event called array exception
+ [x] Register multiple
+ [x] Trigger
+ [x] Trigger class method
+ [x] Unregister
+ [x] Same priority registrations get distinct ids and both fire
+ [x] Unregister all
+ [x] Constructor registers configured events
+ [x] Trigger stops when listener returns false
+ [x] Unregister returns false for unknown id
+ [x] Unregister all without trigger clears everything
+ [x] Unregister all unknown trigger returns false
+ [x] Disable stops triggers and enable resumes them
+
+Helpers
+ [x] Container
+ [x] Log msg
+ [x] File put contents atomic
+ [x] Concat
+ [x] Config
+
+Http Exceptions
+ [x] Http 404 derives code from class name
+ [x] Http 500 derives code from class name
+ [x] Explicit message is kept
+ [x] Base http with unknown code falls back to 500
+ [x] Base http with explicit unknown code
+ [x] Http 301 requires url and reports code
+ [x] Http 302 requires url
+ [x] Http 301 decorate sets location header
+ [x] Every http status class instantiates with data set "Http200"
+ [x] Every http status class instantiates with data set "Http201"
+ [x] Every http status class instantiates with data set "Http202"
+ [x] Every http status class instantiates with data set "Http204"
+ [x] Every http status class instantiates with data set "Http304"
+ [x] Every http status class instantiates with data set "Http400"
+ [x] Every http status class instantiates with data set "Http401"
+ [x] Every http status class instantiates with data set "Http403"
+ [x] Every http status class instantiates with data set "Http404"
+ [x] Every http status class instantiates with data set "Http405"
+ [x] Every http status class instantiates with data set "Http406"
+ [x] Every http status class instantiates with data set "Http409"
+ [x] Every http status class instantiates with data set "Http410"
+ [x] Every http status class instantiates with data set "Http418"
+ [x] Every http status class instantiates with data set "Http422"
+ [x] Every http status class instantiates with data set "Http423"
+ [x] Every http status class instantiates with data set "Http429"
+ [x] Every http status class instantiates with data set "Http500"
+ [x] Every http status class instantiates with data set "Http501"
+ [x] Every http status class instantiates with data set "Http503"
+ [x] Orange exception builds human readable class message
+ [x] Decorate is a no op by default
+
+Input
+ [x] Get url
+ [x] Request uri
+ [x] Uri segment
+ [x] Content type
+ [x] Request method
+ [x] Request type
+ [x] Is ajax request
+ [x] Is cli request
+ [x] Is https request
+ [x] Request
+ [x] Query
+ [x] Cookie
+ [x] Server
+ [x] Header
+ [x] File
+ [x] Json request
+ [x] Input stream returns raw input
+ [x] Request returns default for missing key
+ [x] Query returns whole array when no key
+ [x] Is https request as string
+ [x] Uri segment out of range returns empty
+ [x] Request uri returns empty string when url has no path
+ [x] Request uri returns empty string for malformed url
+
+Log
+ [x] Change threshold
+ [x] Get threshold
+ [x] Is enabled
+ [x] call
+ [x] All psr 3 level methods write
+ [x] Log writes context
+ [x] Write with string level
+ [x] Disabled level is not written
+ [x] Custom handler does not require writable filepath
+ [x] Mono logger exception
+ [x] Constructor throws when handler is not object
+ [x] Convert 2 throws for unknown string level
+ [x] Convert 2 throws for unknown int level
+ [x] Is file writable creates missing directory
+ [x] Is file writable throws when directory creation fails
+ [x] Is file writable throws when directory not writable
+
+Output
+ [x] Flush
+ [x] Set output
+ [x] Append output
+ [x] Get output
+ [x] Header
+ [x] Get headers
+ [x] Send headers
+ [x] Flush headers
+ [x] Content type
+ [x] Get content type short hand
+ [x] Char set
+ [x] Response code int
+ [x] Response code string
+ [x] Response code invalid
+ [x] Response code invalid int
+ [x] Get response code
+ [x] Send
+ [x] Redirect
+ [x] Resolve trusted host honors allowed host
+ [x] Resolve trusted host rejects spoofed host
+ [x] Resolve trusted host fails closed without allowlist
+ [x] Flush all
+ [x] To string returns output
+ [x] Get content type
+ [x] Get char set
+ [x] Constructor force https redirects and exits
+ [x] Content type falls back to mime lookup of fallback key
+ [x] Content type accepts raw fallback mime value
+ [x] Content type throws when type and fallback are unknown
+ [x] Detect accepts type switches to json for json accept
+ [x] Detect accepts type switches to html for html accept
+
+Router
+ [x] Match 1
+ [x] Match 2
+ [x] Match 3
+ [x] Match 4
+ [x] Match 5
+ [x] Get url
+ [x] Site url
+ [x] Get matched invalid value exception
+ [x] Get url invalid value exception
+ [x] Get url parameter invalid value exception
+ [x] Match after successful match still throws when no route found
+ [x] Match route not found exception 1
+ [x] Match route not found exception 2
+ [x] Get url router name not found
+ [x] Config not found exception
+ [x] Add route then match
+ [x] Add routes
+ [x] Get matched returns whole array
+ [x] Get router callback
+ [x] Get router callback without callback throws
+ [x] Site url without prefix returns bare url
+ [x] Constructor falls back to http host when site url not configured
+ [x] Add route throws http method not supported
+ [x] Get url throws router name not found when resolved url is empty
+ [x] Constructor sets cache key and update cache writes through it
+ [x] Get routes loads from valid cache
+ [x] Get routes falls back to config when cache invalid
+
+Security
+ [x] Create keys sets private and auth key permissions to owner only
+ [x] Create keys with restrict ownership false still succeeds
+ [x] Create keys restricts ownership to current user
+ [x] Encrypt
+ [x] Auth
+ [x] Remove invisible characters
+ [x] Clean filename
+ [x] Password hash
+ [x] Create keys throws config not found when key path missing
+ [x] Create keys throws directory not writable when directory not writable
+ [x] Create keys throws file already exists when key file exists
+ [x] Decrypt throws on non hex data
+ [x] Decrypt throws on forged data
+ [x] Get key file path throws invalid value for unknown type
+ [x] Get key file path throws config not found when missing from config
+ [x] Get key file path throws file not found when file missing
+
+String Helpers
+ [x] Is closure true for closure
+ [x] Is closure false for string
+ [x] Element builds standard tag
+ [x] Element self closing tag has no closing tag
+ [x] Element escapes content by default
+ [x] Element does not escape when disabled
+ [x] Convert label camel
+ [x] Convert label pascal
+ [x] Convert label snake
+ [x] Convert label slug
+ [x] Convert label normalize strips non alnum
+ [x] Convert label invalid case throws
+ [x] Esc escapes double quotes
+ [x] E escapes html in string
+ [x] E recurses into arrays
+ [x] E leaves empty input untouched
+ [x] Str contains finds needle
+ [x] Str contains missing needle
+ [x] Str contains empty needle is true
+ [x] Nthfield returns requested field
+ [x] Nthfield out of range returns null
+ [x] After
+ [x] Before
+ [x] Between
+ [x] Left
+ [x] Right
+ [x] Mid is one based
+ [x] Is associative false for list
+ [x] Is associative true for map
+ [x] Is associative false for empty array
+ [x] Sanitize download filename passes through safe name
+ [x] Sanitize download filename strips directory component
+ [x] Sanitize download filename escapes quotes and backslashes
+ [x] Sanitize download filename strips control characters
+
+Viewer
+ [x] Render
+ [x] Render string
+ [x] Render string cache directory is not group or world writable
+ [x] Add path
+ [x] Add paths
+ [x] Render view not found exception
+ [x] Change option
+ [x] Recursive
+ [x] Search method returns directory search
+ [x] Add alias resolves on render
+ [x] Change valid option
+ [x] Change returns self
+ [x] Change unknown option throws
+ [x] Change wrong type throws
+ [x] Change wrong type with array value does not warn
+ [x] Render merges view level data
+ [x] Resolve dynamic view empty uses controller and method
+ [x] Resolve dynamic view replaces placeholders
+ [x] Resolve dynamic view replaces method only
+ [x] Resolve dynamic view ends with slash star
+ [x] Resolve dynamic view namespaced controller segments
+ [x] Resolve dynamic view missing method throws
+ [x] Resolve dynamic view missing controller throws
+ [x] Resolve dynamic view ends with star star
+ [x] Constructor throws when temp directory missing
+ [x] Constructor adds resources
+ [x] Render resolves dynamic view when enabled with router
+ [x] Generate throws view not found for missing file
+ [x] Is file writable creates missing directory
+ [x] Is file writable throws when directory creation fails
+ [x] Is file writable throws when directory not writable
+ [x] Render string throws file not writable when atomic write fails
 
