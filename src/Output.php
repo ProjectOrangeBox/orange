@@ -93,42 +93,42 @@ use orange\framework\exceptions\output\Output as OutputException;
 class Output extends Singleton implements OutputInterface
 {
   /** include ConfigurationTrait methods */
-  use ConfigurationTrait;
+    use ConfigurationTrait;
 
   /**
    * Stores the output content to be sent to the client
    */
-  protected string $output = '';
+    protected string $output = '';
 
   /**
    * Stores HTTP headers to be sent
    */
-  protected array $headers = [];
+    protected array $headers = [];
 
   /**
    * The HTTP response status code
    */
-  protected int $responseCode = 200;
+    protected int $responseCode = 200;
 
   /**
    * Maps internal string keys to HTTP status codes
    */
-  protected array $responseCodesInternalStringKeys = [];
+    protected array $responseCodesInternalStringKeys = [];
 
   /**
    * The Content-Type of the HTTP response
    */
-  protected string $contentType = '';
+    protected string $contentType = '';
 
   /**
    * The character set of the HTTP response
    */
-  protected string $charSet = '';
+    protected string $charSet = '';
 
   /**
    * MIME type mappings for content types
    */
-  protected array $mimes = [];
+    protected array $mimes = [];
 
   /**
    * Constructor is protected to enforce Singleton pattern.
@@ -137,36 +137,36 @@ class Output extends Singleton implements OutputInterface
    * @param array $config Configuration array.
    * @param InputInterface $input Input interface instance.
    */
-  protected function __construct(array $config, protected InputInterface $input)
-  {
-    logMsg('INFO', __METHOD__);
+    protected function __construct(array $config, protected InputInterface $input)
+    {
+        logMsg('INFO', __METHOD__);
 
-    // merge the provided config with the default config
-    // ($input is promoted on the constructor signature; force https and accepts-type detection use it)
-    $this->config = $this->mergeConfigWith($config);
+      // merge the provided config with the default config
+      // ($input is promoted on the constructor signature; force https and accepts-type detection use it)
+        $this->config = $this->mergeConfigWith($config);
 
-    // if force https is enabled in the config then we need to check if the request is https and if not redirect to the https version of the url
-    if ($this->config['force https']) {
-      $this->forceHttps();
+      // if force https is enabled in the config then we need to check if the request is https and if not redirect to the https version of the url
+        if ($this->config['force https']) {
+            $this->forceHttps();
+        }
+
+      // create a mapping of string keys to response codes for easy lookup
+        $this->responseCodesInternalStringKeys = array_change_key_case(array_flip($this->config['status codes']), CASE_LOWER);
+
+        $this->mimes = $this->config['mimes'] ?? [];
+
+      // set the default response code
+        $this->responseCode($this->responseCode);
+      // set the default content type and charset based on config and auto-detection
+        $this->detectAcceptsType($this->config['contentType']);
+        $this->charSet($this->config['charSet']);
     }
 
-    // create a mapping of string keys to response codes for easy lookup
-    $this->responseCodesInternalStringKeys = array_change_key_case(array_flip($this->config['status codes']), CASE_LOWER);
-
-    $this->mimes = $this->config['mimes'] ?? [];
-
-    // set the default response code
-    $this->responseCode($this->responseCode);
-    // set the default content type and charset based on config and auto-detection
-    $this->detectAcceptsType($this->config['contentType']);
-    $this->charSet($this->config['charSet']);
-  }
-
-  public function __toString(): string
-  {
-    // when the object is treated as a string, return the output content
-    return $this->output;
-  }
+    public function __toString(): string
+    {
+      // when the object is treated as a string, return the output content
+        return $this->output;
+    }
 
   /**
    * Redirects the client to a specified URL.
@@ -175,35 +175,35 @@ class Output extends Singleton implements OutputInterface
    * @param int $responseCode HTTP status code for the redirection.
    * @param bool $exit Whether to terminate script execution after redirection.
    */
-  public function redirect(string $url, int $responseCode = 0, bool $exit = true): void
-  {
-    logMsg('INFO', __METHOD__ . ' ' . $url . ' ' . $responseCode . ' ' . $exit);
+    public function redirect(string $url, int $responseCode = 0, bool $exit = true): void
+    {
+        logMsg('INFO', __METHOD__ . ' ' . $url . ' ' . $responseCode . ' ' . $exit);
 
-    $responseCode = ($responseCode == 0) ? $this->config['default redirect code'] : $responseCode;
+        $responseCode = ($responseCode == 0) ? $this->config['default redirect code'] : $responseCode;
 
-    $this->flushAll()
-      ->header('Location: ' . $url, self::REPLACEALL)
-      ->responseCode($responseCode)
-      ->send($exit);
-  }
+        $this->flushAll()
+        ->header('Location: ' . $url, self::REPLACEALL)
+        ->responseCode($responseCode)
+        ->send($exit);
+    }
 
   /**
    * Enforces HTTPS protocol if the request is not already secure.
    */
-  public function forceHttps(): void
-  {
-    logMsg('INFO', __METHOD__);
+    public function forceHttps(): void
+    {
+        logMsg('INFO', __METHOD__);
 
-    if (!$this->input->isHttpsRequest()) {
-      // The Host header is client-supplied; reflecting it straight into the redirect
-      // target is a host-header-injection open redirect. Only ever redirect to a host
-      // we explicitly recognize. Redirect to the same URI over https using the
-      // configured redirect status code.
-      $host = $this->resolveTrustedHost($this->input->server('http_host', ''));
+        if (!$this->input->isHttpsRequest()) {
+          // The Host header is client-supplied; reflecting it straight into the redirect
+          // target is a host-header-injection open redirect. Only ever redirect to a host
+          // we explicitly recognize. Redirect to the same URI over https using the
+          // configured redirect status code.
+            $host = $this->resolveTrustedHost($this->input->server('http_host', ''));
 
-      $this->redirect('https://' . $host . $this->input->server('request_uri', ''), $this->config['force http response code']);
+            $this->redirect('https://' . $host . $this->input->server('request_uri', ''), $this->config['force http response code']);
+        }
     }
-  }
 
   /**
    * Resolve a host that is safe to place in a Location header.
@@ -217,67 +217,67 @@ class Output extends Singleton implements OutputInterface
    * @return string A host that is safe to redirect to.
    * @throws OutputException If no allowed hosts are configured.
    */
-  protected function resolveTrustedHost(string $requestedHost): string
-  {
-    $allowedHosts = $this->config['allowed hosts'] ?? [];
+    protected function resolveTrustedHost(string $requestedHost): string
+    {
+        $allowedHosts = $this->config['allowed hosts'] ?? [];
 
-    if (empty($allowedHosts)) {
-      throw new OutputException('Cannot force https safely: configure "allowed hosts" so the redirect never reflects the client-supplied Host header (open redirect).');
+        if (empty($allowedHosts)) {
+            throw new OutputException('Cannot force https safely: configure "allowed hosts" so the redirect never reflects the client-supplied Host header (open redirect).');
+        }
+
+      // honor the request host only when it is explicitly allowed; otherwise fall back
+      // to the canonical (first) allowed host
+        return in_array($requestedHost, $allowedHosts, true) ? $requestedHost : $allowedHosts[0];
     }
-
-    // honor the request host only when it is explicitly allowed; otherwise fall back
-    // to the canonical (first) allowed host
-    return in_array($requestedHost, $allowedHosts, true) ? $requestedHost : $allowedHosts[0];
-  }
 
   /**
    * Flushes all headers and content.
    *
    * @return self
    */
-  public function flushAll(): self
-  {
-    logMsg('INFO', __METHOD__);
+    public function flushAll(): self
+    {
+        logMsg('INFO', __METHOD__);
 
-    return $this->flushHeaders()->flush();
-  }
+        return $this->flushHeaders()->flush();
+    }
 
   /**
    * Sends the output content and headers to the client.
    *
    * @param bool|int $exit Whether to exit after sending the output.
    */
-  public function send(bool|int $exit = false): void
-  {
-    logMsg('INFO', __METHOD__);
+    public function send(bool|int $exit = false): void
+    {
+        logMsg('INFO', __METHOD__);
 
-    if (!$this->input->isCliRequest()) {
-      foreach ($this->headers as $header) {
-        $this->phpHeader($header);
-      }
+        if (!$this->input->isCliRequest()) {
+            foreach ($this->headers as $header) {
+                $this->phpHeader($header);
+            }
+        }
+
+        $this->phpEcho($this->output);
+
+        if ($exit) {
+            $exitCode = ($exit === true) ? 0 : $exit;
+            $this->phpExit($exitCode);
+        }
     }
-
-    $this->phpEcho($this->output);
-
-    if ($exit) {
-      $exitCode = ($exit === true) ? 0 : $exit;
-      $this->phpExit($exitCode);
-    }
-  }
 
   /**
    * Clears the output content.
    *
    * @return self
    */
-  public function flush(): self
-  {
-    logMsg('INFO', __METHOD__);
+    public function flush(): self
+    {
+        logMsg('INFO', __METHOD__);
 
-    $this->output = '';
+        $this->output = '';
 
-    return $this;
-  }
+        return $this;
+    }
 
   /**
    * Writes content to the output buffer.
@@ -286,24 +286,24 @@ class Output extends Singleton implements OutputInterface
    * @param bool $append Whether to append or overwrite the buffer.
    * @return self
    */
-  public function write(string $string, bool $append = true): self
-  {
-    logMsg('INFO', __METHOD__);
+    public function write(string $string, bool $append = true): self
+    {
+        logMsg('INFO', __METHOD__);
 
-    $this->output = $append ? $this->output . $string : $string;
+        $this->output = $append ? $this->output . $string : $string;
 
-    return $this;
-  }
+        return $this;
+    }
 
   /**
    * Gets the current output buffer.
    *
    * @return string
    */
-  public function get(): string
-  {
-    return $this->output;
-  }
+    public function get(): string
+    {
+        return $this->output;
+    }
 
   /**
    * Sets the Content-Type header.
@@ -312,42 +312,42 @@ class Output extends Singleton implements OutputInterface
    * @param string $fallback Fallback MIME type.
    * @return self
    */
-  public function contentType(string $type, string $fallback = ''): self
-  {
-    logMsg('INFO', __METHOD__ . ' ' . $type);
+    public function contentType(string $type, string $fallback = ''): self
+    {
+        logMsg('INFO', __METHOD__ . ' ' . $type);
 
-    // if they send in the shorthand content type convert it to a proper content type
-    if (isset($this->mimes[$type])) {
-      $detectedContentType = $this->mimes[$type];
-    } elseif (isset($this->mimes[$fallback])) {
-      $detectedContentType = $this->mimes[$fallback];
-    } elseif (in_array($type, $this->mimes)) {
-      $detectedContentType = $type;
-    } elseif (in_array($fallback, $this->mimes)) {
-      $detectedContentType = $fallback;
-    } else {
-      throw new OutputException('Unknown contentType(s) ' . $type . '/' . $fallback);
+      // if they send in the shorthand content type convert it to a proper content type
+        if (isset($this->mimes[$type])) {
+            $detectedContentType = $this->mimes[$type];
+        } elseif (isset($this->mimes[$fallback])) {
+            $detectedContentType = $this->mimes[$fallback];
+        } elseif (in_array($type, $this->mimes)) {
+            $detectedContentType = $type;
+        } elseif (in_array($fallback, $this->mimes)) {
+            $detectedContentType = $fallback;
+        } else {
+            throw new OutputException('Unknown contentType(s) ' . $type . '/' . $fallback);
+        }
+
+        logMsg('INFO', __METHOD__ . ' ' . $detectedContentType);
+
+        $this->contentType = $detectedContentType;
+        $this->header($this->getContentTypeHeader($this->contentType, $this->charSet), self::REPLACEALL);
+
+        return $this;
     }
-
-    logMsg('INFO', __METHOD__ . ' ' . $detectedContentType);
-
-    $this->contentType = $detectedContentType;
-    $this->header($this->getContentTypeHeader($this->contentType, $this->charSet), self::REPLACEALL);
-
-    return $this;
-  }
 
   /**
    * Retrieves the current content type.
    *
    * @return string
    */
-  public function getContentType(): string
-  {
-    logMsg('INFO', __METHOD__);
+    public function getContentType(): string
+    {
+        logMsg('INFO', __METHOD__);
 
-    return $this->contentType;
-  }
+        return $this->contentType;
+    }
 
   /**
    * Sets the character set.
@@ -355,28 +355,28 @@ class Output extends Singleton implements OutputInterface
    * @param string $charSet Character set to use.
    * @return self
    */
-  public function charSet(string $charSet): self
-  {
-    logMsg('INFO', __METHOD__ . ' ' . $charSet);
+    public function charSet(string $charSet): self
+    {
+        logMsg('INFO', __METHOD__ . ' ' . $charSet);
 
-    $this->charSet = $charSet;
+        $this->charSet = $charSet;
 
-    $this->header($this->getContentTypeHeader($this->contentType, $this->charSet), self::REPLACEALL);
+        $this->header($this->getContentTypeHeader($this->contentType, $this->charSet), self::REPLACEALL);
 
-    return $this;
-  }
+        return $this;
+    }
 
   /**
    * Gets the current character set.
    *
    * @return string
    */
-  public function getCharSet(): string
-  {
-    logMsg('INFO', __METHOD__);
+    public function getCharSet(): string
+    {
+        logMsg('INFO', __METHOD__);
 
-    return $this->charSet;
-  }
+        return $this->charSet;
+    }
 
   /**
    * Sets an HTTP header for the response.
@@ -390,30 +390,30 @@ class Output extends Singleton implements OutputInterface
    * @param bool $prepend Whether to prepend the header to the list instead of appending.
    * @return self
    */
-  public function header(string $value, int $replace = self::NO, bool $prepend = false): self
-  {
-    logMsg('INFO', __METHOD__ . ' ' . $value . ' ' . $replace . ' ' . $prepend);
+    public function header(string $value, int $replace = self::NO, bool $prepend = false): self
+    {
+        logMsg('INFO', __METHOD__ . ' ' . $value . ' ' . $replace . ' ' . $prepend);
 
-    if ($replace != self::NO) {
-      $splitOn = ($replace == self::REPLACEALL) ? '/(:| )/' : '/(;|=|,)/';
-      $prefix = strtolower(preg_split($splitOn, $value)[0]);
-      $prefixLength = strlen($prefix);
+        if ($replace != self::NO) {
+            $splitOn = ($replace == self::REPLACEALL) ? '/(:| )/' : '/(;|=|,)/';
+            $prefix = strtolower(preg_split($splitOn, $value)[0]);
+            $prefixLength = strlen($prefix);
 
-      foreach ($this->headers as $index => $headerValue) {
-        if (substr(strtolower($headerValue), 0, $prefixLength) == $prefix) {
-          unset($this->headers[$index]);
+            foreach ($this->headers as $index => $headerValue) {
+                if (substr(strtolower($headerValue), 0, $prefixLength) == $prefix) {
+                    unset($this->headers[$index]);
+                }
+            }
         }
-      }
-    }
 
-    if ($prepend) {
-      array_unshift($this->headers, $value);
-    } else {
-      $this->headers[] = $value;
-    }
+        if ($prepend) {
+            array_unshift($this->headers, $value);
+        } else {
+            $this->headers[] = $value;
+        }
 
-    return $this;
-  }
+        return $this;
+    }
 
   /**
    * Retrieves all currently set HTTP headers.
@@ -422,12 +422,12 @@ class Output extends Singleton implements OutputInterface
    *
    * @return array An array of HTTP headers.
    */
-  public function getHeaders(): array
-  {
-    logMsg('DEBUG', __METHOD__);
+    public function getHeaders(): array
+    {
+        logMsg('DEBUG', __METHOD__);
 
-    return array_values($this->headers);
-  }
+        return array_values($this->headers);
+    }
 
   /**
    * Clears all currently set HTTP headers.
@@ -436,14 +436,14 @@ class Output extends Singleton implements OutputInterface
    *
    * @return self
    */
-  public function flushHeaders(): self
-  {
-    logMsg('INFO', __METHOD__);
+    public function flushHeaders(): self
+    {
+        logMsg('INFO', __METHOD__);
 
-    $this->headers = [];
+        $this->headers = [];
 
-    return $this;
-  }
+        return $this;
+    }
 
   /**
    * Sets the HTTP response code.
@@ -454,41 +454,41 @@ class Output extends Singleton implements OutputInterface
    * @return self
    * @throws OutputException If the status code is unknown or invalid.
    */
-  public function responseCode(int|string $code): self
-  {
-    logMsg('DEBUG', __METHOD__, ['code' => (string)$code]);
+    public function responseCode(int|string $code): self
+    {
+        logMsg('DEBUG', __METHOD__, ['code' => (string)$code]);
 
-    // but if it is a string we need to try and detect the error number
-    if (is_string($code)) {
-      $code = $this->responseCodesInternalStringKeys[strtolower($code)] ?? 0;
+      // but if it is a string we need to try and detect the error number
+        if (is_string($code)) {
+            $code = $this->responseCodesInternalStringKeys[strtolower($code)] ?? 0;
+        }
+
+      // now bring it into http scope if necessary
+        if ($code > 599 || $code < 100) {
+            $code = 500;
+        }
+
+      // Save it
+        $this->responseCode = (int)$code;
+
+      // set final header response
+        $this->header($this->getResponseHeader($this->responseCode), self::REPLACEALL, true);
+
+
+        return $this;
     }
-
-    // now bring it into http scope if necessary
-    if ($code > 599 || $code < 100) {
-      $code = 500;
-    }
-
-    // Save it
-    $this->responseCode = (int)$code;
-
-    // set final header response
-    $this->header($this->getResponseHeader($this->responseCode), self::REPLACEALL, true);
-
-
-    return $this;
-  }
 
   /**
    * Retrieves the currently set HTTP response code.
    *
    * @return int The HTTP response code.
    */
-  public function getResponseCode(): int
-  {
-    logMsg('INFO', __METHOD__);
+    public function getResponseCode(): int
+    {
+        logMsg('INFO', __METHOD__);
 
-    return $this->responseCode;
-  }
+        return $this->responseCode;
+    }
 
   /**
    * Detects the appropriate response type based on the client's Accept header and sets the Content-Type accordingly.
@@ -496,20 +496,20 @@ class Output extends Singleton implements OutputInterface
    * @param string $responseType
    * @return void
    */
-  protected function detectAcceptsType(string $responseType)
-  {
-    if ($this->config['auto detect accepts type']) {
-      if (!empty($accepts = $this->input->header('accept'))) {
-        if (strpos($accepts, 'application/json', 0) !== false || strpos($accepts, 'text/javascript', 0) !== false) {
-          $responseType = 'application/json';
-        } elseif (strpos($accepts, 'text/html', 0) !== false || strpos($accepts, 'application/xhtml+xml', 0) !== false) {
-          $responseType = 'text/html';
+    protected function detectAcceptsType(string $responseType)
+    {
+        if ($this->config['auto detect accepts type']) {
+            if (!empty($accepts = $this->input->header('accept'))) {
+                if (strpos($accepts, 'application/json', 0) !== false || strpos($accepts, 'text/javascript', 0) !== false) {
+                    $responseType = 'application/json';
+                } elseif (strpos($accepts, 'text/html', 0) !== false || strpos($accepts, 'application/xhtml+xml', 0) !== false) {
+                    $responseType = 'text/html';
+                }
+            }
         }
-      }
-    }
 
-    $this->contentType($responseType);
-  }
+        $this->contentType($responseType);
+    }
 
   /**
    * Generates a Content-Type header string.
@@ -520,12 +520,12 @@ class Output extends Singleton implements OutputInterface
    * @param string $charSet The character set (e.g., 'UTF-8').
    * @return string The complete Content-Type header string.
    */
-  protected function getContentTypeHeader(string $contentType, string $charSet): string
-  {
-    logMsg('DEBUG', __METHOD__, ['contentType' => $contentType, 'charSet' => $charSet]);
+    protected function getContentTypeHeader(string $contentType, string $charSet): string
+    {
+        logMsg('DEBUG', __METHOD__, ['contentType' => $contentType, 'charSet' => $charSet]);
 
-    return 'Content-Type: ' . $contentType . '; charset=' . strtoupper($charSet);
-  }
+        return 'Content-Type: ' . $contentType . '; charset=' . strtoupper($charSet);
+    }
 
   /**
    * Generates an HTTP response status header string.
@@ -535,12 +535,12 @@ class Output extends Singleton implements OutputInterface
    * @param int $responseCode The HTTP response status code (e.g., 200, 404).
    * @return string The full HTTP response header.
    */
-  protected function getResponseHeader(int $responseCode): string
-  {
-    logMsg('DEBUG', __METHOD__, ['responseCode' => $responseCode]);
+    protected function getResponseHeader(int $responseCode): string
+    {
+        logMsg('DEBUG', __METHOD__, ['responseCode' => $responseCode]);
 
-    return $this->input->server('server_protocol', 'HTTP/1.0') . ' ' . $responseCode . ' ' . $this->config['status codes'][$responseCode];
-  }
+        return $this->input->server('server_protocol', 'HTTP/1.0') . ' ' . $responseCode . ' ' . $this->config['status codes'][$responseCode];
+    }
 
   /**
    * Outputs a string to the client.
@@ -549,10 +549,10 @@ class Output extends Singleton implements OutputInterface
    *
    * @param string $string The string to output.
    */
-  protected function phpEcho(string $string): void
-  {
-    echo $string;
-  }
+    protected function phpEcho(string $string): void
+    {
+        echo $string;
+    }
 
   /**
    * Terminates script execution with an optional status code.
@@ -561,10 +561,10 @@ class Output extends Singleton implements OutputInterface
    *
    * @param int $status The exit status code (default is 0).
    */
-  protected function phpExit(int $status = 0): void
-  {
-    exit($status);
-  }
+    protected function phpExit(int $status = 0): void
+    {
+        exit($status);
+    }
 
   /**
    * Sends an HTTP header.
@@ -575,63 +575,63 @@ class Output extends Singleton implements OutputInterface
    * @param string $header The header string to send.
    * @param bool $replace Whether to replace a previous header with the same name.
    */
-  protected function phpHeader(string $header, bool $replace = false): void
-  {
-    header($header, $replace);
-  }
+    protected function phpHeader(string $header, bool $replace = false): void
+    {
+        header($header, $replace);
+    }
 
-  public function handleCors(): void
-  {
-    $httpOrigin = $this->input->server('HTTP_ORIGIN');
+    public function handleCors(): void
+    {
+        $httpOrigin = $this->input->server('HTTP_ORIGIN');
 
-    // Allow from any origin
-    if ($httpOrigin !== null) {
-      logMsg('DEBUG', 'CORS Http Origin: ' . $httpOrigin);
+      // Allow from any origin
+        if ($httpOrigin !== null) {
+            logMsg('DEBUG', 'CORS Http Origin: ' . $httpOrigin);
 
-      // The Spec-Compliant Standard
-      $this->responseCode(200);
+          // The Spec-Compliant Standard
+            $this->responseCode(200);
 
-      // Decide if the origin in 'HTTP_ORIGIN' is one
-      if (in_array($httpOrigin, $this->config['allowed cors'], true)) {
-        // the response headers depend on the request Origin, so mark it as
-        // varying by Origin. Without this a shared cache (CDN/reverse proxy)
-        // can store the Access-Control-Allow-Origin for one origin and replay
-        // it to another.
-        $this->header('Vary: Origin');
-        // if it is allowed then send the Access-Control-Allow-Origin header
-        $this->header('Access-Control-Allow-Origin: ' . $httpOrigin);
-        // Only advertise credential support when the app explicitly opts in.
-        // Combined with a reflected Origin this grants cookie/HTTP-auth access
-        // to every allowed origin, so it defaults to off (token/bearer APIs do
-        // not need it - the Authorization header is allowed via Allow-Headers).
-        if (!empty($this->config['access-control-allow-credentials'])) {
-          $this->header('Access-Control-Allow-Credentials: true');
+          // Decide if the origin in 'HTTP_ORIGIN' is one
+            if (in_array($httpOrigin, $this->config['allowed cors'], true)) {
+                // the response headers depend on the request Origin, so mark it as
+                // varying by Origin. Without this a shared cache (CDN/reverse proxy)
+                // can store the Access-Control-Allow-Origin for one origin and replay
+                // it to another.
+                $this->header('Vary: Origin');
+                // if it is allowed then send the Access-Control-Allow-Origin header
+                $this->header('Access-Control-Allow-Origin: ' . $httpOrigin);
+                // Only advertise credential support when the app explicitly opts in.
+                // Combined with a reflected Origin this grants cookie/HTTP-auth access
+                // to every allowed origin, so it defaults to off (token/bearer APIs do
+                // not need it - the Authorization header is allowed via Allow-Headers).
+                if (!empty($this->config['access-control-allow-credentials'])) {
+                    $this->header('Access-Control-Allow-Credentials: true');
+                }
+                // cache for 1 day
+                $this->header('Access-Control-Max-Age: ' . $this->config['access-control-max-age']);
+            } else {
+              // but omit the Access-Control-Allow-Origin header
+              // send and exit
+                $this->send(true);
+            }
         }
-        // cache for 1 day
-        $this->header('Access-Control-Max-Age: ' . $this->config['access-control-max-age']);
-      } else {
-        // but omit the Access-Control-Allow-Origin header
-        // send and exit
-        $this->send(true);
-      }
+
+      // Access-Control headers are received during OPTIONS requests
+        if ($this->input->server('REQUEST_METHOD') == 'OPTIONS') {
+            if ($this->input->server('HTTP_ACCESS_CONTROL_REQUEST_METHOD') !== null) {
+              // queue via $this->header() (not the global header()) so it flows
+              // through the same buffer/test seam as every other response header
+              // and is flushed by the send() below.
+                $this->header('Access-Control-Allow-Methods: ' . $this->config['access-control-allow-methods']);
+            }
+
+            if ($this->input->server('HTTP_ACCESS_CONTROL_REQUEST_HEADERS') !== null) {
+              // Access-Control headers are received during OPTIONS requests
+                $this->header('Access-Control-Allow-Headers: ' . $this->input->server('HTTP_ACCESS_CONTROL_REQUEST_HEADERS'));
+            }
+
+          // send and exit;
+            $this->send(true);
+        }
     }
-
-    // Access-Control headers are received during OPTIONS requests
-    if ($this->input->server('REQUEST_METHOD') == 'OPTIONS') {
-      if ($this->input->server('HTTP_ACCESS_CONTROL_REQUEST_METHOD') !== null) {
-        // queue via $this->header() (not the global header()) so it flows
-        // through the same buffer/test seam as every other response header
-        // and is flushed by the send() below.
-        $this->header('Access-Control-Allow-Methods: ' . $this->config['access-control-allow-methods']);
-      }
-
-      if ($this->input->server('HTTP_ACCESS_CONTROL_REQUEST_HEADERS') !== null) {
-        // Access-Control headers are received during OPTIONS requests
-        $this->header('Access-Control-Allow-Headers: ' . $this->input->server('HTTP_ACCESS_CONTROL_REQUEST_HEADERS'));
-      }
-
-      // send and exit;
-      $this->send(true);
-    }
-  }
 }
