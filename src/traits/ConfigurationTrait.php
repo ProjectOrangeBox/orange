@@ -20,7 +20,7 @@ trait ConfigurationTrait
      *
      * @param string $name
      * @param mixed $value
-     * @return ConfigurationTrait
+     * @return self
      * @throws MissingRequired
      * @throws InvalidValue
      */
@@ -75,7 +75,8 @@ trait ConfigurationTrait
      * optionally doing a recursive merge
      *
      * @param array $config
-     * @param string $path
+     * @param string|bool|null $path Absolute path to the config file, or a bool to be
+     *        reinterpreted as $recursive when the caller omits $path (see is_bool() below).
      * @param bool $recursive
      * @return array
      * @throws ConfigFileNotFound
@@ -115,7 +116,7 @@ trait ConfigurationTrait
      * Wrapper for mergeWith with slightly different signature
      *
      * @param string $path
-     * @param array $currentArray
+     * @param array $configArray
      * @return array
      * @throws ConfigFileNotFound
      * @throws InvalidValue
@@ -268,7 +269,7 @@ trait ConfigurationTrait
      */
     protected function humanize(string $str, string $separator = '_')
     {
-        return ucwords(preg_replace('/[' . preg_quote($separator) . ']+/', ' ', mb_strtolower($str)));
+        return ucwords(preg_replace('/[' . preg_quote($separator, '/') . ']+/', ' ', mb_strtolower($str)));
     }
 
     /**
@@ -296,10 +297,16 @@ trait ConfigurationTrait
                 foreach (explode(',', $rules[$key]) as $rule) {
                     $type = gettype($config[$key]);
                     $hasOption = strpos($rule, '[');
+                    $option = null;
 
                     if ($hasOption !== false) {
                         $option = substr($rule, $hasOption + 1, -1);
                         $rule = substr($rule, 0, $hasOption);
+                    }
+
+                    // these rules can't be evaluated without a bracketed option, e.g. "min[5]"
+                    if ($option === null && in_array($rule, ['min', 'max', 'count', 'size', 'class'], true)) {
+                        throw new InvalidValue('Rule "' . $rule . '" requires an option, e.g. "' . $rule . '[value]".');
                     }
 
                     switch ($rule) {

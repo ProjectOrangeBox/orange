@@ -10,6 +10,7 @@ use orange\framework\helpers\DirectorySearch;
 use orange\framework\interfaces\ConfigInterface;
 use orange\framework\interfaces\InputInterface;
 use orange\framework\interfaces\OutputInterface;
+use orange\framework\interfaces\ViewInterface;
 use ReflectionClass;
 
 /**
@@ -65,11 +66,10 @@ abstract class BaseController
         }
 
         /* @disregard P1014 Undefined property '$view'. */
-        if (isset($this->view) && method_exists($this->view, 'search')) {
+        if (isset($this->view) && $this->view instanceof ViewInterface) {
             // Attach Local view path
             if ($viewPath = realpath($parentPath . '/views')) {
-                /* @disregard P1014 Undefined property '$view'. */
-                $this->view->search->addDirectory($viewPath, DirectorySearch::FIRST);
+                $this->view->search()->addDirectory($viewPath, DirectorySearch::FIRST);
             }
         }
 

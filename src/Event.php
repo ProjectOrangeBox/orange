@@ -341,7 +341,7 @@ class Event extends Singleton implements EventInterface
             // }
             //
             $eventId = $this->registerClosureEvent($trigger, $callable, $priority);
-        } elseif (is_array($callable) && count($callable) == 2) {
+        } elseif (count($callable) == 2) {
             //
             // register a class & method
             //

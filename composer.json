@@ -12,10 +12,16 @@
     },
     "scripts": {
         "test:orange": "cd unittest && sh runUnitTests.sh",
-        "test:orangeCoverage": "cd unittest && sh runCoverage.sh"
+        "test:orangeCoverage": "cd unittest && sh runCoverage.sh",
+        "type-check": "../../bin/phpstan analyse",
+        "lint": "../../bin/phpcs",
+        "lint:fix": "../../bin/phpcbf"
     },
     "scripts-descriptions": {
         "test:orange": "Run the Orange Framework core unit tests (unittest/runUnitTests.sh).",
-        "test:orangeCoverage": "Run the Orange Framework core unit tests with code coverage (unittest/runCoverage.sh)."
+        "test:orangeCoverage": "Run the Orange Framework core unit tests with code coverage (unittest/runCoverage.sh).",
+        "type-check": "Run PHPStan static type analysis on the framework src/ using the root project's vendor/bin/phpstan.",
+        "lint": "Check src/ against the PSR-12 coding standard using the root project's vendor/bin/phpcs.",
+        "lint:fix": "Auto-fix PSR-12 coding standard violations in src/ using the root project's vendor/bin/phpcbf."
     }
 }

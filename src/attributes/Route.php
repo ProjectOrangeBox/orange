@@ -53,5 +53,7 @@ use Attribute;
 #[Attribute(Attribute::TARGET_METHOD)]
 class Route
 {
-    public function __construct(public string|array $method = [], public string $url = '', public string $name = '') {}
+    public function __construct(public string|array $method = [], public string $url = '', public string $name = '')
+    {
+    }
 }

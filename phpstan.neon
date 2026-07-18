@@ -1,0 +1,39 @@
+parameters:
+    level: 5
+    paths:
+        - src
+    excludePaths:
+        # plain-PHP error view templates: ViewAbstract::generate() extract()s data
+        # into scope right before require-ing these, so every "variable" they use
+        # is legitimately defined at render time but invisible to static analysis
+        - src/views/*
+    # global helper functions (logMsg, container, show404, ...) are loaded at
+    # runtime by Application::preContainer() via dynamic include_once, not
+    # through composer's autoloader, so PHPStan can't see them without an
+    # explicit bootstrap - without this every call site would be flagged as a
+    # call to an undefined function. .phpstan-bootstrap.php stubs the handful
+    # of constants (__ROOT__, ENVIRONMENT, ...) that are normally define()'d
+    # by the real runtime bootstrap before config files load.
+    bootstrapFiles:
+        - src/helpers/helpers.php
+        - src/helpers/errors.php
+        - src/helpers/wrappers.php
+        - .phpstan-bootstrap.php
+    ignoreErrors:
+        -
+            # Container services are resolved through a magic __get(), so PHPStan
+            # has no way to know which property names are valid - this is the
+            # framework's intended DI pattern (see src/Container.php), not a bug.
+            message: '#^Access to an undefined property orange\\framework\\interfaces\\ContainerInterface::\$#'
+        -
+            # BaseTraits::newInstance() is the shared factory method behind every
+            # Singleton/Factory/ArrayObject subclass, each of which deliberately
+            # declares its own, differently-shaped __construct() (Container takes
+            # services, Input takes request data, plain Singleton takes nothing,
+            # ...). That's the whole point of the pattern - a single generic
+            # `new static(...$args)` forwarding whatever the concrete subclass
+            # constructor needs. @phpstan-consistent-constructor isn't an option
+            # here: it would require every subclass to share one constructor
+            # signature, which is exactly what this factory exists to avoid.
+            identifier: new.static
+            path: src/base/traits/BaseTraits.php

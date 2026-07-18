@@ -193,7 +193,7 @@ class Container extends Singleton implements ContainerInterface
      *
      * This method allows registering a service as a value, closure, or alias.
      *
-     * @param array|string $serviceName The service name or an array of service names.
+     * @param string $serviceName The service name.
      * @param mixed $arg The service value or closure.
      */
     public function set(string $serviceName, mixed $arg = null): void
@@ -422,10 +422,10 @@ class Container extends Singleton implements ContainerInterface
      * This method is responsible for calling a closure service and handling its result.
      * It executes the closure, passing the container as an argument, and then checks if the
      * result is an object. If it is, it checks if it should be converted to a singleton and does so if necessary.
-     * 
-     * @param string $normalizedName 
-     * @param Closure $closure 
-     * @return mixed 
+     *
+     * @param string $normalizedName
+     * @param Closure $closure
+     * @return mixed
      */
     protected function callClosure(string $normalizedName, Closure $closure): mixed
     {

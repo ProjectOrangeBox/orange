@@ -281,10 +281,10 @@ class Error extends Singleton
     {
         logMsg('INFO', __METHOD__);
 
-        if (isset($this->httpCode) && $this->httpCode > 0) {
-            $responseCode = (int)$this->httpCode;
-        } elseif (isset($this->code) && $this->code > 0) {
-            $responseCode = (int)$this->code;
+        if ($this->httpCode > 0) {
+            $responseCode = $this->httpCode;
+        } elseif ($this->code > 0) {
+            $responseCode = $this->code;
         } else {
             $responseCode = 500;
         }
@@ -362,7 +362,7 @@ class Error extends Singleton
         $foundViewPath = '';
 
         // let's make sure our local views directory is added to the search as a last alternative
-        $this->view->search->addDirectory(__DIR__ . DIRECTORY_SEPARATOR . 'views', DirectorySearch::LAST);
+        $this->view->search()->addDirectory(__DIR__ . DIRECTORY_SEPARATOR . 'views', DirectorySearch::LAST);
 
         // did someone already attach output?
         $searchPaths = [
@@ -381,7 +381,7 @@ class Error extends Singleton
         ];
 
         foreach ($searchPaths as $searchPath) {
-            if ($this->view->search->exists($searchPath)) {
+            if ($this->view->search()->exists($searchPath)) {
                 $foundViewPath = $searchPath;
                 break;
             }

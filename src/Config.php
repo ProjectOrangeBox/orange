@@ -186,8 +186,7 @@ class Config extends SingletonArrayObject implements ConfigInterface
     /**
      * Retrieve configuration data by filename and optional key.
      *
-     * @param string $filename Name of the configuration file.
-     * @param string|null $key Specific key within the configuration file.
+     * @param string $filenameKey Config filename, optionally followed by a dotted key (e.g. "app.debug").
      * @param mixed $defaultValue Default value if the key does not exist.
      * @return mixed Configuration value or default value if key not found.
      */

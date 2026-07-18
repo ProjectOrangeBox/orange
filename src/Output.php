@@ -137,7 +137,7 @@ class Output extends Singleton implements OutputInterface
      * @param array $config Configuration array.
      * @param InputInterface $input Input interface instance.
      */
-    protected function __construct(array $config,protected InputInterface $input)
+    protected function __construct(array $config, protected InputInterface $input)
     {
         logMsg('INFO', __METHOD__);
 
@@ -326,7 +326,7 @@ class Output extends Singleton implements OutputInterface
         } elseif (in_array($fallback, $this->mimes)) {
             $detectedContentType = $fallback;
         } else {
-            throw new OutputException('Unknown contentType(s) ' . $type . '/' . ($fallback ?? ''));
+            throw new OutputException('Unknown contentType(s) ' . $type . '/' . $fallback);
         }
 
         logMsg('INFO', __METHOD__ . ' ' . $detectedContentType);

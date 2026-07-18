@@ -90,6 +90,8 @@ use orange\framework\exceptions\config\ConfigFileDidNotReturnAnArray;
  * It’s the backbone of running an Orange-based application.
  *
  * @package orange\framework
+ * @phpstan-consistent-constructor Subclasses hook into preContainer()/postContainer(),
+ *     never redeclare __construct(), so make()'s `new static()` is safe.
  */
 
 class Application
@@ -153,7 +155,7 @@ class Application
     /**
      * start a http application
      *
-     * @param null|array $config
+     * @param array $config
      * @return ContainerInterface
      * @throws InvalidValue
      * @throws DirectoryNotFound
@@ -344,7 +346,7 @@ class Application
     /**
      * Initializes the DI container using service configuration
      *
-     * @return ContainerInterface
+     * @return void
      * @throws ConfigFileNotFound
      * @throws InvalidValue
      * @throws IncorrectInterface

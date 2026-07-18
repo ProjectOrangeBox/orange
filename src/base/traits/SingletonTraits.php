@@ -28,7 +28,12 @@ trait SingletonTraits
     {
         $subclass = static::class;
 
-        if (!isset(static::$instances[$subclass])) {
+        // $instances is private, so it must be reached through self:: - each class that
+        // uses this trait gets its own copy of the property; static:: would resolve it
+        // via late static binding instead, which for a private property is fragile (a
+        // using-class that itself gets subclassed and re-uses this trait would silently
+        // shadow it, splitting one singleton's storage across two properties).
+        if (!isset(self::$instances[$subclass])) {
             // Note that here we use the "static" keyword instead of the actual
             // class name. In this context, the "static" keyword means "the name
             // of the current class". That detail is important because when the
@@ -36,9 +41,9 @@ trait SingletonTraits
             // subclass to be created here.
             $args = func_get_args();
 
-            static::$instances[$subclass] = static::newInstance(...$args);
+            self::$instances[$subclass] = static::newInstance(...$args);
         }
 
-        return static::$instances[$subclass];
+        return self::$instances[$subclass];
     }
 }

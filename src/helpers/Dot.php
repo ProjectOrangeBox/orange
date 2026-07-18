@@ -130,7 +130,7 @@ class Dot
      * @param string $key The dot-notated key.
      * @return bool True if the key exists, false otherwise.
      */
-    public static function isset(array|\StdClass  &$data, string $key): bool
+    public static function isset(array|\StdClass &$data, string $key): bool
     {
         // a freshly created object is a safe "not found" marker: nothing stored in
         // $data can ever be === to it. This class is documented as standalone/
@@ -148,7 +148,7 @@ class Dot
      * @param string $key The dot-notated key to unset.
      * @return void
      */
-    public static function unset(array|\StdClass  &$data, string $key): void
+    public static function unset(array|\StdClass &$data, string $key): void
     {
         // Check if the key is simple (no delimiter)
         if (strpos($key, static::$delimiter) === false) {

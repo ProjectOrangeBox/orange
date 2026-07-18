@@ -144,8 +144,8 @@ class Router extends Singleton implements RouterInterface
      * Protected constructor to enforce Singleton usage.
      *
      * @param array $config Configuration array for routing settings.
-     * @param InputInterface $input Provides request-related data.
-     * @param CacheInterface $cache optional cache service
+     * @param InputInterface $inputService Provides request-related data.
+     * @param CacheInterface|null $cacheService optional cache service
      * @throws MissingRequired If the 'site' configuration is missing.
      */
     protected function __construct(array $config, protected InputInterface $inputService, protected ?CacheInterface $cacheService = null)
@@ -460,7 +460,7 @@ class Router extends Singleton implements RouterInterface
      * - Include or exclude the HTTP/HTTPS prefix.
      * - Manually specify a custom prefix.
      *
-     * @param bool|string $appendHttp
+     * @param bool|string $prefix
      *      - `true`: Automatically determines `http` or `https` based on the request.
      *      - `false`: Returns only the base URL without any protocol prefix.
      *      - `string`: Allows specifying a custom protocol prefix (e.g., `'ftp://'`).

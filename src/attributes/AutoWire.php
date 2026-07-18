@@ -38,5 +38,7 @@ use Attribute;
 #[Attribute(Attribute::TARGET_METHOD)]
 class AutoWire
 {
-    public function __construct(public string $service) {}
+    public function __construct(public string $service)
+    {
+    }
 }

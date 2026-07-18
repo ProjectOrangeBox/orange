@@ -10,5 +10,6 @@ class RouterCallback
         public string $controller,
         public string $method,
         public array $arguments
-    ) {}
+    ) {
+    }
 }

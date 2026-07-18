@@ -10,14 +10,15 @@ use orange\framework\exceptions\container\CannotUnserializeSingleton;
 trait BaseTraits
 {
     protected array $config;
-    
+
     /**
      * singletons should not have public constructors
      * if you "MUST" get a new instance call newInstance(...)
      *
      * @return void
      */
-    protected function __construct() {
+    protected function __construct()
+    {
         // placeholder
     }
 

@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<ruleset name="orange-framework">
+    <description>Coding standard for the Orange Framework core package.</description>
+
+    <arg name="basepath" value="."/>
+    <arg name="colors"/>
+    <arg name="extensions" value="php"/>
+    <arg value="np"/>
+
+    <file>src</file>
+
+    <rule ref="PSR12"/>
+</ruleset>
