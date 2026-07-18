@@ -4,10 +4,9 @@ declare(strict_types=1);
 
 use orange\framework\Application;
 use orange\framework\interfaces\ContainerInterface;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
-/**
- * @runTestsInSeparateProcesses
- */
+#[RunTestsInSeparateProcesses]
 final class ApplicationTest extends \UnitTestHelper
 {
     public function testMakeReturnsSingletonInstance(): void
@@ -50,10 +49,11 @@ final class ApplicationTest extends \UnitTestHelper
         $container = $app->run([]);
 
         // bootstrap() -> preContainer() installs global error/exception handlers as
-        // a side effect; restore the previous ones immediately so they can't
+        // a side effect; pop them back off (not set_*_handler(null), which would drop
+        // PHPUnit's own handler too and get this test flagged as risky) so they can't
         // interfere with the rest of this process
-        set_error_handler(null);
-        set_exception_handler(null);
+        restore_error_handler();
+        restore_exception_handler();
 
         $this->assertInstanceOf(ContainerInterface::class, $container);
         $this->assertEquals('UTF-8', $container->get('$application')['encoding']);

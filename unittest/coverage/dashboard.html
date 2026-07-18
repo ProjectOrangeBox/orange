@@ -4,9 +4,8 @@
   <meta charset="UTF-8">
   <title>Dashboard for /Users/dmyers/Docker/webapp/vendor/orange/framework/src</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link href="_css/bootstrap.min.css?v=10.1.16" rel="stylesheet" type="text/css">
-  <link href="_css/nv.d3.min.css?v=10.1.16" rel="stylesheet" type="text/css">
-  <link href="_css/style.css?v=10.1.16" rel="stylesheet" type="text/css">
+  <link href="_css/bootstrap.min.css?v=14.2.3" rel="stylesheet" type="text/css">
+  <link href="_css/style.css?v=14.2.3" rel="stylesheet" type="text/css">
   <link href="_css/custom.css" rel="stylesheet" type="text/css">
  </head>
  <body>
@@ -26,291 +25,797 @@
    </div>
   </header>
   <div class="container-fluid">
-   <div class="row">
-    <div class="col-md-12">
-     <h2>Classes</h2>
-    </div>
-   </div>
-   <div class="row">
+   <div class="row dashboard-row">
     <div class="col-md-6">
-     <h3>Coverage Distribution</h3>
-     <div id="classCoverageDistribution" style="height: 300px;">
-       <svg></svg>
+     <h3>Classes</h3>
+     <p class="text-muted small">Bubble size = executable lines. Hover for details, click to navigate.</p>
+     <div class="file-coverage-chart">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" preserveAspectRatio="xMidYMid meet">
+ <style>
+  .bubble-success { fill: var(--phpunit-success-bar); opacity: 0.7; }
+  .bubble-warning { fill: var(--phpunit-warning-bar); opacity: 0.7; }
+  .bubble-danger { fill: var(--phpunit-danger-bar); opacity: 0.7; }
+  .bubble-success:hover, .bubble-warning:hover, .bubble-danger:hover { opacity: 1; stroke: var(--bs-emphasis-color); stroke-width: 1.5; }
+  .chart-grid { stroke: var(--bs-border-color); stroke-width: 0.5; stroke-dasharray: 4,4; opacity: 0.5; }
+  .chart-axis { stroke: var(--bs-border-color); stroke-width: 1; }
+  .chart-label { fill: var(--bs-body-color); font-size: 11px; font-family: var(--bs-font-sans-serif, sans-serif); }
+  .chart-title { fill: var(--bs-body-color); font-size: 12px; font-family: var(--bs-font-sans-serif, sans-serif); }
+ </style>
+ <line x1="60.0" y1="20" x2="60.0" y2="350" class="chart-grid"/>
+ <text x="60.0" y="368" text-anchor="middle" class="chart-label">0%</text>
+ <line x1="204.0" y1="20" x2="204.0" y2="350" class="chart-grid"/>
+ <text x="204.0" y="368" text-anchor="middle" class="chart-label">20%</text>
+ <line x1="348.0" y1="20" x2="348.0" y2="350" class="chart-grid"/>
+ <text x="348.0" y="368" text-anchor="middle" class="chart-label">40%</text>
+ <line x1="492.0" y1="20" x2="492.0" y2="350" class="chart-grid"/>
+ <text x="492.0" y="368" text-anchor="middle" class="chart-label">60%</text>
+ <line x1="636.0" y1="20" x2="636.0" y2="350" class="chart-grid"/>
+ <text x="636.0" y="368" text-anchor="middle" class="chart-label">80%</text>
+ <line x1="780.0" y1="20" x2="780.0" y2="350" class="chart-grid"/>
+ <text x="780.0" y="368" text-anchor="middle" class="chart-label">100%</text>
+ <line x1="60" y1="350.0" x2="780" y2="350.0" class="chart-grid"/>
+ <text x="52" y="350.0" text-anchor="end" dominant-baseline="middle" class="chart-label">0</text>
+ <line x1="60" y1="284.0" x2="780" y2="284.0" class="chart-grid"/>
+ <text x="52" y="284.0" text-anchor="end" dominant-baseline="middle" class="chart-label">20</text>
+ <line x1="60" y1="218.0" x2="780" y2="218.0" class="chart-grid"/>
+ <text x="52" y="218.0" text-anchor="end" dominant-baseline="middle" class="chart-label">40</text>
+ <line x1="60" y1="152.0" x2="780" y2="152.0" class="chart-grid"/>
+ <text x="52" y="152.0" text-anchor="end" dominant-baseline="middle" class="chart-label">60</text>
+ <line x1="60" y1="86.0" x2="780" y2="86.0" class="chart-grid"/>
+ <text x="52" y="86.0" text-anchor="end" dominant-baseline="middle" class="chart-label">80</text>
+ <line x1="60" y1="20.0" x2="780" y2="20.0" class="chart-grid"/>
+ <text x="52" y="20.0" text-anchor="end" dominant-baseline="middle" class="chart-label">100</text>
+ <line x1="60" y1="20" x2="60" y2="350" class="chart-axis"/>
+ <line x1="60" y1="350" x2="780" y2="350" class="chart-axis"/>
+ <text x="420.0" y="395" text-anchor="middle" class="chart-title">Line Coverage (%)</text>
+ <text x="15" y="185.0" text-anchor="middle" transform="rotate(-90, 15, 185.0)" class="chart-title">Cyclomatic Complexity</text>
+ <a href="traits/ConfigurationTrait.php.html#11"><circle cx="737.6" cy="76.1" r="20.0" class="bubble-success"><title>orange\framework\traits\ConfigurationTrait — Coverage: 94.1% | Lines: 153 | Complexity: 83</title></circle></a>
+ <a href="helpers/DirectorySearch.php.html#15"><circle cx="770.2" cy="89.3" r="19.6" class="bubble-success"><title>orange\framework\helpers\DirectorySearch — Coverage: 98.6% | Lines: 147 | Complexity: 79</title></circle></a>
+ <a href="Output.php.html#93"><circle cx="762.4" cy="148.7" r="17.9" class="bubble-success"><title>orange\framework\Output — Coverage: 97.6% | Lines: 123 | Complexity: 61</title></circle></a>
+ <a href="Router.php.html#104"><circle cx="780.0" cy="185.0" r="17.8" class="bubble-success"><title>orange\framework\Router — Coverage: 100.0% | Lines: 121 | Complexity: 50</title></circle></a>
+ <a href="Security.php.html#77"><circle cx="780.0" cy="254.3" r="17.3" class="bubble-success"><title>orange\framework\Security — Coverage: 100.0% | Lines: 114 | Complexity: 29</title></circle></a>
+ <a href="Error.php.html#95"><circle cx="728.6" cy="227.9" r="17.1" class="bubble-success"><title>orange\framework\Error — Coverage: 92.9% | Lines: 112 | Complexity: 37</title></circle></a>
+ <a href="abstract/ViewAbstract.php.html#99"><circle cx="780.0" cy="211.4" r="16.8" class="bubble-success"><title>orange\framework\abstract\ViewAbstract — Coverage: 100.0% | Lines: 108 | Complexity: 42</title></circle></a>
+ <a href="Application.php.html#97"><circle cx="739.6" cy="204.8" r="16.7" class="bubble-success"><title>orange\framework\Application — Coverage: 94.4% | Lines: 107 | Complexity: 44</title></circle></a>
+ <a href="Input.php.html#98"><circle cx="724.6" cy="175.1" r="16.5" class="bubble-success"><title>orange\framework\Input — Coverage: 92.3% | Lines: 104 | Complexity: 53</title></circle></a>
+ <a href="Container.php.html#90"><circle cx="758.0" cy="152.0" r="16.0" class="bubble-success"><title>orange\framework\Container — Coverage: 96.9% | Lines: 98 | Complexity: 60</title></circle></a>
+ <a href="helpers/Dot.php.html#15"><circle cx="780.0" cy="214.7" r="14.3" class="bubble-success"><title>orange\framework\helpers\Dot — Coverage: 100.0% | Lines: 78 | Complexity: 41</title></circle></a>
+ <a href="Event.php.html#105"><circle cx="738.9" cy="257.6" r="13.5" class="bubble-success"><title>orange\framework\Event — Coverage: 94.3% | Lines: 70 | Complexity: 28</title></circle></a>
+ <a href="Log.php.html#102"><circle cx="780.0" cy="234.5" r="12.6" class="bubble-success"><title>orange\framework\Log — Coverage: 100.0% | Lines: 61 | Complexity: 35</title></circle></a>
+ <a href="helpers/Ary.php.html#7"><circle cx="709.8" cy="270.8" r="10.4" class="bubble-success"><title>orange\framework\helpers\Ary — Coverage: 90.2% | Lines: 41 | Complexity: 24</title></circle></a>
+ <a href="Config.php.html#92"><circle cx="708.0" cy="290.6" r="10.2" class="bubble-success"><title>orange\framework\Config — Coverage: 90.0% | Lines: 40 | Complexity: 18</title></circle></a>
+ <a href="Dispatcher.php.html#76"><circle cx="780.0" cy="330.2" r="7.0" class="bubble-success"><title>orange\framework\Dispatcher — Coverage: 100.0% | Lines: 19 | Complexity: 6</title></circle></a>
+ <a href="controllers/BaseController.php.html#19"><circle cx="60.0" cy="317.0" r="7.0" class="bubble-danger"><title>orange\framework\controllers\BaseController — Coverage: 0.0% | Lines: 19 | Complexity: 10</title></circle></a>
+ <a href="base/ArrayObject.php.html#12"><circle cx="780.0" cy="303.8" r="6.9" class="bubble-success"><title>orange\framework\base\ArrayObject — Coverage: 100.0% | Lines: 18 | Complexity: 14</title></circle></a>
+ <a href="exceptions/http/Http.php.html#10"><circle cx="780.0" cy="330.2" r="5.6" class="bubble-success"><title>orange\framework\exceptions\http\Http — Coverage: 100.0% | Lines: 12 | Complexity: 6</title></circle></a>
+ <a href="exceptions/OrangeException.php.html#12"><circle cx="780.0" cy="343.4" r="4.0" class="bubble-success"><title>orange\framework\exceptions\OrangeException — Coverage: 100.0% | Lines: 6 | Complexity: 2</title></circle></a>
+ <a href="base/traits/BaseTraits.php.html#10"><circle cx="780.0" cy="336.8" r="4.0" class="bubble-success"><title>orange\framework\base\traits\BaseTraits — Coverage: 100.0% | Lines: 5 | Complexity: 4</title></circle></a>
+ <a href="base/traits/SingletonTraits.php.html#10"><circle cx="780.0" cy="343.4" r="4.0" class="bubble-success"><title>orange\framework\base\traits\SingletonTraits — Coverage: 100.0% | Lines: 5 | Complexity: 2</title></circle></a>
+ <a href="exceptions/http/Http301.php.html#10"><circle cx="780.0" cy="343.4" r="4.0" class="bubble-success"><title>orange\framework\exceptions\http\Http301 — Coverage: 100.0% | Lines: 3 | Complexity: 2</title></circle></a>
+ <a href="Data.php.html#29"><circle cx="780.0" cy="346.7" r="4.0" class="bubble-success"><title>orange\framework\Data — Coverage: 100.0% | Lines: 2 | Complexity: 1</title></circle></a>
+ <a href="controllers/HomeController.php.html#9"><circle cx="60.0" cy="346.7" r="4.0" class="bubble-danger"><title>orange\framework\controllers\HomeController — Coverage: 0.0% | Lines: 2 | Complexity: 1</title></circle></a>
+ <a href="base/traits/FactoryTraits.php.html#7"><circle cx="780.0" cy="346.7" r="4.0" class="bubble-success"><title>orange\framework\base\traits\FactoryTraits — Coverage: 100.0% | Lines: 2 | Complexity: 1</title></circle></a>
+ <a href="attributes/AttachService.php.html#39"><circle cx="780.0" cy="346.7" r="4.0" class="bubble-success"><title>orange\framework\attributes\AttachService — Coverage: 100.0% | Lines: 1 | Complexity: 1</title></circle></a>
+ <a href="attributes/AutoWire.php.html#39"><circle cx="780.0" cy="346.7" r="4.0" class="bubble-success"><title>orange\framework\attributes\AutoWire — Coverage: 100.0% | Lines: 1 | Complexity: 1</title></circle></a>
+ <a href="attributes/Route.php.html#54"><circle cx="780.0" cy="346.7" r="4.0" class="bubble-success"><title>orange\framework\attributes\Route — Coverage: 100.0% | Lines: 1 | Complexity: 1</title></circle></a>
+ <a href="base/SingletonArrayObject.php.html#11"><circle cx="780.0" cy="346.7" r="4.0" class="bubble-success"><title>orange\framework\base\SingletonArrayObject — Coverage: 100.0% | Lines: 1 | Complexity: 1</title></circle></a>
+ <a href="controllers/FourohFourController.php.html#9"><circle cx="60.0" cy="346.7" r="4.0" class="bubble-danger"><title>orange\framework\controllers\FourohfourController — Coverage: 0.0% | Lines: 1 | Complexity: 1</title></circle></a>
+ <a href="property/RouterCallback.php.html#7"><circle cx="780.0" cy="346.7" r="4.0" class="bubble-success"><title>orange\framework\property\RouterCallback — Coverage: 100.0% | Lines: 1 | Complexity: 1</title></circle></a>
+</svg>
      </div>
     </div>
-    <div class="col-md-6">
-     <h3>Complexity</h3>
-     <div id="classComplexity" style="height: 300px;">
-       <svg></svg>
-     </div>
-    </div>
-   </div>
-   <div class="row">
-    <div class="col-md-6">
-     <h3>Insufficient Coverage</h3>
+    <div class="col-md-6 dashboard-column">
+     <h3>&nbsp;</h3>
+     <p class="text-muted small">Sorted by descending CRAP (Change Risk Anti-Patterns) index.</p>
      <div class="scrollbox">
-      <table class="table">
-       <thead>
-        <tr>
-         <th>Class</th>
-         <th class="text-right">Coverage</th>
-        </tr>
-       </thead>
-       <tbody>
-       <tr><td><a href="controllers/BaseController.php.html#19">orange\framework\controllers\BaseController</a></td><td class="text-right">0%</td></tr>
-       <tr><td><a href="controllers/FourohFourController.php.html#9">orange\framework\controllers\FourohfourController</a></td><td class="text-right">0%</td></tr>
-       <tr><td><a href="controllers/HomeController.php.html#9">orange\framework\controllers\HomeController</a></td><td class="text-right">0%</td></tr>
-
-       </tbody>
-      </table>
-     </div>
-    </div>
-    <div class="col-md-6">
-     <h3>Project Risks</h3>
-     <div class="scrollbox">
-      <table class="table">
-       <thead>
-        <tr>
-         <th>Class</th>
-         <th class="text-right"><abbr title="Change Risk Anti-Patterns (CRAP) Index">CRAP</abbr></th>
-        </tr>
-       </thead>
-       <tbody>
-       <tr><td><a href="controllers/BaseController.php.html#19">orange\framework\controllers\BaseController</a></td><td class="text-right">110</td></tr>
-
-       </tbody>
-      </table>
+<table class="table">
+ <thead>
+  <tr>
+   <th>Class</th>
+   <th class="text-right"><abbr title="Change Risk Anti-Patterns (CRAP) Index">CRAP</abbr></th>
+   <th class="text-right">Coverage</th>
+  </tr>
+ </thead>
+ <tbody>
+  <tr><td><a href="controllers/BaseController.php.html#19">orange\framework\controllers\BaseController</a></td><td class="text-right">110</td><td class="text-right">0.0%</td></tr>
+  <tr><td><a href="traits/ConfigurationTrait.php.html#11">orange\framework\traits\ConfigurationTrait</a></td><td class="text-right">84.40</td><td class="text-right">94.1%</td></tr>
+  <tr><td><a href="helpers/DirectorySearch.php.html#15">orange\framework\helpers\DirectorySearch</a></td><td class="text-right">79</td><td class="text-right">98.6%</td></tr>
+  <tr><td><a href="Output.php.html#93">orange\framework\Output</a></td><td class="text-right">61</td><td class="text-right">97.6%</td></tr>
+  <tr><td><a href="Container.php.html#90">orange\framework\Container</a></td><td class="text-right">60</td><td class="text-right">96.9%</td></tr>
+  <tr><td><a href="Input.php.html#98">orange\framework\Input</a></td><td class="text-right">54.28</td><td class="text-right">92.3%</td></tr>
+  <tr><td><a href="Router.php.html#104">orange\framework\Router</a></td><td class="text-right">50</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Application.php.html#97">orange\framework\Application</a></td><td class="text-right">44.34</td><td class="text-right">94.4%</td></tr>
+  <tr><td><a href="abstract/ViewAbstract.php.html#99">orange\framework\abstract\ViewAbstract</a></td><td class="text-right">42</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="helpers/Dot.php.html#15">orange\framework\helpers\Dot</a></td><td class="text-right">41</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Error.php.html#95">orange\framework\Error</a></td><td class="text-right">37.50</td><td class="text-right">92.9%</td></tr>
+  <tr><td><a href="Log.php.html#102">orange\framework\Log</a></td><td class="text-right">35</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Security.php.html#77">orange\framework\Security</a></td><td class="text-right">29</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Event.php.html#105">orange\framework\Event</a></td><td class="text-right">28.15</td><td class="text-right">94.3%</td></tr>
+  <tr><td><a href="helpers/Ary.php.html#7">orange\framework\helpers\Ary</a></td><td class="text-right">24.53</td><td class="text-right">90.2%</td></tr>
+  <tr><td><a href="Config.php.html#92">orange\framework\Config</a></td><td class="text-right">18.32</td><td class="text-right">90.0%</td></tr>
+  <tr><td><a href="base/ArrayObject.php.html#12">orange\framework\base\ArrayObject</a></td><td class="text-right">14</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Dispatcher.php.html#76">orange\framework\Dispatcher</a></td><td class="text-right">6</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="exceptions/http/Http.php.html#10">orange\framework\exceptions\http\Http</a></td><td class="text-right">6</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="base/traits/BaseTraits.php.html#10">orange\framework\base\traits\BaseTraits</a></td><td class="text-right">4</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="controllers/FourohFourController.php.html#9">orange\framework\controllers\FourohfourController</a></td><td class="text-right">2</td><td class="text-right">0.0%</td></tr>
+  <tr><td><a href="controllers/HomeController.php.html#9">orange\framework\controllers\HomeController</a></td><td class="text-right">2</td><td class="text-right">0.0%</td></tr>
+  <tr><td><a href="exceptions/OrangeException.php.html#12">orange\framework\exceptions\OrangeException</a></td><td class="text-right">2</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="exceptions/http/Http301.php.html#10">orange\framework\exceptions\http\Http301</a></td><td class="text-right">2</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="base/traits/SingletonTraits.php.html#10">orange\framework\base\traits\SingletonTraits</a></td><td class="text-right">2</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Data.php.html#29">orange\framework\Data</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="attributes/AttachService.php.html#39">orange\framework\attributes\AttachService</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="attributes/AutoWire.php.html#39">orange\framework\attributes\AutoWire</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="attributes/Route.php.html#54">orange\framework\attributes\Route</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="base/SingletonArrayObject.php.html#11">orange\framework\base\SingletonArrayObject</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="property/RouterCallback.php.html#7">orange\framework\property\RouterCallback</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="base/traits/FactoryTraits.php.html#7">orange\framework\base\traits\FactoryTraits</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="View.php.html#13">orange\framework\View</a></td><td class="text-right">0</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="base/Factory.php.html#10">orange\framework\base\Factory</a></td><td class="text-right">0</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="base/Singleton.php.html#10">orange\framework\base\Singleton</a></td><td class="text-right">0</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="exceptions/ClassLocked.php.html#9">orange\framework\exceptions\ClassLocked</a></td><td class="text-right">0</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="exceptions/IncorrectInterface.php.html#9">orange\framework\exceptions\IncorrectInterface</a></td><td class="text-right">0</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="exceptions/InvalidValue.php.html#9">orange\framework\exceptions\InvalidValue</a></td><td class="text-right">0</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="exceptions/MagicMethodNotFound.php.html#9">orange\framework\exceptions\MagicMethodNotFound</a></td><td class="text-right">0</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="exceptions/MissingRequired.php.html#9">orange\framework\exceptions\MissingRequired</a></td><td class="text-right">0</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="exceptions/NotFound.php.html#9">orange\framework\exceptions\NotFound</a></td><td class="text-right">0</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="exceptions/ResourceNotFound.php.html#9">orange\framework\exceptions\ResourceNotFound</a></td><td class="text-right">0</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="exceptions/config/Config.php.html#9">orange\framework\exceptions\config\Config</a></td><td class="text-right">0</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="exceptions/config/ConfigDirectoryNotFound.php.html#9">orange\framework\exceptions\config\ConfigDirectoryNotFound</a></td><td class="text-right">0</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="exceptions/config/ConfigFileDidNotReturnAnArray.php.html#9">orange\framework\exceptions\config\ConfigFileDidNotReturnAnArray</a></td><td class="text-right">0</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="exceptions/config/ConfigFileNotFound.php.html#9">orange\framework\exceptions\config\ConfigFileNotFound</a></td><td class="text-right">0</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="exceptions/config/ConfigNotFound.php.html#9">orange\framework\exceptions\config\ConfigNotFound</a></td><td class="text-right">0</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="exceptions/config/InvalidConfigurationValue.php.html#9">orange\framework\exceptions\config\InvalidConfigurationValue</a></td><td class="text-right">0</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="exceptions/container/AutoWire.php.html#9">orange\framework\exceptions\container\AutoWire</a></td><td class="text-right">0</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="exceptions/container/CannotCloneSingleton.php.html#9">orange\framework\exceptions\container\CannotCloneSingleton</a></td><td class="text-right">0</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="exceptions/container/CannotUnserializeSingleton.php.html#9">orange\framework\exceptions\container\CannotUnserializeSingleton</a></td><td class="text-right">0</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="exceptions/container/ConstructorNotPublic.php.html#9">orange\framework\exceptions\container\ConstructorNotPublic</a></td><td class="text-right">0</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="exceptions/container/Container.php.html#9">orange\framework\exceptions\container\Container</a></td><td class="text-right">0</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="exceptions/container/FailedToAutoWire.php.html#9">orange\framework\exceptions\container\FailedToAutoWire</a></td><td class="text-right">0</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="exceptions/container/ServiceNotFound.php.html#9">orange\framework\exceptions\container\ServiceNotFound</a></td><td class="text-right">0</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="exceptions/container/UnableToResolve.php.html#9">orange\framework\exceptions\container\UnableToResolve</a></td><td class="text-right">0</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="exceptions/dispatcher/ArgumentMissMatch.php.html#9">orange\framework\exceptions\dispatcher\ArgumentMissMatch</a></td><td class="text-right">0</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="exceptions/dispatcher/ControllerClassNotFound.php.html#9">orange\framework\exceptions\dispatcher\ControllerClassNotFound</a></td><td class="text-right">0</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="exceptions/dispatcher/ControllerFileNotFound.php.html#9">orange\framework\exceptions\dispatcher\ControllerFileNotFound</a></td><td class="text-right">0</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="exceptions/dispatcher/Dispatcher.php.html#9">orange\framework\exceptions\dispatcher\Dispatcher</a></td><td class="text-right">0</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="exceptions/dispatcher/MethodNotFound.php.html#9">orange\framework\exceptions\dispatcher\MethodNotFound</a></td><td class="text-right">0</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="exceptions/fatal/DieException.php.html#9">orange\framework\exceptions\fatal\DieException</a></td><td class="text-right">0</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="exceptions/fatal/ExitException.php.html#9">orange\framework\exceptions\fatal\ExitException</a></td><td class="text-right">0</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="exceptions/fatal/Fatal.php.html#9">orange\framework\exceptions\fatal\Fatal</a></td><td class="text-right">0</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="exceptions/filesystem/Directory.php.html#9">orange\framework\exceptions\filesystem\Directory</a></td><td class="text-right">0</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="exceptions/filesystem/DirectoryNotFound.php.html#9">orange\framework\exceptions\filesystem\DirectoryNotFound</a></td><td class="text-right">0</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="exceptions/filesystem/DirectoryNotWritable.php.html#9">orange\framework\exceptions\filesystem\DirectoryNotWritable</a></td><td class="text-right">0</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="exceptions/filesystem/File.php.html#9">orange\framework\exceptions\filesystem\File</a></td><td class="text-right">0</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="exceptions/filesystem/FileAlreadyExists.php.html#9">orange\framework\exceptions\filesystem\FileAlreadyExists</a></td><td class="text-right">0</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="exceptions/filesystem/FileNotFound.php.html#9">orange\framework\exceptions\filesystem\FileNotFound</a></td><td class="text-right">0</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="exceptions/filesystem/FileNotWritable.php.html#9">orange\framework\exceptions\filesystem\FileNotWritable</a></td><td class="text-right">0</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="exceptions/filesystem/FileSystem.php.html#9">orange\framework\exceptions\filesystem\FileSystem</a></td><td class="text-right">0</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="exceptions/http/Http200.php.html#7">orange\framework\exceptions\http\Http200</a></td><td class="text-right">0</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="exceptions/http/Http201.php.html#7">orange\framework\exceptions\http\Http201</a></td><td class="text-right">0</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="exceptions/http/Http202.php.html#7">orange\framework\exceptions\http\Http202</a></td><td class="text-right">0</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="exceptions/http/Http204.php.html#7">orange\framework\exceptions\http\Http204</a></td><td class="text-right">0</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="exceptions/http/Http302.php.html#7">orange\framework\exceptions\http\Http302</a></td><td class="text-right">0</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="exceptions/http/Http304.php.html#7">orange\framework\exceptions\http\Http304</a></td><td class="text-right">0</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="exceptions/http/Http400.php.html#7">orange\framework\exceptions\http\Http400</a></td><td class="text-right">0</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="exceptions/http/Http401.php.html#7">orange\framework\exceptions\http\Http401</a></td><td class="text-right">0</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="exceptions/http/Http403.php.html#7">orange\framework\exceptions\http\Http403</a></td><td class="text-right">0</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="exceptions/http/Http404.php.html#7">orange\framework\exceptions\http\Http404</a></td><td class="text-right">0</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="exceptions/http/Http405.php.html#7">orange\framework\exceptions\http\Http405</a></td><td class="text-right">0</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="exceptions/http/Http406.php.html#7">orange\framework\exceptions\http\Http406</a></td><td class="text-right">0</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="exceptions/http/Http409.php.html#7">orange\framework\exceptions\http\Http409</a></td><td class="text-right">0</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="exceptions/http/Http410.php.html#7">orange\framework\exceptions\http\Http410</a></td><td class="text-right">0</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="exceptions/http/Http418.php.html#7">orange\framework\exceptions\http\Http418</a></td><td class="text-right">0</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="exceptions/http/Http422.php.html#7">orange\framework\exceptions\http\Http422</a></td><td class="text-right">0</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="exceptions/http/Http423.php.html#7">orange\framework\exceptions\http\Http423</a></td><td class="text-right">0</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="exceptions/http/Http429.php.html#7">orange\framework\exceptions\http\Http429</a></td><td class="text-right">0</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="exceptions/http/Http500.php.html#7">orange\framework\exceptions\http\Http500</a></td><td class="text-right">0</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="exceptions/http/Http501.php.html#7">orange\framework\exceptions\http\Http501</a></td><td class="text-right">0</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="exceptions/http/Http503.php.html#7">orange\framework\exceptions\http\Http503</a></td><td class="text-right">0</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="exceptions/input/Input.php.html#9">orange\framework\exceptions\input\Input</a></td><td class="text-right">0</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="exceptions/input/Request.php.html#9">orange\framework\exceptions\input\Request</a></td><td class="text-right">0</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="exceptions/network/Network.php.html#9">orange\framework\exceptions\network\Network</a></td><td class="text-right">0</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="exceptions/output/Output.php.html#9">orange\framework\exceptions\output\Output</a></td><td class="text-right">0</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="exceptions/output/Response.php.html#9">orange\framework\exceptions\output\Response</a></td><td class="text-right">0</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="exceptions/router/HttpMethodNotSupported.php.html#9">orange\framework\exceptions\router\HttpMethodNotSupported</a></td><td class="text-right">0</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="exceptions/router/RouteNotFound.php.html#9">orange\framework\exceptions\router\RouteNotFound</a></td><td class="text-right">0</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="exceptions/router/Router.php.html#9">orange\framework\exceptions\router\Router</a></td><td class="text-right">0</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="exceptions/router/RouterNameNotFound.php.html#9">orange\framework\exceptions\router\RouterNameNotFound</a></td><td class="text-right">0</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="exceptions/security/Security.php.html#9">orange\framework\exceptions\security\Security</a></td><td class="text-right">0</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="exceptions/view/View.php.html#9">orange\framework\exceptions\view\View</a></td><td class="text-right">0</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="exceptions/view/ViewNotFound.php.html#9">orange\framework\exceptions\view\ViewNotFound</a></td><td class="text-right">0</td><td class="text-right">100.0%</td></tr>
+ </tbody>
+</table>
      </div>
     </div>
    </div>
-   <div class="row">
-    <div class="col-md-12">
-     <h2>Methods</h2>
-    </div>
-   </div>
-   <div class="row">
+   <div class="row dashboard-row">
     <div class="col-md-6">
-     <h3>Coverage Distribution</h3>
-     <div id="methodCoverageDistribution" style="height: 300px;">
-       <svg></svg>
+     <h3>Methods</h3>
+     <p class="text-muted small">Bubble size = executable lines. Hover for details, click to navigate.</p>
+     <div class="file-coverage-chart">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" preserveAspectRatio="xMidYMid meet">
+ <style>
+  .bubble-success { fill: var(--phpunit-success-bar); opacity: 0.7; }
+  .bubble-warning { fill: var(--phpunit-warning-bar); opacity: 0.7; }
+  .bubble-danger { fill: var(--phpunit-danger-bar); opacity: 0.7; }
+  .bubble-success:hover, .bubble-warning:hover, .bubble-danger:hover { opacity: 1; stroke: var(--bs-emphasis-color); stroke-width: 1.5; }
+  .chart-grid { stroke: var(--bs-border-color); stroke-width: 0.5; stroke-dasharray: 4,4; opacity: 0.5; }
+  .chart-axis { stroke: var(--bs-border-color); stroke-width: 1; }
+  .chart-label { fill: var(--bs-body-color); font-size: 11px; font-family: var(--bs-font-sans-serif, sans-serif); }
+  .chart-title { fill: var(--bs-body-color); font-size: 12px; font-family: var(--bs-font-sans-serif, sans-serif); }
+ </style>
+ <line x1="60.0" y1="20" x2="60.0" y2="350" class="chart-grid"/>
+ <text x="60.0" y="368" text-anchor="middle" class="chart-label">0%</text>
+ <line x1="204.0" y1="20" x2="204.0" y2="350" class="chart-grid"/>
+ <text x="204.0" y="368" text-anchor="middle" class="chart-label">20%</text>
+ <line x1="348.0" y1="20" x2="348.0" y2="350" class="chart-grid"/>
+ <text x="348.0" y="368" text-anchor="middle" class="chart-label">40%</text>
+ <line x1="492.0" y1="20" x2="492.0" y2="350" class="chart-grid"/>
+ <text x="492.0" y="368" text-anchor="middle" class="chart-label">60%</text>
+ <line x1="636.0" y1="20" x2="636.0" y2="350" class="chart-grid"/>
+ <text x="636.0" y="368" text-anchor="middle" class="chart-label">80%</text>
+ <line x1="780.0" y1="20" x2="780.0" y2="350" class="chart-grid"/>
+ <text x="780.0" y="368" text-anchor="middle" class="chart-label">100%</text>
+ <line x1="60" y1="350.0" x2="780" y2="350.0" class="chart-grid"/>
+ <text x="52" y="350.0" text-anchor="end" dominant-baseline="middle" class="chart-label">0</text>
+ <line x1="60" y1="240.0" x2="780" y2="240.0" class="chart-grid"/>
+ <text x="52" y="240.0" text-anchor="end" dominant-baseline="middle" class="chart-label">20</text>
+ <line x1="60" y1="130.0" x2="780" y2="130.0" class="chart-grid"/>
+ <text x="52" y="130.0" text-anchor="end" dominant-baseline="middle" class="chart-label">40</text>
+ <line x1="60" y1="20.0" x2="780" y2="20.0" class="chart-grid"/>
+ <text x="52" y="20.0" text-anchor="end" dominant-baseline="middle" class="chart-label">60</text>
+ <line x1="60" y1="20" x2="60" y2="350" class="chart-axis"/>
+ <line x1="60" y1="350" x2="780" y2="350" class="chart-axis"/>
+ <text x="420.0" y="395" text-anchor="middle" class="chart-title">Line Coverage (%)</text>
+ <text x="15" y="185.0" text-anchor="middle" transform="rotate(-90, 15, 185.0)" class="chart-title">Cyclomatic Complexity</text>
+ <a href="traits/ConfigurationTrait.php.html#292"><circle cx="710.6" cy="91.5" r="20.0" class="bubble-success"><title>orange\framework\traits\ConfigurationTrait::validateConfig — Coverage: 90.4% | Lines: 83 | Complexity: 47</title></circle></a>
+ <a href="Security.php.html#357"><circle cx="780.0" cy="344.5" r="13.7" class="bubble-success"><title>orange\framework\Security::cleanFilename — Coverage: 100.0% | Lines: 39 | Complexity: 1</title></circle></a>
+ <a href="Error.php.html#168"><circle cx="780.0" cy="295.0" r="12.4" class="bubble-success"><title>orange\framework\Error::__construct — Coverage: 100.0% | Lines: 32 | Complexity: 10</title></circle></a>
+ <a href="Application.php.html#230"><circle cx="680.7" cy="306.0" r="11.8" class="bubble-warning"><title>orange\framework\Application::bootstrap — Coverage: 86.2% | Lines: 29 | Complexity: 8</title></circle></a>
+ <a href="abstract/ViewAbstract.php.html#432"><circle cx="780.0" cy="278.5" r="11.6" class="bubble-success"><title>orange\framework\abstract\ViewAbstract::resolveDynamicView — Coverage: 100.0% | Lines: 28 | Complexity: 13</title></circle></a>
+ <a href="Router.php.html#299"><circle cx="780.0" cy="322.5" r="11.0" class="bubble-success"><title>orange\framework\Router::match — Coverage: 100.0% | Lines: 25 | Complexity: 5</title></circle></a>
+ <a href="abstract/ViewAbstract.php.html#151"><circle cx="780.0" cy="322.5" r="11.0" class="bubble-success"><title>orange\framework\abstract\ViewAbstract::__construct — Coverage: 100.0% | Lines: 25 | Complexity: 5</title></circle></a>
+ <a href="Router.php.html#394"><circle cx="780.0" cy="295.0" r="10.5" class="bubble-success"><title>orange\framework\Router::getUrl — Coverage: 100.0% | Lines: 23 | Complexity: 10</title></circle></a>
+ <a href="Security.php.html#117"><circle cx="780.0" cy="300.5" r="10.1" class="bubble-success"><title>orange\framework\Security::createKeys — Coverage: 100.0% | Lines: 21 | Complexity: 9</title></circle></a>
+ <a href="helpers/Ary.php.html#77"><circle cx="642.9" cy="300.5" r="10.1" class="bubble-warning"><title>orange\framework\helpers\Ary::makeAssociated — Coverage: 81.0% | Lines: 21 | Complexity: 9</title></circle></a>
+ <a href="helpers/Dot.php.html#79"><circle cx="780.0" cy="295.0" r="9.8" class="bubble-success"><title>orange\framework\helpers\Dot::get — Coverage: 100.0% | Lines: 20 | Complexity: 10</title></circle></a>
+ <a href="traits/ConfigurationTrait.php.html#28"><circle cx="780.0" cy="300.5" r="9.8" class="bubble-success"><title>orange\framework\traits\ConfigurationTrait::changeOption — Coverage: 100.0% | Lines: 20 | Complexity: 9</title></circle></a>
+ <a href="Dispatcher.php.html#92"><circle cx="780.0" cy="317.0" r="9.6" class="bubble-success"><title>orange\framework\Dispatcher::call — Coverage: 100.0% | Lines: 19 | Complexity: 6</title></circle></a>
+ <a href="Input.php.html#421"><circle cx="780.0" cy="339.0" r="9.6" class="bubble-success"><title>orange\framework\Input::setGlobals — Coverage: 100.0% | Lines: 19 | Complexity: 2</title></circle></a>
+ <a href="Container.php.html#534"><circle cx="740.0" cy="306.0" r="9.3" class="bubble-success"><title>orange\framework\Container::autoWire — Coverage: 94.4% | Lines: 18 | Complexity: 8</title></circle></a>
+ <a href="helpers/Dot.php.html#151"><circle cx="780.0" cy="306.0" r="9.3" class="bubble-success"><title>orange\framework\helpers\Dot::unset — Coverage: 100.0% | Lines: 18 | Complexity: 8</title></circle></a>
+ <a href="Error.php.html#358"><circle cx="780.0" cy="333.5" r="9.1" class="bubble-success"><title>orange\framework\Error::findView — Coverage: 100.0% | Lines: 17 | Complexity: 3</title></circle></a>
+ <a href="Output.php.html#587"><circle cx="780.0" cy="311.5" r="9.1" class="bubble-success"><title>orange\framework\Output::handleCors — Coverage: 100.0% | Lines: 17 | Complexity: 7</title></circle></a>
+ <a href="Event.php.html#332"><circle cx="588.0" cy="328.0" r="8.5" class="bubble-warning"><title>orange\framework\Event::registerEvent — Coverage: 73.3% | Lines: 15 | Complexity: 4</title></circle></a>
+ <a href="helpers/Dot.php.html#38"><circle cx="780.0" cy="311.5" r="8.5" class="bubble-success"><title>orange\framework\helpers\Dot::set — Coverage: 100.0% | Lines: 15 | Complexity: 7</title></circle></a>
+ <a href="helpers/Dot.php.html#226"><circle cx="780.0" cy="306.0" r="8.5" class="bubble-success"><title>orange\framework\helpers\Dot::expand — Coverage: 100.0% | Lines: 15 | Complexity: 8</title></circle></a>
+ <a href="Application.php.html#313"><circle cx="780.0" cy="311.5" r="8.2" class="bubble-success"><title>orange\framework\Application::preContainer — Coverage: 100.0% | Lines: 14 | Complexity: 7</title></circle></a>
+ <a href="Error.php.html#457"><circle cx="780.0" cy="317.0" r="8.2" class="bubble-success"><title>orange\framework\Error::viewRawBuildHtml — Coverage: 100.0% | Lines: 14 | Complexity: 6</title></circle></a>
+ <a href="Output.php.html#319"><circle cx="780.0" cy="322.5" r="8.2" class="bubble-success"><title>orange\framework\Output::contentType — Coverage: 100.0% | Lines: 14 | Complexity: 5</title></circle></a>
+ <a href="controllers/BaseController.php.html#45"><circle cx="60.0" cy="311.5" r="8.2" class="bubble-danger"><title>orange\framework\controllers\BaseController::__construct — Coverage: 0.0% | Lines: 14 | Complexity: 7</title></circle></a>
+ <a href="traits/ConfigurationTrait.php.html#86"><circle cx="780.0" cy="306.0" r="8.2" class="bubble-success"><title>orange\framework\traits\ConfigurationTrait::mergeConfigWith — Coverage: 100.0% | Lines: 14 | Complexity: 8</title></circle></a>
+ <a href="traits/ConfigurationTrait.php.html#130"><circle cx="728.6" cy="322.5" r="8.2" class="bubble-success"><title>orange\framework\traits\ConfigurationTrait::determineConfigPath — Coverage: 92.9% | Lines: 14 | Complexity: 5</title></circle></a>
+ <a href="Router.php.html#151"><circle cx="780.0" cy="328.0" r="7.9" class="bubble-success"><title>orange\framework\Router::__construct — Coverage: 100.0% | Lines: 13 | Complexity: 4</title></circle></a>
+ <a href="Router.php.html#225"><circle cx="780.0" cy="311.5" r="7.9" class="bubble-success"><title>orange\framework\Router::addRoute — Coverage: 100.0% | Lines: 13 | Complexity: 7</title></circle></a>
+ <a href="helpers/DirectorySearch.php.html#175"><circle cx="780.0" cy="311.5" r="7.9" class="bubble-success"><title>orange\framework\helpers\DirectorySearch::removeDirectory — Coverage: 100.0% | Lines: 13 | Complexity: 7</title></circle></a>
+ <a href="Input.php.html#318"><circle cx="540.0" cy="317.0" r="7.6" class="bubble-warning"><title>orange\framework\Input::requestMethod — Coverage: 66.7% | Lines: 12 | Complexity: 6</title></circle></a>
+ <a href="Input.php.html#505"><circle cx="540.0" cy="317.0" r="7.6" class="bubble-warning"><title>orange\framework\Input::detectRequest — Coverage: 66.7% | Lines: 12 | Complexity: 6</title></circle></a>
+ <a href="Output.php.html#397"><circle cx="780.0" cy="317.0" r="7.6" class="bubble-success"><title>orange\framework\Output::header — Coverage: 100.0% | Lines: 12 | Complexity: 6</title></circle></a>
+ <a href="Router.php.html#203"><circle cx="780.0" cy="344.5" r="7.6" class="bubble-success"><title>orange\framework\Router::resetMatched — Coverage: 100.0% | Lines: 12 | Complexity: 1</title></circle></a>
+ <a href="Config.php.html#220"><circle cx="780.0" cy="322.5" r="7.3" class="bubble-success"><title>orange\framework\Config::load — Coverage: 100.0% | Lines: 11 | Complexity: 5</title></circle></a>
+ <a href="Error.php.html#402"><circle cx="780.0" cy="333.5" r="7.3" class="bubble-success"><title>orange\framework\Error::getService — Coverage: 100.0% | Lines: 11 | Complexity: 3</title></circle></a>
+ <a href="Log.php.html#154"><circle cx="780.0" cy="328.0" r="7.3" class="bubble-success"><title>orange\framework\Log::__construct — Coverage: 100.0% | Lines: 11 | Complexity: 4</title></circle></a>
+ <a href="Log.php.html#231"><circle cx="780.0" cy="328.0" r="7.3" class="bubble-success"><title>orange\framework\Log::write — Coverage: 100.0% | Lines: 11 | Complexity: 4</title></circle></a>
+ <a href="Output.php.html#140"><circle cx="714.5" cy="333.5" r="7.3" class="bubble-success"><title>orange\framework\Output::__construct — Coverage: 90.9% | Lines: 11 | Complexity: 3</title></circle></a>
+ <a href="exceptions/http/Http.php.html#12"><circle cx="780.0" cy="322.5" r="7.3" class="bubble-success"><title>orange\framework\exceptions\http\Http::__construct — Coverage: 100.0% | Lines: 11 | Complexity: 5</title></circle></a>
+ <a href="helpers/DirectorySearch.php.html#115"><circle cx="780.0" cy="328.0" r="7.3" class="bubble-success"><title>orange\framework\helpers\DirectorySearch::addDirectory — Coverage: 100.0% | Lines: 11 | Complexity: 4</title></circle></a>
+ <a href="Application.php.html#488"><circle cx="780.0" cy="328.0" r="6.9" class="bubble-success"><title>orange\framework\Application::loadConfigFile — Coverage: 100.0% | Lines: 10 | Complexity: 4</title></circle></a>
+ <a href="Security.php.html#214"><circle cx="780.0" cy="333.5" r="6.9" class="bubble-success"><title>orange\framework\Security::decrypt — Coverage: 100.0% | Lines: 10 | Complexity: 3</title></circle></a>
+ <a href="Security.php.html#269"><circle cx="780.0" cy="333.5" r="6.9" class="bubble-success"><title>orange\framework\Security::verifySignature — Coverage: 100.0% | Lines: 10 | Complexity: 3</title></circle></a>
+ <a href="abstract/ViewAbstract.php.html#258"><circle cx="780.0" cy="322.5" r="6.9" class="bubble-success"><title>orange\framework\abstract\ViewAbstract::renderString — Coverage: 100.0% | Lines: 10 | Complexity: 5</title></circle></a>
+ <a href="abstract/ViewAbstract.php.html#299"><circle cx="780.0" cy="328.0" r="6.9" class="bubble-success"><title>orange\framework\abstract\ViewAbstract::change — Coverage: 100.0% | Lines: 10 | Complexity: 4</title></circle></a>
+ <a href="helpers/DirectorySearch.php.html#584"><circle cx="780.0" cy="328.0" r="6.9" class="bubble-success"><title>orange\framework\helpers\DirectorySearch::recursiveGlob — Coverage: 100.0% | Lines: 10 | Complexity: 4</title></circle></a>
+ <a href="helpers/DirectorySearch.php.html#708"><circle cx="636.0" cy="300.5" r="6.9" class="bubble-warning"><title>orange\framework\helpers\DirectorySearch::setupResourceKeyStyle — Coverage: 80.0% | Lines: 10 | Complexity: 9</title></circle></a>
+ <a href="Application.php.html#167"><circle cx="780.0" cy="344.5" r="6.6" class="bubble-success"><title>orange\framework\Application::http — Coverage: 100.0% | Lines: 9 | Complexity: 1</title></circle></a>
+ <a href="Application.php.html#418"><circle cx="620.0" cy="322.5" r="6.6" class="bubble-warning"><title>orange\framework\Application::loadEnvironment — Coverage: 77.8% | Lines: 9 | Complexity: 5</title></circle></a>
+ <a href="Application.php.html#452"><circle cx="780.0" cy="333.5" r="6.6" class="bubble-success"><title>orange\framework\Application::setConfigDirectories — Coverage: 100.0% | Lines: 9 | Complexity: 3</title></circle></a>
+ <a href="Config.php.html#122"><circle cx="460.0" cy="333.5" r="6.6" class="bubble-warning"><title>orange\framework\Config::__construct — Coverage: 55.6% | Lines: 9 | Complexity: 3</title></circle></a>
+ <a href="Container.php.html#143"><circle cx="780.0" cy="317.0" r="6.6" class="bubble-success"><title>orange\framework\Container::get — Coverage: 100.0% | Lines: 9 | Complexity: 6</title></circle></a>
+ <a href="Container.php.html#317"><circle cx="700.0" cy="311.5" r="6.6" class="bubble-warning"><title>orange\framework\Container::getServiceType — Coverage: 88.9% | Lines: 9 | Complexity: 7</title></circle></a>
+ <a href="Container.php.html#471"><circle cx="700.0" cy="328.0" r="6.6" class="bubble-warning"><title>orange\framework\Container::isSingleton — Coverage: 88.9% | Lines: 9 | Complexity: 4</title></circle></a>
+ <a href="Event.php.html#214"><circle cx="780.0" cy="322.5" r="6.6" class="bubble-success"><title>orange\framework\Event::trigger — Coverage: 100.0% | Lines: 9 | Complexity: 5</title></circle></a>
+ <a href="Event.php.html#290"><circle cx="780.0" cy="333.5" r="6.6" class="bubble-success"><title>orange\framework\Event::unregisterAll — Coverage: 100.0% | Lines: 9 | Complexity: 3</title></circle></a>
+ <a href="Input.php.html#393"><circle cx="780.0" cy="311.5" r="6.6" class="bubble-success"><title>orange\framework\Input::isHttpsRequest — Coverage: 100.0% | Lines: 9 | Complexity: 7</title></circle></a>
+ <a href="Log.php.html#354"><circle cx="780.0" cy="322.5" r="6.6" class="bubble-success"><title>orange\framework\Log::isFileWritable — Coverage: 100.0% | Lines: 9 | Complexity: 5</title></circle></a>
+ <a href="abstract/ViewAbstract.php.html#224"><circle cx="780.0" cy="328.0" r="6.6" class="bubble-success"><title>orange\framework\abstract\ViewAbstract::render — Coverage: 100.0% | Lines: 9 | Complexity: 4</title></circle></a>
+ <a href="helpers/DirectorySearch.php.html#545"><circle cx="780.0" cy="317.0" r="6.6" class="bubble-success"><title>orange\framework\helpers\DirectorySearch::scanDirectories — Coverage: 100.0% | Lines: 9 | Complexity: 6</title></circle></a>
+ <a href="Application.php.html#360"><circle cx="780.0" cy="328.0" r="6.2" class="bubble-success"><title>orange\framework\Application::bootstrapContainer — Coverage: 100.0% | Lines: 8 | Complexity: 4</title></circle></a>
+ <a href="Config.php.html#255"><circle cx="780.0" cy="328.0" r="6.2" class="bubble-success"><title>orange\framework\Config::findAllConfigFilesInEachDirectory — Coverage: 100.0% | Lines: 8 | Complexity: 4</title></circle></a>
+ <a href="Container.php.html#432"><circle cx="780.0" cy="328.0" r="6.2" class="bubble-success"><title>orange\framework\Container::getAlias — Coverage: 100.0% | Lines: 8 | Complexity: 4</title></circle></a>
+ <a href="Error.php.html#280"><circle cx="780.0" cy="328.0" r="6.2" class="bubble-success"><title>orange\framework\Error::sendResponseCode — Coverage: 100.0% | Lines: 8 | Complexity: 4</title></circle></a>
+ <a href="Error.php.html#315"><circle cx="60.0" cy="344.5" r="6.2" class="bubble-danger"><title>orange\framework\Error::sendOutput — Coverage: 0.0% | Lines: 8 | Complexity: 1</title></circle></a>
+ <a href="Error.php.html#437"><circle cx="780.0" cy="328.0" r="6.2" class="bubble-success"><title>orange\framework\Error::viewRaw — Coverage: 100.0% | Lines: 8 | Complexity: 4</title></circle></a>
+ <a href="Event.php.html#131"><circle cx="780.0" cy="333.5" r="6.2" class="bubble-success"><title>orange\framework\Event::__construct — Coverage: 100.0% | Lines: 8 | Complexity: 3</title></circle></a>
+ <a href="Event.php.html#266"><circle cx="780.0" cy="328.0" r="6.2" class="bubble-success"><title>orange\framework\Event::unregister — Coverage: 100.0% | Lines: 8 | Complexity: 4</title></circle></a>
+ <a href="Input.php.html#119"><circle cx="780.0" cy="344.5" r="6.2" class="bubble-success"><title>orange\framework\Input::__construct — Coverage: 100.0% | Lines: 8 | Complexity: 1</title></circle></a>
+ <a href="Log.php.html#327"><circle cx="780.0" cy="322.5" r="6.2" class="bubble-success"><title>orange\framework\Log::convert2 — Coverage: 100.0% | Lines: 8 | Complexity: 5</title></circle></a>
+ <a href="Output.php.html#254"><circle cx="780.0" cy="322.5" r="6.2" class="bubble-success"><title>orange\framework\Output::send — Coverage: 100.0% | Lines: 8 | Complexity: 5</title></circle></a>
+ <a href="Output.php.html#461"><circle cx="780.0" cy="328.0" r="6.2" class="bubble-success"><title>orange\framework\Output::responseCode — Coverage: 100.0% | Lines: 8 | Complexity: 4</title></circle></a>
+ <a href="Router.php.html#269"><circle cx="780.0" cy="339.0" r="6.2" class="bubble-success"><title>orange\framework\Router::addRoutes — Coverage: 100.0% | Lines: 8 | Complexity: 2</title></circle></a>
+ <a href="Router.php.html#371"><circle cx="780.0" cy="328.0" r="6.2" class="bubble-success"><title>orange\framework\Router::getRouterCallback — Coverage: 100.0% | Lines: 8 | Complexity: 4</title></circle></a>
+ <a href="Security.php.html#414"><circle cx="780.0" cy="328.0" r="6.2" class="bubble-success"><title>orange\framework\Security::getKeyFilePath — Coverage: 100.0% | Lines: 8 | Complexity: 4</title></circle></a>
+ <a href="abstract/ViewAbstract.php.html#332"><circle cx="780.0" cy="339.0" r="6.2" class="bubble-success"><title>orange\framework\abstract\ViewAbstract::generate — Coverage: 100.0% | Lines: 8 | Complexity: 2</title></circle></a>
+ <a href="abstract/ViewAbstract.php.html#363"><circle cx="780.0" cy="328.0" r="6.2" class="bubble-success"><title>orange\framework\abstract\ViewAbstract::isFileWritable — Coverage: 100.0% | Lines: 8 | Complexity: 4</title></circle></a>
+ <a href="helpers/DirectorySearch.php.html#242"><circle cx="780.0" cy="339.0" r="6.2" class="bubble-success"><title>orange\framework\helpers\DirectorySearch::replaceDirectories — Coverage: 100.0% | Lines: 8 | Complexity: 2</title></circle></a>
+ <a href="traits/ConfigurationTrait.php.html#175"><circle cx="780.0" cy="328.0" r="6.2" class="bubble-success"><title>orange\framework\traits\ConfigurationTrait::setFromConfig — Coverage: 100.0% | Lines: 8 | Complexity: 4</title></circle></a>
+ <a href="traits/ConfigurationTrait.php.html#208"><circle cx="780.0" cy="328.0" r="6.2" class="bubble-success"><title>orange\framework\traits\ConfigurationTrait::assignFromConfig — Coverage: 100.0% | Lines: 8 | Complexity: 4</title></circle></a>
+ <a href="Application.php.html#124"><circle cx="780.0" cy="328.0" r="5.8" class="bubble-success"><title>orange\framework\Application::make — Coverage: 100.0% | Lines: 7 | Complexity: 4</title></circle></a>
+ <a href="Application.php.html#525"><circle cx="780.0" cy="333.5" r="5.8" class="bubble-success"><title>orange\framework\Application::loadEnvironmentFile — Coverage: 100.0% | Lines: 7 | Complexity: 3</title></circle></a>
+ <a href="Config.php.html#195"><circle cx="780.0" cy="333.5" r="5.8" class="bubble-success"><title>orange\framework\Config::get — Coverage: 100.0% | Lines: 7 | Complexity: 3</title></circle></a>
+ <a href="Container.php.html#191"><circle cx="780.0" cy="328.0" r="5.8" class="bubble-success"><title>orange\framework\Container::set — Coverage: 100.0% | Lines: 7 | Complexity: 4</title></circle></a>
+ <a href="Error.php.html#264"><circle cx="780.0" cy="344.5" r="5.8" class="bubble-success"><title>orange\framework\Error::show — Coverage: 100.0% | Lines: 7 | Complexity: 1</title></circle></a>
+ <a href="Input.php.html#350"><circle cx="780.0" cy="317.0" r="5.8" class="bubble-success"><title>orange\framework\Input::requestType — Coverage: 100.0% | Lines: 7 | Complexity: 6</title></circle></a>
+ <a href="Output.php.html#503"><circle cx="780.0" cy="311.5" r="5.8" class="bubble-success"><title>orange\framework\Output::detectAcceptsType — Coverage: 100.0% | Lines: 7 | Complexity: 7</title></circle></a>
+ <a href="Router.php.html#509"><circle cx="780.0" cy="322.5" r="5.8" class="bubble-success"><title>orange\framework\Router::getRoutes — Coverage: 100.0% | Lines: 7 | Complexity: 5</title></circle></a>
+ <a href="helpers/DirectorySearch.php.html#402"><circle cx="780.0" cy="333.5" r="5.8" class="bubble-success"><title>orange\framework\helpers\DirectorySearch::find — Coverage: 100.0% | Lines: 7 | Complexity: 3</title></circle></a>
+ <a href="helpers/DirectorySearch.php.html#615"><circle cx="780.0" cy="333.5" r="5.8" class="bubble-success"><title>orange\framework\helpers\DirectorySearch::addMatches — Coverage: 100.0% | Lines: 7 | Complexity: 3</title></circle></a>
+ <a href="helpers/Dot.php.html#199"><circle cx="780.0" cy="317.0" r="5.8" class="bubble-success"><title>orange\framework\helpers\Dot::flatten — Coverage: 100.0% | Lines: 7 | Complexity: 6</title></circle></a>
+ <a href="Log.php.html#187"><circle cx="780.0" cy="339.0" r="5.4" class="bubble-success"><title>orange\framework\Log::changeThreshold — Coverage: 100.0% | Lines: 6 | Complexity: 2</title></circle></a>
+ <a href="Output.php.html#182"><circle cx="780.0" cy="339.0" r="5.4" class="bubble-success"><title>orange\framework\Output::redirect — Coverage: 100.0% | Lines: 6 | Complexity: 2</title></circle></a>
+ <a href="base/ArrayObject.php.html#94"><circle cx="780.0" cy="328.0" r="5.4" class="bubble-success"><title>orange\framework\base\ArrayObject::merge — Coverage: 100.0% | Lines: 6 | Complexity: 4</title></circle></a>
+ <a href="helpers/DirectorySearch.php.html#151"><circle cx="780.0" cy="328.0" r="5.4" class="bubble-success"><title>orange\framework\helpers\DirectorySearch::addDirectories — Coverage: 100.0% | Lines: 6 | Complexity: 4</title></circle></a>
+ <a href="helpers/DirectorySearch.php.html#278"><circle cx="780.0" cy="339.0" r="5.4" class="bubble-success"><title>orange\framework\helpers\DirectorySearch::flushDirectories — Coverage: 100.0% | Lines: 6 | Complexity: 2</title></circle></a>
+ <a href="Container.php.html#344"><circle cx="780.0" cy="344.5" r="4.9" class="bubble-success"><title>orange\framework\Container::attach — Coverage: 100.0% | Lines: 5 | Complexity: 1</title></circle></a>
+ <a href="Input.php.html#470"><circle cx="780.0" cy="328.0" r="4.9" class="bubble-success"><title>orange\framework\Input::detectServerHeaders — Coverage: 100.0% | Lines: 5 | Complexity: 4</title></circle></a>
+ <a href="Log.php.html#295"><circle cx="780.0" cy="333.5" r="4.9" class="bubble-success"><title>orange\framework\Log::log — Coverage: 100.0% | Lines: 5 | Complexity: 3</title></circle></a>
+ <a href="Security.php.html#192"><circle cx="780.0" cy="344.5" r="4.9" class="bubble-success"><title>orange\framework\Security::encrypt — Coverage: 100.0% | Lines: 5 | Complexity: 1</title></circle></a>
+ <a href="Security.php.html#248"><circle cx="780.0" cy="344.5" r="4.9" class="bubble-success"><title>orange\framework\Security::createSignature — Coverage: 100.0% | Lines: 5 | Complexity: 1</title></circle></a>
+ <a href="controllers/BaseController.php.html#83"><circle cx="60.0" cy="333.5" r="4.9" class="bubble-danger"><title>orange\framework\controllers\BaseController::autoAttachService — Coverage: 0.0% | Lines: 5 | Complexity: 3</title></circle></a>
+ <a href="exceptions/OrangeException.php.html#18"><circle cx="780.0" cy="344.5" r="4.9" class="bubble-success"><title>orange\framework\exceptions\OrangeException::__construct — Coverage: 100.0% | Lines: 5 | Complexity: 1</title></circle></a>
+ <a href="helpers/Ary.php.html#16"><circle cx="780.0" cy="333.5" r="4.9" class="bubble-success"><title>orange\framework\helpers\Ary::remapKey — Coverage: 100.0% | Lines: 5 | Complexity: 3</title></circle></a>
+ <a href="helpers/Ary.php.html#161"><circle cx="780.0" cy="328.0" r="4.9" class="bubble-success"><title>orange\framework\helpers\Ary::elements — Coverage: 100.0% | Lines: 5 | Complexity: 4</title></circle></a>
+ <a href="helpers/DirectorySearch.php.html#86"><circle cx="780.0" cy="344.5" r="4.9" class="bubble-success"><title>orange\framework\helpers\DirectorySearch::__construct — Coverage: 100.0% | Lines: 5 | Complexity: 1</title></circle></a>
+ <a href="helpers/DirectorySearch.php.html#303"><circle cx="780.0" cy="339.0" r="4.9" class="bubble-success"><title>orange\framework\helpers\DirectorySearch::addResource — Coverage: 100.0% | Lines: 5 | Complexity: 2</title></circle></a>
+ <a href="helpers/DirectorySearch.php.html#424"><circle cx="780.0" cy="339.0" r="4.9" class="bubble-success"><title>orange\framework\helpers\DirectorySearch::findAll — Coverage: 100.0% | Lines: 5 | Complexity: 2</title></circle></a>
+ <a href="helpers/DirectorySearch.php.html#683"><circle cx="780.0" cy="322.5" r="4.9" class="bubble-success"><title>orange\framework\helpers\DirectorySearch::callback — Coverage: 100.0% | Lines: 5 | Complexity: 5</title></circle></a>
+ <a href="base/traits/SingletonTraits.php.html#27"><circle cx="780.0" cy="339.0" r="4.9" class="bubble-success"><title>orange\framework\base\traits\SingletonTraits::getInstance — Coverage: 100.0% | Lines: 5 | Complexity: 2</title></circle></a>
+ <a href="Container.php.html#287"><circle cx="780.0" cy="339.0" r="4.4" class="bubble-success"><title>orange\framework\Container::debugInfo — Coverage: 100.0% | Lines: 4 | Complexity: 2</title></circle></a>
+ <a href="Container.php.html#411"><circle cx="780.0" cy="339.0" r="4.4" class="bubble-success"><title>orange\framework\Container::callClosure — Coverage: 100.0% | Lines: 4 | Complexity: 2</title></circle></a>
+ <a href="Container.php.html#591"><circle cx="780.0" cy="339.0" r="4.4" class="bubble-success"><title>orange\framework\Container::resolveAutoWireArgs — Coverage: 100.0% | Lines: 4 | Complexity: 2</title></circle></a>
+ <a href="Error.php.html#340"><circle cx="780.0" cy="333.5" r="4.4" class="bubble-success"><title>orange\framework\Error::renderViewBasedOnCode — Coverage: 100.0% | Lines: 4 | Complexity: 3</title></circle></a>
+ <a href="Event.php.html#196"><circle cx="780.0" cy="339.0" r="4.4" class="bubble-success"><title>orange\framework\Event::registerMultiple — Coverage: 100.0% | Lines: 4 | Complexity: 2</title></circle></a>
+ <a href="Output.php.html#197"><circle cx="780.0" cy="339.0" r="4.4" class="bubble-success"><title>orange\framework\Output::forceHttps — Coverage: 100.0% | Lines: 4 | Complexity: 2</title></circle></a>
+ <a href="Output.php.html#224"><circle cx="780.0" cy="333.5" r="4.4" class="bubble-success"><title>orange\framework\Output::resolveTrustedHost — Coverage: 100.0% | Lines: 4 | Complexity: 3</title></circle></a>
+ <a href="Output.php.html#362"><circle cx="780.0" cy="344.5" r="4.4" class="bubble-success"><title>orange\framework\Output::charSet — Coverage: 100.0% | Lines: 4 | Complexity: 1</title></circle></a>
+ <a href="Router.php.html#358"><circle cx="780.0" cy="328.0" r="4.4" class="bubble-success"><title>orange\framework\Router::getMatched — Coverage: 100.0% | Lines: 4 | Complexity: 4</title></circle></a>
+ <a href="Router.php.html#470"><circle cx="780.0" cy="328.0" r="4.4" class="bubble-success"><title>orange\framework\Router::siteUrl — Coverage: 100.0% | Lines: 4 | Complexity: 4</title></circle></a>
+ <a href="Security.php.html#320"><circle cx="780.0" cy="344.5" r="4.4" class="bubble-success"><title>orange\framework\Security::verifyPassword — Coverage: 100.0% | Lines: 4 | Complexity: 1</title></circle></a>
+ <a href="Security.php.html#338"><circle cx="780.0" cy="344.5" r="4.4" class="bubble-success"><title>orange\framework\Security::removeInvisibleCharacters — Coverage: 100.0% | Lines: 4 | Complexity: 1</title></circle></a>
+ <a href="base/ArrayObject.php.html#123"><circle cx="780.0" cy="339.0" r="4.4" class="bubble-success"><title>orange\framework\base\ArrayObject::buildArrayObjects — Coverage: 100.0% | Lines: 4 | Complexity: 2</title></circle></a>
+ <a href="helpers/Ary.php.html#35"><circle cx="780.0" cy="333.5" r="4.4" class="bubble-success"><title>orange\framework\helpers\Ary::remapValue — Coverage: 100.0% | Lines: 4 | Complexity: 3</title></circle></a>
+ <a href="helpers/Ary.php.html#57"><circle cx="780.0" cy="339.0" r="4.4" class="bubble-success"><title>orange\framework\helpers\Ary::wrapArray — Coverage: 100.0% | Lines: 4 | Complexity: 2</title></circle></a>
+ <a href="helpers/DirectorySearch.php.html#352"><circle cx="780.0" cy="344.5" r="4.4" class="bubble-success"><title>orange\framework\helpers\DirectorySearch::flushResources — Coverage: 100.0% | Lines: 4 | Complexity: 1</title></circle></a>
+ <a href="Container.php.html#105"><circle cx="780.0" cy="339.0" r="4.0" class="bubble-success"><title>orange\framework\Container::__construct — Coverage: 100.0% | Lines: 3 | Complexity: 2</title></circle></a>
+ <a href="Error.php.html#300"><circle cx="780.0" cy="339.0" r="4.0" class="bubble-success"><title>orange\framework\Error::sendMimeType — Coverage: 100.0% | Lines: 3 | Complexity: 2</title></circle></a>
+ <a href="Event.php.html#181"><circle cx="780.0" cy="344.5" r="4.0" class="bubble-success"><title>orange\framework\Event::register — Coverage: 100.0% | Lines: 3 | Complexity: 1</title></circle></a>
+ <a href="Event.php.html#316"><circle cx="780.0" cy="344.5" r="4.0" class="bubble-success"><title>orange\framework\Event::listeners — Coverage: 100.0% | Lines: 3 | Complexity: 1</title></circle></a>
+ <a href="Event.php.html#382"><circle cx="780.0" cy="344.5" r="4.0" class="bubble-success"><title>orange\framework\Event::registerClosureEvent — Coverage: 100.0% | Lines: 3 | Complexity: 1</title></circle></a>
+ <a href="Input.php.html#219"><circle cx="780.0" cy="339.0" r="4.0" class="bubble-success"><title>orange\framework\Input::server — Coverage: 100.0% | Lines: 3 | Complexity: 2</title></circle></a>
+ <a href="Input.php.html#236"><circle cx="780.0" cy="339.0" r="4.0" class="bubble-success"><title>orange\framework\Input::header — Coverage: 100.0% | Lines: 3 | Complexity: 2</title></circle></a>
+ <a href="Input.php.html#252"><circle cx="780.0" cy="339.0" r="4.0" class="bubble-success"><title>orange\framework\Input::getUrl — Coverage: 100.0% | Lines: 3 | Complexity: 2</title></circle></a>
+ <a href="Input.php.html#266"><circle cx="780.0" cy="344.5" r="4.0" class="bubble-success"><title>orange\framework\Input::requestUri — Coverage: 100.0% | Lines: 3 | Complexity: 1</title></circle></a>
+ <a href="Input.php.html#286"><circle cx="780.0" cy="344.5" r="4.0" class="bubble-success"><title>orange\framework\Input::uriSegment — Coverage: 100.0% | Lines: 3 | Complexity: 1</title></circle></a>
+ <a href="Input.php.html#302"><circle cx="780.0" cy="339.0" r="4.0" class="bubble-success"><title>orange\framework\Input::contentType — Coverage: 100.0% | Lines: 3 | Complexity: 2</title></circle></a>
+ <a href="Output.php.html#277"><circle cx="780.0" cy="344.5" r="4.0" class="bubble-success"><title>orange\framework\Output::flush — Coverage: 100.0% | Lines: 3 | Complexity: 1</title></circle></a>
+ <a href="Output.php.html#293"><circle cx="780.0" cy="339.0" r="4.0" class="bubble-success"><title>orange\framework\Output::write — Coverage: 100.0% | Lines: 3 | Complexity: 2</title></circle></a>
+ <a href="Output.php.html#443"><circle cx="780.0" cy="344.5" r="4.0" class="bubble-success"><title>orange\framework\Output::flushHeaders — Coverage: 100.0% | Lines: 3 | Complexity: 1</title></circle></a>
+ <a href="Security.php.html#178"><circle cx="780.0" cy="333.5" r="4.0" class="bubble-success"><title>orange\framework\Security::restrictToCurrentUser — Coverage: 100.0% | Lines: 3 | Complexity: 3</title></circle></a>
+ <a href="Security.php.html#302"><circle cx="780.0" cy="344.5" r="4.0" class="bubble-success"><title>orange\framework\Security::encodePassword — Coverage: 100.0% | Lines: 3 | Complexity: 1</title></circle></a>
+ <a href="abstract/ViewAbstract.php.html#395"><circle cx="780.0" cy="344.5" r="4.0" class="bubble-success"><title>orange\framework\abstract\ViewAbstract::resolveAlias — Coverage: 100.0% | Lines: 3 | Complexity: 1</title></circle></a>
+ <a href="abstract/ViewAbstract.php.html#411"><circle cx="780.0" cy="339.0" r="4.0" class="bubble-success"><title>orange\framework\abstract\ViewAbstract::data — Coverage: 100.0% | Lines: 3 | Complexity: 2</title></circle></a>
+ <a href="base/ArrayObject.php.html#42"><circle cx="780.0" cy="333.5" r="4.0" class="bubble-success"><title>orange\framework\base\ArrayObject::__call — Coverage: 100.0% | Lines: 3 | Complexity: 3</title></circle></a>
+ <a href="helpers/DirectorySearch.php.html#215"><circle cx="780.0" cy="339.0" r="4.0" class="bubble-success"><title>orange\framework\helpers\DirectorySearch::removeDirectories — Coverage: 100.0% | Lines: 3 | Complexity: 2</title></circle></a>
+ <a href="helpers/DirectorySearch.php.html#324"><circle cx="780.0" cy="339.0" r="4.0" class="bubble-success"><title>orange\framework\helpers\DirectorySearch::addResources — Coverage: 100.0% | Lines: 3 | Complexity: 2</title></circle></a>
+ <a href="helpers/DirectorySearch.php.html#370"><circle cx="780.0" cy="344.5" r="4.0" class="bubble-success"><title>orange\framework\helpers\DirectorySearch::removeResource — Coverage: 100.0% | Lines: 3 | Complexity: 1</title></circle></a>
+ <a href="helpers/DirectorySearch.php.html#386"><circle cx="780.0" cy="339.0" r="4.0" class="bubble-success"><title>orange\framework\helpers\DirectorySearch::removeResources — Coverage: 100.0% | Lines: 3 | Complexity: 2</title></circle></a>
+ <a href="Config.php.html#161"><circle cx="780.0" cy="344.5" r="4.0" class="bubble-success"><title>orange\framework\Config::offsetExists — Coverage: 100.0% | Lines: 2 | Complexity: 1</title></circle></a>
+ <a href="Config.php.html#180"><circle cx="780.0" cy="344.5" r="4.0" class="bubble-success"><title>orange\framework\Config::offsetGet — Coverage: 100.0% | Lines: 2 | Complexity: 1</title></circle></a>
+ <a href="Container.php.html#458"><circle cx="780.0" cy="339.0" r="4.0" class="bubble-success"><title>orange\framework\Container::setMany — Coverage: 100.0% | Lines: 2 | Complexity: 2</title></circle></a>
+ <a href="Container.php.html#501"><circle cx="780.0" cy="339.0" r="4.0" class="bubble-success"><title>orange\framework\Container::convertToSingleton — Coverage: 100.0% | Lines: 2 | Complexity: 2</title></circle></a>
+ <a href="Data.php.html#35"><circle cx="780.0" cy="344.5" r="4.0" class="bubble-success"><title>orange\framework\Data::__construct — Coverage: 100.0% | Lines: 2 | Complexity: 1</title></circle></a>
+ <a href="Event.php.html#158"><circle cx="780.0" cy="344.5" r="4.0" class="bubble-success"><title>orange\framework\Event::disable — Coverage: 100.0% | Lines: 2 | Complexity: 1</title></circle></a>
+ <a href="Event.php.html#167"><circle cx="780.0" cy="344.5" r="4.0" class="bubble-success"><title>orange\framework\Event::enable — Coverage: 100.0% | Lines: 2 | Complexity: 1</title></circle></a>
+ <a href="Event.php.html#241"><circle cx="780.0" cy="344.5" r="4.0" class="bubble-success"><title>orange\framework\Event::has — Coverage: 100.0% | Lines: 2 | Complexity: 1</title></circle></a>
+ <a href="Event.php.html#253"><circle cx="780.0" cy="344.5" r="4.0" class="bubble-success"><title>orange\framework\Event::triggers — Coverage: 100.0% | Lines: 2 | Complexity: 1</title></circle></a>
+ <a href="Input.php.html#149"><circle cx="780.0" cy="344.5" r="4.0" class="bubble-success"><title>orange\framework\Input::request — Coverage: 100.0% | Lines: 2 | Complexity: 1</title></circle></a>
+ <a href="Input.php.html#164"><circle cx="780.0" cy="344.5" r="4.0" class="bubble-success"><title>orange\framework\Input::query — Coverage: 100.0% | Lines: 2 | Complexity: 1</title></circle></a>
+ <a href="Input.php.html#189"><circle cx="780.0" cy="344.5" r="4.0" class="bubble-success"><title>orange\framework\Input::cookie — Coverage: 100.0% | Lines: 2 | Complexity: 1</title></circle></a>
+ <a href="Input.php.html#204"><circle cx="780.0" cy="344.5" r="4.0" class="bubble-success"><title>orange\framework\Input::file — Coverage: 100.0% | Lines: 2 | Complexity: 1</title></circle></a>
+ <a href="Output.php.html#242"><circle cx="780.0" cy="344.5" r="4.0" class="bubble-success"><title>orange\framework\Output::flushAll — Coverage: 100.0% | Lines: 2 | Complexity: 1</title></circle></a>
+ <a href="Output.php.html#349"><circle cx="780.0" cy="344.5" r="4.0" class="bubble-success"><title>orange\framework\Output::getContentType — Coverage: 100.0% | Lines: 2 | Complexity: 1</title></circle></a>
+ <a href="Output.php.html#378"><circle cx="780.0" cy="344.5" r="4.0" class="bubble-success"><title>orange\framework\Output::getCharSet — Coverage: 100.0% | Lines: 2 | Complexity: 1</title></circle></a>
+ <a href="Output.php.html#429"><circle cx="780.0" cy="344.5" r="4.0" class="bubble-success"><title>orange\framework\Output::getHeaders — Coverage: 100.0% | Lines: 2 | Complexity: 1</title></circle></a>
+ <a href="Output.php.html#490"><circle cx="780.0" cy="344.5" r="4.0" class="bubble-success"><title>orange\framework\Output::getResponseCode — Coverage: 100.0% | Lines: 2 | Complexity: 1</title></circle></a>
+ <a href="Output.php.html#527"><circle cx="780.0" cy="344.5" r="4.0" class="bubble-success"><title>orange\framework\Output::getContentTypeHeader — Coverage: 100.0% | Lines: 2 | Complexity: 1</title></circle></a>
+ <a href="Output.php.html#542"><circle cx="780.0" cy="344.5" r="4.0" class="bubble-success"><title>orange\framework\Output::getResponseHeader — Coverage: 100.0% | Lines: 2 | Complexity: 1</title></circle></a>
+ <a href="Router.php.html#491"><circle cx="780.0" cy="333.5" r="4.0" class="bubble-success"><title>orange\framework\Router::updateCache — Coverage: 100.0% | Lines: 2 | Complexity: 3</title></circle></a>
+ <a href="Router.php.html#538"><circle cx="780.0" cy="344.5" r="4.0" class="bubble-success"><title>orange\framework\Router::addConfigRoutes — Coverage: 100.0% | Lines: 2 | Complexity: 1</title></circle></a>
+ <a href="Security.php.html#87"><circle cx="780.0" cy="344.5" r="4.0" class="bubble-success"><title>orange\framework\Security::__construct — Coverage: 100.0% | Lines: 2 | Complexity: 1</title></circle></a>
+ <a href="abstract/ViewAbstract.php.html#197"><circle cx="780.0" cy="344.5" r="4.0" class="bubble-success"><title>orange\framework\abstract\ViewAbstract::search — Coverage: 100.0% | Lines: 2 | Complexity: 1</title></circle></a>
+ <a href="abstract/ViewAbstract.php.html#209"><circle cx="780.0" cy="344.5" r="4.0" class="bubble-success"><title>orange\framework\abstract\ViewAbstract::addAlias — Coverage: 100.0% | Lines: 2 | Complexity: 1</title></circle></a>
+ <a href="controllers/HomeController.php.html#11"><circle cx="60.0" cy="344.5" r="4.0" class="bubble-danger"><title>orange\framework\controllers\HomeController::index — Coverage: 0.0% | Lines: 2 | Complexity: 1</title></circle></a>
+ <a href="exceptions/http/Http301.php.html#20"><circle cx="780.0" cy="344.5" r="4.0" class="bubble-success"><title>orange\framework\exceptions\http\Http301::decorate — Coverage: 100.0% | Lines: 2 | Complexity: 1</title></circle></a>
+ <a href="helpers/DirectorySearch.php.html#339"><circle cx="780.0" cy="344.5" r="4.0" class="bubble-success"><title>orange\framework\helpers\DirectorySearch::replaceResources — Coverage: 100.0% | Lines: 2 | Complexity: 1</title></circle></a>
+ <a href="helpers/DirectorySearch.php.html#444"><circle cx="780.0" cy="344.5" r="4.0" class="bubble-success"><title>orange\framework\helpers\DirectorySearch::list — Coverage: 100.0% | Lines: 2 | Complexity: 1</title></circle></a>
+ <a href="helpers/DirectorySearch.php.html#459"><circle cx="780.0" cy="344.5" r="4.0" class="bubble-success"><title>orange\framework\helpers\DirectorySearch::findFirst — Coverage: 100.0% | Lines: 2 | Complexity: 1</title></circle></a>
+ <a href="helpers/DirectorySearch.php.html#474"><circle cx="780.0" cy="344.5" r="4.0" class="bubble-success"><title>orange\framework\helpers\DirectorySearch::findLast — Coverage: 100.0% | Lines: 2 | Complexity: 1</title></circle></a>
+ <a href="helpers/DirectorySearch.php.html#487"><circle cx="780.0" cy="344.5" r="4.0" class="bubble-success"><title>orange\framework\helpers\DirectorySearch::exists — Coverage: 100.0% | Lines: 2 | Complexity: 1</title></circle></a>
+ <a href="helpers/DirectorySearch.php.html#499"><circle cx="780.0" cy="344.5" r="4.0" class="bubble-success"><title>orange\framework\helpers\DirectorySearch::lock — Coverage: 100.0% | Lines: 2 | Complexity: 1</title></circle></a>
+ <a href="helpers/DirectorySearch.php.html#512"><circle cx="780.0" cy="344.5" r="4.0" class="bubble-success"><title>orange\framework\helpers\DirectorySearch::unlock — Coverage: 100.0% | Lines: 2 | Complexity: 1</title></circle></a>
+ <a href="helpers/DirectorySearch.php.html#637"><circle cx="780.0" cy="339.0" r="4.0" class="bubble-success"><title>orange\framework\helpers\DirectorySearch::ifLockedThrowException — Coverage: 100.0% | Lines: 2 | Complexity: 2</title></circle></a>
+ <a href="helpers/DirectorySearch.php.html#656"><circle cx="780.0" cy="333.5" r="4.0" class="bubble-success"><title>orange\framework\helpers\DirectorySearch::normalizeKey — Coverage: 100.0% | Lines: 2 | Complexity: 3</title></circle></a>
+ <a href="helpers/DirectorySearch.php.html#668"><circle cx="780.0" cy="344.5" r="4.0" class="bubble-success"><title>orange\framework\helpers\DirectorySearch::rescan — Coverage: 100.0% | Lines: 2 | Complexity: 1</title></circle></a>
+ <a href="helpers/Dot.php.html#133"><circle cx="780.0" cy="344.5" r="4.0" class="bubble-success"><title>orange\framework\helpers\Dot::isset — Coverage: 100.0% | Lines: 2 | Complexity: 1</title></circle></a>
+ <a href="base/traits/BaseTraits.php.html#30"><circle cx="780.0" cy="344.5" r="4.0" class="bubble-success"><title>orange\framework\base\traits\BaseTraits::newInstance — Coverage: 100.0% | Lines: 2 | Complexity: 1</title></circle></a>
+ <a href="base/traits/FactoryTraits.php.html#17"><circle cx="780.0" cy="344.5" r="4.0" class="bubble-success"><title>orange\framework\base\traits\FactoryTraits::getInstance — Coverage: 100.0% | Lines: 2 | Complexity: 1</title></circle></a>
+ <a href="traits/ConfigurationTrait.php.html#246"><circle cx="780.0" cy="339.0" r="4.0" class="bubble-success"><title>orange\framework\traits\ConfigurationTrait::camelize — Coverage: 100.0% | Lines: 2 | Complexity: 2</title></circle></a>
+ <a href="Application.php.html#111"><circle cx="780.0" cy="344.5" r="4.0" class="bubble-success"><title>orange\framework\Application::__construct — Coverage: 100.0% | Lines: 1 | Complexity: 1</title></circle></a>
+ <a href="Application.php.html#150"><circle cx="780.0" cy="344.5" r="4.0" class="bubble-success"><title>orange\framework\Application::get — Coverage: 100.0% | Lines: 1 | Complexity: 1</title></circle></a>
+ <a href="Application.php.html#212"><circle cx="780.0" cy="344.5" r="4.0" class="bubble-success"><title>orange\framework\Application::run — Coverage: 100.0% | Lines: 1 | Complexity: 1</title></circle></a>
+ <a href="Application.php.html#393"><circle cx="780.0" cy="344.5" r="4.0" class="bubble-success"><title>orange\framework\Application::postContainer — Coverage: 100.0% | Lines: 1 | Complexity: 1</title></circle></a>
+ <a href="Application.php.html#407"><circle cx="780.0" cy="344.5" r="4.0" class="bubble-success"><title>orange\framework\Application::env — Coverage: 100.0% | Lines: 1 | Complexity: 1</title></circle></a>
+ <a href="Config.php.html#150"><circle cx="780.0" cy="344.5" r="4.0" class="bubble-success"><title>orange\framework\Config::__get — Coverage: 100.0% | Lines: 1 | Complexity: 1</title></circle></a>
+ <a href="Container.php.html#128"><circle cx="780.0" cy="344.5" r="4.0" class="bubble-success"><title>orange\framework\Container::__get — Coverage: 100.0% | Lines: 1 | Complexity: 1</title></circle></a>
+ <a href="Container.php.html#178"><circle cx="780.0" cy="344.5" r="4.0" class="bubble-success"><title>orange\framework\Container::__set — Coverage: 100.0% | Lines: 1 | Complexity: 1</title></circle></a>
+ <a href="Container.php.html#214"><circle cx="780.0" cy="344.5" r="4.0" class="bubble-success"><title>orange\framework\Container::__isset — Coverage: 100.0% | Lines: 1 | Complexity: 1</title></circle></a>
+ <a href="Container.php.html#225"><circle cx="780.0" cy="344.5" r="4.0" class="bubble-success"><title>orange\framework\Container::isset — Coverage: 100.0% | Lines: 1 | Complexity: 1</title></circle></a>
+ <a href="Container.php.html#237"><circle cx="780.0" cy="344.5" r="4.0" class="bubble-success"><title>orange\framework\Container::has — Coverage: 100.0% | Lines: 1 | Complexity: 1</title></circle></a>
+ <a href="Container.php.html#247"><circle cx="780.0" cy="344.5" r="4.0" class="bubble-success"><title>orange\framework\Container::__unset — Coverage: 100.0% | Lines: 1 | Complexity: 1</title></circle></a>
+ <a href="Container.php.html#257"><circle cx="780.0" cy="344.5" r="4.0" class="bubble-success"><title>orange\framework\Container::unset — Coverage: 100.0% | Lines: 1 | Complexity: 1</title></circle></a>
+ <a href="Container.php.html#267"><circle cx="780.0" cy="344.5" r="4.0" class="bubble-success"><title>orange\framework\Container::remove — Coverage: 100.0% | Lines: 1 | Complexity: 1</title></circle></a>
+ <a href="Container.php.html#277"><circle cx="780.0" cy="344.5" r="4.0" class="bubble-success"><title>orange\framework\Container::__debugInfo — Coverage: 100.0% | Lines: 1 | Complexity: 1</title></circle></a>
+ <a href="Container.php.html#303"><circle cx="780.0" cy="344.5" r="4.0" class="bubble-success"><title>orange\framework\Container::getServices — Coverage: 100.0% | Lines: 1 | Complexity: 1</title></circle></a>
+ <a href="Container.php.html#361"><circle cx="780.0" cy="344.5" r="4.0" class="bubble-success"><title>orange\framework\Container::addAlias — Coverage: 100.0% | Lines: 1 | Complexity: 1</title></circle></a>
+ <a href="Container.php.html#373"><circle cx="780.0" cy="344.5" r="4.0" class="bubble-success"><title>orange\framework\Container::addClosure — Coverage: 100.0% | Lines: 1 | Complexity: 1</title></circle></a>
+ <a href="Container.php.html#385"><circle cx="780.0" cy="344.5" r="4.0" class="bubble-success"><title>orange\framework\Container::addAutoWireClass — Coverage: 100.0% | Lines: 1 | Complexity: 1</title></circle></a>
+ <a href="Container.php.html#397"><circle cx="780.0" cy="344.5" r="4.0" class="bubble-success"><title>orange\framework\Container::addValue — Coverage: 100.0% | Lines: 1 | Complexity: 1</title></circle></a>
+ <a href="Input.php.html#176"><circle cx="780.0" cy="344.5" r="4.0" class="bubble-success"><title>orange\framework\Input::inputStream — Coverage: 100.0% | Lines: 1 | Complexity: 1</title></circle></a>
+ <a href="Input.php.html#371"><circle cx="780.0" cy="344.5" r="4.0" class="bubble-success"><title>orange\framework\Input::isAjaxRequest — Coverage: 100.0% | Lines: 1 | Complexity: 1</title></circle></a>
+ <a href="Input.php.html#381"><circle cx="780.0" cy="344.5" r="4.0" class="bubble-success"><title>orange\framework\Input::isCliRequest — Coverage: 100.0% | Lines: 1 | Complexity: 1</title></circle></a>
+ <a href="Input.php.html#458"><circle cx="780.0" cy="344.5" r="4.0" class="bubble-success"><title>orange\framework\Input::fromGlobals — Coverage: 100.0% | Lines: 1 | Complexity: 1</title></circle></a>
+ <a href="Input.php.html#490"><circle cx="780.0" cy="344.5" r="4.0" class="bubble-success"><title>orange\framework\Input::normalizeServerKey — Coverage: 100.0% | Lines: 1 | Complexity: 1</title></circle></a>
+ <a href="Input.php.html#546"><circle cx="780.0" cy="339.0" r="4.0" class="bubble-success"><title>orange\framework\Input::extract — Coverage: 100.0% | Lines: 1 | Complexity: 2</title></circle></a>
+ <a href="Log.php.html#209"><circle cx="780.0" cy="344.5" r="4.0" class="bubble-success"><title>orange\framework\Log::getThreshold — Coverage: 100.0% | Lines: 1 | Complexity: 1</title></circle></a>
+ <a href="Log.php.html#219"><circle cx="780.0" cy="344.5" r="4.0" class="bubble-success"><title>orange\framework\Log::isEnabled — Coverage: 100.0% | Lines: 1 | Complexity: 1</title></circle></a>
+ <a href="Log.php.html#254"><circle cx="780.0" cy="344.5" r="4.0" class="bubble-success"><title>orange\framework\Log::emergency — Coverage: 100.0% | Lines: 1 | Complexity: 1</title></circle></a>
+ <a href="Log.php.html#259"><circle cx="780.0" cy="344.5" r="4.0" class="bubble-success"><title>orange\framework\Log::alert — Coverage: 100.0% | Lines: 1 | Complexity: 1</title></circle></a>
+ <a href="Log.php.html#264"><circle cx="780.0" cy="344.5" r="4.0" class="bubble-success"><title>orange\framework\Log::critical — Coverage: 100.0% | Lines: 1 | Complexity: 1</title></circle></a>
+ <a href="Log.php.html#269"><circle cx="780.0" cy="344.5" r="4.0" class="bubble-success"><title>orange\framework\Log::error — Coverage: 100.0% | Lines: 1 | Complexity: 1</title></circle></a>
+ <a href="Log.php.html#274"><circle cx="780.0" cy="344.5" r="4.0" class="bubble-success"><title>orange\framework\Log::warning — Coverage: 100.0% | Lines: 1 | Complexity: 1</title></circle></a>
+ <a href="Log.php.html#279"><circle cx="780.0" cy="344.5" r="4.0" class="bubble-success"><title>orange\framework\Log::notice — Coverage: 100.0% | Lines: 1 | Complexity: 1</title></circle></a>
+ <a href="Log.php.html#284"><circle cx="780.0" cy="344.5" r="4.0" class="bubble-success"><title>orange\framework\Log::info — Coverage: 100.0% | Lines: 1 | Complexity: 1</title></circle></a>
+ <a href="Log.php.html#289"><circle cx="780.0" cy="344.5" r="4.0" class="bubble-success"><title>orange\framework\Log::debug — Coverage: 100.0% | Lines: 1 | Complexity: 1</title></circle></a>
+ <a href="Log.php.html#314"><circle cx="780.0" cy="339.0" r="4.0" class="bubble-success"><title>orange\framework\Log::isLevelEnabled — Coverage: 100.0% | Lines: 1 | Complexity: 2</title></circle></a>
+ <a href="Output.php.html#169"><circle cx="780.0" cy="344.5" r="4.0" class="bubble-success"><title>orange\framework\Output::__toString — Coverage: 100.0% | Lines: 1 | Complexity: 1</title></circle></a>
+ <a href="Output.php.html#307"><circle cx="780.0" cy="344.5" r="4.0" class="bubble-success"><title>orange\framework\Output::get — Coverage: 100.0% | Lines: 1 | Complexity: 1</title></circle></a>
+ <a href="Output.php.html#556"><circle cx="780.0" cy="344.5" r="4.0" class="bubble-success"><title>orange\framework\Output::phpEcho — Coverage: 100.0% | Lines: 1 | Complexity: 1</title></circle></a>
+ <a href="Output.php.html#568"><circle cx="60.0" cy="344.5" r="4.0" class="bubble-danger"><title>orange\framework\Output::phpExit — Coverage: 0.0% | Lines: 1 | Complexity: 1</title></circle></a>
+ <a href="Output.php.html#582"><circle cx="60.0" cy="344.5" r="4.0" class="bubble-danger"><title>orange\framework\Output::phpHeader — Coverage: 0.0% | Lines: 1 | Complexity: 1</title></circle></a>
+ <a href="attributes/AttachService.php.html#41"><circle cx="780.0" cy="344.5" r="4.0" class="bubble-success"><title>orange\framework\attributes\AttachService::__construct — Coverage: 100.0% | Lines: 1 | Complexity: 1</title></circle></a>
+ <a href="attributes/AutoWire.php.html#41"><circle cx="780.0" cy="344.5" r="4.0" class="bubble-success"><title>orange\framework\attributes\AutoWire::__construct — Coverage: 100.0% | Lines: 1 | Complexity: 1</title></circle></a>
+ <a href="attributes/Route.php.html#56"><circle cx="780.0" cy="344.5" r="4.0" class="bubble-success"><title>orange\framework\attributes\Route::__construct — Coverage: 100.0% | Lines: 1 | Complexity: 1</title></circle></a>
+ <a href="base/ArrayObject.php.html#17"><circle cx="780.0" cy="344.5" r="4.0" class="bubble-success"><title>orange\framework\base\ArrayObject::__construct — Coverage: 100.0% | Lines: 1 | Complexity: 1</title></circle></a>
+ <a href="base/ArrayObject.php.html#29"><circle cx="780.0" cy="344.5" r="4.0" class="bubble-success"><title>orange\framework\base\ArrayObject::__set — Coverage: 100.0% | Lines: 1 | Complexity: 1</title></circle></a>
+ <a href="base/ArrayObject.php.html#57"><circle cx="780.0" cy="344.5" r="4.0" class="bubble-success"><title>orange\framework\base\ArrayObject::has — Coverage: 100.0% | Lines: 1 | Complexity: 1</title></circle></a>
+ <a href="base/ArrayObject.php.html#68"><circle cx="780.0" cy="344.5" r="4.0" class="bubble-success"><title>orange\framework\base\ArrayObject::__get — Coverage: 100.0% | Lines: 1 | Complexity: 1</title></circle></a>
+ <a href="base/ArrayObject.php.html#81"><circle cx="780.0" cy="344.5" r="4.0" class="bubble-success"><title>orange\framework\base\ArrayObject::get — Coverage: 100.0% | Lines: 1 | Complexity: 1</title></circle></a>
+ <a href="base/SingletonArrayObject.php.html#20"><circle cx="780.0" cy="344.5" r="4.0" class="bubble-success"><title>orange\framework\base\SingletonArrayObject::__construct — Coverage: 100.0% | Lines: 1 | Complexity: 1</title></circle></a>
+ <a href="controllers/FourohFourController.php.html#11"><circle cx="60.0" cy="344.5" r="4.0" class="bubble-danger"><title>orange\framework\controllers\FourohfourController::index — Coverage: 0.0% | Lines: 1 | Complexity: 1</title></circle></a>
+ <a href="exceptions/OrangeException.php.html#31"><circle cx="780.0" cy="344.5" r="4.0" class="bubble-success"><title>orange\framework\exceptions\OrangeException::decorate — Coverage: 100.0% | Lines: 1 | Complexity: 1</title></circle></a>
+ <a href="exceptions/http/Http.php.html#43"><circle cx="780.0" cy="344.5" r="4.0" class="bubble-success"><title>orange\framework\exceptions\http\Http::getHttpCode — Coverage: 100.0% | Lines: 1 | Complexity: 1</title></circle></a>
+ <a href="exceptions/http/Http301.php.html#12"><circle cx="780.0" cy="344.5" r="4.0" class="bubble-success"><title>orange\framework\exceptions\http\Http301::__construct — Coverage: 100.0% | Lines: 1 | Complexity: 1</title></circle></a>
+ <a href="helpers/Ary.php.html#130"><circle cx="780.0" cy="339.0" r="4.0" class="bubble-success"><title>orange\framework\helpers\Ary::element — Coverage: 100.0% | Lines: 1 | Complexity: 2</title></circle></a>
+ <a href="helpers/Ary.php.html#143"><circle cx="780.0" cy="344.5" r="4.0" class="bubble-success"><title>orange\framework\helpers\Ary::randomElement — Coverage: 100.0% | Lines: 1 | Complexity: 1</title></circle></a>
+ <a href="helpers/DirectorySearch.php.html#229"><circle cx="780.0" cy="344.5" r="4.0" class="bubble-success"><title>orange\framework\helpers\DirectorySearch::listDirectories — Coverage: 100.0% | Lines: 1 | Complexity: 1</title></circle></a>
+ <a href="helpers/DirectorySearch.php.html#267"><circle cx="780.0" cy="344.5" r="4.0" class="bubble-success"><title>orange\framework\helpers\DirectorySearch::directoryExists — Coverage: 100.0% | Lines: 1 | Complexity: 1</title></circle></a>
+ <a href="helpers/DirectorySearch.php.html#524"><circle cx="780.0" cy="344.5" r="4.0" class="bubble-success"><title>orange\framework\helpers\DirectorySearch::isLocked — Coverage: 100.0% | Lines: 1 | Complexity: 1</title></circle></a>
+ <a href="helpers/DirectorySearch.php.html#534"><circle cx="780.0" cy="344.5" r="4.0" class="bubble-success"><title>orange\framework\helpers\DirectorySearch::__debugInfo — Coverage: 100.0% | Lines: 1 | Complexity: 1</title></circle></a>
+ <a href="helpers/Dot.php.html#25"><circle cx="780.0" cy="344.5" r="4.0" class="bubble-success"><title>orange\framework\helpers\Dot::changeDelimiter — Coverage: 100.0% | Lines: 1 | Complexity: 1</title></circle></a>
+ <a href="property/RouterCallback.php.html#9"><circle cx="780.0" cy="344.5" r="4.0" class="bubble-success"><title>orange\framework\property\RouterCallback::__construct — Coverage: 100.0% | Lines: 1 | Complexity: 1</title></circle></a>
+ <a href="base/traits/BaseTraits.php.html#20"><circle cx="780.0" cy="344.5" r="4.0" class="bubble-success"><title>orange\framework\base\traits\BaseTraits::__construct — Coverage: 100.0% | Lines: 1 | Complexity: 1</title></circle></a>
+ <a href="base/traits/BaseTraits.php.html#46"><circle cx="780.0" cy="344.5" r="4.0" class="bubble-success"><title>orange\framework\base\traits\BaseTraits::__clone — Coverage: 100.0% | Lines: 1 | Complexity: 1</title></circle></a>
+ <a href="base/traits/BaseTraits.php.html#58"><circle cx="780.0" cy="344.5" r="4.0" class="bubble-success"><title>orange\framework\base\traits\BaseTraits::__wakeup — Coverage: 100.0% | Lines: 1 | Complexity: 1</title></circle></a>
+ <a href="traits/ConfigurationTrait.php.html#125"><circle cx="780.0" cy="344.5" r="4.0" class="bubble-success"><title>orange\framework\traits\ConfigurationTrait::getConfigFile — Coverage: 100.0% | Lines: 1 | Complexity: 1</title></circle></a>
+ <a href="traits/ConfigurationTrait.php.html#232"><circle cx="780.0" cy="344.5" r="4.0" class="bubble-success"><title>orange\framework\traits\ConfigurationTrait::normalize — Coverage: 100.0% | Lines: 1 | Complexity: 1</title></circle></a>
+ <a href="traits/ConfigurationTrait.php.html#261"><circle cx="780.0" cy="344.5" r="4.0" class="bubble-success"><title>orange\framework\traits\ConfigurationTrait::underscore — Coverage: 100.0% | Lines: 1 | Complexity: 1</title></circle></a>
+ <a href="traits/ConfigurationTrait.php.html#275"><circle cx="780.0" cy="344.5" r="4.0" class="bubble-success"><title>orange\framework\traits\ConfigurationTrait::humanize — Coverage: 100.0% | Lines: 1 | Complexity: 1</title></circle></a>
+</svg>
      </div>
     </div>
-    <div class="col-md-6">
-     <h3>Complexity</h3>
-     <div id="methodComplexity" style="height: 300px;">
-       <svg></svg>
-     </div>
-    </div>
-   </div>
-   <div class="row">
-    <div class="col-md-6">
-     <h3>Insufficient Coverage</h3>
+    <div class="col-md-6 dashboard-column">
+     <h3>&nbsp;</h3>
+     <p class="text-muted small">Sorted by descending CRAP (Change Risk Anti-Patterns) index.</p>
      <div class="scrollbox">
-      <table class="table">
-       <thead>
-        <tr>
-         <th>Method</th>
-         <th class="text-right">Coverage</th>
-        </tr>
-       </thead>
-       <tbody>
-       <tr><td><a href="Error.php.html#315"><abbr title="orange\framework\Error::sendOutput">sendOutput</abbr></a></td><td class="text-right">0%</td></tr>
-       <tr><td><a href="Output.php.html#564"><abbr title="orange\framework\Output::phpExit">phpExit</abbr></a></td><td class="text-right">0%</td></tr>
-       <tr><td><a href="Output.php.html#578"><abbr title="orange\framework\Output::phpHeader">phpHeader</abbr></a></td><td class="text-right">0%</td></tr>
-       <tr><td><a href="controllers/BaseController.php.html#45"><abbr title="orange\framework\controllers\BaseController::__construct">__construct</abbr></a></td><td class="text-right">0%</td></tr>
-       <tr><td><a href="controllers/BaseController.php.html#83"><abbr title="orange\framework\controllers\BaseController::autoAttachService">autoAttachService</abbr></a></td><td class="text-right">0%</td></tr>
-       <tr><td><a href="controllers/FourohFourController.php.html#11"><abbr title="orange\framework\controllers\FourohfourController::index">index</abbr></a></td><td class="text-right">0%</td></tr>
-       <tr><td><a href="controllers/HomeController.php.html#11"><abbr title="orange\framework\controllers\HomeController::index">index</abbr></a></td><td class="text-right">0%</td></tr>
-       <tr><td><a href="Config.php.html#122"><abbr title="orange\framework\Config::__construct">__construct</abbr></a></td><td class="text-right">55%</td></tr>
-       <tr><td><a href="Container.php.html#325"><abbr title="orange\framework\Container::getServiceType">getServiceType</abbr></a></td><td class="text-right">63%</td></tr>
-       <tr><td><a href="Input.php.html#318"><abbr title="orange\framework\Input::requestMethod">requestMethod</abbr></a></td><td class="text-right">66%</td></tr>
-       <tr><td><a href="Input.php.html#505"><abbr title="orange\framework\Input::detectRequest">detectRequest</abbr></a></td><td class="text-right">66%</td></tr>
-       <tr><td><a href="Event.php.html#332"><abbr title="orange\framework\Event::registerEvent">registerEvent</abbr></a></td><td class="text-right">73%</td></tr>
-       <tr><td><a href="Application.php.html#418"><abbr title="orange\framework\Application::loadEnvironment">loadEnvironment</abbr></a></td><td class="text-right">77%</td></tr>
-       <tr><td><a href="helpers/Ary.php.html#77"><abbr title="orange\framework\helpers\Ary::makeAssociated">makeAssociated</abbr></a></td><td class="text-right">80%</td></tr>
-       <tr><td><a href="Application.php.html#230"><abbr title="orange\framework\Application::bootstrap">bootstrap</abbr></a></td><td class="text-right">86%</td></tr>
-       <tr><td><a href="helpers/DirectorySearch.php.html#708"><abbr title="orange\framework\helpers\DirectorySearch::setupResourceKeyStyle">setupResourceKeyStyle</abbr></a></td><td class="text-right">87%</td></tr>
-       <tr><td><a href="Container.php.html#490"><abbr title="orange\framework\Container::isSingleton">isSingleton</abbr></a></td><td class="text-right">88%</td></tr>
-
-       </tbody>
-      </table>
-     </div>
-    </div>
-    <div class="col-md-6">
-     <h3>Project Risks</h3>
-     <div class="scrollbox">
-      <table class="table">
-       <thead>
-        <tr>
-         <th>Method</th>
-         <th class="text-right"><abbr title="Change Risk Anti-Patterns (CRAP) Index">CRAP</abbr></th>
-        </tr>
-       </thead>
-       <tbody>
-       <tr><td><a href="controllers/BaseController.php.html#45"><abbr title="orange\framework\controllers\BaseController::__construct">__construct</abbr></a></td><td class="text-right">56</td></tr>
-       <tr><td><a href="controllers/BaseController.php.html#83"><abbr title="orange\framework\controllers\BaseController::autoAttachService">autoAttachService</abbr></a></td><td class="text-right">12</td></tr>
-       <tr><td><a href="helpers/DirectorySearch.php.html#708"><abbr title="orange\framework\helpers\DirectorySearch::setupResourceKeyStyle">setupResourceKeyStyle</abbr></a></td><td class="text-right">11</td></tr>
-       <tr><td><a href="helpers/Ary.php.html#77"><abbr title="orange\framework\helpers\Ary::makeAssociated">makeAssociated</abbr></a></td><td class="text-right">9</td></tr>
-       <tr><td><a href="Container.php.html#325"><abbr title="orange\framework\Container::getServiceType">getServiceType</abbr></a></td><td class="text-right">9</td></tr>
-       <tr><td><a href="Application.php.html#230"><abbr title="orange\framework\Application::bootstrap">bootstrap</abbr></a></td><td class="text-right">8</td></tr>
-       <tr><td><a href="Input.php.html#318"><abbr title="orange\framework\Input::requestMethod">requestMethod</abbr></a></td><td class="text-right">7</td></tr>
-       <tr><td><a href="Input.php.html#505"><abbr title="orange\framework\Input::detectRequest">detectRequest</abbr></a></td><td class="text-right">7</td></tr>
-       <tr><td><a href="Application.php.html#418"><abbr title="orange\framework\Application::loadEnvironment">loadEnvironment</abbr></a></td><td class="text-right">5</td></tr>
-       <tr><td><a href="Event.php.html#332"><abbr title="orange\framework\Event::registerEvent">registerEvent</abbr></a></td><td class="text-right">4</td></tr>
-       <tr><td><a href="Container.php.html#490"><abbr title="orange\framework\Container::isSingleton">isSingleton</abbr></a></td><td class="text-right">4</td></tr>
-       <tr><td><a href="Config.php.html#122"><abbr title="orange\framework\Config::__construct">__construct</abbr></a></td><td class="text-right">3</td></tr>
-
-       </tbody>
-      </table>
+<table class="table">
+ <thead>
+  <tr>
+   <th>Method</th>
+   <th class="text-right"><abbr title="Change Risk Anti-Patterns (CRAP) Index">CRAP</abbr></th>
+   <th class="text-right">Coverage</th>
+  </tr>
+ </thead>
+ <tbody>
+  <tr><td><a href="controllers/BaseController.php.html#45">orange\framework\controllers\BaseController::__construct</a></td><td class="text-right">56</td><td class="text-right">0.0%</td></tr>
+  <tr><td><a href="traits/ConfigurationTrait.php.html#292">orange\framework\traits\ConfigurationTrait::validateConfig</a></td><td class="text-right">48.98</td><td class="text-right">90.4%</td></tr>
+  <tr><td><a href="abstract/ViewAbstract.php.html#432">orange\framework\abstract\ViewAbstract::resolveDynamicView</a></td><td class="text-right">13</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="controllers/BaseController.php.html#83">orange\framework\controllers\BaseController::autoAttachService</a></td><td class="text-right">12</td><td class="text-right">0.0%</td></tr>
+  <tr><td><a href="Error.php.html#168">orange\framework\Error::__construct</a></td><td class="text-right">10</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Router.php.html#394">orange\framework\Router::getUrl</a></td><td class="text-right">10</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="helpers/Dot.php.html#79">orange\framework\helpers\Dot::get</a></td><td class="text-right">10</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="helpers/DirectorySearch.php.html#708">orange\framework\helpers\DirectorySearch::setupResourceKeyStyle</a></td><td class="text-right">9.65</td><td class="text-right">80.0%</td></tr>
+  <tr><td><a href="helpers/Ary.php.html#77">orange\framework\helpers\Ary::makeAssociated</a></td><td class="text-right">9.56</td><td class="text-right">81.0%</td></tr>
+  <tr><td><a href="Security.php.html#117">orange\framework\Security::createKeys</a></td><td class="text-right">9</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="traits/ConfigurationTrait.php.html#28">orange\framework\traits\ConfigurationTrait::changeOption</a></td><td class="text-right">9</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Application.php.html#230">orange\framework\Application::bootstrap</a></td><td class="text-right">8.17</td><td class="text-right">86.2%</td></tr>
+  <tr><td><a href="Container.php.html#534">orange\framework\Container::autoWire</a></td><td class="text-right">8.01</td><td class="text-right">94.4%</td></tr>
+  <tr><td><a href="helpers/Dot.php.html#151">orange\framework\helpers\Dot::unset</a></td><td class="text-right">8</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="helpers/Dot.php.html#226">orange\framework\helpers\Dot::expand</a></td><td class="text-right">8</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="traits/ConfigurationTrait.php.html#86">orange\framework\traits\ConfigurationTrait::mergeConfigWith</a></td><td class="text-right">8</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Input.php.html#318">orange\framework\Input::requestMethod</a></td><td class="text-right">7.33</td><td class="text-right">66.7%</td></tr>
+  <tr><td><a href="Input.php.html#505">orange\framework\Input::detectRequest</a></td><td class="text-right">7.33</td><td class="text-right">66.7%</td></tr>
+  <tr><td><a href="Container.php.html#317">orange\framework\Container::getServiceType</a></td><td class="text-right">7.07</td><td class="text-right">88.9%</td></tr>
+  <tr><td><a href="Application.php.html#313">orange\framework\Application::preContainer</a></td><td class="text-right">7</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Input.php.html#393">orange\framework\Input::isHttpsRequest</a></td><td class="text-right">7</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Output.php.html#503">orange\framework\Output::detectAcceptsType</a></td><td class="text-right">7</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Output.php.html#587">orange\framework\Output::handleCors</a></td><td class="text-right">7</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Router.php.html#225">orange\framework\Router::addRoute</a></td><td class="text-right">7</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="helpers/DirectorySearch.php.html#175">orange\framework\helpers\DirectorySearch::removeDirectory</a></td><td class="text-right">7</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="helpers/Dot.php.html#38">orange\framework\helpers\Dot::set</a></td><td class="text-right">7</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Container.php.html#143">orange\framework\Container::get</a></td><td class="text-right">6</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Dispatcher.php.html#92">orange\framework\Dispatcher::call</a></td><td class="text-right">6</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Error.php.html#457">orange\framework\Error::viewRawBuildHtml</a></td><td class="text-right">6</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Input.php.html#350">orange\framework\Input::requestType</a></td><td class="text-right">6</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Output.php.html#397">orange\framework\Output::header</a></td><td class="text-right">6</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="helpers/DirectorySearch.php.html#545">orange\framework\helpers\DirectorySearch::scanDirectories</a></td><td class="text-right">6</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="helpers/Dot.php.html#199">orange\framework\helpers\Dot::flatten</a></td><td class="text-right">6</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Application.php.html#418">orange\framework\Application::loadEnvironment</a></td><td class="text-right">5.27</td><td class="text-right">77.8%</td></tr>
+  <tr><td><a href="traits/ConfigurationTrait.php.html#130">orange\framework\traits\ConfigurationTrait::determineConfigPath</a></td><td class="text-right">5.01</td><td class="text-right">92.9%</td></tr>
+  <tr><td><a href="Config.php.html#220">orange\framework\Config::load</a></td><td class="text-right">5</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Event.php.html#214">orange\framework\Event::trigger</a></td><td class="text-right">5</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Log.php.html#327">orange\framework\Log::convert2</a></td><td class="text-right">5</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Log.php.html#354">orange\framework\Log::isFileWritable</a></td><td class="text-right">5</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Output.php.html#254">orange\framework\Output::send</a></td><td class="text-right">5</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Output.php.html#319">orange\framework\Output::contentType</a></td><td class="text-right">5</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Router.php.html#299">orange\framework\Router::match</a></td><td class="text-right">5</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Router.php.html#509">orange\framework\Router::getRoutes</a></td><td class="text-right">5</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="abstract/ViewAbstract.php.html#151">orange\framework\abstract\ViewAbstract::__construct</a></td><td class="text-right">5</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="abstract/ViewAbstract.php.html#258">orange\framework\abstract\ViewAbstract::renderString</a></td><td class="text-right">5</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="exceptions/http/Http.php.html#12">orange\framework\exceptions\http\Http::__construct</a></td><td class="text-right">5</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="helpers/DirectorySearch.php.html#683">orange\framework\helpers\DirectorySearch::callback</a></td><td class="text-right">5</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Event.php.html#332">orange\framework\Event::registerEvent</a></td><td class="text-right">4.30</td><td class="text-right">73.3%</td></tr>
+  <tr><td><a href="Container.php.html#471">orange\framework\Container::isSingleton</a></td><td class="text-right">4.02</td><td class="text-right">88.9%</td></tr>
+  <tr><td><a href="Application.php.html#124">orange\framework\Application::make</a></td><td class="text-right">4</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Application.php.html#360">orange\framework\Application::bootstrapContainer</a></td><td class="text-right">4</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Application.php.html#488">orange\framework\Application::loadConfigFile</a></td><td class="text-right">4</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Config.php.html#255">orange\framework\Config::findAllConfigFilesInEachDirectory</a></td><td class="text-right">4</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Container.php.html#191">orange\framework\Container::set</a></td><td class="text-right">4</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Container.php.html#432">orange\framework\Container::getAlias</a></td><td class="text-right">4</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Error.php.html#280">orange\framework\Error::sendResponseCode</a></td><td class="text-right">4</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Error.php.html#437">orange\framework\Error::viewRaw</a></td><td class="text-right">4</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Event.php.html#266">orange\framework\Event::unregister</a></td><td class="text-right">4</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Input.php.html#470">orange\framework\Input::detectServerHeaders</a></td><td class="text-right">4</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Log.php.html#154">orange\framework\Log::__construct</a></td><td class="text-right">4</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Log.php.html#231">orange\framework\Log::write</a></td><td class="text-right">4</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Output.php.html#461">orange\framework\Output::responseCode</a></td><td class="text-right">4</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Router.php.html#151">orange\framework\Router::__construct</a></td><td class="text-right">4</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Router.php.html#358">orange\framework\Router::getMatched</a></td><td class="text-right">4</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Router.php.html#371">orange\framework\Router::getRouterCallback</a></td><td class="text-right">4</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Router.php.html#470">orange\framework\Router::siteUrl</a></td><td class="text-right">4</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Security.php.html#414">orange\framework\Security::getKeyFilePath</a></td><td class="text-right">4</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="abstract/ViewAbstract.php.html#224">orange\framework\abstract\ViewAbstract::render</a></td><td class="text-right">4</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="abstract/ViewAbstract.php.html#299">orange\framework\abstract\ViewAbstract::change</a></td><td class="text-right">4</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="abstract/ViewAbstract.php.html#363">orange\framework\abstract\ViewAbstract::isFileWritable</a></td><td class="text-right">4</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="base/ArrayObject.php.html#94">orange\framework\base\ArrayObject::merge</a></td><td class="text-right">4</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="helpers/Ary.php.html#161">orange\framework\helpers\Ary::elements</a></td><td class="text-right">4</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="helpers/DirectorySearch.php.html#115">orange\framework\helpers\DirectorySearch::addDirectory</a></td><td class="text-right">4</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="helpers/DirectorySearch.php.html#151">orange\framework\helpers\DirectorySearch::addDirectories</a></td><td class="text-right">4</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="helpers/DirectorySearch.php.html#584">orange\framework\helpers\DirectorySearch::recursiveGlob</a></td><td class="text-right">4</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="traits/ConfigurationTrait.php.html#175">orange\framework\traits\ConfigurationTrait::setFromConfig</a></td><td class="text-right">4</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="traits/ConfigurationTrait.php.html#208">orange\framework\traits\ConfigurationTrait::assignFromConfig</a></td><td class="text-right">4</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Config.php.html#122">orange\framework\Config::__construct</a></td><td class="text-right">3.79</td><td class="text-right">55.6%</td></tr>
+  <tr><td><a href="Output.php.html#140">orange\framework\Output::__construct</a></td><td class="text-right">3.01</td><td class="text-right">90.9%</td></tr>
+  <tr><td><a href="Application.php.html#452">orange\framework\Application::setConfigDirectories</a></td><td class="text-right">3</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Application.php.html#525">orange\framework\Application::loadEnvironmentFile</a></td><td class="text-right">3</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Config.php.html#195">orange\framework\Config::get</a></td><td class="text-right">3</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Error.php.html#340">orange\framework\Error::renderViewBasedOnCode</a></td><td class="text-right">3</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Error.php.html#358">orange\framework\Error::findView</a></td><td class="text-right">3</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Error.php.html#402">orange\framework\Error::getService</a></td><td class="text-right">3</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Event.php.html#131">orange\framework\Event::__construct</a></td><td class="text-right">3</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Event.php.html#290">orange\framework\Event::unregisterAll</a></td><td class="text-right">3</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Log.php.html#295">orange\framework\Log::log</a></td><td class="text-right">3</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Output.php.html#224">orange\framework\Output::resolveTrustedHost</a></td><td class="text-right">3</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Router.php.html#491">orange\framework\Router::updateCache</a></td><td class="text-right">3</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Security.php.html#178">orange\framework\Security::restrictToCurrentUser</a></td><td class="text-right">3</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Security.php.html#214">orange\framework\Security::decrypt</a></td><td class="text-right">3</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Security.php.html#269">orange\framework\Security::verifySignature</a></td><td class="text-right">3</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="base/ArrayObject.php.html#42">orange\framework\base\ArrayObject::__call</a></td><td class="text-right">3</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="helpers/Ary.php.html#16">orange\framework\helpers\Ary::remapKey</a></td><td class="text-right">3</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="helpers/Ary.php.html#35">orange\framework\helpers\Ary::remapValue</a></td><td class="text-right">3</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="helpers/DirectorySearch.php.html#402">orange\framework\helpers\DirectorySearch::find</a></td><td class="text-right">3</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="helpers/DirectorySearch.php.html#615">orange\framework\helpers\DirectorySearch::addMatches</a></td><td class="text-right">3</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="helpers/DirectorySearch.php.html#656">orange\framework\helpers\DirectorySearch::normalizeKey</a></td><td class="text-right">3</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Container.php.html#105">orange\framework\Container::__construct</a></td><td class="text-right">2</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Container.php.html#287">orange\framework\Container::debugInfo</a></td><td class="text-right">2</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Container.php.html#411">orange\framework\Container::callClosure</a></td><td class="text-right">2</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Container.php.html#458">orange\framework\Container::setMany</a></td><td class="text-right">2</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Container.php.html#501">orange\framework\Container::convertToSingleton</a></td><td class="text-right">2</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Container.php.html#591">orange\framework\Container::resolveAutoWireArgs</a></td><td class="text-right">2</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Error.php.html#300">orange\framework\Error::sendMimeType</a></td><td class="text-right">2</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Error.php.html#315">orange\framework\Error::sendOutput</a></td><td class="text-right">2</td><td class="text-right">0.0%</td></tr>
+  <tr><td><a href="Event.php.html#196">orange\framework\Event::registerMultiple</a></td><td class="text-right">2</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Input.php.html#219">orange\framework\Input::server</a></td><td class="text-right">2</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Input.php.html#236">orange\framework\Input::header</a></td><td class="text-right">2</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Input.php.html#252">orange\framework\Input::getUrl</a></td><td class="text-right">2</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Input.php.html#302">orange\framework\Input::contentType</a></td><td class="text-right">2</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Input.php.html#421">orange\framework\Input::setGlobals</a></td><td class="text-right">2</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Input.php.html#546">orange\framework\Input::extract</a></td><td class="text-right">2</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Log.php.html#187">orange\framework\Log::changeThreshold</a></td><td class="text-right">2</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Log.php.html#314">orange\framework\Log::isLevelEnabled</a></td><td class="text-right">2</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Output.php.html#182">orange\framework\Output::redirect</a></td><td class="text-right">2</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Output.php.html#197">orange\framework\Output::forceHttps</a></td><td class="text-right">2</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Output.php.html#293">orange\framework\Output::write</a></td><td class="text-right">2</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Output.php.html#568">orange\framework\Output::phpExit</a></td><td class="text-right">2</td><td class="text-right">0.0%</td></tr>
+  <tr><td><a href="Output.php.html#582">orange\framework\Output::phpHeader</a></td><td class="text-right">2</td><td class="text-right">0.0%</td></tr>
+  <tr><td><a href="Router.php.html#269">orange\framework\Router::addRoutes</a></td><td class="text-right">2</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="abstract/ViewAbstract.php.html#332">orange\framework\abstract\ViewAbstract::generate</a></td><td class="text-right">2</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="abstract/ViewAbstract.php.html#411">orange\framework\abstract\ViewAbstract::data</a></td><td class="text-right">2</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="base/ArrayObject.php.html#123">orange\framework\base\ArrayObject::buildArrayObjects</a></td><td class="text-right">2</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="controllers/FourohFourController.php.html#11">orange\framework\controllers\FourohfourController::index</a></td><td class="text-right">2</td><td class="text-right">0.0%</td></tr>
+  <tr><td><a href="controllers/HomeController.php.html#11">orange\framework\controllers\HomeController::index</a></td><td class="text-right">2</td><td class="text-right">0.0%</td></tr>
+  <tr><td><a href="helpers/Ary.php.html#57">orange\framework\helpers\Ary::wrapArray</a></td><td class="text-right">2</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="helpers/Ary.php.html#130">orange\framework\helpers\Ary::element</a></td><td class="text-right">2</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="helpers/DirectorySearch.php.html#215">orange\framework\helpers\DirectorySearch::removeDirectories</a></td><td class="text-right">2</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="helpers/DirectorySearch.php.html#242">orange\framework\helpers\DirectorySearch::replaceDirectories</a></td><td class="text-right">2</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="helpers/DirectorySearch.php.html#278">orange\framework\helpers\DirectorySearch::flushDirectories</a></td><td class="text-right">2</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="helpers/DirectorySearch.php.html#303">orange\framework\helpers\DirectorySearch::addResource</a></td><td class="text-right">2</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="helpers/DirectorySearch.php.html#324">orange\framework\helpers\DirectorySearch::addResources</a></td><td class="text-right">2</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="helpers/DirectorySearch.php.html#386">orange\framework\helpers\DirectorySearch::removeResources</a></td><td class="text-right">2</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="helpers/DirectorySearch.php.html#424">orange\framework\helpers\DirectorySearch::findAll</a></td><td class="text-right">2</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="helpers/DirectorySearch.php.html#637">orange\framework\helpers\DirectorySearch::ifLockedThrowException</a></td><td class="text-right">2</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="base/traits/SingletonTraits.php.html#27">orange\framework\base\traits\SingletonTraits::getInstance</a></td><td class="text-right">2</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="traits/ConfigurationTrait.php.html#246">orange\framework\traits\ConfigurationTrait::camelize</a></td><td class="text-right">2</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Application.php.html#111">orange\framework\Application::__construct</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Application.php.html#150">orange\framework\Application::get</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Application.php.html#167">orange\framework\Application::http</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Application.php.html#212">orange\framework\Application::run</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Application.php.html#393">orange\framework\Application::postContainer</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Application.php.html#407">orange\framework\Application::env</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Config.php.html#150">orange\framework\Config::__get</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Config.php.html#161">orange\framework\Config::offsetExists</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Config.php.html#180">orange\framework\Config::offsetGet</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Container.php.html#128">orange\framework\Container::__get</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Container.php.html#178">orange\framework\Container::__set</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Container.php.html#214">orange\framework\Container::__isset</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Container.php.html#225">orange\framework\Container::isset</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Container.php.html#237">orange\framework\Container::has</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Container.php.html#247">orange\framework\Container::__unset</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Container.php.html#257">orange\framework\Container::unset</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Container.php.html#267">orange\framework\Container::remove</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Container.php.html#277">orange\framework\Container::__debugInfo</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Container.php.html#303">orange\framework\Container::getServices</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Container.php.html#344">orange\framework\Container::attach</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Container.php.html#361">orange\framework\Container::addAlias</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Container.php.html#373">orange\framework\Container::addClosure</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Container.php.html#385">orange\framework\Container::addAutoWireClass</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Container.php.html#397">orange\framework\Container::addValue</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Data.php.html#35">orange\framework\Data::__construct</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Error.php.html#264">orange\framework\Error::show</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Event.php.html#158">orange\framework\Event::disable</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Event.php.html#167">orange\framework\Event::enable</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Event.php.html#181">orange\framework\Event::register</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Event.php.html#241">orange\framework\Event::has</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Event.php.html#253">orange\framework\Event::triggers</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Event.php.html#316">orange\framework\Event::listeners</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Event.php.html#382">orange\framework\Event::registerClosureEvent</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Input.php.html#119">orange\framework\Input::__construct</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Input.php.html#149">orange\framework\Input::request</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Input.php.html#164">orange\framework\Input::query</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Input.php.html#176">orange\framework\Input::inputStream</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Input.php.html#189">orange\framework\Input::cookie</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Input.php.html#204">orange\framework\Input::file</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Input.php.html#266">orange\framework\Input::requestUri</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Input.php.html#286">orange\framework\Input::uriSegment</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Input.php.html#371">orange\framework\Input::isAjaxRequest</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Input.php.html#381">orange\framework\Input::isCliRequest</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Input.php.html#458">orange\framework\Input::fromGlobals</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Input.php.html#490">orange\framework\Input::normalizeServerKey</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Log.php.html#209">orange\framework\Log::getThreshold</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Log.php.html#219">orange\framework\Log::isEnabled</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Log.php.html#254">orange\framework\Log::emergency</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Log.php.html#259">orange\framework\Log::alert</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Log.php.html#264">orange\framework\Log::critical</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Log.php.html#269">orange\framework\Log::error</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Log.php.html#274">orange\framework\Log::warning</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Log.php.html#279">orange\framework\Log::notice</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Log.php.html#284">orange\framework\Log::info</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Log.php.html#289">orange\framework\Log::debug</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Output.php.html#169">orange\framework\Output::__toString</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Output.php.html#242">orange\framework\Output::flushAll</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Output.php.html#277">orange\framework\Output::flush</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Output.php.html#307">orange\framework\Output::get</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Output.php.html#349">orange\framework\Output::getContentType</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Output.php.html#362">orange\framework\Output::charSet</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Output.php.html#378">orange\framework\Output::getCharSet</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Output.php.html#429">orange\framework\Output::getHeaders</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Output.php.html#443">orange\framework\Output::flushHeaders</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Output.php.html#490">orange\framework\Output::getResponseCode</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Output.php.html#527">orange\framework\Output::getContentTypeHeader</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Output.php.html#542">orange\framework\Output::getResponseHeader</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Output.php.html#556">orange\framework\Output::phpEcho</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Router.php.html#203">orange\framework\Router::resetMatched</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Router.php.html#538">orange\framework\Router::addConfigRoutes</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Security.php.html#87">orange\framework\Security::__construct</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Security.php.html#192">orange\framework\Security::encrypt</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Security.php.html#248">orange\framework\Security::createSignature</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Security.php.html#302">orange\framework\Security::encodePassword</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Security.php.html#320">orange\framework\Security::verifyPassword</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Security.php.html#338">orange\framework\Security::removeInvisibleCharacters</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Security.php.html#357">orange\framework\Security::cleanFilename</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="abstract/ViewAbstract.php.html#197">orange\framework\abstract\ViewAbstract::search</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="abstract/ViewAbstract.php.html#209">orange\framework\abstract\ViewAbstract::addAlias</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="abstract/ViewAbstract.php.html#395">orange\framework\abstract\ViewAbstract::resolveAlias</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="attributes/AttachService.php.html#41">orange\framework\attributes\AttachService::__construct</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="attributes/AutoWire.php.html#41">orange\framework\attributes\AutoWire::__construct</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="attributes/Route.php.html#56">orange\framework\attributes\Route::__construct</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="base/ArrayObject.php.html#17">orange\framework\base\ArrayObject::__construct</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="base/ArrayObject.php.html#29">orange\framework\base\ArrayObject::__set</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="base/ArrayObject.php.html#57">orange\framework\base\ArrayObject::has</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="base/ArrayObject.php.html#68">orange\framework\base\ArrayObject::__get</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="base/ArrayObject.php.html#81">orange\framework\base\ArrayObject::get</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="base/SingletonArrayObject.php.html#20">orange\framework\base\SingletonArrayObject::__construct</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="exceptions/OrangeException.php.html#18">orange\framework\exceptions\OrangeException::__construct</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="exceptions/OrangeException.php.html#31">orange\framework\exceptions\OrangeException::decorate</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="exceptions/http/Http.php.html#43">orange\framework\exceptions\http\Http::getHttpCode</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="exceptions/http/Http301.php.html#12">orange\framework\exceptions\http\Http301::__construct</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="exceptions/http/Http301.php.html#20">orange\framework\exceptions\http\Http301::decorate</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="helpers/Ary.php.html#143">orange\framework\helpers\Ary::randomElement</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="helpers/DirectorySearch.php.html#86">orange\framework\helpers\DirectorySearch::__construct</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="helpers/DirectorySearch.php.html#229">orange\framework\helpers\DirectorySearch::listDirectories</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="helpers/DirectorySearch.php.html#267">orange\framework\helpers\DirectorySearch::directoryExists</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="helpers/DirectorySearch.php.html#339">orange\framework\helpers\DirectorySearch::replaceResources</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="helpers/DirectorySearch.php.html#352">orange\framework\helpers\DirectorySearch::flushResources</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="helpers/DirectorySearch.php.html#370">orange\framework\helpers\DirectorySearch::removeResource</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="helpers/DirectorySearch.php.html#444">orange\framework\helpers\DirectorySearch::list</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="helpers/DirectorySearch.php.html#459">orange\framework\helpers\DirectorySearch::findFirst</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="helpers/DirectorySearch.php.html#474">orange\framework\helpers\DirectorySearch::findLast</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="helpers/DirectorySearch.php.html#487">orange\framework\helpers\DirectorySearch::exists</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="helpers/DirectorySearch.php.html#499">orange\framework\helpers\DirectorySearch::lock</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="helpers/DirectorySearch.php.html#512">orange\framework\helpers\DirectorySearch::unlock</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="helpers/DirectorySearch.php.html#524">orange\framework\helpers\DirectorySearch::isLocked</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="helpers/DirectorySearch.php.html#534">orange\framework\helpers\DirectorySearch::__debugInfo</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="helpers/DirectorySearch.php.html#668">orange\framework\helpers\DirectorySearch::rescan</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="helpers/Dot.php.html#25">orange\framework\helpers\Dot::changeDelimiter</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="helpers/Dot.php.html#133">orange\framework\helpers\Dot::isset</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="property/RouterCallback.php.html#9">orange\framework\property\RouterCallback::__construct</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="base/traits/BaseTraits.php.html#20">orange\framework\base\traits\BaseTraits::__construct</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="base/traits/BaseTraits.php.html#30">orange\framework\base\traits\BaseTraits::newInstance</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="base/traits/BaseTraits.php.html#46">orange\framework\base\traits\BaseTraits::__clone</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="base/traits/BaseTraits.php.html#58">orange\framework\base\traits\BaseTraits::__wakeup</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="base/traits/FactoryTraits.php.html#17">orange\framework\base\traits\FactoryTraits::getInstance</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="traits/ConfigurationTrait.php.html#125">orange\framework\traits\ConfigurationTrait::getConfigFile</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="traits/ConfigurationTrait.php.html#232">orange\framework\traits\ConfigurationTrait::normalize</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="traits/ConfigurationTrait.php.html#261">orange\framework\traits\ConfigurationTrait::underscore</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="traits/ConfigurationTrait.php.html#275">orange\framework\traits\ConfigurationTrait::humanize</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+ </tbody>
+</table>
      </div>
     </div>
    </div>
    <footer>
     <hr/>
     <p>
-     <small>Generated by <a href="https://github.com/sebastianbergmann/php-code-coverage" target="_top">php-code-coverage 10.1.16</a> using <a href="https://www.php.net/" target="_top">PHP 8.5.8</a> and <a href="https://phpunit.de/">PHPUnit 10.5.64</a> at Sat Jul 18 14:53:54 UTC 2026.</small>
+     <small>Generated by <a href="https://github.com/sebastianbergmann/php-code-coverage" target="_top">php-code-coverage 14.2.3</a> using <a href="https://www.php.net/" target="_top">PHP 8.5.8</a> and <a href="https://phpunit.de/">PHPUnit 13.2.4</a> at Sat Jul 18 17:43:40 UTC 2026.</small>
     </p>
    </footer>
   </div>
-  <script src="_js/jquery.min.js?v=10.1.16" type="text/javascript"></script>
-  <script src="_js/d3.min.js?v=10.1.16" type="text/javascript"></script>
-  <script src="_js/nv.d3.min.js?v=10.1.16" type="text/javascript"></script>
-  <script type="text/javascript">
-$(document).ready(function() {
-  nv.addGraph(function() {
-    var chart = nv.models.multiBarChart();
-    chart.tooltips(false)
-      .showControls(false)
-      .showLegend(false)
-      .reduceXTicks(false)
-      .staggerLabels(true)
-      .yAxis.tickFormat(d3.format('d'));
-
-    d3.select('#classCoverageDistribution svg')
-      .datum(getCoverageDistributionData([3,0,0,0,0,0,0,0,0,0,10,92], "Class Coverage"))
-      .transition().duration(500).call(chart);
-
-    nv.utils.windowResize(chart.update);
-
-    return chart;
-  });
-
-  nv.addGraph(function() {
-    var chart = nv.models.multiBarChart();
-    chart.tooltips(false)
-      .showControls(false)
-      .showLegend(false)
-      .reduceXTicks(false)
-      .staggerLabels(true)
-      .yAxis.tickFormat(d3.format('d'));
-
-    d3.select('#methodCoverageDistribution svg')
-      .datum(getCoverageDistributionData([7,0,0,0,0,0,1,3,2,4,2,242], "Method Coverage"))
-      .transition().duration(500).call(chart);
-
-    nv.utils.windowResize(chart.update);
-
-    return chart;
-  });
-
-  function getCoverageDistributionData(data, label) {
-    var labels = [
-      '0%',
-      '0-10%',
-      '10-20%',
-      '20-30%',
-      '30-40%',
-      '40-50%',
-      '50-60%',
-      '60-70%',
-      '70-80%',
-      '80-90%',
-      '90-100%',
-      '100%'
-    ];
-    var values = [];
-    $.each(labels, function(key) {
-      values.push({x: labels[key], y: data[key]});
-    });
-
-    return [
-      {
-        key: label,
-        values: values,
-        color: "#4572A7"
-      }
-    ];
-  }
-  nv.addGraph(function() {
-    var chart = nv.models.scatterChart()
-      .showDistX(true)
-      .showDistY(true)
-      .showLegend(false)
-      .forceX([0, 100]);
-    chart.tooltipContent(function(graph) {
-      return '<p>' + graph.point.class + '</p>';
-    });
-
-    chart.xAxis.axisLabel('Code Coverage (in percent)');
-    chart.yAxis.axisLabel('Cyclomatic Complexity');
-
-    d3.select('#classComplexity svg')
-      .datum(getComplexityData([[94.39252336448598,44,"<a href=\"Application.php.html#97\">orange\\framework\\Application<\/a>"],[90,18,"<a href=\"Config.php.html#92\">orange\\framework\\Config<\/a>"],[92.17391304347827,61,"<a href=\"Container.php.html#90\">orange\\framework\\Container<\/a>"],[100,1,"<a href=\"Data.php.html#29\">orange\\framework\\Data<\/a>"],[100,6,"<a href=\"Dispatcher.php.html#76\">orange\\framework\\Dispatcher<\/a>"],[93.22033898305084,38,"<a href=\"Error.php.html#95\">orange\\framework\\Error<\/a>"],[94.28571428571428,28,"<a href=\"Event.php.html#105\">orange\\framework\\Event<\/a>"],[92.3076923076923,53,"<a href=\"Input.php.html#98\">orange\\framework\\Input<\/a>"],[100,35,"<a href=\"Log.php.html#102\">orange\\framework\\Log<\/a>"],[98.34710743801654,60,"<a href=\"Output.php.html#93\">orange\\framework\\Output<\/a>"],[100,50,"<a href=\"Router.php.html#104\">orange\\framework\\Router<\/a>"],[100,29,"<a href=\"Security.php.html#77\">orange\\framework\\Security<\/a>"],[100,0,"<a href=\"View.php.html#13\">orange\\framework\\View<\/a>"],[100,42,"<a href=\"abstract\/ViewAbstract.php.html#99\">orange\\framework\\abstract\\ViewAbstract<\/a>"],[100,1,"<a href=\"attributes\/AttachService.php.html#38\">orange\\framework\\attributes\\AttachService<\/a>"],[100,1,"<a href=\"attributes\/AutoWire.php.html#38\">orange\\framework\\attributes\\AutoWire<\/a>"],[100,1,"<a href=\"attributes\/Route.php.html#53\">orange\\framework\\attributes\\Route<\/a>"],[100,15,"<a href=\"base\/ArrayObject.php.html#12\">orange\\framework\\base\\ArrayObject<\/a>"],[100,0,"<a href=\"base\/Factory.php.html#10\">orange\\framework\\base\\Factory<\/a>"],[100,0,"<a href=\"base\/Singleton.php.html#10\">orange\\framework\\base\\Singleton<\/a>"],[100,1,"<a href=\"base\/SingletonArrayObject.php.html#11\">orange\\framework\\base\\SingletonArrayObject<\/a>"],[0,10,"<a href=\"controllers\/BaseController.php.html#19\">orange\\framework\\controllers\\BaseController<\/a>"],[0,1,"<a href=\"controllers\/FourohFourController.php.html#9\">orange\\framework\\controllers\\FourohfourController<\/a>"],[0,1,"<a href=\"controllers\/HomeController.php.html#9\">orange\\framework\\controllers\\HomeController<\/a>"],[100,0,"<a href=\"exceptions\/ClassLocked.php.html#9\">orange\\framework\\exceptions\\ClassLocked<\/a>"],[100,0,"<a href=\"exceptions\/IncorrectInterface.php.html#9\">orange\\framework\\exceptions\\IncorrectInterface<\/a>"],[100,0,"<a href=\"exceptions\/InvalidValue.php.html#9\">orange\\framework\\exceptions\\InvalidValue<\/a>"],[100,0,"<a href=\"exceptions\/MagicMethodNotFound.php.html#9\">orange\\framework\\exceptions\\MagicMethodNotFound<\/a>"],[100,0,"<a href=\"exceptions\/MissingRequired.php.html#9\">orange\\framework\\exceptions\\MissingRequired<\/a>"],[100,0,"<a href=\"exceptions\/NotFound.php.html#9\">orange\\framework\\exceptions\\NotFound<\/a>"],[100,2,"<a href=\"exceptions\/OrangeException.php.html#12\">orange\\framework\\exceptions\\OrangeException<\/a>"],[100,0,"<a href=\"exceptions\/ResourceNotFound.php.html#9\">orange\\framework\\exceptions\\ResourceNotFound<\/a>"],[100,0,"<a href=\"exceptions\/config\/Config.php.html#9\">orange\\framework\\exceptions\\config\\Config<\/a>"],[100,0,"<a href=\"exceptions\/config\/ConfigDirectoryNotFound.php.html#9\">orange\\framework\\exceptions\\config\\ConfigDirectoryNotFound<\/a>"],[100,0,"<a href=\"exceptions\/config\/ConfigFileDidNotReturnAnArray.php.html#9\">orange\\framework\\exceptions\\config\\ConfigFileDidNotReturnAnArray<\/a>"],[100,0,"<a href=\"exceptions\/config\/ConfigFileNotFound.php.html#9\">orange\\framework\\exceptions\\config\\ConfigFileNotFound<\/a>"],[100,0,"<a href=\"exceptions\/config\/ConfigNotFound.php.html#9\">orange\\framework\\exceptions\\config\\ConfigNotFound<\/a>"],[100,0,"<a href=\"exceptions\/config\/InvalidConfigurationValue.php.html#9\">orange\\framework\\exceptions\\config\\InvalidConfigurationValue<\/a>"],[100,0,"<a href=\"exceptions\/container\/AutoWire.php.html#9\">orange\\framework\\exceptions\\container\\AutoWire<\/a>"],[100,0,"<a href=\"exceptions\/container\/CannotCloneSingleton.php.html#9\">orange\\framework\\exceptions\\container\\CannotCloneSingleton<\/a>"],[100,0,"<a href=\"exceptions\/container\/CannotUnserializeSingleton.php.html#9\">orange\\framework\\exceptions\\container\\CannotUnserializeSingleton<\/a>"],[100,0,"<a href=\"exceptions\/container\/ConstructorNotPublic.php.html#9\">orange\\framework\\exceptions\\container\\ConstructorNotPublic<\/a>"],[100,0,"<a href=\"exceptions\/container\/Container.php.html#9\">orange\\framework\\exceptions\\container\\Container<\/a>"],[100,0,"<a href=\"exceptions\/container\/FailedToAutoWire.php.html#9\">orange\\framework\\exceptions\\container\\FailedToAutoWire<\/a>"],[100,0,"<a href=\"exceptions\/container\/ServiceNotFound.php.html#9\">orange\\framework\\exceptions\\container\\ServiceNotFound<\/a>"],[100,0,"<a href=\"exceptions\/container\/UnableToResolve.php.html#9\">orange\\framework\\exceptions\\container\\UnableToResolve<\/a>"],[100,0,"<a href=\"exceptions\/dispatcher\/ArgumentMissMatch.php.html#9\">orange\\framework\\exceptions\\dispatcher\\ArgumentMissMatch<\/a>"],[100,0,"<a href=\"exceptions\/dispatcher\/ControllerClassNotFound.php.html#9\">orange\\framework\\exceptions\\dispatcher\\ControllerClassNotFound<\/a>"],[100,0,"<a href=\"exceptions\/dispatcher\/ControllerFileNotFound.php.html#9\">orange\\framework\\exceptions\\dispatcher\\ControllerFileNotFound<\/a>"],[100,0,"<a href=\"exceptions\/dispatcher\/Dispatcher.php.html#9\">orange\\framework\\exceptions\\dispatcher\\Dispatcher<\/a>"],[100,0,"<a href=\"exceptions\/dispatcher\/MethodNotFound.php.html#9\">orange\\framework\\exceptions\\dispatcher\\MethodNotFound<\/a>"],[100,0,"<a href=\"exceptions\/fatal\/DieException.php.html#9\">orange\\framework\\exceptions\\fatal\\DieException<\/a>"],[100,0,"<a href=\"exceptions\/fatal\/ExitException.php.html#9\">orange\\framework\\exceptions\\fatal\\ExitException<\/a>"],[100,0,"<a href=\"exceptions\/fatal\/Fatal.php.html#9\">orange\\framework\\exceptions\\fatal\\Fatal<\/a>"],[100,0,"<a href=\"exceptions\/filesystem\/Directory.php.html#9\">orange\\framework\\exceptions\\filesystem\\Directory<\/a>"],[100,0,"<a href=\"exceptions\/filesystem\/DirectoryNotFound.php.html#9\">orange\\framework\\exceptions\\filesystem\\DirectoryNotFound<\/a>"],[100,0,"<a href=\"exceptions\/filesystem\/DirectoryNotWritable.php.html#9\">orange\\framework\\exceptions\\filesystem\\DirectoryNotWritable<\/a>"],[100,0,"<a href=\"exceptions\/filesystem\/File.php.html#9\">orange\\framework\\exceptions\\filesystem\\File<\/a>"],[100,0,"<a href=\"exceptions\/filesystem\/FileAlreadyExists.php.html#9\">orange\\framework\\exceptions\\filesystem\\FileAlreadyExists<\/a>"],[100,0,"<a href=\"exceptions\/filesystem\/FileNotFound.php.html#9\">orange\\framework\\exceptions\\filesystem\\FileNotFound<\/a>"],[100,0,"<a href=\"exceptions\/filesystem\/FileNotWritable.php.html#9\">orange\\framework\\exceptions\\filesystem\\FileNotWritable<\/a>"],[100,0,"<a href=\"exceptions\/filesystem\/FileSystem.php.html#9\">orange\\framework\\exceptions\\filesystem\\FileSystem<\/a>"],[100,6,"<a href=\"exceptions\/http\/Http.php.html#10\">orange\\framework\\exceptions\\http\\Http<\/a>"],[100,0,"<a href=\"exceptions\/http\/Http200.php.html#7\">orange\\framework\\exceptions\\http\\Http200<\/a>"],[100,0,"<a href=\"exceptions\/http\/Http201.php.html#7\">orange\\framework\\exceptions\\http\\Http201<\/a>"],[100,0,"<a href=\"exceptions\/http\/Http202.php.html#7\">orange\\framework\\exceptions\\http\\Http202<\/a>"],[100,0,"<a href=\"exceptions\/http\/Http204.php.html#7\">orange\\framework\\exceptions\\http\\Http204<\/a>"],[100,2,"<a href=\"exceptions\/http\/Http301.php.html#10\">orange\\framework\\exceptions\\http\\Http301<\/a>"],[100,0,"<a href=\"exceptions\/http\/Http302.php.html#7\">orange\\framework\\exceptions\\http\\Http302<\/a>"],[100,0,"<a href=\"exceptions\/http\/Http304.php.html#7\">orange\\framework\\exceptions\\http\\Http304<\/a>"],[100,0,"<a href=\"exceptions\/http\/Http400.php.html#7\">orange\\framework\\exceptions\\http\\Http400<\/a>"],[100,0,"<a href=\"exceptions\/http\/Http401.php.html#7\">orange\\framework\\exceptions\\http\\Http401<\/a>"],[100,0,"<a href=\"exceptions\/http\/Http403.php.html#7\">orange\\framework\\exceptions\\http\\Http403<\/a>"],[100,0,"<a href=\"exceptions\/http\/Http404.php.html#7\">orange\\framework\\exceptions\\http\\Http404<\/a>"],[100,0,"<a href=\"exceptions\/http\/Http405.php.html#7\">orange\\framework\\exceptions\\http\\Http405<\/a>"],[100,0,"<a href=\"exceptions\/http\/Http406.php.html#7\">orange\\framework\\exceptions\\http\\Http406<\/a>"],[100,0,"<a href=\"exceptions\/http\/Http409.php.html#7\">orange\\framework\\exceptions\\http\\Http409<\/a>"],[100,0,"<a href=\"exceptions\/http\/Http410.php.html#7\">orange\\framework\\exceptions\\http\\Http410<\/a>"],[100,0,"<a href=\"exceptions\/http\/Http418.php.html#7\">orange\\framework\\exceptions\\http\\Http418<\/a>"],[100,0,"<a href=\"exceptions\/http\/Http422.php.html#7\">orange\\framework\\exceptions\\http\\Http422<\/a>"],[100,0,"<a href=\"exceptions\/http\/Http423.php.html#7\">orange\\framework\\exceptions\\http\\Http423<\/a>"],[100,0,"<a href=\"exceptions\/http\/Http429.php.html#7\">orange\\framework\\exceptions\\http\\Http429<\/a>"],[100,0,"<a href=\"exceptions\/http\/Http500.php.html#7\">orange\\framework\\exceptions\\http\\Http500<\/a>"],[100,0,"<a href=\"exceptions\/http\/Http501.php.html#7\">orange\\framework\\exceptions\\http\\Http501<\/a>"],[100,0,"<a href=\"exceptions\/http\/Http503.php.html#7\">orange\\framework\\exceptions\\http\\Http503<\/a>"],[100,0,"<a href=\"exceptions\/input\/Input.php.html#9\">orange\\framework\\exceptions\\input\\Input<\/a>"],[100,0,"<a href=\"exceptions\/input\/Request.php.html#9\">orange\\framework\\exceptions\\input\\Request<\/a>"],[100,0,"<a href=\"exceptions\/network\/Network.php.html#9\">orange\\framework\\exceptions\\network\\Network<\/a>"],[100,0,"<a href=\"exceptions\/output\/Output.php.html#9\">orange\\framework\\exceptions\\output\\Output<\/a>"],[100,0,"<a href=\"exceptions\/output\/Response.php.html#9\">orange\\framework\\exceptions\\output\\Response<\/a>"],[100,0,"<a href=\"exceptions\/router\/HttpMethodNotSupported.php.html#9\">orange\\framework\\exceptions\\router\\HttpMethodNotSupported<\/a>"],[100,0,"<a href=\"exceptions\/router\/RouteNotFound.php.html#9\">orange\\framework\\exceptions\\router\\RouteNotFound<\/a>"],[100,0,"<a href=\"exceptions\/router\/Router.php.html#9\">orange\\framework\\exceptions\\router\\Router<\/a>"],[100,0,"<a href=\"exceptions\/router\/RouterNameNotFound.php.html#9\">orange\\framework\\exceptions\\router\\RouterNameNotFound<\/a>"],[100,0,"<a href=\"exceptions\/security\/Security.php.html#9\">orange\\framework\\exceptions\\security\\Security<\/a>"],[100,0,"<a href=\"exceptions\/view\/View.php.html#9\">orange\\framework\\exceptions\\view\\View<\/a>"],[100,0,"<a href=\"exceptions\/view\/ViewNotFound.php.html#9\">orange\\framework\\exceptions\\view\\ViewNotFound<\/a>"],[90.2439024390244,24,"<a href=\"helpers\/Ary.php.html#7\">orange\\framework\\helpers\\Ary<\/a>"],[97.1590909090909,81,"<a href=\"helpers\/DirectorySearch.php.html#15\">orange\\framework\\helpers\\DirectorySearch<\/a>"],[100,41,"<a href=\"helpers\/Dot.php.html#15\">orange\\framework\\helpers\\Dot<\/a>"],[100,1,"<a href=\"property\/RouterCallback.php.html#7\">orange\\framework\\property\\RouterCallback<\/a>"],[100,4,"<a href=\"base\/traits\/BaseTraits.php.html#10\">orange\\framework\\base\\traits\\BaseTraits<\/a>"],[100,1,"<a href=\"base\/traits\/FactoryTraits.php.html#7\">orange\\framework\\base\\traits\\FactoryTraits<\/a>"],[100,2,"<a href=\"base\/traits\/SingletonTraits.php.html#10\">orange\\framework\\base\\traits\\SingletonTraits<\/a>"],[94.90445859872611,84,"<a href=\"traits\/ConfigurationTrait.php.html#11\">orange\\framework\\traits\\ConfigurationTrait<\/a>"]], 'Class Complexity'))
-      .transition()
-      .duration(500)
-      .call(chart);
-
-    nv.utils.windowResize(chart.update);
-
-    return chart;
-  });
-
-  nv.addGraph(function() {
-    var chart = nv.models.scatterChart()
-      .showDistX(true)
-      .showDistY(true)
-      .showLegend(false)
-      .forceX([0, 100]);
-    chart.tooltipContent(function(graph) {
-      return '<p>' + graph.point.class + '</p>';
-    });
-
-    chart.xAxis.axisLabel('Code Coverage (in percent)');
-    chart.yAxis.axisLabel('Method Complexity');
-
-    d3.select('#methodComplexity svg')
-      .datum(getComplexityData([[100,1,"<a href=\"Application.php.html#111\">orange\\framework\\Application::__construct<\/a>"],[100,4,"<a href=\"Application.php.html#124\">orange\\framework\\Application::make<\/a>"],[100,1,"<a href=\"Application.php.html#150\">orange\\framework\\Application::get<\/a>"],[100,1,"<a href=\"Application.php.html#167\">orange\\framework\\Application::http<\/a>"],[100,1,"<a href=\"Application.php.html#212\">orange\\framework\\Application::run<\/a>"],[86.20689655172413,8,"<a href=\"Application.php.html#230\">orange\\framework\\Application::bootstrap<\/a>"],[100,7,"<a href=\"Application.php.html#313\">orange\\framework\\Application::preContainer<\/a>"],[100,4,"<a href=\"Application.php.html#360\">orange\\framework\\Application::bootstrapContainer<\/a>"],[100,1,"<a href=\"Application.php.html#393\">orange\\framework\\Application::postContainer<\/a>"],[100,1,"<a href=\"Application.php.html#407\">orange\\framework\\Application::env<\/a>"],[77.77777777777779,5,"<a href=\"Application.php.html#418\">orange\\framework\\Application::loadEnvironment<\/a>"],[100,3,"<a href=\"Application.php.html#452\">orange\\framework\\Application::setConfigDirectories<\/a>"],[100,4,"<a href=\"Application.php.html#488\">orange\\framework\\Application::loadConfigFile<\/a>"],[100,3,"<a href=\"Application.php.html#525\">orange\\framework\\Application::loadEnvironmentFile<\/a>"],[55.55555555555556,3,"<a href=\"Config.php.html#122\">orange\\framework\\Config::__construct<\/a>"],[100,1,"<a href=\"Config.php.html#149\">orange\\framework\\Config::__get<\/a>"],[100,1,"<a href=\"Config.php.html#160\">orange\\framework\\Config::offsetExists<\/a>"],[100,1,"<a href=\"Config.php.html#179\">orange\\framework\\Config::offsetGet<\/a>"],[100,3,"<a href=\"Config.php.html#193\">orange\\framework\\Config::get<\/a>"],[100,5,"<a href=\"Config.php.html#218\">orange\\framework\\Config::load<\/a>"],[100,4,"<a href=\"Config.php.html#253\">orange\\framework\\Config::findAllConfigFilesInEachDirectory<\/a>"],[100,2,"<a href=\"Container.php.html#105\">orange\\framework\\Container::__construct<\/a>"],[100,1,"<a href=\"Container.php.html#128\">orange\\framework\\Container::__get<\/a>"],[100,7,"<a href=\"Container.php.html#143\">orange\\framework\\Container::get<\/a>"],[100,1,"<a href=\"Container.php.html#186\">orange\\framework\\Container::__set<\/a>"],[100,4,"<a href=\"Container.php.html#199\">orange\\framework\\Container::set<\/a>"],[100,1,"<a href=\"Container.php.html#222\">orange\\framework\\Container::__isset<\/a>"],[100,1,"<a href=\"Container.php.html#233\">orange\\framework\\Container::isset<\/a>"],[100,1,"<a href=\"Container.php.html#245\">orange\\framework\\Container::has<\/a>"],[100,1,"<a href=\"Container.php.html#255\">orange\\framework\\Container::__unset<\/a>"],[100,1,"<a href=\"Container.php.html#265\">orange\\framework\\Container::unset<\/a>"],[100,1,"<a href=\"Container.php.html#275\">orange\\framework\\Container::remove<\/a>"],[100,1,"<a href=\"Container.php.html#285\">orange\\framework\\Container::__debugInfo<\/a>"],[100,2,"<a href=\"Container.php.html#295\">orange\\framework\\Container::debugInfo<\/a>"],[100,1,"<a href=\"Container.php.html#311\">orange\\framework\\Container::getServices<\/a>"],[63.1578947368421,7,"<a href=\"Container.php.html#325\">orange\\framework\\Container::getServiceType<\/a>"],[100,1,"<a href=\"Container.php.html#363\">orange\\framework\\Container::attach<\/a>"],[100,1,"<a href=\"Container.php.html#380\">orange\\framework\\Container::addAlias<\/a>"],[100,1,"<a href=\"Container.php.html#392\">orange\\framework\\Container::addClosure<\/a>"],[100,1,"<a href=\"Container.php.html#404\">orange\\framework\\Container::addAutoWireClass<\/a>"],[100,1,"<a href=\"Container.php.html#416\">orange\\framework\\Container::addValue<\/a>"],[100,2,"<a href=\"Container.php.html#430\">orange\\framework\\Container::callClosure<\/a>"],[100,4,"<a href=\"Container.php.html#451\">orange\\framework\\Container::getAlias<\/a>"],[100,2,"<a href=\"Container.php.html#477\">orange\\framework\\Container::setMany<\/a>"],[88.88888888888889,4,"<a href=\"Container.php.html#490\">orange\\framework\\Container::isSingleton<\/a>"],[100,2,"<a href=\"Container.php.html#520\">orange\\framework\\Container::convertToSingleton<\/a>"],[94.44444444444444,8,"<a href=\"Container.php.html#553\">orange\\framework\\Container::autoWire<\/a>"],[100,2,"<a href=\"Container.php.html#610\">orange\\framework\\Container::resolveAutoWireArgs<\/a>"],[100,1,"<a href=\"Data.php.html#35\">orange\\framework\\Data::__construct<\/a>"],[100,6,"<a href=\"Dispatcher.php.html#92\">orange\\framework\\Dispatcher::call<\/a>"],[100,10,"<a href=\"Error.php.html#168\">orange\\framework\\Error::__construct<\/a>"],[100,1,"<a href=\"Error.php.html#264\">orange\\framework\\Error::show<\/a>"],[100,4,"<a href=\"Error.php.html#280\">orange\\framework\\Error::sendResponseCode<\/a>"],[100,2,"<a href=\"Error.php.html#300\">orange\\framework\\Error::sendMimeType<\/a>"],[0,1,"<a href=\"Error.php.html#315\">orange\\framework\\Error::sendOutput<\/a>"],[100,3,"<a href=\"Error.php.html#340\">orange\\framework\\Error::renderViewBasedOnCode<\/a>"],[100,3,"<a href=\"Error.php.html#358\">orange\\framework\\Error::findView<\/a>"],[100,3,"<a href=\"Error.php.html#402\">orange\\framework\\Error::getService<\/a>"],[100,5,"<a href=\"Error.php.html#437\">orange\\framework\\Error::viewRaw<\/a>"],[100,6,"<a href=\"Error.php.html#464\">orange\\framework\\Error::viewRawBuildHtml<\/a>"],[100,3,"<a href=\"Event.php.html#131\">orange\\framework\\Event::__construct<\/a>"],[100,1,"<a href=\"Event.php.html#158\">orange\\framework\\Event::disable<\/a>"],[100,1,"<a href=\"Event.php.html#167\">orange\\framework\\Event::enable<\/a>"],[100,1,"<a href=\"Event.php.html#181\">orange\\framework\\Event::register<\/a>"],[100,2,"<a href=\"Event.php.html#196\">orange\\framework\\Event::registerMultiple<\/a>"],[100,5,"<a href=\"Event.php.html#214\">orange\\framework\\Event::trigger<\/a>"],[100,1,"<a href=\"Event.php.html#241\">orange\\framework\\Event::has<\/a>"],[100,1,"<a href=\"Event.php.html#253\">orange\\framework\\Event::triggers<\/a>"],[100,4,"<a href=\"Event.php.html#266\">orange\\framework\\Event::unregister<\/a>"],[100,3,"<a href=\"Event.php.html#290\">orange\\framework\\Event::unregisterAll<\/a>"],[100,1,"<a href=\"Event.php.html#316\">orange\\framework\\Event::listeners<\/a>"],[73.33333333333333,4,"<a href=\"Event.php.html#332\">orange\\framework\\Event::registerEvent<\/a>"],[100,1,"<a href=\"Event.php.html#382\">orange\\framework\\Event::registerClosureEvent<\/a>"],[100,1,"<a href=\"Input.php.html#119\">orange\\framework\\Input::__construct<\/a>"],[100,1,"<a href=\"Input.php.html#149\">orange\\framework\\Input::request<\/a>"],[100,1,"<a href=\"Input.php.html#164\">orange\\framework\\Input::query<\/a>"],[100,1,"<a href=\"Input.php.html#176\">orange\\framework\\Input::inputStream<\/a>"],[100,1,"<a href=\"Input.php.html#189\">orange\\framework\\Input::cookie<\/a>"],[100,1,"<a href=\"Input.php.html#204\">orange\\framework\\Input::file<\/a>"],[100,2,"<a href=\"Input.php.html#219\">orange\\framework\\Input::server<\/a>"],[100,2,"<a href=\"Input.php.html#236\">orange\\framework\\Input::header<\/a>"],[100,2,"<a href=\"Input.php.html#252\">orange\\framework\\Input::getUrl<\/a>"],[100,1,"<a href=\"Input.php.html#266\">orange\\framework\\Input::requestUri<\/a>"],[100,1,"<a href=\"Input.php.html#286\">orange\\framework\\Input::uriSegment<\/a>"],[100,2,"<a href=\"Input.php.html#302\">orange\\framework\\Input::contentType<\/a>"],[66.66666666666666,6,"<a href=\"Input.php.html#318\">orange\\framework\\Input::requestMethod<\/a>"],[100,6,"<a href=\"Input.php.html#350\">orange\\framework\\Input::requestType<\/a>"],[100,1,"<a href=\"Input.php.html#371\">orange\\framework\\Input::isAjaxRequest<\/a>"],[100,1,"<a href=\"Input.php.html#381\">orange\\framework\\Input::isCliRequest<\/a>"],[100,7,"<a href=\"Input.php.html#393\">orange\\framework\\Input::isHttpsRequest<\/a>"],[100,2,"<a href=\"Input.php.html#421\">orange\\framework\\Input::setGlobals<\/a>"],[100,1,"<a href=\"Input.php.html#458\">orange\\framework\\Input::fromGlobals<\/a>"],[100,4,"<a href=\"Input.php.html#470\">orange\\framework\\Input::detectServerHeaders<\/a>"],[100,1,"<a href=\"Input.php.html#490\">orange\\framework\\Input::normalizeServerKey<\/a>"],[66.66666666666666,6,"<a href=\"Input.php.html#505\">orange\\framework\\Input::detectRequest<\/a>"],[100,2,"<a href=\"Input.php.html#546\">orange\\framework\\Input::extract<\/a>"],[100,4,"<a href=\"Log.php.html#154\">orange\\framework\\Log::__construct<\/a>"],[100,2,"<a href=\"Log.php.html#187\">orange\\framework\\Log::changeThreshold<\/a>"],[100,1,"<a href=\"Log.php.html#209\">orange\\framework\\Log::getThreshold<\/a>"],[100,1,"<a href=\"Log.php.html#219\">orange\\framework\\Log::isEnabled<\/a>"],[100,4,"<a href=\"Log.php.html#231\">orange\\framework\\Log::write<\/a>"],[100,1,"<a href=\"Log.php.html#254\">orange\\framework\\Log::emergency<\/a>"],[100,1,"<a href=\"Log.php.html#259\">orange\\framework\\Log::alert<\/a>"],[100,1,"<a href=\"Log.php.html#264\">orange\\framework\\Log::critical<\/a>"],[100,1,"<a href=\"Log.php.html#269\">orange\\framework\\Log::error<\/a>"],[100,1,"<a href=\"Log.php.html#274\">orange\\framework\\Log::warning<\/a>"],[100,1,"<a href=\"Log.php.html#279\">orange\\framework\\Log::notice<\/a>"],[100,1,"<a href=\"Log.php.html#284\">orange\\framework\\Log::info<\/a>"],[100,1,"<a href=\"Log.php.html#289\">orange\\framework\\Log::debug<\/a>"],[100,3,"<a href=\"Log.php.html#295\">orange\\framework\\Log::log<\/a>"],[100,2,"<a href=\"Log.php.html#314\">orange\\framework\\Log::isLevelEnabled<\/a>"],[100,5,"<a href=\"Log.php.html#327\">orange\\framework\\Log::convert2<\/a>"],[100,5,"<a href=\"Log.php.html#354\">orange\\framework\\Log::isFileWritable<\/a>"],[100,2,"<a href=\"Output.php.html#140\">orange\\framework\\Output::__construct<\/a>"],[100,1,"<a href=\"Output.php.html#165\">orange\\framework\\Output::__toString<\/a>"],[100,2,"<a href=\"Output.php.html#178\">orange\\framework\\Output::redirect<\/a>"],[100,2,"<a href=\"Output.php.html#193\">orange\\framework\\Output::forceHttps<\/a>"],[100,3,"<a href=\"Output.php.html#220\">orange\\framework\\Output::resolveTrustedHost<\/a>"],[100,1,"<a href=\"Output.php.html#238\">orange\\framework\\Output::flushAll<\/a>"],[100,5,"<a href=\"Output.php.html#250\">orange\\framework\\Output::send<\/a>"],[100,1,"<a href=\"Output.php.html#273\">orange\\framework\\Output::flush<\/a>"],[100,2,"<a href=\"Output.php.html#289\">orange\\framework\\Output::write<\/a>"],[100,1,"<a href=\"Output.php.html#303\">orange\\framework\\Output::get<\/a>"],[100,5,"<a href=\"Output.php.html#315\">orange\\framework\\Output::contentType<\/a>"],[100,1,"<a href=\"Output.php.html#345\">orange\\framework\\Output::getContentType<\/a>"],[100,1,"<a href=\"Output.php.html#358\">orange\\framework\\Output::charSet<\/a>"],[100,1,"<a href=\"Output.php.html#374\">orange\\framework\\Output::getCharSet<\/a>"],[100,6,"<a href=\"Output.php.html#393\">orange\\framework\\Output::header<\/a>"],[100,1,"<a href=\"Output.php.html#425\">orange\\framework\\Output::getHeaders<\/a>"],[100,1,"<a href=\"Output.php.html#439\">orange\\framework\\Output::flushHeaders<\/a>"],[100,4,"<a href=\"Output.php.html#457\">orange\\framework\\Output::responseCode<\/a>"],[100,1,"<a href=\"Output.php.html#486\">orange\\framework\\Output::getResponseCode<\/a>"],[100,7,"<a href=\"Output.php.html#499\">orange\\framework\\Output::detectAcceptsType<\/a>"],[100,1,"<a href=\"Output.php.html#523\">orange\\framework\\Output::getContentTypeHeader<\/a>"],[100,1,"<a href=\"Output.php.html#538\">orange\\framework\\Output::getResponseHeader<\/a>"],[100,1,"<a href=\"Output.php.html#552\">orange\\framework\\Output::phpEcho<\/a>"],[0,1,"<a href=\"Output.php.html#564\">orange\\framework\\Output::phpExit<\/a>"],[0,1,"<a href=\"Output.php.html#578\">orange\\framework\\Output::phpHeader<\/a>"],[100,7,"<a href=\"Output.php.html#583\">orange\\framework\\Output::handleCors<\/a>"],[100,4,"<a href=\"Router.php.html#151\">orange\\framework\\Router::__construct<\/a>"],[100,1,"<a href=\"Router.php.html#203\">orange\\framework\\Router::resetMatched<\/a>"],[100,7,"<a href=\"Router.php.html#225\">orange\\framework\\Router::addRoute<\/a>"],[100,2,"<a href=\"Router.php.html#269\">orange\\framework\\Router::addRoutes<\/a>"],[100,5,"<a href=\"Router.php.html#299\">orange\\framework\\Router::match<\/a>"],[100,4,"<a href=\"Router.php.html#358\">orange\\framework\\Router::getMatched<\/a>"],[100,4,"<a href=\"Router.php.html#371\">orange\\framework\\Router::getRouterCallback<\/a>"],[100,10,"<a href=\"Router.php.html#394\">orange\\framework\\Router::getUrl<\/a>"],[100,4,"<a href=\"Router.php.html#470\">orange\\framework\\Router::siteUrl<\/a>"],[100,3,"<a href=\"Router.php.html#491\">orange\\framework\\Router::updateCache<\/a>"],[100,5,"<a href=\"Router.php.html#509\">orange\\framework\\Router::getRoutes<\/a>"],[100,1,"<a href=\"Router.php.html#538\">orange\\framework\\Router::addConfigRoutes<\/a>"],[100,1,"<a href=\"Security.php.html#87\">orange\\framework\\Security::__construct<\/a>"],[100,9,"<a href=\"Security.php.html#117\">orange\\framework\\Security::createKeys<\/a>"],[100,3,"<a href=\"Security.php.html#178\">orange\\framework\\Security::restrictToCurrentUser<\/a>"],[100,1,"<a href=\"Security.php.html#192\">orange\\framework\\Security::encrypt<\/a>"],[100,3,"<a href=\"Security.php.html#214\">orange\\framework\\Security::decrypt<\/a>"],[100,1,"<a href=\"Security.php.html#248\">orange\\framework\\Security::createSignature<\/a>"],[100,3,"<a href=\"Security.php.html#269\">orange\\framework\\Security::verifySignature<\/a>"],[100,1,"<a href=\"Security.php.html#302\">orange\\framework\\Security::encodePassword<\/a>"],[100,1,"<a href=\"Security.php.html#320\">orange\\framework\\Security::verifyPassword<\/a>"],[100,1,"<a href=\"Security.php.html#338\">orange\\framework\\Security::removeInvisibleCharacters<\/a>"],[100,1,"<a href=\"Security.php.html#357\">orange\\framework\\Security::cleanFilename<\/a>"],[100,4,"<a href=\"Security.php.html#414\">orange\\framework\\Security::getKeyFilePath<\/a>"],[100,5,"<a href=\"abstract\/ViewAbstract.php.html#151\">orange\\framework\\abstract\\ViewAbstract::__construct<\/a>"],[100,1,"<a href=\"abstract\/ViewAbstract.php.html#197\">orange\\framework\\abstract\\ViewAbstract::search<\/a>"],[100,1,"<a href=\"abstract\/ViewAbstract.php.html#209\">orange\\framework\\abstract\\ViewAbstract::addAlias<\/a>"],[100,4,"<a href=\"abstract\/ViewAbstract.php.html#224\">orange\\framework\\abstract\\ViewAbstract::render<\/a>"],[100,5,"<a href=\"abstract\/ViewAbstract.php.html#258\">orange\\framework\\abstract\\ViewAbstract::renderString<\/a>"],[100,4,"<a href=\"abstract\/ViewAbstract.php.html#299\">orange\\framework\\abstract\\ViewAbstract::change<\/a>"],[100,2,"<a href=\"abstract\/ViewAbstract.php.html#332\">orange\\framework\\abstract\\ViewAbstract::generate<\/a>"],[100,4,"<a href=\"abstract\/ViewAbstract.php.html#363\">orange\\framework\\abstract\\ViewAbstract::isFileWritable<\/a>"],[100,1,"<a href=\"abstract\/ViewAbstract.php.html#395\">orange\\framework\\abstract\\ViewAbstract::resolveAlias<\/a>"],[100,2,"<a href=\"abstract\/ViewAbstract.php.html#411\">orange\\framework\\abstract\\ViewAbstract::data<\/a>"],[100,13,"<a href=\"abstract\/ViewAbstract.php.html#432\">orange\\framework\\abstract\\ViewAbstract::resolveDynamicView<\/a>"],[100,1,"<a href=\"attributes\/AttachService.php.html#41\">orange\\framework\\attributes\\AttachService::__construct<\/a>"],[100,1,"<a href=\"attributes\/AutoWire.php.html#41\">orange\\framework\\attributes\\AutoWire::__construct<\/a>"],[100,1,"<a href=\"attributes\/Route.php.html#56\">orange\\framework\\attributes\\Route::__construct<\/a>"],[100,1,"<a href=\"base\/ArrayObject.php.html#17\">orange\\framework\\base\\ArrayObject::__construct<\/a>"],[100,1,"<a href=\"base\/ArrayObject.php.html#29\">orange\\framework\\base\\ArrayObject::__set<\/a>"],[100,3,"<a href=\"base\/ArrayObject.php.html#42\">orange\\framework\\base\\ArrayObject::__call<\/a>"],[100,1,"<a href=\"base\/ArrayObject.php.html#57\">orange\\framework\\base\\ArrayObject::has<\/a>"],[100,1,"<a href=\"base\/ArrayObject.php.html#68\">orange\\framework\\base\\ArrayObject::__get<\/a>"],[100,2,"<a href=\"base\/ArrayObject.php.html#81\">orange\\framework\\base\\ArrayObject::get<\/a>"],[100,4,"<a href=\"base\/ArrayObject.php.html#94\">orange\\framework\\base\\ArrayObject::merge<\/a>"],[100,2,"<a href=\"base\/ArrayObject.php.html#123\">orange\\framework\\base\\ArrayObject::buildArrayObjects<\/a>"],[100,1,"<a href=\"base\/SingletonArrayObject.php.html#20\">orange\\framework\\base\\SingletonArrayObject::__construct<\/a>"],[0,7,"<a href=\"controllers\/BaseController.php.html#45\">orange\\framework\\controllers\\BaseController::__construct<\/a>"],[0,3,"<a href=\"controllers\/BaseController.php.html#83\">orange\\framework\\controllers\\BaseController::autoAttachService<\/a>"],[0,1,"<a href=\"controllers\/FourohFourController.php.html#11\">orange\\framework\\controllers\\FourohfourController::index<\/a>"],[0,1,"<a href=\"controllers\/HomeController.php.html#11\">orange\\framework\\controllers\\HomeController::index<\/a>"],[100,1,"<a href=\"exceptions\/OrangeException.php.html#18\">orange\\framework\\exceptions\\OrangeException::__construct<\/a>"],[100,1,"<a href=\"exceptions\/OrangeException.php.html#31\">orange\\framework\\exceptions\\OrangeException::decorate<\/a>"],[100,5,"<a href=\"exceptions\/http\/Http.php.html#12\">orange\\framework\\exceptions\\http\\Http::__construct<\/a>"],[100,1,"<a href=\"exceptions\/http\/Http.php.html#43\">orange\\framework\\exceptions\\http\\Http::getHttpCode<\/a>"],[100,1,"<a href=\"exceptions\/http\/Http301.php.html#14\">orange\\framework\\exceptions\\http\\Http301::__construct<\/a>"],[100,1,"<a href=\"exceptions\/http\/Http301.php.html#23\">orange\\framework\\exceptions\\http\\Http301::decorate<\/a>"],[100,3,"<a href=\"helpers\/Ary.php.html#16\">orange\\framework\\helpers\\Ary::remapKey<\/a>"],[100,3,"<a href=\"helpers\/Ary.php.html#35\">orange\\framework\\helpers\\Ary::remapValue<\/a>"],[100,2,"<a href=\"helpers\/Ary.php.html#57\">orange\\framework\\helpers\\Ary::wrapArray<\/a>"],[80.95238095238095,9,"<a href=\"helpers\/Ary.php.html#77\">orange\\framework\\helpers\\Ary::makeAssociated<\/a>"],[100,2,"<a href=\"helpers\/Ary.php.html#130\">orange\\framework\\helpers\\Ary::element<\/a>"],[100,1,"<a href=\"helpers\/Ary.php.html#143\">orange\\framework\\helpers\\Ary::randomElement<\/a>"],[100,4,"<a href=\"helpers\/Ary.php.html#161\">orange\\framework\\helpers\\Ary::elements<\/a>"],[100,1,"<a href=\"helpers\/DirectorySearch.php.html#86\">orange\\framework\\helpers\\DirectorySearch::__construct<\/a>"],[100,4,"<a href=\"helpers\/DirectorySearch.php.html#115\">orange\\framework\\helpers\\DirectorySearch::addDirectory<\/a>"],[100,4,"<a href=\"helpers\/DirectorySearch.php.html#151\">orange\\framework\\helpers\\DirectorySearch::addDirectories<\/a>"],[100,7,"<a href=\"helpers\/DirectorySearch.php.html#175\">orange\\framework\\helpers\\DirectorySearch::removeDirectory<\/a>"],[100,2,"<a href=\"helpers\/DirectorySearch.php.html#215\">orange\\framework\\helpers\\DirectorySearch::removeDirectories<\/a>"],[100,1,"<a href=\"helpers\/DirectorySearch.php.html#229\">orange\\framework\\helpers\\DirectorySearch::listDirectories<\/a>"],[100,2,"<a href=\"helpers\/DirectorySearch.php.html#242\">orange\\framework\\helpers\\DirectorySearch::replaceDirectories<\/a>"],[100,1,"<a href=\"helpers\/DirectorySearch.php.html#267\">orange\\framework\\helpers\\DirectorySearch::directoryExists<\/a>"],[100,2,"<a href=\"helpers\/DirectorySearch.php.html#278\">orange\\framework\\helpers\\DirectorySearch::flushDirectories<\/a>"],[100,2,"<a href=\"helpers\/DirectorySearch.php.html#303\">orange\\framework\\helpers\\DirectorySearch::addResource<\/a>"],[100,2,"<a href=\"helpers\/DirectorySearch.php.html#324\">orange\\framework\\helpers\\DirectorySearch::addResources<\/a>"],[100,1,"<a href=\"helpers\/DirectorySearch.php.html#339\">orange\\framework\\helpers\\DirectorySearch::replaceResources<\/a>"],[100,1,"<a href=\"helpers\/DirectorySearch.php.html#352\">orange\\framework\\helpers\\DirectorySearch::flushResources<\/a>"],[100,1,"<a href=\"helpers\/DirectorySearch.php.html#370\">orange\\framework\\helpers\\DirectorySearch::removeResource<\/a>"],[100,2,"<a href=\"helpers\/DirectorySearch.php.html#386\">orange\\framework\\helpers\\DirectorySearch::removeResources<\/a>"],[100,3,"<a href=\"helpers\/DirectorySearch.php.html#402\">orange\\framework\\helpers\\DirectorySearch::find<\/a>"],[100,2,"<a href=\"helpers\/DirectorySearch.php.html#424\">orange\\framework\\helpers\\DirectorySearch::findAll<\/a>"],[100,1,"<a href=\"helpers\/DirectorySearch.php.html#444\">orange\\framework\\helpers\\DirectorySearch::list<\/a>"],[100,1,"<a href=\"helpers\/DirectorySearch.php.html#459\">orange\\framework\\helpers\\DirectorySearch::findFirst<\/a>"],[100,1,"<a href=\"helpers\/DirectorySearch.php.html#474\">orange\\framework\\helpers\\DirectorySearch::findLast<\/a>"],[100,1,"<a href=\"helpers\/DirectorySearch.php.html#487\">orange\\framework\\helpers\\DirectorySearch::exists<\/a>"],[100,1,"<a href=\"helpers\/DirectorySearch.php.html#499\">orange\\framework\\helpers\\DirectorySearch::lock<\/a>"],[100,1,"<a href=\"helpers\/DirectorySearch.php.html#512\">orange\\framework\\helpers\\DirectorySearch::unlock<\/a>"],[100,1,"<a href=\"helpers\/DirectorySearch.php.html#524\">orange\\framework\\helpers\\DirectorySearch::isLocked<\/a>"],[100,1,"<a href=\"helpers\/DirectorySearch.php.html#534\">orange\\framework\\helpers\\DirectorySearch::__debugInfo<\/a>"],[100,6,"<a href=\"helpers\/DirectorySearch.php.html#545\">orange\\framework\\helpers\\DirectorySearch::scanDirectories<\/a>"],[100,4,"<a href=\"helpers\/DirectorySearch.php.html#584\">orange\\framework\\helpers\\DirectorySearch::recursiveGlob<\/a>"],[100,3,"<a href=\"helpers\/DirectorySearch.php.html#615\">orange\\framework\\helpers\\DirectorySearch::addMatches<\/a>"],[100,2,"<a href=\"helpers\/DirectorySearch.php.html#637\">orange\\framework\\helpers\\DirectorySearch::ifLockedThrowException<\/a>"],[100,3,"<a href=\"helpers\/DirectorySearch.php.html#656\">orange\\framework\\helpers\\DirectorySearch::normalizeKey<\/a>"],[100,1,"<a href=\"helpers\/DirectorySearch.php.html#668\">orange\\framework\\helpers\\DirectorySearch::rescan<\/a>"],[100,5,"<a href=\"helpers\/DirectorySearch.php.html#683\">orange\\framework\\helpers\\DirectorySearch::callback<\/a>"],[87.17948717948718,11,"<a href=\"helpers\/DirectorySearch.php.html#708\">orange\\framework\\helpers\\DirectorySearch::setupResourceKeyStyle<\/a>"],[100,1,"<a href=\"helpers\/Dot.php.html#25\">orange\\framework\\helpers\\Dot::changeDelimiter<\/a>"],[100,7,"<a href=\"helpers\/Dot.php.html#38\">orange\\framework\\helpers\\Dot::set<\/a>"],[100,10,"<a href=\"helpers\/Dot.php.html#79\">orange\\framework\\helpers\\Dot::get<\/a>"],[100,1,"<a href=\"helpers\/Dot.php.html#133\">orange\\framework\\helpers\\Dot::isset<\/a>"],[100,8,"<a href=\"helpers\/Dot.php.html#151\">orange\\framework\\helpers\\Dot::unset<\/a>"],[100,6,"<a href=\"helpers\/Dot.php.html#199\">orange\\framework\\helpers\\Dot::flatten<\/a>"],[100,8,"<a href=\"helpers\/Dot.php.html#226\">orange\\framework\\helpers\\Dot::expand<\/a>"],[100,1,"<a href=\"property\/RouterCallback.php.html#9\">orange\\framework\\property\\RouterCallback::__construct<\/a>"],[100,1,"<a href=\"base\/traits\/BaseTraits.php.html#20\">orange\\framework\\base\\traits\\BaseTraits::__construct<\/a>"],[100,1,"<a href=\"base\/traits\/BaseTraits.php.html#30\">orange\\framework\\base\\traits\\BaseTraits::newInstance<\/a>"],[100,1,"<a href=\"base\/traits\/BaseTraits.php.html#46\">orange\\framework\\base\\traits\\BaseTraits::__clone<\/a>"],[100,1,"<a href=\"base\/traits\/BaseTraits.php.html#58\">orange\\framework\\base\\traits\\BaseTraits::__wakeup<\/a>"],[100,1,"<a href=\"base\/traits\/FactoryTraits.php.html#17\">orange\\framework\\base\\traits\\FactoryTraits::getInstance<\/a>"],[100,2,"<a href=\"base\/traits\/SingletonTraits.php.html#27\">orange\\framework\\base\\traits\\SingletonTraits::getInstance<\/a>"],[100,9,"<a href=\"traits\/ConfigurationTrait.php.html#28\">orange\\framework\\traits\\ConfigurationTrait::changeOption<\/a>"],[100,8,"<a href=\"traits\/ConfigurationTrait.php.html#86\">orange\\framework\\traits\\ConfigurationTrait::mergeConfigWith<\/a>"],[100,1,"<a href=\"traits\/ConfigurationTrait.php.html#125\">orange\\framework\\traits\\ConfigurationTrait::getConfigFile<\/a>"],[100,6,"<a href=\"traits\/ConfigurationTrait.php.html#130\">orange\\framework\\traits\\ConfigurationTrait::determineConfigPath<\/a>"],[100,4,"<a href=\"traits\/ConfigurationTrait.php.html#181\">orange\\framework\\traits\\ConfigurationTrait::setFromConfig<\/a>"],[100,4,"<a href=\"traits\/ConfigurationTrait.php.html#214\">orange\\framework\\traits\\ConfigurationTrait::assignFromConfig<\/a>"],[100,1,"<a href=\"traits\/ConfigurationTrait.php.html#238\">orange\\framework\\traits\\ConfigurationTrait::normalize<\/a>"],[100,2,"<a href=\"traits\/ConfigurationTrait.php.html#252\">orange\\framework\\traits\\ConfigurationTrait::camelize<\/a>"],[100,1,"<a href=\"traits\/ConfigurationTrait.php.html#267\">orange\\framework\\traits\\ConfigurationTrait::underscore<\/a>"],[100,1,"<a href=\"traits\/ConfigurationTrait.php.html#281\">orange\\framework\\traits\\ConfigurationTrait::humanize<\/a>"],[90.36144578313254,47,"<a href=\"traits\/ConfigurationTrait.php.html#298\">orange\\framework\\traits\\ConfigurationTrait::validateConfig<\/a>"]], 'Method Complexity'))
-      .transition()
-      .duration(500)
-      .call(chart);
-
-    nv.utils.windowResize(chart.update);
-
-    return chart;
-  });
-
-  function getComplexityData(data, label) {
-    var values = [];
-    $.each(data, function(key) {
-      var value = Math.round(data[key][0]*100) / 100;
-      values.push({
-        x: value,
-        y: data[key][1],
-        class: data[key][2],
-        size: 0.05,
-        shape: 'diamond'
-      });
-    });
-
-    return [
-      {
-        key: label,
-        values: values,
-        color: "#4572A7"
-      }
-    ];
-  }
-});
-  </script>
  </body>
 </html>

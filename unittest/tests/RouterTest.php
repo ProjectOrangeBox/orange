@@ -288,7 +288,7 @@ final class RouterTest extends UnitTestHelper
         );
         $cachedRoutes->addRoute(['method' => 'get', 'name' => 'fromcache', 'url' => '/fromcache', 'callback' => $this->callback]);
 
-        $cache = $this->createMock(CacheInterface::class);
+        $cache = $this->createStub(CacheInterface::class);
         $cache->method('get')->willReturn([
             'routes' => $this->getPrivatePublic('routes', $cachedRoutes),
             'routesByName' => $this->getPrivatePublic('routesByName', $cachedRoutes),
@@ -306,7 +306,7 @@ final class RouterTest extends UnitTestHelper
 
     public function testGetRoutesFallsBackToConfigWhenCacheInvalid(): void
     {
-        $cache = $this->createMock(CacheInterface::class);
+        $cache = $this->createStub(CacheInterface::class);
         $cache->method('get')->willReturn('not-a-valid-cache-array');
 
         $instance = Router::newInstance(

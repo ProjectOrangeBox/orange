@@ -8,6 +8,7 @@ use orange\framework\exceptions\http\Http404;
 use orange\framework\exceptions\http\Http500;
 use orange\framework\exceptions\http\Http301;
 use orange\framework\exceptions\OrangeException;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 /**
  * Covers the Http exception hierarchy: the shared code/message derivation in the
@@ -92,9 +93,7 @@ final class HttpExceptionsTest extends UnitTestHelper
         $e->decorate($error);
     }
 
-    /**
-     * @dataProvider allHttpStatusClasses
-     */
+    #[DataProvider('allHttpStatusClasses')]
     public function testEveryHttpStatusClassInstantiates(string $class, int $expectedCode): void
     {
         $e = new $class();

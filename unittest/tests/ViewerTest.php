@@ -171,7 +171,7 @@ final class ViewerTest extends UnitTestHelper
 
     private function useCallback(array $callback): void
     {
-        $router = $this->createMock(\orange\framework\interfaces\RouterInterface::class);
+        $router = $this->createStub(\orange\framework\interfaces\RouterInterface::class);
         $router->method('getMatched')->willReturn($callback);
 
         $this->setPrivatePublic('router', $router);
@@ -271,7 +271,7 @@ final class ViewerTest extends UnitTestHelper
 
     public function testRenderResolvesDynamicViewWhenEnabledWithRouter(): void
     {
-        $router = $this->createMock(\orange\framework\interfaces\RouterInterface::class);
+        $router = $this->createStub(\orange\framework\interfaces\RouterInterface::class);
         $router->method('getMatched')->willReturn(['TestController', 'render']);
 
         $this->setPrivatePublic('router', $router);

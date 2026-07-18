@@ -10,13 +10,13 @@ use orange\framework\exceptions\IncorrectInterface;
 use orange\framework\exceptions\filesystem\FileNotFound;
 use orange\framework\exceptions\config\ConfigFileDidNotReturnAnArray;
 use orange\framework\exceptions\config\InvalidConfigurationValue;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Exercises the individual bootstrap helpers of Application without running the
  * full http()/run() lifecycle (which sends output and defines global state).
- *
- * @runTestsInSeparateProcesses
  */
+#[RunTestsInSeparateProcesses]
 final class ApplicationBootstrapTest extends \UnitTestHelper
 {
     protected $instance;
@@ -139,10 +139,19 @@ final class ApplicationBootstrapTest extends \UnitTestHelper
         $this->callMethod('preContainer');
 
         // preContainer() registers these via first-class callable syntax (errorHandler(...)),
-        // which wraps them in a Closure - passing null restores the previous (built-in) handler
-        // and returns what was registered, so reflect on it to confirm which function it wraps
-        $errorHandler = set_error_handler(null);
-        $exceptionHandler = set_exception_handler(null);
+        // which wraps them in a Closure. set_error_handler() always returns whatever was
+        // active before the call while pushing a new one on PHP's handler stack, so pushing
+        // a disposable no-op handler is how we peek at the current one; restore_error_handler()
+        // then pops it back off. A second restore_*_handler() call pops preContainer()'s own
+        // registration too, leaving PHPUnit's own handler in place exactly as it was pre-test -
+        // PHPUnit 13 flags a test as risky if it leaves a foreign handler installed.
+        $errorHandler = set_error_handler(fn () => null);
+        restore_error_handler();
+        restore_error_handler();
+
+        $exceptionHandler = set_exception_handler(fn () => null);
+        restore_exception_handler();
+        restore_exception_handler();
 
         $this->assertEquals('errorHandler', (new ReflectionFunction($errorHandler))->getName());
         $this->assertEquals('exceptionHandler', (new ReflectionFunction($exceptionHandler))->getName());
@@ -171,10 +180,11 @@ final class ApplicationBootstrapTest extends \UnitTestHelper
             $this->addToAssertionCount(1);
         } finally {
             // preContainer() installs global error/exception handlers as a side effect;
-            // restore the previous ones immediately so they can't interfere with the
-            // rest of this process (same technique as the handlers test above)
-            set_error_handler(null);
-            set_exception_handler(null);
+            // pop them back off (not set_*_handler(null), which would drop PHPUnit's own
+            // handler too and get this test flagged as risky) so they can't interfere
+            // with the rest of this process
+            restore_error_handler();
+            restore_exception_handler();
             unlink($helperFile);
         }
     }
@@ -191,8 +201,8 @@ final class ApplicationBootstrapTest extends \UnitTestHelper
         try {
             $this->callMethod('preContainer');
 
-            set_error_handler(null);
-            set_exception_handler(null);
+            restore_error_handler();
+            restore_exception_handler();
 
             $this->assertTrue(defined('APP_BOOTSTRAP_TEST_CONSTANT'));
             $this->assertEquals('hello', APP_BOOTSTRAP_TEST_CONSTANT);

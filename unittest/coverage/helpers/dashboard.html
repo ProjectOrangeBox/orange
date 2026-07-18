@@ -4,9 +4,8 @@
   <meta charset="UTF-8">
   <title>Dashboard for /Users/dmyers/Docker/webapp/vendor/orange/framework/src/helpers</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link href="../_css/bootstrap.min.css?v=10.1.16" rel="stylesheet" type="text/css">
-  <link href="../_css/nv.d3.min.css?v=10.1.16" rel="stylesheet" type="text/css">
-  <link href="../_css/style.css?v=10.1.16" rel="stylesheet" type="text/css">
+  <link href="../_css/bootstrap.min.css?v=14.2.3" rel="stylesheet" type="text/css">
+  <link href="../_css/style.css?v=14.2.3" rel="stylesheet" type="text/css">
   <link href="../_css/custom.css" rel="stylesheet" type="text/css">
  </head>
  <body>
@@ -27,262 +26,238 @@
    </div>
   </header>
   <div class="container-fluid">
-   <div class="row">
-    <div class="col-md-12">
-     <h2>Classes</h2>
-    </div>
-   </div>
-   <div class="row">
+   <div class="row dashboard-row">
     <div class="col-md-6">
-     <h3>Coverage Distribution</h3>
-     <div id="classCoverageDistribution" style="height: 300px;">
-       <svg></svg>
+     <h3>Classes</h3>
+     <p class="text-muted small">Bubble size = executable lines. Hover for details, click to navigate.</p>
+     <div class="file-coverage-chart">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" preserveAspectRatio="xMidYMid meet">
+ <style>
+  .bubble-success { fill: var(--phpunit-success-bar); opacity: 0.7; }
+  .bubble-warning { fill: var(--phpunit-warning-bar); opacity: 0.7; }
+  .bubble-danger { fill: var(--phpunit-danger-bar); opacity: 0.7; }
+  .bubble-success:hover, .bubble-warning:hover, .bubble-danger:hover { opacity: 1; stroke: var(--bs-emphasis-color); stroke-width: 1.5; }
+  .chart-grid { stroke: var(--bs-border-color); stroke-width: 0.5; stroke-dasharray: 4,4; opacity: 0.5; }
+  .chart-axis { stroke: var(--bs-border-color); stroke-width: 1; }
+  .chart-label { fill: var(--bs-body-color); font-size: 11px; font-family: var(--bs-font-sans-serif, sans-serif); }
+  .chart-title { fill: var(--bs-body-color); font-size: 12px; font-family: var(--bs-font-sans-serif, sans-serif); }
+ </style>
+ <line x1="60.0" y1="20" x2="60.0" y2="350" class="chart-grid"/>
+ <text x="60.0" y="368" text-anchor="middle" class="chart-label">0%</text>
+ <line x1="204.0" y1="20" x2="204.0" y2="350" class="chart-grid"/>
+ <text x="204.0" y="368" text-anchor="middle" class="chart-label">20%</text>
+ <line x1="348.0" y1="20" x2="348.0" y2="350" class="chart-grid"/>
+ <text x="348.0" y="368" text-anchor="middle" class="chart-label">40%</text>
+ <line x1="492.0" y1="20" x2="492.0" y2="350" class="chart-grid"/>
+ <text x="492.0" y="368" text-anchor="middle" class="chart-label">60%</text>
+ <line x1="636.0" y1="20" x2="636.0" y2="350" class="chart-grid"/>
+ <text x="636.0" y="368" text-anchor="middle" class="chart-label">80%</text>
+ <line x1="780.0" y1="20" x2="780.0" y2="350" class="chart-grid"/>
+ <text x="780.0" y="368" text-anchor="middle" class="chart-label">100%</text>
+ <line x1="60" y1="350.0" x2="780" y2="350.0" class="chart-grid"/>
+ <text x="52" y="350.0" text-anchor="end" dominant-baseline="middle" class="chart-label">0</text>
+ <line x1="60" y1="284.0" x2="780" y2="284.0" class="chart-grid"/>
+ <text x="52" y="284.0" text-anchor="end" dominant-baseline="middle" class="chart-label">20</text>
+ <line x1="60" y1="218.0" x2="780" y2="218.0" class="chart-grid"/>
+ <text x="52" y="218.0" text-anchor="end" dominant-baseline="middle" class="chart-label">40</text>
+ <line x1="60" y1="152.0" x2="780" y2="152.0" class="chart-grid"/>
+ <text x="52" y="152.0" text-anchor="end" dominant-baseline="middle" class="chart-label">60</text>
+ <line x1="60" y1="86.0" x2="780" y2="86.0" class="chart-grid"/>
+ <text x="52" y="86.0" text-anchor="end" dominant-baseline="middle" class="chart-label">80</text>
+ <line x1="60" y1="20.0" x2="780" y2="20.0" class="chart-grid"/>
+ <text x="52" y="20.0" text-anchor="end" dominant-baseline="middle" class="chart-label">100</text>
+ <line x1="60" y1="20" x2="60" y2="350" class="chart-axis"/>
+ <line x1="60" y1="350" x2="780" y2="350" class="chart-axis"/>
+ <text x="420.0" y="395" text-anchor="middle" class="chart-title">Line Coverage (%)</text>
+ <text x="15" y="185.0" text-anchor="middle" transform="rotate(-90, 15, 185.0)" class="chart-title">Cyclomatic Complexity</text>
+ <a href="DirectorySearch.php.html#15"><circle cx="770.2" cy="89.3" r="20.0" class="bubble-success"><title>orange\framework\helpers\DirectorySearch — Coverage: 98.6% | Lines: 147 | Complexity: 79</title></circle></a>
+ <a href="Dot.php.html#15"><circle cx="780.0" cy="214.7" r="14.6" class="bubble-success"><title>orange\framework\helpers\Dot — Coverage: 100.0% | Lines: 78 | Complexity: 41</title></circle></a>
+ <a href="Ary.php.html#7"><circle cx="709.8" cy="270.8" r="10.6" class="bubble-success"><title>orange\framework\helpers\Ary — Coverage: 90.2% | Lines: 41 | Complexity: 24</title></circle></a>
+</svg>
      </div>
     </div>
-    <div class="col-md-6">
-     <h3>Complexity</h3>
-     <div id="classComplexity" style="height: 300px;">
-       <svg></svg>
-     </div>
-    </div>
-   </div>
-   <div class="row">
-    <div class="col-md-6">
-     <h3>Insufficient Coverage</h3>
+    <div class="col-md-6 dashboard-column">
+     <h3>&nbsp;</h3>
+     <p class="text-muted small">Sorted by descending CRAP (Change Risk Anti-Patterns) index.</p>
      <div class="scrollbox">
-      <table class="table">
-       <thead>
-        <tr>
-         <th>Class</th>
-         <th class="text-right">Coverage</th>
-        </tr>
-       </thead>
-       <tbody>
-
-       </tbody>
-      </table>
-     </div>
-    </div>
-    <div class="col-md-6">
-     <h3>Project Risks</h3>
-     <div class="scrollbox">
-      <table class="table">
-       <thead>
-        <tr>
-         <th>Class</th>
-         <th class="text-right"><abbr title="Change Risk Anti-Patterns (CRAP) Index">CRAP</abbr></th>
-        </tr>
-       </thead>
-       <tbody>
-
-       </tbody>
-      </table>
+<table class="table">
+ <thead>
+  <tr>
+   <th>Class</th>
+   <th class="text-right"><abbr title="Change Risk Anti-Patterns (CRAP) Index">CRAP</abbr></th>
+   <th class="text-right">Coverage</th>
+  </tr>
+ </thead>
+ <tbody>
+  <tr><td><a href="DirectorySearch.php.html#15">orange\framework\helpers\DirectorySearch</a></td><td class="text-right">79</td><td class="text-right">98.6%</td></tr>
+  <tr><td><a href="Dot.php.html#15">orange\framework\helpers\Dot</a></td><td class="text-right">41</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Ary.php.html#7">orange\framework\helpers\Ary</a></td><td class="text-right">24.53</td><td class="text-right">90.2%</td></tr>
+ </tbody>
+</table>
      </div>
     </div>
    </div>
-   <div class="row">
-    <div class="col-md-12">
-     <h2>Methods</h2>
-    </div>
-   </div>
-   <div class="row">
+   <div class="row dashboard-row">
     <div class="col-md-6">
-     <h3>Coverage Distribution</h3>
-     <div id="methodCoverageDistribution" style="height: 300px;">
-       <svg></svg>
+     <h3>Methods</h3>
+     <p class="text-muted small">Bubble size = executable lines. Hover for details, click to navigate.</p>
+     <div class="file-coverage-chart">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" preserveAspectRatio="xMidYMid meet">
+ <style>
+  .bubble-success { fill: var(--phpunit-success-bar); opacity: 0.7; }
+  .bubble-warning { fill: var(--phpunit-warning-bar); opacity: 0.7; }
+  .bubble-danger { fill: var(--phpunit-danger-bar); opacity: 0.7; }
+  .bubble-success:hover, .bubble-warning:hover, .bubble-danger:hover { opacity: 1; stroke: var(--bs-emphasis-color); stroke-width: 1.5; }
+  .chart-grid { stroke: var(--bs-border-color); stroke-width: 0.5; stroke-dasharray: 4,4; opacity: 0.5; }
+  .chart-axis { stroke: var(--bs-border-color); stroke-width: 1; }
+  .chart-label { fill: var(--bs-body-color); font-size: 11px; font-family: var(--bs-font-sans-serif, sans-serif); }
+  .chart-title { fill: var(--bs-body-color); font-size: 12px; font-family: var(--bs-font-sans-serif, sans-serif); }
+ </style>
+ <line x1="60.0" y1="20" x2="60.0" y2="350" class="chart-grid"/>
+ <text x="60.0" y="368" text-anchor="middle" class="chart-label">0%</text>
+ <line x1="204.0" y1="20" x2="204.0" y2="350" class="chart-grid"/>
+ <text x="204.0" y="368" text-anchor="middle" class="chart-label">20%</text>
+ <line x1="348.0" y1="20" x2="348.0" y2="350" class="chart-grid"/>
+ <text x="348.0" y="368" text-anchor="middle" class="chart-label">40%</text>
+ <line x1="492.0" y1="20" x2="492.0" y2="350" class="chart-grid"/>
+ <text x="492.0" y="368" text-anchor="middle" class="chart-label">60%</text>
+ <line x1="636.0" y1="20" x2="636.0" y2="350" class="chart-grid"/>
+ <text x="636.0" y="368" text-anchor="middle" class="chart-label">80%</text>
+ <line x1="780.0" y1="20" x2="780.0" y2="350" class="chart-grid"/>
+ <text x="780.0" y="368" text-anchor="middle" class="chart-label">100%</text>
+ <line x1="60" y1="350.0" x2="780" y2="350.0" class="chart-grid"/>
+ <text x="52" y="350.0" text-anchor="end" dominant-baseline="middle" class="chart-label">0</text>
+ <line x1="60" y1="240.0" x2="780" y2="240.0" class="chart-grid"/>
+ <text x="52" y="240.0" text-anchor="end" dominant-baseline="middle" class="chart-label">5</text>
+ <line x1="60" y1="130.0" x2="780" y2="130.0" class="chart-grid"/>
+ <text x="52" y="130.0" text-anchor="end" dominant-baseline="middle" class="chart-label">10</text>
+ <line x1="60" y1="20.0" x2="780" y2="20.0" class="chart-grid"/>
+ <text x="52" y="20.0" text-anchor="end" dominant-baseline="middle" class="chart-label">15</text>
+ <line x1="60" y1="20" x2="60" y2="350" class="chart-axis"/>
+ <line x1="60" y1="350" x2="780" y2="350" class="chart-axis"/>
+ <text x="420.0" y="395" text-anchor="middle" class="chart-title">Line Coverage (%)</text>
+ <text x="15" y="185.0" text-anchor="middle" transform="rotate(-90, 15, 185.0)" class="chart-title">Cyclomatic Complexity</text>
+ <a href="Ary.php.html#77"><circle cx="642.9" cy="152.0" r="20.0" class="bubble-warning"><title>orange\framework\helpers\Ary::makeAssociated — Coverage: 81.0% | Lines: 21 | Complexity: 9</title></circle></a>
+ <a href="Dot.php.html#79"><circle cx="780.0" cy="130.0" r="19.5" class="bubble-success"><title>orange\framework\helpers\Dot::get — Coverage: 100.0% | Lines: 20 | Complexity: 10</title></circle></a>
+ <a href="Dot.php.html#151"><circle cx="780.0" cy="174.0" r="18.5" class="bubble-success"><title>orange\framework\helpers\Dot::unset — Coverage: 100.0% | Lines: 18 | Complexity: 8</title></circle></a>
+ <a href="Dot.php.html#38"><circle cx="780.0" cy="196.0" r="16.9" class="bubble-success"><title>orange\framework\helpers\Dot::set — Coverage: 100.0% | Lines: 15 | Complexity: 7</title></circle></a>
+ <a href="Dot.php.html#226"><circle cx="780.0" cy="174.0" r="16.9" class="bubble-success"><title>orange\framework\helpers\Dot::expand — Coverage: 100.0% | Lines: 15 | Complexity: 8</title></circle></a>
+ <a href="DirectorySearch.php.html#175"><circle cx="780.0" cy="196.0" r="15.7" class="bubble-success"><title>orange\framework\helpers\DirectorySearch::removeDirectory — Coverage: 100.0% | Lines: 13 | Complexity: 7</title></circle></a>
+ <a href="DirectorySearch.php.html#115"><circle cx="780.0" cy="262.0" r="14.5" class="bubble-success"><title>orange\framework\helpers\DirectorySearch::addDirectory — Coverage: 100.0% | Lines: 11 | Complexity: 4</title></circle></a>
+ <a href="DirectorySearch.php.html#584"><circle cx="780.0" cy="262.0" r="13.8" class="bubble-success"><title>orange\framework\helpers\DirectorySearch::recursiveGlob — Coverage: 100.0% | Lines: 10 | Complexity: 4</title></circle></a>
+ <a href="DirectorySearch.php.html#708"><circle cx="636.0" cy="152.0" r="13.8" class="bubble-warning"><title>orange\framework\helpers\DirectorySearch::setupResourceKeyStyle — Coverage: 80.0% | Lines: 10 | Complexity: 9</title></circle></a>
+ <a href="DirectorySearch.php.html#545"><circle cx="780.0" cy="218.0" r="13.1" class="bubble-success"><title>orange\framework\helpers\DirectorySearch::scanDirectories — Coverage: 100.0% | Lines: 9 | Complexity: 6</title></circle></a>
+ <a href="DirectorySearch.php.html#242"><circle cx="780.0" cy="306.0" r="12.3" class="bubble-success"><title>orange\framework\helpers\DirectorySearch::replaceDirectories — Coverage: 100.0% | Lines: 8 | Complexity: 2</title></circle></a>
+ <a href="DirectorySearch.php.html#402"><circle cx="780.0" cy="284.0" r="11.5" class="bubble-success"><title>orange\framework\helpers\DirectorySearch::find — Coverage: 100.0% | Lines: 7 | Complexity: 3</title></circle></a>
+ <a href="DirectorySearch.php.html#615"><circle cx="780.0" cy="284.0" r="11.5" class="bubble-success"><title>orange\framework\helpers\DirectorySearch::addMatches — Coverage: 100.0% | Lines: 7 | Complexity: 3</title></circle></a>
+ <a href="Dot.php.html#199"><circle cx="780.0" cy="218.0" r="11.5" class="bubble-success"><title>orange\framework\helpers\Dot::flatten — Coverage: 100.0% | Lines: 7 | Complexity: 6</title></circle></a>
+ <a href="DirectorySearch.php.html#151"><circle cx="780.0" cy="262.0" r="10.7" class="bubble-success"><title>orange\framework\helpers\DirectorySearch::addDirectories — Coverage: 100.0% | Lines: 6 | Complexity: 4</title></circle></a>
+ <a href="DirectorySearch.php.html#278"><circle cx="780.0" cy="306.0" r="10.7" class="bubble-success"><title>orange\framework\helpers\DirectorySearch::flushDirectories — Coverage: 100.0% | Lines: 6 | Complexity: 2</title></circle></a>
+ <a href="Ary.php.html#16"><circle cx="780.0" cy="284.0" r="9.8" class="bubble-success"><title>orange\framework\helpers\Ary::remapKey — Coverage: 100.0% | Lines: 5 | Complexity: 3</title></circle></a>
+ <a href="Ary.php.html#161"><circle cx="780.0" cy="262.0" r="9.8" class="bubble-success"><title>orange\framework\helpers\Ary::elements — Coverage: 100.0% | Lines: 5 | Complexity: 4</title></circle></a>
+ <a href="DirectorySearch.php.html#86"><circle cx="780.0" cy="328.0" r="9.8" class="bubble-success"><title>orange\framework\helpers\DirectorySearch::__construct — Coverage: 100.0% | Lines: 5 | Complexity: 1</title></circle></a>
+ <a href="DirectorySearch.php.html#303"><circle cx="780.0" cy="306.0" r="9.8" class="bubble-success"><title>orange\framework\helpers\DirectorySearch::addResource — Coverage: 100.0% | Lines: 5 | Complexity: 2</title></circle></a>
+ <a href="DirectorySearch.php.html#424"><circle cx="780.0" cy="306.0" r="9.8" class="bubble-success"><title>orange\framework\helpers\DirectorySearch::findAll — Coverage: 100.0% | Lines: 5 | Complexity: 2</title></circle></a>
+ <a href="DirectorySearch.php.html#683"><circle cx="780.0" cy="240.0" r="9.8" class="bubble-success"><title>orange\framework\helpers\DirectorySearch::callback — Coverage: 100.0% | Lines: 5 | Complexity: 5</title></circle></a>
+ <a href="Ary.php.html#35"><circle cx="780.0" cy="284.0" r="8.7" class="bubble-success"><title>orange\framework\helpers\Ary::remapValue — Coverage: 100.0% | Lines: 4 | Complexity: 3</title></circle></a>
+ <a href="Ary.php.html#57"><circle cx="780.0" cy="306.0" r="8.7" class="bubble-success"><title>orange\framework\helpers\Ary::wrapArray — Coverage: 100.0% | Lines: 4 | Complexity: 2</title></circle></a>
+ <a href="DirectorySearch.php.html#352"><circle cx="780.0" cy="328.0" r="8.7" class="bubble-success"><title>orange\framework\helpers\DirectorySearch::flushResources — Coverage: 100.0% | Lines: 4 | Complexity: 1</title></circle></a>
+ <a href="DirectorySearch.php.html#215"><circle cx="780.0" cy="306.0" r="7.6" class="bubble-success"><title>orange\framework\helpers\DirectorySearch::removeDirectories — Coverage: 100.0% | Lines: 3 | Complexity: 2</title></circle></a>
+ <a href="DirectorySearch.php.html#324"><circle cx="780.0" cy="306.0" r="7.6" class="bubble-success"><title>orange\framework\helpers\DirectorySearch::addResources — Coverage: 100.0% | Lines: 3 | Complexity: 2</title></circle></a>
+ <a href="DirectorySearch.php.html#370"><circle cx="780.0" cy="328.0" r="7.6" class="bubble-success"><title>orange\framework\helpers\DirectorySearch::removeResource — Coverage: 100.0% | Lines: 3 | Complexity: 1</title></circle></a>
+ <a href="DirectorySearch.php.html#386"><circle cx="780.0" cy="306.0" r="7.6" class="bubble-success"><title>orange\framework\helpers\DirectorySearch::removeResources — Coverage: 100.0% | Lines: 3 | Complexity: 2</title></circle></a>
+ <a href="DirectorySearch.php.html#339"><circle cx="780.0" cy="328.0" r="6.2" class="bubble-success"><title>orange\framework\helpers\DirectorySearch::replaceResources — Coverage: 100.0% | Lines: 2 | Complexity: 1</title></circle></a>
+ <a href="DirectorySearch.php.html#444"><circle cx="780.0" cy="328.0" r="6.2" class="bubble-success"><title>orange\framework\helpers\DirectorySearch::list — Coverage: 100.0% | Lines: 2 | Complexity: 1</title></circle></a>
+ <a href="DirectorySearch.php.html#459"><circle cx="780.0" cy="328.0" r="6.2" class="bubble-success"><title>orange\framework\helpers\DirectorySearch::findFirst — Coverage: 100.0% | Lines: 2 | Complexity: 1</title></circle></a>
+ <a href="DirectorySearch.php.html#474"><circle cx="780.0" cy="328.0" r="6.2" class="bubble-success"><title>orange\framework\helpers\DirectorySearch::findLast — Coverage: 100.0% | Lines: 2 | Complexity: 1</title></circle></a>
+ <a href="DirectorySearch.php.html#487"><circle cx="780.0" cy="328.0" r="6.2" class="bubble-success"><title>orange\framework\helpers\DirectorySearch::exists — Coverage: 100.0% | Lines: 2 | Complexity: 1</title></circle></a>
+ <a href="DirectorySearch.php.html#499"><circle cx="780.0" cy="328.0" r="6.2" class="bubble-success"><title>orange\framework\helpers\DirectorySearch::lock — Coverage: 100.0% | Lines: 2 | Complexity: 1</title></circle></a>
+ <a href="DirectorySearch.php.html#512"><circle cx="780.0" cy="328.0" r="6.2" class="bubble-success"><title>orange\framework\helpers\DirectorySearch::unlock — Coverage: 100.0% | Lines: 2 | Complexity: 1</title></circle></a>
+ <a href="DirectorySearch.php.html#637"><circle cx="780.0" cy="306.0" r="6.2" class="bubble-success"><title>orange\framework\helpers\DirectorySearch::ifLockedThrowException — Coverage: 100.0% | Lines: 2 | Complexity: 2</title></circle></a>
+ <a href="DirectorySearch.php.html#656"><circle cx="780.0" cy="284.0" r="6.2" class="bubble-success"><title>orange\framework\helpers\DirectorySearch::normalizeKey — Coverage: 100.0% | Lines: 2 | Complexity: 3</title></circle></a>
+ <a href="DirectorySearch.php.html#668"><circle cx="780.0" cy="328.0" r="6.2" class="bubble-success"><title>orange\framework\helpers\DirectorySearch::rescan — Coverage: 100.0% | Lines: 2 | Complexity: 1</title></circle></a>
+ <a href="Dot.php.html#133"><circle cx="780.0" cy="328.0" r="6.2" class="bubble-success"><title>orange\framework\helpers\Dot::isset — Coverage: 100.0% | Lines: 2 | Complexity: 1</title></circle></a>
+ <a href="Ary.php.html#130"><circle cx="780.0" cy="306.0" r="4.4" class="bubble-success"><title>orange\framework\helpers\Ary::element — Coverage: 100.0% | Lines: 1 | Complexity: 2</title></circle></a>
+ <a href="Ary.php.html#143"><circle cx="780.0" cy="328.0" r="4.4" class="bubble-success"><title>orange\framework\helpers\Ary::randomElement — Coverage: 100.0% | Lines: 1 | Complexity: 1</title></circle></a>
+ <a href="DirectorySearch.php.html#229"><circle cx="780.0" cy="328.0" r="4.4" class="bubble-success"><title>orange\framework\helpers\DirectorySearch::listDirectories — Coverage: 100.0% | Lines: 1 | Complexity: 1</title></circle></a>
+ <a href="DirectorySearch.php.html#267"><circle cx="780.0" cy="328.0" r="4.4" class="bubble-success"><title>orange\framework\helpers\DirectorySearch::directoryExists — Coverage: 100.0% | Lines: 1 | Complexity: 1</title></circle></a>
+ <a href="DirectorySearch.php.html#524"><circle cx="780.0" cy="328.0" r="4.4" class="bubble-success"><title>orange\framework\helpers\DirectorySearch::isLocked — Coverage: 100.0% | Lines: 1 | Complexity: 1</title></circle></a>
+ <a href="DirectorySearch.php.html#534"><circle cx="780.0" cy="328.0" r="4.4" class="bubble-success"><title>orange\framework\helpers\DirectorySearch::__debugInfo — Coverage: 100.0% | Lines: 1 | Complexity: 1</title></circle></a>
+ <a href="Dot.php.html#25"><circle cx="780.0" cy="328.0" r="4.4" class="bubble-success"><title>orange\framework\helpers\Dot::changeDelimiter — Coverage: 100.0% | Lines: 1 | Complexity: 1</title></circle></a>
+</svg>
      </div>
     </div>
-    <div class="col-md-6">
-     <h3>Complexity</h3>
-     <div id="methodComplexity" style="height: 300px;">
-       <svg></svg>
-     </div>
-    </div>
-   </div>
-   <div class="row">
-    <div class="col-md-6">
-     <h3>Insufficient Coverage</h3>
+    <div class="col-md-6 dashboard-column">
+     <h3>&nbsp;</h3>
+     <p class="text-muted small">Sorted by descending CRAP (Change Risk Anti-Patterns) index.</p>
      <div class="scrollbox">
-      <table class="table">
-       <thead>
-        <tr>
-         <th>Method</th>
-         <th class="text-right">Coverage</th>
-        </tr>
-       </thead>
-       <tbody>
-       <tr><td><a href="Ary.php.html#77"><abbr title="orange\framework\helpers\Ary::makeAssociated">makeAssociated</abbr></a></td><td class="text-right">80%</td></tr>
-       <tr><td><a href="DirectorySearch.php.html#708"><abbr title="orange\framework\helpers\DirectorySearch::setupResourceKeyStyle">setupResourceKeyStyle</abbr></a></td><td class="text-right">87%</td></tr>
-
-       </tbody>
-      </table>
-     </div>
-    </div>
-    <div class="col-md-6">
-     <h3>Project Risks</h3>
-     <div class="scrollbox">
-      <table class="table">
-       <thead>
-        <tr>
-         <th>Method</th>
-         <th class="text-right"><abbr title="Change Risk Anti-Patterns (CRAP) Index">CRAP</abbr></th>
-        </tr>
-       </thead>
-       <tbody>
-       <tr><td><a href="DirectorySearch.php.html#708"><abbr title="orange\framework\helpers\DirectorySearch::setupResourceKeyStyle">setupResourceKeyStyle</abbr></a></td><td class="text-right">11</td></tr>
-       <tr><td><a href="Ary.php.html#77"><abbr title="orange\framework\helpers\Ary::makeAssociated">makeAssociated</abbr></a></td><td class="text-right">9</td></tr>
-
-       </tbody>
-      </table>
+<table class="table">
+ <thead>
+  <tr>
+   <th>Method</th>
+   <th class="text-right"><abbr title="Change Risk Anti-Patterns (CRAP) Index">CRAP</abbr></th>
+   <th class="text-right">Coverage</th>
+  </tr>
+ </thead>
+ <tbody>
+  <tr><td><a href="Dot.php.html#79">orange\framework\helpers\Dot::get</a></td><td class="text-right">10</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="DirectorySearch.php.html#708">orange\framework\helpers\DirectorySearch::setupResourceKeyStyle</a></td><td class="text-right">9.65</td><td class="text-right">80.0%</td></tr>
+  <tr><td><a href="Ary.php.html#77">orange\framework\helpers\Ary::makeAssociated</a></td><td class="text-right">9.56</td><td class="text-right">81.0%</td></tr>
+  <tr><td><a href="Dot.php.html#151">orange\framework\helpers\Dot::unset</a></td><td class="text-right">8</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Dot.php.html#226">orange\framework\helpers\Dot::expand</a></td><td class="text-right">8</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="DirectorySearch.php.html#175">orange\framework\helpers\DirectorySearch::removeDirectory</a></td><td class="text-right">7</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Dot.php.html#38">orange\framework\helpers\Dot::set</a></td><td class="text-right">7</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="DirectorySearch.php.html#545">orange\framework\helpers\DirectorySearch::scanDirectories</a></td><td class="text-right">6</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Dot.php.html#199">orange\framework\helpers\Dot::flatten</a></td><td class="text-right">6</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="DirectorySearch.php.html#683">orange\framework\helpers\DirectorySearch::callback</a></td><td class="text-right">5</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Ary.php.html#161">orange\framework\helpers\Ary::elements</a></td><td class="text-right">4</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="DirectorySearch.php.html#115">orange\framework\helpers\DirectorySearch::addDirectory</a></td><td class="text-right">4</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="DirectorySearch.php.html#151">orange\framework\helpers\DirectorySearch::addDirectories</a></td><td class="text-right">4</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="DirectorySearch.php.html#584">orange\framework\helpers\DirectorySearch::recursiveGlob</a></td><td class="text-right">4</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Ary.php.html#16">orange\framework\helpers\Ary::remapKey</a></td><td class="text-right">3</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Ary.php.html#35">orange\framework\helpers\Ary::remapValue</a></td><td class="text-right">3</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="DirectorySearch.php.html#402">orange\framework\helpers\DirectorySearch::find</a></td><td class="text-right">3</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="DirectorySearch.php.html#615">orange\framework\helpers\DirectorySearch::addMatches</a></td><td class="text-right">3</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="DirectorySearch.php.html#656">orange\framework\helpers\DirectorySearch::normalizeKey</a></td><td class="text-right">3</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Ary.php.html#57">orange\framework\helpers\Ary::wrapArray</a></td><td class="text-right">2</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Ary.php.html#130">orange\framework\helpers\Ary::element</a></td><td class="text-right">2</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="DirectorySearch.php.html#215">orange\framework\helpers\DirectorySearch::removeDirectories</a></td><td class="text-right">2</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="DirectorySearch.php.html#242">orange\framework\helpers\DirectorySearch::replaceDirectories</a></td><td class="text-right">2</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="DirectorySearch.php.html#278">orange\framework\helpers\DirectorySearch::flushDirectories</a></td><td class="text-right">2</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="DirectorySearch.php.html#303">orange\framework\helpers\DirectorySearch::addResource</a></td><td class="text-right">2</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="DirectorySearch.php.html#324">orange\framework\helpers\DirectorySearch::addResources</a></td><td class="text-right">2</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="DirectorySearch.php.html#386">orange\framework\helpers\DirectorySearch::removeResources</a></td><td class="text-right">2</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="DirectorySearch.php.html#424">orange\framework\helpers\DirectorySearch::findAll</a></td><td class="text-right">2</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="DirectorySearch.php.html#637">orange\framework\helpers\DirectorySearch::ifLockedThrowException</a></td><td class="text-right">2</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Ary.php.html#143">orange\framework\helpers\Ary::randomElement</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="DirectorySearch.php.html#86">orange\framework\helpers\DirectorySearch::__construct</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="DirectorySearch.php.html#229">orange\framework\helpers\DirectorySearch::listDirectories</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="DirectorySearch.php.html#267">orange\framework\helpers\DirectorySearch::directoryExists</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="DirectorySearch.php.html#339">orange\framework\helpers\DirectorySearch::replaceResources</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="DirectorySearch.php.html#352">orange\framework\helpers\DirectorySearch::flushResources</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="DirectorySearch.php.html#370">orange\framework\helpers\DirectorySearch::removeResource</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="DirectorySearch.php.html#444">orange\framework\helpers\DirectorySearch::list</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="DirectorySearch.php.html#459">orange\framework\helpers\DirectorySearch::findFirst</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="DirectorySearch.php.html#474">orange\framework\helpers\DirectorySearch::findLast</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="DirectorySearch.php.html#487">orange\framework\helpers\DirectorySearch::exists</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="DirectorySearch.php.html#499">orange\framework\helpers\DirectorySearch::lock</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="DirectorySearch.php.html#512">orange\framework\helpers\DirectorySearch::unlock</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="DirectorySearch.php.html#524">orange\framework\helpers\DirectorySearch::isLocked</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="DirectorySearch.php.html#534">orange\framework\helpers\DirectorySearch::__debugInfo</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="DirectorySearch.php.html#668">orange\framework\helpers\DirectorySearch::rescan</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Dot.php.html#25">orange\framework\helpers\Dot::changeDelimiter</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+  <tr><td><a href="Dot.php.html#133">orange\framework\helpers\Dot::isset</a></td><td class="text-right">1</td><td class="text-right">100.0%</td></tr>
+ </tbody>
+</table>
      </div>
     </div>
    </div>
    <footer>
     <hr/>
     <p>
-     <small>Generated by <a href="https://github.com/sebastianbergmann/php-code-coverage" target="_top">php-code-coverage 10.1.16</a> using <a href="https://www.php.net/" target="_top">PHP 8.5.8</a> and <a href="https://phpunit.de/">PHPUnit 10.5.64</a> at Sat Jul 18 14:53:54 UTC 2026.</small>
+     <small>Generated by <a href="https://github.com/sebastianbergmann/php-code-coverage" target="_top">php-code-coverage 14.2.3</a> using <a href="https://www.php.net/" target="_top">PHP 8.5.8</a> and <a href="https://phpunit.de/">PHPUnit 13.2.4</a> at Sat Jul 18 17:43:40 UTC 2026.</small>
     </p>
    </footer>
   </div>
-  <script src="../_js/jquery.min.js?v=10.1.16" type="text/javascript"></script>
-  <script src="../_js/d3.min.js?v=10.1.16" type="text/javascript"></script>
-  <script src="../_js/nv.d3.min.js?v=10.1.16" type="text/javascript"></script>
-  <script type="text/javascript">
-$(document).ready(function() {
-  nv.addGraph(function() {
-    var chart = nv.models.multiBarChart();
-    chart.tooltips(false)
-      .showControls(false)
-      .showLegend(false)
-      .reduceXTicks(false)
-      .staggerLabels(true)
-      .yAxis.tickFormat(d3.format('d'));
-
-    d3.select('#classCoverageDistribution svg')
-      .datum(getCoverageDistributionData([0,0,0,0,0,0,0,0,0,0,2,1], "Class Coverage"))
-      .transition().duration(500).call(chart);
-
-    nv.utils.windowResize(chart.update);
-
-    return chart;
-  });
-
-  nv.addGraph(function() {
-    var chart = nv.models.multiBarChart();
-    chart.tooltips(false)
-      .showControls(false)
-      .showLegend(false)
-      .reduceXTicks(false)
-      .staggerLabels(true)
-      .yAxis.tickFormat(d3.format('d'));
-
-    d3.select('#methodCoverageDistribution svg')
-      .datum(getCoverageDistributionData([0,0,0,0,0,0,0,0,0,2,0,45], "Method Coverage"))
-      .transition().duration(500).call(chart);
-
-    nv.utils.windowResize(chart.update);
-
-    return chart;
-  });
-
-  function getCoverageDistributionData(data, label) {
-    var labels = [
-      '0%',
-      '0-10%',
-      '10-20%',
-      '20-30%',
-      '30-40%',
-      '40-50%',
-      '50-60%',
-      '60-70%',
-      '70-80%',
-      '80-90%',
-      '90-100%',
-      '100%'
-    ];
-    var values = [];
-    $.each(labels, function(key) {
-      values.push({x: labels[key], y: data[key]});
-    });
-
-    return [
-      {
-        key: label,
-        values: values,
-        color: "#4572A7"
-      }
-    ];
-  }
-  nv.addGraph(function() {
-    var chart = nv.models.scatterChart()
-      .showDistX(true)
-      .showDistY(true)
-      .showLegend(false)
-      .forceX([0, 100]);
-    chart.tooltipContent(function(graph) {
-      return '<p>' + graph.point.class + '</p>';
-    });
-
-    chart.xAxis.axisLabel('Code Coverage (in percent)');
-    chart.yAxis.axisLabel('Cyclomatic Complexity');
-
-    d3.select('#classComplexity svg')
-      .datum(getComplexityData([[90.2439024390244,24,"<a href=\"Ary.php.html#7\">orange\\framework\\helpers\\Ary<\/a>"],[97.1590909090909,81,"<a href=\"DirectorySearch.php.html#15\">orange\\framework\\helpers\\DirectorySearch<\/a>"],[100,41,"<a href=\"Dot.php.html#15\">orange\\framework\\helpers\\Dot<\/a>"]], 'Class Complexity'))
-      .transition()
-      .duration(500)
-      .call(chart);
-
-    nv.utils.windowResize(chart.update);
-
-    return chart;
-  });
-
-  nv.addGraph(function() {
-    var chart = nv.models.scatterChart()
-      .showDistX(true)
-      .showDistY(true)
-      .showLegend(false)
-      .forceX([0, 100]);
-    chart.tooltipContent(function(graph) {
-      return '<p>' + graph.point.class + '</p>';
-    });
-
-    chart.xAxis.axisLabel('Code Coverage (in percent)');
-    chart.yAxis.axisLabel('Method Complexity');
-
-    d3.select('#methodComplexity svg')
-      .datum(getComplexityData([[100,3,"<a href=\"Ary.php.html#16\">orange\\framework\\helpers\\Ary::remapKey<\/a>"],[100,3,"<a href=\"Ary.php.html#35\">orange\\framework\\helpers\\Ary::remapValue<\/a>"],[100,2,"<a href=\"Ary.php.html#57\">orange\\framework\\helpers\\Ary::wrapArray<\/a>"],[80.95238095238095,9,"<a href=\"Ary.php.html#77\">orange\\framework\\helpers\\Ary::makeAssociated<\/a>"],[100,2,"<a href=\"Ary.php.html#130\">orange\\framework\\helpers\\Ary::element<\/a>"],[100,1,"<a href=\"Ary.php.html#143\">orange\\framework\\helpers\\Ary::randomElement<\/a>"],[100,4,"<a href=\"Ary.php.html#161\">orange\\framework\\helpers\\Ary::elements<\/a>"],[100,1,"<a href=\"DirectorySearch.php.html#86\">orange\\framework\\helpers\\DirectorySearch::__construct<\/a>"],[100,4,"<a href=\"DirectorySearch.php.html#115\">orange\\framework\\helpers\\DirectorySearch::addDirectory<\/a>"],[100,4,"<a href=\"DirectorySearch.php.html#151\">orange\\framework\\helpers\\DirectorySearch::addDirectories<\/a>"],[100,7,"<a href=\"DirectorySearch.php.html#175\">orange\\framework\\helpers\\DirectorySearch::removeDirectory<\/a>"],[100,2,"<a href=\"DirectorySearch.php.html#215\">orange\\framework\\helpers\\DirectorySearch::removeDirectories<\/a>"],[100,1,"<a href=\"DirectorySearch.php.html#229\">orange\\framework\\helpers\\DirectorySearch::listDirectories<\/a>"],[100,2,"<a href=\"DirectorySearch.php.html#242\">orange\\framework\\helpers\\DirectorySearch::replaceDirectories<\/a>"],[100,1,"<a href=\"DirectorySearch.php.html#267\">orange\\framework\\helpers\\DirectorySearch::directoryExists<\/a>"],[100,2,"<a href=\"DirectorySearch.php.html#278\">orange\\framework\\helpers\\DirectorySearch::flushDirectories<\/a>"],[100,2,"<a href=\"DirectorySearch.php.html#303\">orange\\framework\\helpers\\DirectorySearch::addResource<\/a>"],[100,2,"<a href=\"DirectorySearch.php.html#324\">orange\\framework\\helpers\\DirectorySearch::addResources<\/a>"],[100,1,"<a href=\"DirectorySearch.php.html#339\">orange\\framework\\helpers\\DirectorySearch::replaceResources<\/a>"],[100,1,"<a href=\"DirectorySearch.php.html#352\">orange\\framework\\helpers\\DirectorySearch::flushResources<\/a>"],[100,1,"<a href=\"DirectorySearch.php.html#370\">orange\\framework\\helpers\\DirectorySearch::removeResource<\/a>"],[100,2,"<a href=\"DirectorySearch.php.html#386\">orange\\framework\\helpers\\DirectorySearch::removeResources<\/a>"],[100,3,"<a href=\"DirectorySearch.php.html#402\">orange\\framework\\helpers\\DirectorySearch::find<\/a>"],[100,2,"<a href=\"DirectorySearch.php.html#424\">orange\\framework\\helpers\\DirectorySearch::findAll<\/a>"],[100,1,"<a href=\"DirectorySearch.php.html#444\">orange\\framework\\helpers\\DirectorySearch::list<\/a>"],[100,1,"<a href=\"DirectorySearch.php.html#459\">orange\\framework\\helpers\\DirectorySearch::findFirst<\/a>"],[100,1,"<a href=\"DirectorySearch.php.html#474\">orange\\framework\\helpers\\DirectorySearch::findLast<\/a>"],[100,1,"<a href=\"DirectorySearch.php.html#487\">orange\\framework\\helpers\\DirectorySearch::exists<\/a>"],[100,1,"<a href=\"DirectorySearch.php.html#499\">orange\\framework\\helpers\\DirectorySearch::lock<\/a>"],[100,1,"<a href=\"DirectorySearch.php.html#512\">orange\\framework\\helpers\\DirectorySearch::unlock<\/a>"],[100,1,"<a href=\"DirectorySearch.php.html#524\">orange\\framework\\helpers\\DirectorySearch::isLocked<\/a>"],[100,1,"<a href=\"DirectorySearch.php.html#534\">orange\\framework\\helpers\\DirectorySearch::__debugInfo<\/a>"],[100,6,"<a href=\"DirectorySearch.php.html#545\">orange\\framework\\helpers\\DirectorySearch::scanDirectories<\/a>"],[100,4,"<a href=\"DirectorySearch.php.html#584\">orange\\framework\\helpers\\DirectorySearch::recursiveGlob<\/a>"],[100,3,"<a href=\"DirectorySearch.php.html#615\">orange\\framework\\helpers\\DirectorySearch::addMatches<\/a>"],[100,2,"<a href=\"DirectorySearch.php.html#637\">orange\\framework\\helpers\\DirectorySearch::ifLockedThrowException<\/a>"],[100,3,"<a href=\"DirectorySearch.php.html#656\">orange\\framework\\helpers\\DirectorySearch::normalizeKey<\/a>"],[100,1,"<a href=\"DirectorySearch.php.html#668\">orange\\framework\\helpers\\DirectorySearch::rescan<\/a>"],[100,5,"<a href=\"DirectorySearch.php.html#683\">orange\\framework\\helpers\\DirectorySearch::callback<\/a>"],[87.17948717948718,11,"<a href=\"DirectorySearch.php.html#708\">orange\\framework\\helpers\\DirectorySearch::setupResourceKeyStyle<\/a>"],[100,1,"<a href=\"Dot.php.html#25\">orange\\framework\\helpers\\Dot::changeDelimiter<\/a>"],[100,7,"<a href=\"Dot.php.html#38\">orange\\framework\\helpers\\Dot::set<\/a>"],[100,10,"<a href=\"Dot.php.html#79\">orange\\framework\\helpers\\Dot::get<\/a>"],[100,1,"<a href=\"Dot.php.html#133\">orange\\framework\\helpers\\Dot::isset<\/a>"],[100,8,"<a href=\"Dot.php.html#151\">orange\\framework\\helpers\\Dot::unset<\/a>"],[100,6,"<a href=\"Dot.php.html#199\">orange\\framework\\helpers\\Dot::flatten<\/a>"],[100,8,"<a href=\"Dot.php.html#226\">orange\\framework\\helpers\\Dot::expand<\/a>"]], 'Method Complexity'))
-      .transition()
-      .duration(500)
-      .call(chart);
-
-    nv.utils.windowResize(chart.update);
-
-    return chart;
-  });
-
-  function getComplexityData(data, label) {
-    var values = [];
-    $.each(data, function(key) {
-      var value = Math.round(data[key][0]*100) / 100;
-      values.push({
-        x: value,
-        y: data[key][1],
-        class: data[key][2],
-        size: 0.05,
-        shape: 'diamond'
-      });
-    });
-
-    return [
-      {
-        key: label,
-        values: values,
-        color: "#4572A7"
-      }
-    ];
-  }
-});
-  </script>
  </body>
 </html>
