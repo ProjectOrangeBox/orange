@@ -114,10 +114,11 @@ trait ConfigurationTrait
     }
 
     /**
-     * Wrapper for mergeWith with slightly different signature
+     * Wrapper for mergeConfigWith with slightly different signature
      *
-     * @param string $path
+     * @param string|null $path
      * @param array $configArray
+     * @param bool $recursive
      * @return array
      * @throws ConfigFileNotFound
      * @throws InvalidValue

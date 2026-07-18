@@ -86,9 +86,9 @@ interface DirectorySearchInterface
 
     /**
      * this can be used to lock and unlock the class from
-     * adding directories, removing directories, changing the extension
+     * adding, removing, or replacing directories and resources
      * this might be helpful if you load the class once from a cache
-     * if any of those are called a exception will be thrown
+     * if any of those are called while locked an exception will be thrown
      */
     public function lock(): self;
     public function unlock(): self;

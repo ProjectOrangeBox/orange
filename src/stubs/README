@@ -1,14 +1,15 @@
-if you don't want to use these services
-it easier to just use these "dummy" stubs for the services
+If you don't want to use a real implementation of a service, it's easier to
+just register one of these "dummy" stubs in its place.
 
-That way when somebody requests the Event service for example they don't get a missing service error.
+That way when somebody requests the Event service, for example, they don't
+get a missing service error - they just get a no-op.
 
-using the stub as a service
+Using a stub as a service:
 
 in the __construct()
-    
-    $this->eventService = Container::get('event');
+
+    $this->eventService = container()->get('event');
 
 In a method which needs to call a method on the service
-    
+
     $this->eventService->trigger('load.model');

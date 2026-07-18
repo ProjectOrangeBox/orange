@@ -6,6 +6,13 @@ namespace orange\framework\controllers;
 
 use orange\framework\controllers\BaseController;
 
+/**
+ * Default controller for the "/" route.
+ *
+ * Ships with a placeholder index() action that renders a simple welcome
+ * page. Intended to be replaced by pointing the "/" route at a different
+ * controller and method.
+ */
 class HomeController extends BaseController
 {
     public function index(): string

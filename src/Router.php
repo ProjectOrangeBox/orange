@@ -49,7 +49,8 @@ use orange\framework\traits\ConfigurationTrait;
  *
  * 3. Constructor
  *  •   Takes in config, input service, and optional cache service.
- *  •   Validates required configuration (site).
+ *  •   Determines the site URL from the 'site url' config value, falling back to the request's
+ *      HTTP_HOST; throws if neither is available.
  *  •   Loads routes from cache (if available) or from configuration.
  *  •   Sets up default route placeholders like 404 and home.
  *
@@ -68,19 +69,21 @@ use orange\framework\traits\ConfigurationTrait;
  *  •   Throws RouteNotFound if nothing matches.
  *  4.  getMatched(?string $key = null)
  *  •   Returns full matched route info or a specific value (like callback or url).
- *  5.  getUrl(string $searchName, array $arguments = [], ?bool $skipParameterTypeChecking = null)
+ *  5.  getRouterCallback()
+ *  •   Builds a RouterCallback value object (controller, method, arguments) from the matched route.
+ *  6.  getUrl(string $searchName, array $arguments = [], ?bool $skipParameterTypeChecking = null)
  *  •   Generates a URL from a named route, inserting arguments into placeholders.
  *  •   Enforces regex validation on arguments unless skipped.
  *  •   Throws exceptions if arguments don’t match or route name isn’t found.
- *  6.  siteUrl(bool|string $prefix = true)
+ *  7.  siteUrl(bool|string $prefix = true)
  *  •   Returns the application’s base URL with optional scheme (http://, https://, or custom).
- *  7.  updateCache() / getRoutes() / addConfigRoutes()
+ *  8.  updateCache() / getRoutes() / addConfigRoutes()
  *  •   Manage loading and caching of route definitions for performance.
  *
  * ⸻
  *
  * 5. Error Handling
- *  •   Throws MissingRequired if critical config (like site) is missing.
+ *  •   Throws MissingRequired if no site URL can be determined (missing 'site url' config and no HTTP_HOST).
  *  •   Throws RouteNotFound when no route matches.
  *  •   Throws HttpMethodNotSupported if an invalid method is used.
  *  •   Throws RouterNameNotFound if generating a URL for an unknown route.
@@ -146,7 +149,8 @@ class Router extends Singleton implements RouterInterface
      * @param array $config Configuration array for routing settings.
      * @param InputInterface $inputService Provides request-related data.
      * @param CacheInterface|null $cacheService optional cache service
-     * @throws MissingRequired If the 'site' configuration is missing.
+     * @throws MissingRequired If neither the 'site url' config value nor the request's HTTP_HOST
+     *         server value can be used to determine the site URL.
      */
     protected function __construct(array $config, protected InputInterface $inputService, protected ?CacheInterface $cacheService = null)
     {
@@ -221,6 +225,7 @@ class Router extends Singleton implements RouterInterface
      *
      * @param array $options Route configuration (e.g., method, URL pattern, callback).
      * @return self
+     * @throws HttpMethodNotSupported If $options['method'] is not one of the supported HTTP methods.
      */
     public function addRoute(array $options): self
     {
@@ -265,6 +270,7 @@ class Router extends Singleton implements RouterInterface
      *
      * @param array $routes Array of route configurations.
      * @return self
+     * @throws HttpMethodNotSupported If any route's method is not one of the supported HTTP methods.
      */
     public function addRoutes(array $routes): self
     {
@@ -368,6 +374,12 @@ class Router extends Singleton implements RouterInterface
         return ($key) ? $this->matched[mb_strtolower($key)] : $this->matched;
     }
 
+    /**
+     * Builds a RouterCallback value object from the currently matched route's callback.
+     *
+     * @return RouterCallback
+     * @throws InvalidValue If the matched route's callback is not a valid [controller, method] pair.
+     */
     public function getRouterCallback(): RouterCallback
     {
         $callback = $this->getMatched('callback');
@@ -388,8 +400,13 @@ class Router extends Singleton implements RouterInterface
      *
      * @param string $searchName Route name.
      * @param array $arguments Arguments for dynamic segments.
+     * @param bool|null $skipParameterTypeChecking Overrides the router's configured default for
+     *        this call only; null uses the configured default ($this->skipParameterTypeChecking).
      * @return string The generated URL.
-     * @throws RouterNameNotFound If the route name is not found.
+     * @throws RouterNameNotFound If the route name is not found, or if the URL is empty after
+     *         substituting arguments.
+     * @throws InvalidValue If the argument count doesn't match the route's placeholder count, or an
+     *         argument fails its placeholder's regular expression.
      */
     public function getUrl(string $searchName = '', array $arguments = [], ?bool $skipParameterTypeChecking = null): string
     {
@@ -504,7 +521,6 @@ class Router extends Singleton implements RouterInterface
      * If no cached routes are found, it will load the configuration routes and cache them.
      *
      * @return void
-     * @throws MissingRequired
      */
     protected function getRoutes(): void
     {
@@ -530,8 +546,6 @@ class Router extends Singleton implements RouterInterface
 
     /**
      * Adds routes from the configuration.
-     *
-     * @throws MissingRequired If the configuration does not contain the required routes.
      *
      * @return void
      */

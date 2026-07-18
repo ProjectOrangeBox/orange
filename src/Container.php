@@ -74,7 +74,8 @@ use ReflectionClass;
  * The container throws specialized exceptions when:
  *  •   A service is not found (ServiceNotFound).
  *  •   An alias chain loops too deep (InvalidValue).
- *  •   Auto-wiring fails due to reflection issues (FailedToAutoWire, UnableToResolve, ConstructorNotPublic).
+ *  •   Auto-wiring fails to find a usable constructor or getInstance() method (FailedToAutoWire).
+ *  •   Note: ConstructorNotPublic and UnableToResolve are declared in orange\framework\exceptions\container but are not currently thrown anywhere in this class.
  *
  * This ensures clear debugging when a service cannot be resolved.
  *
@@ -124,6 +125,8 @@ class Container extends Singleton implements ContainerInterface
      * @param string $serviceName The name of the service.
      * @return mixed The service instance or value.
      * @throws ServiceNotFound If the service is not found.
+     * @throws InvalidValue If alias resolution exceeds the maximum allowed depth.
+     * @throws FailedToAutoWire If the service is registered as an auto-wired class that cannot be instantiated.
      */
     public function __get(string $serviceName): mixed
     {
@@ -139,6 +142,8 @@ class Container extends Singleton implements ContainerInterface
      * @param string $serviceName The name of the service.
      * @return mixed The resolved service.
      * @throws ServiceNotFound If the service is not registered.
+     * @throws InvalidValue If alias resolution exceeds the maximum allowed depth.
+     * @throws FailedToAutoWire If the service is registered as an auto-wired class that cannot be instantiated.
      */
     public function get(string $serviceName): mixed
     {
@@ -273,6 +278,7 @@ class Container extends Singleton implements ContainerInterface
      * Return a debug array of the registered services.
      *
      * @return array The debug information of the registered services.
+     * @throws NotFound If a registered service has an unknown type.
      */
     public function __debugInfo(): array
     {
@@ -283,6 +289,7 @@ class Container extends Singleton implements ContainerInterface
      * Return a debug array of the registered services.
      *
      * @return array The debug information of the registered services.
+     * @throws NotFound If a registered service has an unknown type.
      */
     public function debugInfo(): array
     {
@@ -526,10 +533,12 @@ class Container extends Singleton implements ContainerInterface
      * And when you retrieve it:
      * $service = $container->get('myService');
      *
+     * @param string $normalizedName The normalized service name, used to store the resolved instance as a singleton if applicable.
      * @param string $fullyQualifiedClass
      * @return mixed
      * @throws FailedToAutoWire
      * @throws ServiceNotFound
+     * @throws InvalidValue If resolving a dependency's alias exceeds the maximum allowed depth.
      */
     protected function autoWire(string $normalizedName, string $fullyQualifiedClass): mixed
     {
@@ -587,6 +596,9 @@ class Container extends Singleton implements ContainerInterface
      *
      * @param \ReflectionMethod $method
      * @return array
+     * @throws ServiceNotFound If a requested service is not registered.
+     * @throws InvalidValue If resolving a requested service's alias exceeds the maximum allowed depth.
+     * @throws FailedToAutoWire If a requested service is itself an auto-wired class that cannot be instantiated.
      */
     protected function resolveAutoWireArgs(\ReflectionMethod $method): array
     {

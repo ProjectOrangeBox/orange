@@ -188,6 +188,8 @@ class Security extends Singleton implements SecurityInterface
      *
      * @param string $data Data to encrypt.
      * @return string Encrypted data in hexadecimal format.
+     * @throws ConfigNotFound If the public key path is missing from the configuration.
+     * @throws FileNotFound If the public key file does not exist.
      */
     public function encrypt(string $data): string
     {
@@ -209,7 +211,10 @@ class Security extends Singleton implements SecurityInterface
      * @param string $data Encrypted data in hexadecimal format.
      * @return string Decrypted plain text data.
      *
-     * @throws SecurityException If the data format is invalid.
+     * @throws SecurityException If the data is not valid hexadecimal, or cannot be decrypted
+     *         (e.g. forged, truncated, or encrypted for a different key).
+     * @throws ConfigNotFound If the private key path is missing from the configuration.
+     * @throws FileNotFound If the private key file does not exist.
      */
     public function decrypt(string $data): string
     {
@@ -244,6 +249,8 @@ class Security extends Singleton implements SecurityInterface
      *
      * @param string $message The message to sign.
      * @return string HMAC signature in hexadecimal format.
+     * @throws ConfigNotFound If the auth key path is missing from the configuration.
+     * @throws FileNotFound If the auth key file does not exist.
      */
     public function createSignature(string $message): string
     {
@@ -265,6 +272,9 @@ class Security extends Singleton implements SecurityInterface
      * @param string $signature HMAC signature to verify.
      * @param string $message Original message.
      * @return bool True if the signature is valid, false otherwise.
+     * @throws ConfigNotFound If the auth key path is missing from the configuration (only reached
+     *         when $signature is valid hex of the expected length).
+     * @throws FileNotFound If the auth key file does not exist (same condition as above).
      */
     public function verifySignature(string $signature, string $message): bool
     {

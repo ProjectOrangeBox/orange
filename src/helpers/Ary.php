@@ -71,8 +71,12 @@ class Ary
      * @param array $array The input array of arrays or objects.
      * @param string $key The key to use as the associative key (default 'id').
      * @param string $value The key to use as the value; use '*' for the entire row (default '*').
-     * @param string $sort Sorting option: 'asc', 'desc', or '' for no sort (default '').
+     * @param string|null $sort Sort the result: 'asc'/'a' (alias for ksort), 'desc'/'d' (alias for krsort),
+     *                     or any of 'asort', 'arsort', 'ksort', 'krsort', 'natcasesort', 'natsort',
+     *                     'shuffle', 'sort', 'rsort' to call that function directly; null for no sort.
+     * @param int $flags Optional flags passed as the second argument to the sort function; -1 (default) omits the argument.
      * @return array The associative array.
+     * @throws \Exception If $sort is set but doesn't match a known sort option.
      */
     public static function makeAssociated(array $array, string $key = 'id', string $value = '*', ?string $sort = null, int $flags = -1): array
     {

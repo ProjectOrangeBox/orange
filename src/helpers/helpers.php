@@ -96,11 +96,13 @@ if (!function_exists('dataUri')) {
 
 if (!function_exists('convertLabel')) {
     /**
-     * Converts a string to a specific case format (e.g., camel, snake, slug).
+     * Converts a string to a specific case format.
      *
      * @param string $value The string to convert.
-     * @param string $case The target case format.
+     * @param string $case The target case format: 'normalize', 'lower', 'upper', 'title',
+     *                     'ucfirst', 'camel', 'pascal', 'snake', or 'slug'.
      * @return string The converted string.
+     * @throws \InvalidArgumentException If $case is not one of the recognized case formats.
      */
     function convertLabel(string $value, string $case = 'camel'): string
     {

@@ -79,9 +79,11 @@ use orange\framework\exceptions\IncorrectInterface;
  * ⸻
  *
  * 5. Error Handling
+ *  •   Throws Directory (constructor) if the configured temp directory does not exist.
  *  •   Throws ViewNotFound if a view file cannot be located.
  *  •   Throws DirectoryNotWritable or FileNotWritable if caching directories are inaccessible.
- *  •   Throws InvalidValue for incorrect config changes.
+ *  •   Throws InvalidValue for incorrect config changes, or when dynamic view resolution is
+ *      missing the controller/method needed to fill in a placeholder.
  *  •   Wraps low-level errors into framework exceptions for consistency.
  *
  * ⸻
@@ -146,7 +148,8 @@ abstract class ViewAbstract extends Singleton implements ViewInterface
      *
      * @param array $config Configuration array.
      * @param DataInterface|null $data Optional data source for the view.
-     * @throws IncorrectInterface|Directory
+     * @param RouterInterface|null $router Optional router used to resolve dynamic view names.
+     * @throws Directory If the configured temp directory does not exist.
      */
     protected function __construct(array $config, protected ?DataInterface $data = null, protected ?RouterInterface $router = null)
     {
@@ -219,7 +222,9 @@ abstract class ViewAbstract extends Singleton implements ViewInterface
      * @param array $data Data to pass into the view.
      * @param array $options Rendering options.
      * @return string Rendered view content.
-     * @throws ViewNotFound|ResourceNotFound
+     * @throws ViewNotFound If the view file cannot be located.
+     * @throws InvalidValue If dynamic view resolution is enabled but the matched route is missing
+     *         the controller or method needed to resolve a placeholder.
      */
     public function render(string $view = '', array $data = [], array $options = []): string
     {
@@ -253,7 +258,9 @@ abstract class ViewAbstract extends Singleton implements ViewInterface
      * @param array $data Data for the template.
      * @param array $options Rendering options.
      * @return string Rendered output.
-     * @throws FileNotWritable
+     * @throws DirectoryNotWritable If the temp directory does not exist and cannot be created.
+     * @throws FileNotWritable If the temp directory exists but is not writable, or the compiled
+     *         template file cannot be written.
      */
     public function renderString(string $string, array $data = [], array $options = []): string
     {
@@ -357,8 +364,8 @@ abstract class ViewAbstract extends Singleton implements ViewInterface
      *
      * @param string $file The file path to check.
      * @return bool Returns true if the file or directory is writable.
-     * @throws DirectoryNotWritable If the directory cannot be created or is not writable.
-     * @throws FileNotWritable If the file cannot be written to.
+     * @throws DirectoryNotWritable If the directory does not exist and cannot be created.
+     * @throws FileNotWritable If the directory exists but is not writable.
      */
     protected function isFileWritable(string $file): bool
     {

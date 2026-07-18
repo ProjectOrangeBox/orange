@@ -227,6 +227,7 @@ class Log extends Singleton implements LogInterface, LoggerInterface
      * @param string|int $level Log level.
      * @param string|\Stringable $message Log message.
      * @param array $context Contextual information.
+     * @return void
      */
     public function write(string|int $level, string|\Stringable $message, array $context = []): void
     {

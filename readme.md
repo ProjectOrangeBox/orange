@@ -61,6 +61,24 @@
 `src/controllers/HomeController.php`
     Default landing controller; swap it to customize the "/" route quickly.
 
+`src/controllers/FourohfourController.php`
+    Default 404 handler wired up in `src/config/routes.php`; just calls the `show404()` helper.
+
+`src/attributes/*`
+    PHP attributes used for declarative wiring instead of config arrays: `#[AttachService('name')]` marks a `BaseController` property to be pulled from the container (see `BaseController::autoAttachService()`); `#[AutoWire('name')]` is stacked once per positional argument on a constructor or `getInstance()` method (in declaration order) to resolve each argument from the container when the class is auto-wired (see `Container::autoWire()`); `#[Route(method, url, name)]` marks a controller method as a route definition for the router to discover.
+
+`src/base/*`
+    Shared building blocks behind the framework's OOP singletons/factories: `Factory` (+ `FactoryTraits`) creates a fresh instance on every `getInstance()` call; `Singleton` (+ `SingletonTraits`) caches one instance per subclass instead; `BaseTraits` supplies the shared non-public constructor, `newInstance()`, and clone/wakeup guards common to both. `ArrayObject` extends PHP's `ArrayObject` with property-style access, an `array_*`-function passthrough via `__call()`, and a `merge()` helper; `SingletonArrayObject` combines it with the singleton behavior (used by `Data`).
+
+`src/property/RouterCallback.php`
+    Plain value object (controller, method, arguments) produced by `Router::getRouterCallback()` and consumed by `Dispatcher`.
+
+`src/traits/ConfigurationTrait.php`
+    Shared behavior for services configured from `src/config/*.php` files: `getConfigFile()`/`mergeConfigWith()` load and merge a config file by convention (or explicit path), `setFromConfig()`/`assignFromConfig()` push config values into setter methods or matching properties, `changeOption()` lets callers safely mutate a single option with type checking (`$changeableTypeCheck`), and `validateConfig()` checks present config values against simple rule strings (a type like `string`/`array`, or `min[n]`/`max[n]`/`count[n]`/`size[n]`/`class[X]`, etc).
+
+`src/stubs/*`
+    No-op drop-in replacements for services (e.g. `Log`, `Output`) you can register in the container instead of the real implementation, so code that depends on a service doesn't blow up when that service is intentionally disabled. See `src/stubs/README`.
+
 `src/helpers/*`
     Standalone utility classes and global functions loaded by `Application`:
     - `Ary.php` — static array helpers (remap keys/values, etc.).

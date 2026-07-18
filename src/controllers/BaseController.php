@@ -14,7 +14,13 @@ use orange\framework\interfaces\ViewInterface;
 use ReflectionClass;
 
 /**
- * this is a user controller that others can extend it is not nessesary but it's nice to put commonly used code here
+ * Base controller that application controllers may extend.
+ *
+ * Not required, but provides commonly used behavior shared across controllers:
+ * auto-attaching services declared with the #[AttachService] attribute, loading
+ * controller-local libraries listed in $libraries, registering a controller-local
+ * view directory (when a $view property is present), and invoking an optional
+ * beforeMethodCalled() hook on the extending controller after construction.
  */
 abstract class BaseController
 {

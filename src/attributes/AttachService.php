@@ -15,18 +15,18 @@ use Attribute;
  * Attribute Declaration: #[Attribute(Attribute::TARGET_PROPERTY)] - This attribute can only be applied to class properties.
  * Constructor: Takes a single string $attachService parameter, which specifies the service name/key to inject.
  *
- * Usage Example
  * How It Works
- * When the DI container processes a class, it looks for properties marked with #[AttachService].
+ * BaseController (not the DI container) scans its own properties for #[AttachService].
  * It reads the service name from the attribute's $attachService property.
- * It retrieves the corresponding service from the container and injects it into the property.
+ * It retrieves the corresponding service from the container and assigns it to the property.
  * Benefits
  * Declarative: Makes service dependencies explicit and self-documenting.
  * Type-Safe: Leverages PHP's attribute system for compile-time validation.
  * Framework Integration: Works seamlessly with OrangeFramework's container system.
  * This attribute simplifies dependency injection by eliminating the need for manual constructor parameters or setter methods for common services.
  *
- * class MyController {
+ * Usage Example
+ * class MyController extends BaseController {
  *   #[AttachService('database')]
  *   public $db;
  *

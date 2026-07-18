@@ -117,7 +117,9 @@ class Config extends SingletonArrayObject implements ConfigInterface
      * Protected constructor to enforce Singleton usage.
      *
      * @param array $config Initial configuration array.
-     * @throws DirectoryNotFound If the default configuration directory is invalid.
+     * @param CacheInterface|null $cacheService Optional cache used to persist the discovered
+     *        config-file map (keyed by ENVIRONMENT + class name) instead of rescanning the
+     *        search directories on every instantiation.
      */
     protected function __construct(array $config = [], ?CacheInterface $cacheService = null)
     {
@@ -145,6 +147,7 @@ class Config extends SingletonArrayObject implements ConfigInterface
      *
      * @param string $filename Name of the configuration file (without extension).
      * @return mixed Configuration data or null if not found.
+     * @throws ConfigFileDidNotReturnAnArray If a discovered config file does not return an array.
      */
     #[\Override]
     public function __get(string $filename): mixed
@@ -175,7 +178,7 @@ class Config extends SingletonArrayObject implements ConfigInterface
      *
      * @param mixed $filename Name of the configuration file.
      * @return mixed Configuration data.
-     * @throws InvalidConfigurationValue If configuration data is invalid.
+     * @throws ConfigFileDidNotReturnAnArray If a discovered config file does not return an array.
      */
     public function offsetGet(mixed $filename): mixed
     {
@@ -190,6 +193,7 @@ class Config extends SingletonArrayObject implements ConfigInterface
      * @param string $filenameKey Config filename, optionally followed by a dotted key (e.g. "app.debug").
      * @param mixed $defaultValue Default value if the key does not exist.
      * @return mixed Configuration value or default value if key not found.
+     * @throws ConfigFileDidNotReturnAnArray If a discovered config file does not return an array.
      */
     #[\Override]
     public function get(string $filenameKey, mixed $defaultValue = null): mixed
@@ -215,7 +219,7 @@ class Config extends SingletonArrayObject implements ConfigInterface
      *
      * @param string $filename Name of the configuration file.
      * @return array The configuration array.
-     * @throws InvalidConfigurationValue If the configuration file doesn't return an array.
+     * @throws ConfigFileDidNotReturnAnArray If the configuration file doesn't return an array.
      */
     protected function load(string $filename): array
     {

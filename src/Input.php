@@ -14,24 +14,24 @@ use orange\framework\traits\ConfigurationTrait;
  * Centralizes access to request state by wrapping superglobals and injected config inside a singleton Input service; the constructor merges supplied config, stores query/body/cookie/file data, normalizes server values, and records the raw input stream.
  * Utility accessors (request, query, cookie, file) pull values via a shared extract helper while logging calls, giving callers filtered slices or the whole dataset without touching superglobals directly.
  * Server and header lookups normalize keys (lowercase, underscores to spaces, HTTP/Server prefixes stripped) so the rest of the class can query consistent identifiers.
- * URL helpers surface the request URI and individual segments, backed by the normalized server data (packages/orange/src/Input.php:231, packages/orange/src/Input.php:261).
+ * URL helpers surface the request URI and individual segments, backed by the normalized server data (see requestUri() and uriSegment()).
  * Methods such as contentType, requestMethod, and requestType interpret headers and overrides to expose the effective content type, HTTP verb (including _method overrides), and whether the call is HTML/AJAX/CLI.
  * Boolean helpers report on AJAX, CLI, and HTTPS status, including the ability to return scheme strings when requested.
- * detectInputStream parses the raw body for URL-encoded or JSON payloads on non-POST verbs so the $request array stays populated even when PHP would normally leave it empty.
+ * detectRequest parses the raw body for URL-encoded or JSON payloads based on content type so the $request array stays populated even when PHP would normally leave it empty (e.g. PUT/PATCH/DELETE, which PHP does not auto-populate into $_POST).
  *
  * 1. Core Purpose:
  * - Unified API for accessing request data across different sources and methods.
  * - Supports method overrides and JSON/form-encoded body parsing.
  * - Identifies request type (AJAX, CLI, HTTPS) and normalizes server data.
  *
- * 2. Key Properties:
- * - @property array $query        Parsed query string ($_GET)
- * - @property array $request      Parsed request body ($_POST, JSON, etc.)
- * - @property array $server       Normalized $_SERVER values
- * - @property array $cookies      Parsed cookies ($_COOKIE)
- * - @property array $files        Uploaded files ($_FILES)
- * - @property array $headers      Extracted HTTP headers
- * - @property-read string $inputStream Raw body input stream
+ * 2. Key Properties (internal storage; not magic-accessible, reached only through the methods below):
+ * - array $query        Parsed query string ($_GET), exposed via query()
+ * - array $request      Parsed request body ($_POST, JSON, etc.), exposed via request()
+ * - array $server       Normalized $_SERVER values, exposed via server()
+ * - array $cookies      Parsed cookies ($_COOKIE), exposed via cookie()
+ * - array $files        Uploaded files ($_FILES), exposed via file()
+ * - array $headers      Extracted HTTP headers, exposed via header()
+ * - string $inputStream Raw body input stream, exposed via inputStream()
  *
  * 3. Important Methods:
  * - request(?string $key = null, mixed $default = null): mixed
@@ -81,7 +81,7 @@ use orange\framework\traits\ConfigurationTrait;
  *
  * 4. Configuration & Setup:
  * - Constructor expects a config array with optional keys:
- *   - query, request, server, cookies, files, inputStream, php_sapi, stdin
+ *   - query, request, server, cookies, files, input, php_sapi, stdin
  * - Merges config using ConfigurationTrait's `mergeConfigWith()` method.
  *
  * 5. Error Handling:

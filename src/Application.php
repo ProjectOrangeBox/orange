@@ -120,6 +120,8 @@ class Application
      * @param null|array $environmentalFiles
      * @param null|array $configDirectories
      * @return Application
+     * @throws FileNotFound If an environmental file passed in $environmentalFiles cannot be found.
+     * @throws InvalidConfigurationValue If an environmental file passed in $environmentalFiles is not a valid INI file.
      */
     public static function make(?array $environmentalFiles = null, ?array $configDirectories = null): Application
     {
@@ -159,7 +161,7 @@ class Application
      * @return ContainerInterface
      * @throws InvalidValue
      * @throws DirectoryNotFound
-     * @throws ConfigFileNotFound
+     * @throws ConfigFileDidNotReturnAnArray
      * @throws MissingRequired
      * @throws FileNotFound
      * @throws IncorrectInterface
@@ -204,7 +206,7 @@ class Application
      * @return ContainerInterface
      * @throws InvalidValue
      * @throws DirectoryNotFound
-     * @throws ConfigFileNotFound
+     * @throws ConfigFileDidNotReturnAnArray
      * @throws MissingRequired
      * @throws FileNotFound
      * @throws IncorrectInterface
@@ -222,7 +224,7 @@ class Application
      * @return ContainerInterface
      * @throws InvalidValue
      * @throws DirectoryNotFound
-     * @throws ConfigFileNotFound
+     * @throws ConfigFileDidNotReturnAnArray
      * @throws MissingRequired
      * @throws FileNotFound
      * @throws IncorrectInterface
@@ -307,8 +309,7 @@ class Application
      *
      * @return void
      * @throws FileNotFound
-     * @throws ConfigFileNotFound
-     * @throws InvalidValue
+     * @throws ConfigFileDidNotReturnAnArray
      */
     protected function preContainer(): void
     {
@@ -353,7 +354,6 @@ class Application
      * Initializes the DI container using service configuration
      *
      * @return void
-     * @throws ConfigFileNotFound
      * @throws InvalidValue
      * @throws IncorrectInterface
      */
@@ -414,6 +414,7 @@ class Application
      *
      * @return void
      * @throws FileNotFound
+     * @throws InvalidConfigurationValue
      */
     public function loadEnvironment(): void
     {
@@ -447,7 +448,6 @@ class Application
      * or use the defaults if none provided
      *
      * @return void
-     * @throws FileNotFound
      */
     public function setConfigDirectories(): void
     {

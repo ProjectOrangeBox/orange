@@ -57,7 +57,8 @@ use ReflectionMethod;
  *
  * The dispatcher enforces correctness by throwing exceptions when something is wrong:
  *  •   ControllerClassNotFound → controller class missing.
- *  •   MethodNotFound → method missing on controller.
+ *  •   MethodNotFound → method missing or not public on the controller.
+ *  •   ArgumentMissMatch → controller method invoked without its required arguments.
  *  •   InvalidValue → controller method returned something other than a string.
  *
  * This ensures failures are explicit and caught early.
@@ -86,7 +87,8 @@ class Dispatcher extends Singleton implements DispatcherInterface
      * @return string The output of the controller's method.
      *
      * @throws ControllerClassNotFound If the specified controller class does not exist.
-     * @throws MethodNotFound If the specified method does not exist in the controller class.
+     * @throws MethodNotFound If the specified method does not exist, or is not public, on the controller class.
+     * @throws ArgumentMissMatch If the method is invoked without arguments required by its signature.
      * @throws InvalidValue If the controller's method does not return a string.
      */
     public function call(RouterCallback $routerCallback): string

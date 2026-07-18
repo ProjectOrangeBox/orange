@@ -163,6 +163,9 @@ class Error extends Singleton
      * Initializes the Error class with the given configuration and optional exception.
      *
      * @param array $config Configuration options.
+     * @param ContainerInterface|null $container Optional DI container used to resolve the
+     *        data/input/view/output services; falls back to the container() helper, and
+     *        then to Orange's own default classes, when not provided.
      * @param Throwable|null $thrown Optional exception causing the error.
      */
     protected function __construct(array $config = [], public ?ContainerInterface $container = null, ?Throwable $thrown = null)

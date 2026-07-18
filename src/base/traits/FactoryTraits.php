@@ -7,12 +7,11 @@ namespace orange\framework\base\traits;
 trait FactoryTraits
 {
     /**
-     * The method you use to generate
-     * the Singleton's instance.
+     * The method you use to generate a new instance of the class.
      *
-     * This calls newInstance on the child class
-     * and then stores it if you call getInstance again
-     * that instance can be returned again
+     * Unlike SingletonTraits::getInstance(), this does NOT cache the
+     * result - every call to newInstance() (via this method) returns a
+     * brand new instance.
      */
     public static function getInstance(): mixed
     {

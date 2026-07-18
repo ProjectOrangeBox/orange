@@ -70,12 +70,18 @@ use orange\framework\exceptions\output\Output as OutputException;
  *  •   getContentTypeHeader() → builds Content-Type header string.
  *  •   getResponseHeader() → builds HTTP status header string.
  *  •   phpEcho(), phpExit(), phpHeader() → wrapper methods around PHP functions, useful for testing and overriding.
+ *  •   Cross-Origin Resource Sharing
+ *  •   handleCors() → when enabled via config, sets Access-Control-* headers for allowed origins
+ *      (optionally with credentials support) and answers OPTIONS preflight requests, sending and
+ *      exiting immediately for disallowed origins or completed preflights.
  *
  * ⸻
  *
  * 4. Error Handling
- *  •   Throws OutputException when an invalid content type or HTTP status code is provided.
- *  •   Strictly validates status codes against configured list.
+ *  •   Throws OutputException when an invalid or unregistered content type is provided to contentType().
+ *  •   Throws OutputException when forceHttps() cannot resolve a trusted host (no "allowed hosts" configured).
+ *  •   Invalid or out-of-range HTTP status codes are not rejected with an exception; responseCode() silently
+ *      falls back to 500 instead.
  *
  * ⸻
  *
@@ -136,6 +142,8 @@ class Output extends Singleton implements OutputInterface
      *
      * @param array $config Configuration array.
      * @param InputInterface $input Input interface instance.
+     * @throws OutputException If "force https" is enabled but no trusted host can be resolved,
+     *         or if the configured/detected content type is not a known MIME type.
      */
     protected function __construct(array $config, protected InputInterface $input)
     {
@@ -193,6 +201,8 @@ class Output extends Singleton implements OutputInterface
 
     /**
      * Enforces HTTPS protocol if the request is not already secure.
+     *
+     * @throws OutputException If no trusted host can be resolved (see resolveTrustedHost()).
      */
     public function forceHttps(): void
     {
@@ -390,7 +400,11 @@ class Output extends Singleton implements OutputInterface
      * @param string $value The header string to be sent (e.g., 'Content-Type: text/html').
      * @param int $replace Flag indicating whether to replace existing headers with the same prefix.
      *                     - Use `self::NO` to prevent replacement.
-     *                     - Use `self::REPLACEALL` to replace all matching headers.
+     *                     - Use `self::REPLACEALL` to replace headers matching everything up to the
+     *                       first `:` or space (i.e. matches by header/status-line name).
+     *                     - Use `self::REPLACEEXACT` to replace headers matching everything up to the
+     *                       first `;`, `=`, or `,` (a narrower match than REPLACEALL, useful for headers
+     *                       whose value itself contains a colon or space, e.g. Set-Cookie).
      * @param bool $prepend Whether to prepend the header to the list instead of appending.
      * @return self
      */
@@ -453,10 +467,11 @@ class Output extends Singleton implements OutputInterface
      * Sets the HTTP response code.
      *
      * Allows setting a response code either by integer value or by a string key mapped internally.
+     * An unrecognized string key resolves to 0, and any code outside the 100-599 range (including
+     * that 0) is silently replaced with 500 - no exception is thrown for an invalid/unknown code.
      *
      * @param int|string $code The HTTP status code (e.g., 200, 404) or its string representation.
      * @return self
-     * @throws OutputException If the status code is unknown or invalid.
      */
     public function responseCode(int|string $code): self
     {
@@ -584,6 +599,18 @@ class Output extends Singleton implements OutputInterface
         header($header, $replace);
     }
 
+    /**
+     * Handles Cross-Origin Resource Sharing (CORS) for the current request.
+     *
+     * Reads the Origin header; when it is present and listed in the "allowed cors" config, sets
+     * Access-Control-Allow-Origin (plus a Vary: Origin header and, if opted into via config,
+     * Access-Control-Allow-Credentials). When the Origin is present but not allowed, the response
+     * is sent and the script exits immediately without the Access-Control-Allow-Origin header.
+     * For OPTIONS preflight requests, echoes back the requested method/headers as
+     * Access-Control-Allow-Methods/Access-Control-Allow-Headers, then sends and exits.
+     *
+     * @return void
+     */
     public function handleCors(): void
     {
         $httpOrigin = $this->input->server('HTTP_ORIGIN');

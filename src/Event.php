@@ -127,6 +127,7 @@ class Event extends Singleton implements EventInterface
    * Constructor is protected to enforce Singleton usage.
    *
    * @param array $config Configuration array.
+   * @throws InvalidValue If a configured event listener is not a closure, string, or two-element array.
    */
     protected function __construct(array $config)
     {
@@ -177,6 +178,7 @@ class Event extends Singleton implements EventInterface
    * @param \Closure|array $callable Event callback (closure or class-method pair).
    * @param int $priority Priority of the event listener.
    * @return int Event ID for reference.
+   * @throws InvalidValue If $callable is not a closure or a two-element array.
    */
     public function register(string $trigger, \Closure|array $callable, int $priority = self::PRIORITY_NORMAL): int
     {
@@ -192,6 +194,7 @@ class Event extends Singleton implements EventInterface
    * @param array $multiple Array of event trigger => callable pairs.
    * @param int $priority Priority for all listeners.
    * @return array Array of registered event IDs.
+   * @throws InvalidValue If a $multiple callable is not a closure, string, or two-element array.
    */
     public function registerMultiple(array $multiple, int $priority = self::PRIORITY_NORMAL): array
     {
@@ -325,9 +328,10 @@ class Event extends Singleton implements EventInterface
    * Register an event listener.
    *
    * @param string $trigger Event trigger name.
-   * @param \Closure|array $callable Callback.
+   * @param \Closure|array|string $callable Callback: a closure, a [ClassName, 'method'] pair, or a 'ClassName::method' string.
    * @param int $priority Priority level.
    * @return int Event ID.
+   * @throws InvalidValue If $callable is not a closure, string, or two-element array.
    */
     protected function registerEvent(string $trigger, \Closure|array|string $callable, int $priority): int
     {
