@@ -9,7 +9,6 @@ use orange\framework\exceptions\MissingRequired;
 use orange\framework\exceptions\IncorrectInterface;
 use orange\framework\interfaces\ContainerInterface;
 use orange\framework\exceptions\filesystem\FileNotFound;
-use orange\framework\exceptions\config\ConfigFileNotFound;
 use orange\framework\exceptions\filesystem\DirectoryNotFound;
 use orange\framework\exceptions\config\InvalidConfigurationValue;
 use orange\framework\exceptions\config\ConfigFileDidNotReturnAnArray;

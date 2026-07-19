@@ -7,8 +7,6 @@ namespace orange\framework;
 use orange\framework\base\SingletonArrayObject;
 use orange\framework\interfaces\CacheInterface;
 use orange\framework\interfaces\ConfigInterface;
-use orange\framework\exceptions\filesystem\DirectoryNotFound;
-use orange\framework\exceptions\config\InvalidConfigurationValue;
 use orange\framework\exceptions\config\ConfigFileDidNotReturnAnArray;
 
 /**
