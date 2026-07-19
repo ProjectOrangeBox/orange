@@ -31,7 +31,8 @@ use orange\framework\exceptions\config\ConfigFileDidNotReturnAnArray;
  * 2. Key Properties
  *  •   $configuration → stores loaded configurations indexed by filename.
  *  •   $searchDirectories → list of directories where configuration files will be searched.
- *  •   $foundDirectoriesByName → map of config file names to their discovered file paths across directories.
+ *  •   $foundConfigFiles → map of config file names to their discovered file paths across directories.
+ *  •   $resolved / $missingKeys → per-lookup memoization for get() ("file.key" → value / known-miss).
  *
  * ⸻
  *
@@ -109,6 +110,19 @@ class Config extends SingletonArrayObject implements ConfigInterface
      */
     protected array $foundConfigFiles = [];
 
+    /**
+     * Memoized get() results keyed by the full "$filenameKey" string.
+     * Only successful lookups are stored here; values are never null, so a
+     * cheap isset() is a valid hit test.
+     */
+    protected array $resolved = [];
+
+    /**
+     * Lookups known to have no value ("file.key" → true). Tracked separately
+     * from $resolved because each caller supplies its own default value.
+     */
+    protected array $missingKeys = [];
+
     protected string $separator = '.';
 
     /**
@@ -161,14 +175,10 @@ class Config extends SingletonArrayObject implements ConfigInterface
      */
     public function offsetExists(mixed $filename): bool
     {
-        logMsg('INFO', __METHOD__ . ' ' . $filename);
-
         // isset() should be a cheap, side-effect-free existence check: don't call
         // load() here - it would parse/merge the config file (and can throw
-        // ConfigFileDidNotReturnAnArray) just to answer an isset(). A filename with no
-        // discovered files at all isn't in $foundConfigFiles, and count(null) is a
-        // TypeError under PHP 8, so guard with ?? [].
-        return count($this->foundConfigFiles[$filename] ?? []) > 0;
+        // ConfigFileDidNotReturnAnArray) just to answer an isset().
+        return !empty($this->foundConfigFiles[$filename]);
     }
 
     /**
@@ -180,8 +190,6 @@ class Config extends SingletonArrayObject implements ConfigInterface
      */
     public function offsetGet(mixed $filename): mixed
     {
-        logMsg('INFO', __METHOD__ . ' ' . $filename);
-
         return $this->get($filename);
     }
 
@@ -196,7 +204,15 @@ class Config extends SingletonArrayObject implements ConfigInterface
     #[\Override]
     public function get(string $filenameKey, mixed $defaultValue = null): mixed
     {
-        logMsg('INFO', __METHOD__ . ' ' . $filenameKey);
+        // memoized hit - skips the separator parse and load() entirely
+        if (isset($this->resolved[$filenameKey])) {
+            return $this->resolved[$filenameKey];
+        }
+
+        // known miss - the default belongs to each caller, so only the miss is cached
+        if (isset($this->missingKeys[$filenameKey])) {
+            return $defaultValue;
+        }
 
         $filename = $filenameKey;
         $key = null;
@@ -209,7 +225,19 @@ class Config extends SingletonArrayObject implements ConfigInterface
         $completeConfig = $this->load($filename);
 
         // Return the entire array if no key is specified
-        return $key !== null ? ($completeConfig[$key] ?? $defaultValue) : $completeConfig;
+        if ($key === null) {
+            return $this->resolved[$filenameKey] = $completeConfig;
+        }
+
+        // isset() (not array_key_exists) on purpose: a key holding null falls
+        // through to the default, matching the original "?? $defaultValue" behavior
+        if (isset($completeConfig[$key])) {
+            return $this->resolved[$filenameKey] = $completeConfig[$key];
+        }
+
+        $this->missingKeys[$filenameKey] = true;
+
+        return $defaultValue;
     }
 
     /**
@@ -221,31 +249,26 @@ class Config extends SingletonArrayObject implements ConfigInterface
      */
     protected function load(string $filename): array
     {
-        $config = [];
-
-        // Check if the configuration file exists in the found directories
-        if (isset($this->foundConfigFiles[$filename])) {
-            // Check if configuration has already been loaded
-            if (!isset($this->configuration[$filename])) {
-                $foundConfigs = [];
-
-                foreach ($this->foundConfigFiles[$filename] as $configFile) {
-                    if (!is_array($includedConfig = include $configFile)) {
-                        throw new ConfigFileDidNotReturnAnArray('"' . $configFile . '" did not return an array.');
-                    }
-
-                    $foundConfigs[] = $includedConfig;
-                }
-
-                // now let's do the merge all at once.
-                $this->configuration[$filename] = array_replace_recursive(...$foundConfigs);
-            }
-
-            $config = $this->configuration[$filename];
+        // Check if configuration has already been loaded
+        if (isset($this->configuration[$filename])) {
+            return $this->configuration[$filename];
         }
 
-        // and now configuration has the configuration array
-        return $config;
+        $foundConfigs = [];
+
+        foreach ($this->foundConfigFiles[$filename] ?? [] as $configFile) {
+            if (!is_array($includedConfig = include $configFile)) {
+                throw new ConfigFileDidNotReturnAnArray('"' . $configFile . '" did not return an array.');
+            }
+
+            $foundConfigs[] = $includedConfig;
+        }
+
+        // merge only when more than one file was found - the single-file case
+        // (the common one) doesn't need array_replace_recursive() at all
+        return $this->configuration[$filename] = isset($foundConfigs[1])
+            ? array_replace_recursive(...$foundConfigs)
+            : ($foundConfigs[0] ?? []);
     }
 
     /**
@@ -260,14 +283,18 @@ class Config extends SingletonArrayObject implements ConfigInterface
 
         // find all of the cache file names by reading all of the searchDirectories
         foreach ($this->searchDirectories as $searchDirectory) {
-            foreach (glob($searchDirectory . DIRECTORY_SEPARATOR . '*.php') as $file) {
-                $name = basename($file, '.php');
-                // if we haven't added this config then we need to add it now.
-                if (!isset($found[$name])) {
-                    $found[$name] = [];
-                }
-                // get canonicalized absolute pathname
-                $found[$name][] = realpath($file);
+            // canonicalize the directory once instead of realpath()ing every file
+            // inside it (one syscall per directory instead of one per file);
+            // a false return also skips directories that don't exist
+            if (($realDirectory = realpath($searchDirectory)) === false) {
+                continue;
+            }
+
+            // GLOB_NOSORT: order within a directory can't matter - a basename
+            // appears at most once per directory, and merge priority comes from
+            // the searchDirectories order
+            foreach (glob($realDirectory . DIRECTORY_SEPARATOR . '*.php', GLOB_NOSORT) as $file) {
+                $found[basename($file, '.php')][] = $file;
             }
         }
 
