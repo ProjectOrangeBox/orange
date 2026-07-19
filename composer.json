@@ -20,7 +20,9 @@
         "lint:phpmd": "../../bin/phpmd src text phpmd.xml",
         "analyze:deptrac": "../../bin/deptrac analyse",
         "rector": "../../bin/rector process --dry-run",
-        "rector:fix": "../../bin/rector process"
+        "rector:fix": "../../bin/rector process",
+        "findViews": "bin/findViews",
+        "installModule": "bin/installModule"
     },
     "scripts-descriptions": {
         "test:orange": "Run the Orange Framework core unit tests (unittest/runUnitTests.sh).",
@@ -32,6 +34,9 @@
         "lint:phpmd": "Check src/ for code smells, complexity and unused code with PHP Mess Detector.",
         "analyze:deptrac": "Check src/ for architectural layer violations with Deptrac (see deptrac.yaml).",
         "analyze:rector": "Preview automated refactoring/modernization suggestions with Rector (dry-run, does not modify files).",
-        "analyze:rectorFix": "Automated refactoring/modernization suggestions with Rector."
+        "analyze:rectorFix": "Automated refactoring/modernization suggestions with Rector.",
+        "findViews": "Find view files under a controllers directory relative to project root, e.g. `composer findViews application`.",
+        "findRoutes": "Scan for routes under a given directory, e.g. `composer findRoutes application`.",
+        "installModule": "Install a module, e.g. `composer installModule <module-name>`."
     }
 }

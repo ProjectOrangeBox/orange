@@ -11,52 +11,61 @@ $argv = $_SERVER['argv'];
 echo PHP_EOL;
 
 if ($argc != 2) {
-    echo 'Please provide controllers directory relative to ' . __ROOT__ . PHP_EOL . PHP_EOL;
+    echo 'Please provide directory relative to ' . __ROOT__ . PHP_EOL . PHP_EOL;
     exit(1);
 }
 
-$path = __ROOT__ . DIRECTORY_SEPARATOR . trim(trim($argv[1]), '/');
-
 $main = new Main();
-$main->run($path);
+$main->run(__ROOT__ . DIRECTORY_SEPARATOR . trim(trim($argv[1]), '/'));
 
 class Main
 {
-    protected string $match = '/views/';
+    protected string $matches = '/views/';
 
     public function run(string $path): void
     {
-        $q = "'";
-
         if (!$path = realpath($path)) {
             $this->error('Can not locate ' . $path);
         }
 
-        echo PHP_EOL . 'Found Views:' . PHP_EOL;
-        echo PHP_EOL . '*** copy & paste as needed ***' . PHP_EOL . PHP_EOL;
+        echo 'Searching ' . $path . PHP_EOL;
 
-        foreach ($this->globr($path . '/*.php') as $absPath) {
-            $directoryPos = strpos($absPath, $this->match);
+        $lines = [];
+
+        $q = "'";
+
+        $phpFiles = $this->rglob($path . '/', '*.php');
+
+        foreach ($phpFiles as $absPath) {
+            $directoryPos = strpos($absPath, $this->matches);
 
             if ($directoryPos > 0) {
                 $name = substr($absPath, $directoryPos + 1);
-                $key = substr($name, strlen($this->match) - 1, -4);
+                $key = substr($name, strlen($this->matches) - 1, -4);
 
-                $absPath = '__ROOT__ . ' . $q . substr($absPath, strlen(__ROOT__)) . $q;
-
-                echo $q . $key . $q . ' => ' . $absPath . ',' . PHP_EOL;
+                $lines[] =   $q . $key . $q . ' => ' . '__ROOT__ . ' . $q . substr($absPath, strlen(__ROOT__)) . $q . ',';
             }
         }
 
-        echo PHP_EOL . PHP_EOL;
+        $this->displayOutput($lines);
     }
 
-    protected function globr($pattern, $flags = 0)
+    protected function displayOutput(array $lines): void
     {
-        $files = glob($pattern, $flags);
+        if (count($lines) == 0) {
+            $this->error('No Views found.');
+        }
 
-        foreach (glob(dirname($pattern) . '/*', GLOB_ONLYDIR | GLOB_NOSORT) as $dir) {
-            $files = array_merge($files, $this->globr($dir . '/' . basename($pattern), $flags));
+        echo 'Found Views Pathes:' . PHP_EOL;
+        echo PHP_EOL . implode(PHP_EOL, $lines) . PHP_EOL . PHP_EOL;
+    }
+
+    protected function rglob(string $path = '', string $pattern = '*', int $flags = 0): array
+    {
+        $files = glob($path . $pattern, $flags) ?: [];
+
+        foreach (glob($path . '*', GLOB_MARK | GLOB_ONLYDIR | GLOB_NOSORT) ?: [] as $dir) {
+            array_push($files, ...$this->rglob($dir, $pattern, $flags));
         }
 
         return $files;
@@ -64,7 +73,7 @@ class Main
 
     protected function error(string $msg): void
     {
-        echo $msg . PHP_EOL;
+        echo $msg . PHP_EOL . PHP_EOL;
         exit(1);
     }
 }

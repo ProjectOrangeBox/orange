@@ -32,13 +32,13 @@ exit(0);
 
 class App
 {
-  use ConfigurationTrait;
+    use ConfigurationTrait;
 
-  protected array $config = [
-    'install directory' => 'install',
-    'merge prefix' => '@',
-    'merge after' => '/* merged content below */',
-    'empty config file' => '<?php
+    protected array $config = [
+        'install directory' => 'install',
+        'merge prefix' => '@',
+        'merge after' => '/* merged content below */',
+        'empty config file' => '<?php
 
     declare(strict_types=1);
 
@@ -48,195 +48,195 @@ class App
         **ARRAY**
     ];
     ',
-    'empty config file merge variable' => '**ARRAY**',
-    'valid directories' => [
-      '/bin',
-      '/htdocs',
-      '/support',
-      '/var',
-      '/config',
-    ],
-    'valid files' => [
-      '/config'
-    ],
-  ];
-  protected ConsoleInterface $console;
-  protected string $path = '';
-  protected bool $overwrite = false;
-  protected string $rootPath = '';
-  protected string $fullPath = '';
+        'empty config file merge variable' => '**ARRAY**',
+        'valid directories' => [
+            '/bin',
+            '/htdocs',
+            '/support',
+            '/var',
+            '/config',
+        ],
+        'valid files' => [
+            '/config'
+        ],
+    ];
+    protected ConsoleInterface $console;
+    protected string $path = '';
+    protected bool $overwrite = false;
+    protected string $rootPath = '';
+    protected string $fullPath = '';
 
-  public function __construct(protected ContainerInterface $container)
-  {
-    // cli application is now set up so away we go!
-    $this->console = $container->console;
+    public function __construct(protected ContainerInterface $container)
+    {
+        // cli application is now set up so away we go!
+        $this->console = $container->console;
 
-    $this->console->minimumArguments(1, 'Please include the path to the assets you would like to add as your last argument.');
+        $this->console->minimumArguments(1, 'Please include the path to the assets you would like to add as your last argument.');
 
-    $this->overwrite = $this->console->getArgumentExists('-o');
+        $this->overwrite = $this->console->getArgumentExists('-o');
 
-    if ($this->overwrite) {
-      $this->console->warning('Overwriting files');
-    } else {
-      $this->console->info('Non-Overwriting');
+        if ($this->overwrite) {
+            $this->console->warning('Overwriting files');
+        } else {
+            $this->console->info('Non-Overwriting');
+        }
+
+        $this->path = trim($this->console->getLastArgument(), '/');
+
+        $this->verifyPath();
     }
 
-    $this->path = trim($this->console->getLastArgument(), '/');
-
-    $this->verifyPath();
-  }
-
-  public function mergeDirectories(): void
-  {
-    foreach ($this->config['valid directories'] as $directory) {
-      $this->merge($directory);
-    }
-  }
-
-  public function mergeFiles(): void
-  {
-    foreach ($this->config['valid files'] as $file) {
-      $this->mergeConfig($file);
-    }
-  }
-
-  protected function verifyPath(): void
-  {
-    // if path isn't found abs Path is false
-    $fullPathTest = realpath(__ROOT__ . '/' . $this->path);
-
-    if ($fullPathTest === false || !is_dir($fullPathTest)) {
-      $this->console->stop('Unable to locate "' . $this->path . '".');
-    } else {
-      $this->fullPath = $fullPathTest;
-      $this->console->echo('<primary>Using directory "' . $this->fullPath . '".');
-    }
-  }
-
-  protected function mergeConfig(string $dest): void
-  {
-    $this->merge($dest, true);
-  }
-
-  protected function merge(string $dest, bool $isConfigFile = false): void
-  {
-    $dest = trim($dest, '/');
-
-    if (is_dir($this->fullPath . '/' . $dest)) {
-      $matches = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($this->fullPath . '/' . $dest, FilesystemIterator::SKIP_DOTS));
-
-      foreach ($matches as $file) {
-        $this->doMerge($file, $isConfigFile);
-      }
-    }
-  }
-
-  protected function doMerge(SplFileInfo $file, bool $isConfigFile)
-  {
-    $from = $file->getPathname();
-    $to = str_replace($this->fullPath, '', $from);
-    $to = str_replace('/' . $this->config['merge prefix'], '/', $to);
-    $to = __ROOT__ . $to;
-
-    // Create an empty config file if there isn't one already
-    if (!file_exists($to) && $isConfigFile) {
-      file_put_contents($to, $this->emptyConfig($this->config['merge after']));
+    public function mergeDirectories(): void
+    {
+        foreach ($this->config['valid directories'] as $directory) {
+            $this->merge($directory);
+        }
     }
 
-    // if the first character is @ then merge with the file which has the matching name
-    if (substr($file->getFilename(), 0, strlen($this->config['merge prefix'])) == $this->config['merge prefix']) {
-      $this->mergeContents($from, $to);
-    } else {
-      $this->copy($from, $to);
-    }
-  }
-
-  protected function mergeContents(string $from, string $to): void
-  {
-    $this->console->info('Merge ' . str_replace(__ROOT__, '', $from) . ' into ' . str_replace(__ROOT__, '', $to));
-
-    if (!$this->hasString($to, $this->config['merge after'])) {
-      $this->console->warning('Could not locate "' . $this->config['merge after'] . '" skipping file');
-    } else {
-      $mergeContent = file_get_contents($from);
-      $toContent = file_get_contents($to);
-
-      if (strpos($this->normalizedString($toContent), $this->normalizedString($mergeContent)) !== false) {
-        $this->console->warning('Seems merged content may already be in destination file. Skipping');
-      } else {
-        file_put_contents($to, $this->putAfter($to, $this->config['merge after'], $mergeContent), LOCK_EX);
-      }
-    }
-  }
-
-  protected function normalizedString(string $input): string
-  {
-    return preg_replace("/[^a-z0-9]/", '', strtolower($input));
-  }
-
-  protected function copy(string $source, string $dest): void
-  {
-    $this->console->info('Copying "' . str_replace(__ROOT__, '', $source) . '" to "' . str_replace(__ROOT__, '', $dest) . '".');
-
-    if (file_exists($dest)) {
-      if (!$this->overwrite) {
-        $this->console->warning('"' . str_replace(__ROOT__, '', $dest) . '" already exists.');
-      } else {
-        $this->console->warning('Removing "' . str_replace(__ROOT__, '', $dest) . '".');
-        unlink($dest);
-      }
+    public function mergeFiles(): void
+    {
+        foreach ($this->config['valid files'] as $file) {
+            $this->mergeConfig($file);
+        }
     }
 
-    $dirname = pathinfo($dest, PATHINFO_DIRNAME);
+    protected function verifyPath(): void
+    {
+        // if path isn't found abs Path is false
+        $fullPathTest = realpath(__ROOT__ . '/' . $this->path);
 
-    if (!file_exists($dirname)) {
-      mkdir($dirname, 0777, true);
+        if ($fullPathTest === false || !is_dir($fullPathTest)) {
+            $this->console->stop('Unable to locate "' . $this->path . '".');
+        } else {
+            $this->fullPath = $fullPathTest;
+            $this->console->echo('<primary>Using directory "' . $this->fullPath . '".');
+        }
     }
 
-    if (!copy($source, $dest)) {
-      $this->console->stop('Could not copy "' . str_replace(__ROOT__, '', $source) . '"  to "' . str_replace(__ROOT__, '', $dest) . '".');
-    }
-  }
-
-  protected function hasString(string $path, string $string): bool
-  {
-    $found = false;
-    $lines = file($path);
-
-    foreach ($lines as $line) {
-      if (trim($line) == $string) {
-        $found = true;
-
-        break;
-      }
+    protected function mergeConfig(string $dest): void
+    {
+        $this->merge($dest, true);
     }
 
-    return $found;
-  }
+    protected function merge(string $dest, bool $isConfigFile = false): void
+    {
+        $dest = trim($dest, '/');
 
-  protected function putAfter(string $path, string $after, string $put): string
-  {
-    $success = false;
-    $newFile = '';
-    $lines = file($path);
+        if (is_dir($this->fullPath . '/' . $dest)) {
+            $matches = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($this->fullPath . '/' . $dest, FilesystemIterator::SKIP_DOTS));
 
-    foreach ($lines as $line) {
-      $newFile .= $line;
-
-      if (trim($line) == $after && !$success) {
-        $newFile .= PHP_EOL;
-        $newFile .= $put;
-        $newFile .= PHP_EOL;
-
-        $success = true;
-      }
+            foreach ($matches as $file) {
+                $this->doMerge($file, $isConfigFile);
+            }
+        }
     }
 
-    return $newFile;
-  }
+    protected function doMerge(SplFileInfo $file, bool $isConfigFile)
+    {
+        $from = $file->getPathname();
+        $to = str_replace($this->fullPath, '', $from);
+        $to = str_replace('/' . $this->config['merge prefix'], '/', $to);
+        $to = __ROOT__ . $to;
 
-  protected function emptyConfig(string $content): string
-  {
-    return str_replace($this->config['empty config file merge variable'], $content, $this->config['empty config file']);
-  }
+        // Create an empty config file if there isn't one already
+        if (!file_exists($to) && $isConfigFile) {
+            file_put_contents($to, $this->emptyConfig($this->config['merge after']));
+        }
+
+        // if the first character is @ then merge with the file which has the matching name
+        if (substr($file->getFilename(), 0, strlen($this->config['merge prefix'])) == $this->config['merge prefix']) {
+            $this->mergeContents($from, $to);
+        } else {
+            $this->copy($from, $to);
+        }
+    }
+
+    protected function mergeContents(string $from, string $to): void
+    {
+        $this->console->info('Merge ' . str_replace(__ROOT__, '', $from) . ' into ' . str_replace(__ROOT__, '', $to));
+
+        if (!$this->hasString($to, $this->config['merge after'])) {
+            $this->console->warning('Could not locate "' . $this->config['merge after'] . '" skipping file');
+        } else {
+            $mergeContent = file_get_contents($from);
+            $toContent = file_get_contents($to);
+
+            if (strpos($this->normalizedString($toContent), $this->normalizedString($mergeContent)) !== false) {
+                $this->console->warning('Seems merged content may already be in destination file. Skipping');
+            } else {
+                file_put_contents($to, $this->putAfter($to, $this->config['merge after'], $mergeContent), LOCK_EX);
+            }
+        }
+    }
+
+    protected function normalizedString(string $input): string
+    {
+        return preg_replace("/[^a-z0-9]/", '', strtolower($input));
+    }
+
+    protected function copy(string $source, string $dest): void
+    {
+        $this->console->info('Copying "' . str_replace(__ROOT__, '', $source) . '" to "' . str_replace(__ROOT__, '', $dest) . '".');
+
+        if (file_exists($dest)) {
+            if (!$this->overwrite) {
+                $this->console->warning('"' . str_replace(__ROOT__, '', $dest) . '" already exists.');
+            } else {
+                $this->console->warning('Removing "' . str_replace(__ROOT__, '', $dest) . '".');
+                unlink($dest);
+            }
+        }
+
+        $dirname = pathinfo($dest, PATHINFO_DIRNAME);
+
+        if (!file_exists($dirname)) {
+            mkdir($dirname, 0777, true);
+        }
+
+        if (!copy($source, $dest)) {
+            $this->console->stop('Could not copy "' . str_replace(__ROOT__, '', $source) . '"  to "' . str_replace(__ROOT__, '', $dest) . '".');
+        }
+    }
+
+    protected function hasString(string $path, string $string): bool
+    {
+        $found = false;
+        $lines = file($path);
+
+        foreach ($lines as $line) {
+            if (trim($line) == $string) {
+                $found = true;
+
+                break;
+            }
+        }
+
+        return $found;
+    }
+
+    protected function putAfter(string $path, string $after, string $put): string
+    {
+        $success = false;
+        $newFile = '';
+        $lines = file($path);
+
+        foreach ($lines as $line) {
+            $newFile .= $line;
+
+            if (trim($line) == $after && !$success) {
+                $newFile .= PHP_EOL;
+                $newFile .= $put;
+                $newFile .= PHP_EOL;
+
+                $success = true;
+            }
+        }
+
+        return $newFile;
+    }
+
+    protected function emptyConfig(string $content): string
+    {
+        return str_replace($this->config['empty config file merge variable'], $content, $this->config['empty config file']);
+    }
 }
