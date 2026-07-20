@@ -1,15 +1,23 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
-set -e
+set -euo pipefail
 
-echo "== composer lint =="
-composer lint:fix
+checks=(
+  "composer lint:fix"
+  "composer rector:fix"
+  "composer type-check"
+  "composer test:orange"
+)
 
-echo "== rector fix =="
-composer rector:fix
+for check in "${checks[@]}"; do
+  echo ""
+  echo "==> $check"
+  if ! eval "$check"; then
+    echo "" >&2
+    echo "FAILED: $check" >&2
+    exit 1
+  fi
+done
 
-echo "== composer type-check =="
-composer type-check
-
-echo "== composer test:orange =="
-composer test:orange
+echo ""
+echo "All checks passed.”
