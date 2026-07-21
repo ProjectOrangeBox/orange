@@ -5,6 +5,10 @@ declare(strict_types=1);
 use orange\framework\Data;
 use orange\framework\Error;
 use orange\framework\interfaces\OutputInterface;
+use orange\framework\interfaces\ViewInterface;
+use orange\framework\interfaces\ContainerInterface;
+use orange\framework\interfaces\DirectorySearchInterface;
+use orange\framework\exceptions\container\ServiceNotFound;
 
 /**
  * Error::__construct() resolves services and then calls sendOutput() which
@@ -125,6 +129,24 @@ final class ErrorTest extends UnitTestHelper
         $this->assertEquals('Not Found', $decoded['message']);
     }
 
+    public function testViewRawAjaxIsJson(): void
+    {
+        // Input::requestType() only ever returns 'html', 'ajax', or 'cli' - it never
+        // literally returns 'json' - and sendMimeType() sends a "json" content type for
+        // 'ajax'. viewRaw() must match that, or an AJAX error response ends up with a
+        // "Content-Type: application/json" header over a print_r()-formatted body.
+        $this->instance->requestType = 'ajax';
+        $this->withData(['code' => 404, 'message' => 'Not Found']);
+
+        $raw = $this->callMethod('viewRaw');
+
+        $decoded = json_decode($raw, true);
+
+        $this->assertIsArray($decoded);
+        $this->assertEquals(404, $decoded['code']);
+        $this->assertEquals('Not Found', $decoded['message']);
+    }
+
     public function testViewRawHtml(): void
     {
         $this->instance->requestType = 'html';
@@ -207,5 +229,75 @@ final class ErrorTest extends UnitTestHelper
         $this->assertStringContainsString('&lt;script&gt;', $raw);
         $this->assertStringNotContainsString('<img', $raw);
         $this->assertStringNotContainsString('<b>bold</b>', $raw);
+    }
+
+    /* findView() */
+
+    public function testFindViewSkipsAddDirectoryWhenLocalViewsDirectoryAlreadyRegistered(): void
+    {
+        // addDirectory() unconditionally forces a full filesystem rescan of every
+        // registered search directory on the next exists() call, even when the directory
+        // being "added" is already present - findView() must only add its local views
+        // directory once, not on every single call (i.e. every error rendered)
+        $search = $this->createMock(DirectorySearchInterface::class);
+        $search->expects($this->once())->method('directoryExists')->willReturn(true);
+        $search->expects($this->never())->method('addDirectory');
+        $search->method('exists')->willReturn(false);
+
+        $view = $this->createMock(ViewInterface::class);
+        $view->expects($this->once())->method('search')->willReturn($search);
+        $this->setPrivatePublic('view', $view);
+
+        $this->instance->errorViewDirectory = 'errors';
+        $this->instance->envDirectory = 'testing';
+        $this->instance->requestTypeDirectory = 'html';
+
+        $this->assertSame('', $this->callMethod('findView', ['404']));
+    }
+
+    public function testFindViewAddsLocalViewsDirectoryWhenNotYetRegistered(): void
+    {
+        $search = $this->createMock(DirectorySearchInterface::class);
+        $search->expects($this->once())->method('directoryExists')->willReturn(false);
+        $search->expects($this->once())->method('addDirectory');
+        $search->method('exists')->willReturn(false);
+
+        $view = $this->createMock(ViewInterface::class);
+        $view->expects($this->once())->method('search')->willReturn($search);
+        $this->setPrivatePublic('view', $view);
+
+        $this->instance->errorViewDirectory = 'errors';
+        $this->instance->envDirectory = 'testing';
+        $this->instance->requestTypeDirectory = 'html';
+
+        $this->assertSame('', $this->callMethod('findView', ['404']));
+    }
+
+    /* getService() */
+
+    public function testGetServiceFallsBackToOrangeDefaultWhenServiceNotFound(): void
+    {
+        $container = $this->createMock(ContainerInterface::class);
+        $container->expects($this->once())->method('get')->willThrowException(new ServiceNotFound('data'));
+        $this->setPrivatePublic('container', $container);
+
+        $result = $this->callMethod('getService', ['data', []]);
+
+        $this->assertInstanceOf(Data::class, $result);
+    }
+
+    public function testGetServicePropagatesRealConstructionErrors(): void
+    {
+        // a container that DOES have "data" registered but throws while building it (e.g.
+        // a bad autowired dependency) must not be treated the same as "not registered" -
+        // catching every Throwable here would silently mask a real bug behind an unrelated
+        // fallback instance instead of letting the actual error surface
+        $container = $this->createMock(ContainerInterface::class);
+        $container->expects($this->once())->method('get')->willThrowException(new RuntimeException('boom'));
+        $this->setPrivatePublic('container', $container);
+
+        $this->expectException(RuntimeException::class);
+
+        $this->callMethod('getService', ['data', []]);
     }
 }

@@ -77,6 +77,30 @@ use ReflectionMethod;
 class Dispatcher extends Singleton implements DispatcherInterface
 {
     /**
+     * Memoized class_exists() results keyed by controller class name.
+     *
+     * A class can't become undefined or newly-defined-then-undefined during a
+     * process's lifetime, so this is safe to keep for as long as this singleton
+     * lives - which matters for long-running workers (Swoole/RoadRunner) that
+     * re-dispatch the same route thousands of times without ever redefining
+     * classes, and would otherwise pay for class_exists() on every one of them.
+     *
+     * @var array<string, bool>
+     */
+    protected array $controllerExistsCache = [];
+
+    /**
+     * Memoized "does this controller declare this method, and is it public"
+     * results, keyed by "Controller::method". Same reasoning as
+     * $controllerExistsCache: method existence/visibility can't change at
+     * runtime, so method_exists() + a ReflectionMethod construction only need
+     * to run once per distinct controller/method pair.
+     *
+     * @var array<string, bool>
+     */
+    protected array $methodIsCallableCache = [];
+
+    /**
      * Calls the matched route's callback with the provided arguments.
      *
      * This method takes a RouterCallback object containing the controller class name,
@@ -99,39 +123,50 @@ class Dispatcher extends Singleton implements DispatcherInterface
         }
 
         // let's make sure the controller is present and autoload it
-        if (!class_exists($routerCallback->controller)) {
+        if (!($this->controllerExistsCache[$routerCallback->controller] ??= class_exists($routerCallback->controller))) {
             throw new ControllerClassNotFound($routerCallback->controller);
         }
 
-        // let's make sure the controller has this method
-        if (!method_exists($routerCallback->controller, $routerCallback->method)) {
-            throw new MethodNotFound($routerCallback->controller . '::' . $routerCallback->method);
+        $methodKey = $routerCallback->controller . '::' . $routerCallback->method;
+
+        // let's make sure the controller has this method, and that it's public -
+        // method_exists() doesn't check visibility, and calling a private/protected
+        // method from here would throw an uncaught fatal Error instead of a clean
+        // MethodNotFound, so treat non-public methods the same as missing ones
+        $this->methodIsCallableCache[$methodKey] ??= method_exists($routerCallback->controller, $routerCallback->method)
+            && new ReflectionMethod($routerCallback->controller, $routerCallback->method)->isPublic();
+
+        if (!$this->methodIsCallableCache[$methodKey]) {
+            throw new MethodNotFound($methodKey);
         }
 
-        // method_exists() doesn't check visibility - calling a private/protected method
-        // from here would throw an uncaught fatal Error instead of a clean MethodNotFound,
-        // so treat non-public methods the same as missing ones
-        if (!new ReflectionMethod($routerCallback->controller, $routerCallback->method)->isPublic()) {
-            throw new MethodNotFound($routerCallback->controller . '::' . $routerCallback->method);
-        }
+        // The router callback arguments can contain non-numeric keys if the end user used named capture groups
+        // so we need to filter out the named keys before unpacking them to pass them to the controller method
+        // so we don't get a "Cannot use positional argument after named argument during unpacking" error
+        // arguments are always passed as they are captured
+        // this protects the developer from accidentally using named capture groups
+        // (filtered into a local variable rather than written back onto $routerCallback,
+        // which the caller may still hold a reference to)
+        $arguments = array_filter(
+            $routerCallback->arguments,
+            is_int(...),
+            ARRAY_FILTER_USE_KEY
+        );
 
-        // ok now instantiate the class and call the method
+        // instantiate and call as two separate steps, each with its own catch, so an
+        // ArgumentCountError is attributed to whichever one actually threw it - both
+        // used to share one try/catch, so a controller whose constructor required
+        // arguments was misreported as its method being the one missing arguments
         try {
-            // The router callback arguments can contain non-numeric keys if the end user used named capture groups
-            // so we need to filter out the named keys before unpacking them to pass them to the controller method
-            // so we don't get a "Cannot use positional argument after named argument during unpacking" error
-            // arguments are always passed as they are captured
-            // this protects the developer from accidentally using named capture groups
-            $routerCallback->arguments = array_filter(
-                $routerCallback->arguments,
-                is_int(...),
-                ARRAY_FILTER_USE_KEY
-            );
-
-            $output = new $routerCallback->controller()->{$routerCallback->method}(...$routerCallback->arguments);
+            $controller = new $routerCallback->controller();
         } catch (\ArgumentCountError $e) {
-            // if we get an argument count error it means the method is missing a required argument which means the route is not properly defined so throw a method not found exception
-            throw new ArgumentMissMatch($routerCallback->controller . '::' . $routerCallback->method . ' is missing required arguments. ' . $e->getMessage());
+            throw new ArgumentMissMatch($routerCallback->controller . '::__construct is missing required arguments. ' . $e->getMessage());
+        }
+
+        try {
+            $output = $controller->{$routerCallback->method}(...$arguments);
+        } catch (\ArgumentCountError $e) {
+            throw new ArgumentMissMatch($methodKey . ' is missing required arguments. ' . $e->getMessage());
         }
 
         // if they didn't return anything set output to an empty string

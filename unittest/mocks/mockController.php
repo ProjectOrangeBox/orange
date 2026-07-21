@@ -41,3 +41,15 @@ class mockController
         return 'should not be reachable via routing';
     }
 }
+
+class mockControllerRequiringConstructorArgs
+{
+    public function __construct(string $required)
+    {
+    }
+
+    public function index()
+    {
+        return 'unreachable - constructor requires an argument the dispatcher never provides';
+    }
+}

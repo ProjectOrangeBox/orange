@@ -227,6 +227,9 @@ Dispatcher
  [x] Method pass two empty
  [x] Non string return throws invalid value
  [x] Named capture group arguments are filtered out
+ [x] Call does not mutate router callback arguments
+ [x] Constructor argument count error is attributed to constructor
+ [x] Controller and method cache distinguishes different methods
 
 Dot
  [x] Change delimiter
@@ -258,12 +261,17 @@ Error
  [x] Send mime type ajax is json
  [x] Send mime type html is html
  [x] View raw json
+ [x] View raw ajax is json
  [x] View raw html
  [x] View raw cli
  [x] View raw unknown request type falls back to cli format
  [x] View raw build html includes all known fields
  [x] View raw build html omits missing fields
  [x] View raw build html escapes untrusted fields
+ [x] Find view skips add directory when local views directory already registered
+ [x] Find view adds local views directory when not yet registered
+ [x] Get service falls back to orange default when service not found
+ [x] Get service propagates real construction errors
 
 Error Advanced
  [x] Find view locates request type view

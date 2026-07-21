@@ -91,4 +91,44 @@ final class DispatcherTest extends UnitTestHelper
             $this->instance->call(new RouterCallback('mockController', 'namedArgsFiltered', ['name' => 'ignored', 0 => 'one']))
         );
     }
+
+    public function testCallDoesNotMutateRouterCallbackArguments(): void
+    {
+        // call() used to filter named-capture-group keys by writing back onto
+        // $routerCallback->arguments; a caller holding onto that same RouterCallback
+        // instance afterward (e.g. for logging) would see its named keys silently gone
+        $routerCallback = new RouterCallback('mockController', 'namedArgsFiltered', ['name' => 'ignored', 0 => 'one']);
+
+        $this->instance->call($routerCallback);
+
+        $this->assertEquals(['name' => 'ignored', 0 => 'one'], $routerCallback->arguments);
+    }
+
+    public function testConstructorArgumentCountErrorIsAttributedToConstructor(): void
+    {
+        // a controller whose constructor requires an argument the dispatcher never
+        // supplies used to be reported as its method missing arguments, since both
+        // the instantiation and the method call shared one try/catch
+        try {
+            $this->instance->call(new RouterCallback('mockControllerRequiringConstructorArgs', 'index', []));
+            $this->fail('expected ' . ArgumentMissMatch::class . ' to be thrown');
+        } catch (ArgumentMissMatch $e) {
+            $this->assertStringContainsString('__construct', $e->getMessage());
+            $this->assertStringNotContainsString('::index', $e->getMessage());
+        }
+    }
+
+    public function testControllerAndMethodCacheDistinguishesDifferentMethods(): void
+    {
+        // the memoized controller-exists/method-is-callable results are keyed per
+        // controller/method pair - exercise two different methods on the same
+        // controller, one already dispatched earlier in this test class (index) and
+        // one not, to make sure a cache hit for one pair never leaks into another
+        $this->assertEquals('<h1>foobar</h1>', $this->instance->call(new RouterCallback('mockController', 'index', [])));
+        $this->assertEquals('one', $this->instance->call(new RouterCallback('mockController', 'passone', ['one'])));
+
+        $this->expectException(MethodNotFound::class);
+
+        $this->instance->call(new RouterCallback('mockController', 'stillNotAMethod', []));
+    }
 }

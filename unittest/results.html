@@ -294,6 +294,9 @@
             <li class="success">Method pass two empty</li>
             <li class="success">Non string return throws invalid value</li>
             <li class="success">Named capture group arguments are filtered out</li>
+            <li class="success">Call does not mutate router callback arguments</li>
+            <li class="success">Constructor argument count error is attributed to constructor</li>
+            <li class="success">Controller and method cache distinguishes different methods</li>
         </ul>
         <h2>Dot</h2>
         <ul>
@@ -327,12 +330,17 @@
             <li class="success">Send mime type ajax is json</li>
             <li class="success">Send mime type html is html</li>
             <li class="success">View raw json</li>
+            <li class="success">View raw ajax is json</li>
             <li class="success">View raw html</li>
             <li class="success">View raw cli</li>
             <li class="success">View raw unknown request type falls back to cli format</li>
             <li class="success">View raw build html includes all known fields</li>
             <li class="success">View raw build html omits missing fields</li>
             <li class="success">View raw build html escapes untrusted fields</li>
+            <li class="success">Find view skips add directory when local views directory already registered</li>
+            <li class="success">Find view adds local views directory when not yet registered</li>
+            <li class="success">Get service falls back to orange default when service not found</li>
+            <li class="success">Get service propagates real construction errors</li>
         </ul>
         <h2>Error Advanced</h2>
         <ul>

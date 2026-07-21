@@ -13,6 +13,7 @@ use orange\framework\interfaces\InputInterface;
 use orange\framework\traits\ConfigurationTrait;
 use orange\framework\interfaces\OutputInterface;
 use orange\framework\interfaces\ContainerInterface;
+use orange\framework\exceptions\container\ServiceNotFound;
 
 /**
  * Overview of Error.php
@@ -367,8 +368,18 @@ class Error extends Singleton
 
         $foundViewPath = '';
 
-        // let's make sure our local views directory is added to the search as a last alternative
-        $this->view->search()->addDirectory(__DIR__ . DIRECTORY_SEPARATOR . 'views', DirectorySearch::LAST);
+        $viewSearch = $this->view->search();
+
+        // let's make sure our local views directory is added to the search as a last alternative -
+        // only add it if it's not already registered: addDirectory() unconditionally forces a
+        // rescan of every registered directory on the next exists() call (even when the directory
+        // is already present), so calling it on every findView() invocation was forcing a full
+        // filesystem re-glob on every single error rendered
+        $localViewsDirectory = __DIR__ . DIRECTORY_SEPARATOR . 'views';
+
+        if (!$viewSearch->directoryExists($localViewsDirectory)) {
+            $viewSearch->addDirectory($localViewsDirectory, DirectorySearch::LAST);
+        }
 
         // did someone already attach output?
         $searchPaths = [
@@ -387,7 +398,7 @@ class Error extends Singleton
         ];
 
         foreach ($searchPaths as $searchPath) {
-            if ($this->view->search()->exists($searchPath)) {
+            if ($viewSearch->exists($searchPath)) {
                 $foundViewPath = $searchPath;
                 break;
             }
@@ -417,8 +428,12 @@ class Error extends Singleton
         try {
             // try to get the service from the container first
             $service = $this->container->get($name);
-        } catch (Throwable $e) {
-            // fall back to orange classes / services
+        } catch (ServiceNotFound) {
+            // only fall back to orange's own default classes/services when the container
+            // genuinely has nothing registered under this name - catching every Throwable
+            // here would also swallow a real failure while building an actually-registered
+            // service (e.g. a bad autowired dependency), silently masking it behind a
+            // fallback instance instead of letting the real error surface
             $className = ucfirst(mb_strtolower($name));
 
             // same folder as this class
@@ -454,8 +469,11 @@ class Error extends Singleton
         $finalData = (array)$this->data;
 
         // fall back to hard coded response format
+        // 'ajax' is the value Input::requestType() actually returns for AJAX requests
+        // (sendMimeType() sends a "json" content type for it) - 'json' is kept too since
+        // it's a reasonable requestType value for any other caller of this method
         $finalOutput = match ($this->requestType) {
-            'json' => json_encode($finalData, JSON_PRETTY_PRINT),
+            'json', 'ajax' => json_encode($finalData, JSON_PRETTY_PRINT),
             'html' => $this->viewRawBuildHtml($finalOutput, $finalData),
             default => print_r($finalData, true) . PHP_EOL,
         };
