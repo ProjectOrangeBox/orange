@@ -23,21 +23,21 @@ final class DispatcherTest extends UnitTestHelper
     // Tests
     public function testCall(): void
     {
-        $this->assertEquals('<h1>foobar</h1>', $this->instance->call(new RouterCallback('mockController','index',[])));
+        $this->assertEquals('<h1>foobar</h1>', $this->instance->call(new RouterCallback('mockController', 'index', [])));
     }
 
     public function testControllerClassNotFoundException(): void
     {
         $this->expectException(ControllerClassNotFound::class);
 
-        $this->assertNull($this->instance->call(new RouterCallback('foobar','index',[])));
+        $this->assertNull($this->instance->call(new RouterCallback('foobar', 'index', [])));
     }
 
     public function testMethodNotFoundException(): void
     {
         $this->expectException(MethodNotFound::class);
 
-        $this->assertNull($this->instance->call(new RouterCallback('mockController','foobar',[])));
+        $this->assertNull($this->instance->call(new RouterCallback('mockController', 'foobar', [])));
     }
 
     public function testProtectedMethodThrowsMethodNotFound(): void
@@ -52,24 +52,24 @@ final class DispatcherTest extends UnitTestHelper
 
     public function testMethodPassOne(): void
     {
-        $this->assertEquals('one', $this->instance->call(new RouterCallback('mockController','passone',['one'])));
+        $this->assertEquals('one', $this->instance->call(new RouterCallback('mockController', 'passone', ['one'])));
     }
 
     public function testMethodPassTwo(): void
     {
-        $this->assertEquals('one+two', $this->instance->call(new RouterCallback('mockController','passtwo',['one','two'])));
+        $this->assertEquals('one+two', $this->instance->call(new RouterCallback('mockController', 'passtwo', ['one','two'])));
     }
 
     public function testMethodPassOneNull(): void
     {
-        $this->assertEquals('one+', $this->instance->call(new RouterCallback('mockController','passonenull',['one'])));
+        $this->assertEquals('one+', $this->instance->call(new RouterCallback('mockController', 'passonenull', ['one'])));
     }
 
     public function testMethodPassTwoEmpty(): void
     {
         $this->expectException(ArgumentMissMatch::class);
 
-        $this->assertEquals('+', $this->instance->call(new RouterCallback('mockController','passtwo',[])));
+        $this->assertEquals('+', $this->instance->call(new RouterCallback('mockController', 'passtwo', [])));
     }
 
     public function testNonStringReturnThrowsInvalidValue(): void

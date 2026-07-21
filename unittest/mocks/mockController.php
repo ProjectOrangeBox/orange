@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 class mockController
 {
-    public function __construct() {}
+    public function __construct()
+    {
+    }
 
     public function index()
     {

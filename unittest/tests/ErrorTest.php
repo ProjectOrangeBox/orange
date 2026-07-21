@@ -22,7 +22,7 @@ final class ErrorTest extends UnitTestHelper
 
     protected function setUp(): void
     {
-        $this->instance = (new ReflectionClass(Error::class))->newInstanceWithoutConstructor();
+        $this->instance = new ReflectionClass(Error::class)->newInstanceWithoutConstructor();
     }
 
     private function withData(array $data): Data
