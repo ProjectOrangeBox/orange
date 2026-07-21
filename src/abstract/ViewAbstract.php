@@ -229,7 +229,10 @@ abstract class ViewAbstract extends Singleton implements ViewInterface
     public function render(string $view = '', array $data = [], array $options = []): string
     {
         logMsg('INFO', __METHOD__);
-        logMsg('DEBUG', '', ['view' => $view, 'data' => $data, 'options' => $options]);
+        // only build the message/context if this level is enabled - logMsg() alone would build it regardless
+        if (isLogEnabled('DEBUG')) {
+            logMsg('DEBUG', '', ['view' => $view, 'data' => $data, 'options' => $options]);
+        }
 
 
         // allow dynamic views only if router ALSO provided
@@ -265,7 +268,10 @@ abstract class ViewAbstract extends Singleton implements ViewInterface
     public function renderString(string $string, array $data = [], array $options = []): string
     {
         logMsg('INFO', __METHOD__);
-        logMsg('DEBUG', '', ['string' => $string, 'data' => $data, 'options' => $options]);
+        // only build the message/context if this level is enabled - logMsg() alone would build it regardless
+        if (isLogEnabled('DEBUG')) {
+            logMsg('DEBUG', '', ['string' => $string, 'data' => $data, 'options' => $options]);
+        }
 
         // convert the view into a unique hash
         // and make sure it's not binary value!
@@ -306,7 +312,10 @@ abstract class ViewAbstract extends Singleton implements ViewInterface
     public function change(string $name, mixed $value): self
     {
         logMsg('INFO', __METHOD__);
-        logMsg('DEBUG', '', ['name' => $name, 'value' => $value]);
+        // only build the message/context if this level is enabled - logMsg() alone would build it regardless
+        if (isLogEnabled('DEBUG')) {
+            logMsg('DEBUG', '', ['name' => $name, 'value' => $value]);
+        }
 
         if (!isset($this->changeableTypeCheck[$name])) {
             throw new InvalidValue($name);
@@ -339,7 +348,10 @@ abstract class ViewAbstract extends Singleton implements ViewInterface
     protected function generate(string $__viewFilePath, array $__dataArray): string
     {
         logMsg('INFO', __METHOD__ . ' ' . $__viewFilePath);
-        logMsg('DEBUG', '', ['__viewFilePath' => $__viewFilePath, '__dataArray' => $__dataArray]);
+        // only build the message/context if this level is enabled - logMsg() alone would build it regardless
+        if (isLogEnabled('DEBUG')) {
+            logMsg('DEBUG', '', ['__viewFilePath' => $__viewFilePath, '__dataArray' => $__dataArray]);
+        }
 
         // what file are we looking for?
         if (!\file_exists($__viewFilePath)) {

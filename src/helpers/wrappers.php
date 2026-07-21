@@ -16,6 +16,40 @@ if (!function_exists('container')) {
 }
 
 /*
+ * Check whether a log level would actually be written, without building a
+ * message/context first.
+ *
+ * Call sites that only construct their message for logging - string
+ * concatenation, an array literal, var_export(), ... - should guard the
+ * logMsg() call with this instead of always building the value and letting
+ * logMsg()/Log::log() discard it:
+ *
+ *     if (isLogEnabled('DEBUG')) {
+ *         logMsg('DEBUG', __METHOD__, ['key' => $key]);
+ *     }
+ *
+ * Log::isLevelEnabled() memoizes its answer per level, so repeated calls for
+ * the same level cost one array lookup after the first.
+ */
+if (!function_exists('isLogEnabled')) {
+    function isLogEnabled(string|int $level): bool
+    {
+        static $logInstance;
+
+        try {
+            if ($logInstance === null) {
+                $logInstance = container()->log;
+            }
+
+            return $logInstance->isLevelEnabled($level);
+        } catch (Throwable) {
+            // good chance the container or log isn't setup yet
+            return false;
+        }
+    }
+}
+
+/*
  * Easy Access to logging
  * works only if logging service exists
  *

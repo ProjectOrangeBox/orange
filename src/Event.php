@@ -183,7 +183,11 @@ class Event extends Singleton implements EventInterface
     public function register(string $trigger, \Closure|array $callable, int $priority = self::PRIORITY_NORMAL): int
     {
         logMsg('INFO', __METHOD__);
-        logMsg('DEBUG', '', ['trigger' => $trigger, 'callable' => $callable, 'priority' => $priority]);
+
+        // only build the message/context if this level is enabled - logMsg() alone would build it regardless
+        if (isLogEnabled('DEBUG')) {
+            logMsg('DEBUG', '', ['trigger' => $trigger, 'callable' => $callable, 'priority' => $priority]);
+        }
 
         return $this->registerEvent($trigger, $callable, $priority);
     }
@@ -217,7 +221,11 @@ class Event extends Singleton implements EventInterface
     public function trigger(string $trigger, &...$arguments): self
     {
         logMsg('INFO', __METHOD__ . ' ' . $trigger);
-        logMsg('DEBUG', '', ['trigger' => $trigger, 'arguments' => $arguments, 'disabled' => $this->disabled]);
+
+        // only build the message/context if this level is enabled - logMsg() alone would build it regardless
+        if (isLogEnabled('DEBUG')) {
+            logMsg('DEBUG', '', ['trigger' => $trigger, 'arguments' => $arguments, 'disabled' => $this->disabled]);
+        }
 
         if (!$this->disabled) {
             $trigger = $this->normalize($trigger);
@@ -243,7 +251,10 @@ class Event extends Singleton implements EventInterface
    */
     public function has(string $trigger): bool
     {
-        logMsg('DEBUG', __METHOD__, ['trigger' => $trigger]);
+        // only build the message/context if this level is enabled - logMsg() alone would build it regardless
+        if (isLogEnabled('DEBUG')) {
+            logMsg('DEBUG', __METHOD__, ['trigger' => $trigger]);
+        }
 
         return isset($this->events[$this->normalize($trigger)]);
     }
@@ -255,7 +266,10 @@ class Event extends Singleton implements EventInterface
    */
     public function triggers(): array
     {
-        logMsg('DEBUG', __METHOD__, array_keys($this->events));
+        // only build the message/context if this level is enabled - logMsg() alone would build it regardless
+        if (isLogEnabled('DEBUG')) {
+            logMsg('DEBUG', __METHOD__, array_keys($this->events));
+        }
 
         return array_keys($this->events);
     }
@@ -268,7 +282,10 @@ class Event extends Singleton implements EventInterface
    */
     public function unregister(int $eventId): bool
     {
-        logMsg('DEBUG', __METHOD__, ['eventId' => $eventId]);
+        // only build the message/context if this level is enabled - logMsg() alone would build it regardless
+        if (isLogEnabled('DEBUG')) {
+            logMsg('DEBUG', __METHOD__, ['eventId' => $eventId]);
+        }
 
         foreach ($this->events as $trigger => &$listeners) {
             if (isset($listeners[$eventId])) {
@@ -292,7 +309,10 @@ class Event extends Singleton implements EventInterface
    */
     public function unregisterAll(?string $trigger = null): bool
     {
-        logMsg('DEBUG', __METHOD__, ['trigger' => $trigger]);
+        // only build the message/context if this level is enabled - logMsg() alone would build it regardless
+        if (isLogEnabled('DEBUG')) {
+            logMsg('DEBUG', __METHOD__, ['trigger' => $trigger]);
+        }
 
       // this exits on the first successful removal
         if ($trigger) {
@@ -318,10 +338,10 @@ class Event extends Singleton implements EventInterface
    */
     protected function listeners(string $trigger): array
     {
-        $trigger = $this->normalize($trigger);
-      // Sort by priority (highest first)
-        krsort($this->events[$trigger]);
-        return $this->events[$trigger];
+        // Listeners are already ordered highest-priority-first at registration
+        // time (see registerClosureEvent()), so trigger() - which can fire many
+        // times per request - no longer re-sorts on every call.
+        return $this->events[$this->normalize($trigger)];
     }
 
   /**
@@ -400,7 +420,15 @@ class Event extends Singleton implements EventInterface
       // overflow the way a raw timestamp can.
         $eventId = ($priority * 1_000_000_000_000) + (self::$sequence++ % 1_000_000_000_000);
 
-        $this->events[$this->normalize($trigger)][$eventId] = $callable;
+        $normalizedTrigger = $this->normalize($trigger);
+
+        $this->events[$normalizedTrigger][$eventId] = $callable;
+
+        // Sort this trigger's listeners highest-priority-first now, at
+        // registration time (infrequent), rather than on every trigger() fire.
+        // unregister()/unregisterAll() only remove keys, so the order set here
+        // is preserved until the next registration.
+        krsort($this->events[$normalizedTrigger]);
 
         return $eventId;
     }

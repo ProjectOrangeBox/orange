@@ -328,7 +328,10 @@ class Output extends Singleton implements OutputInterface
      */
     public function contentType(string $type, string $fallback = ''): self
     {
-        logMsg('INFO', __METHOD__ . ' ' . $type);
+        // only build the message/context if this level is enabled - logMsg() alone would build it regardless
+        if (isLogEnabled('INFO')) {
+            logMsg('INFO', __METHOD__ . ' ' . $type);
+        }
 
         // if they send in the shorthand content type convert it to a proper content type
         if (isset($this->mimes[$type])) {
@@ -343,7 +346,10 @@ class Output extends Singleton implements OutputInterface
             throw new OutputException('Unknown contentType(s) ' . $type . '/' . $fallback);
         }
 
-        logMsg('INFO', __METHOD__ . ' ' . $detectedContentType);
+        // only build the message/context if this level is enabled - logMsg() alone would build it regardless
+        if (isLogEnabled('INFO')) {
+            logMsg('INFO', __METHOD__ . ' ' . $detectedContentType);
+        }
 
         $this->contentType = $detectedContentType;
         $this->header($this->getContentTypeHeader($this->contentType, $this->charSet), self::REPLACEALL);
@@ -371,7 +377,10 @@ class Output extends Singleton implements OutputInterface
      */
     public function charSet(string $charSet): self
     {
-        logMsg('INFO', __METHOD__ . ' ' . $charSet);
+        // only build the message/context if this level is enabled - logMsg() alone would build it regardless
+        if (isLogEnabled('INFO')) {
+            logMsg('INFO', __METHOD__ . ' ' . $charSet);
+        }
 
         $this->charSet = $charSet;
 
@@ -410,7 +419,10 @@ class Output extends Singleton implements OutputInterface
      */
     public function header(string $value, int $replace = self::NO, bool $prepend = false): self
     {
-        logMsg('INFO', __METHOD__ . ' ' . $value . ' ' . $replace . ' ' . $prepend);
+        // only build the message/context if this level is enabled - logMsg() alone would build it regardless
+        if (isLogEnabled('INFO')) {
+            logMsg('INFO', __METHOD__ . ' ' . $value . ' ' . $replace . ' ' . $prepend);
+        }
 
         if ($replace != self::NO) {
             $splitOn = ($replace == self::REPLACEALL) ? '/(:| )/' : '/(;|=|,)/';
@@ -475,8 +487,6 @@ class Output extends Singleton implements OutputInterface
      */
     public function responseCode(int|string $code): self
     {
-        logMsg('DEBUG', __METHOD__, ['code' => (string)$code]);
-
         // but if it is a string we need to try and detect the error number
         if (is_string($code)) {
             $code = $this->responseCodesInternalStringKeys[strtolower($code)] ?? 0;
@@ -541,8 +551,6 @@ class Output extends Singleton implements OutputInterface
      */
     protected function getContentTypeHeader(string $contentType, string $charSet): string
     {
-        logMsg('DEBUG', __METHOD__, ['contentType' => $contentType, 'charSet' => $charSet]);
-
         return 'Content-Type: ' . $contentType . '; charset=' . strtoupper($charSet);
     }
 
@@ -556,8 +564,6 @@ class Output extends Singleton implements OutputInterface
      */
     protected function getResponseHeader(int $responseCode): string
     {
-        logMsg('DEBUG', __METHOD__, ['responseCode' => $responseCode]);
-
         return $this->input->server('server_protocol', 'HTTP/1.0') . ' ' . $responseCode . ' ' . $this->config['status codes'][$responseCode];
     }
 

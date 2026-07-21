@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace orange\framework;
 
-use orange\framework\base\SingletonArrayObject;
+use orange\framework\base\Singleton;
 use orange\framework\interfaces\CacheInterface;
 use orange\framework\interfaces\ConfigInterface;
+use orange\framework\exceptions\config\ImmutableAccess;
 use orange\framework\exceptions\config\ConfigFileDidNotReturnAnArray;
 
 /**
@@ -24,7 +25,8 @@ use orange\framework\exceptions\config\ConfigFileDidNotReturnAnArray;
  *  •   Supports multiple directories (with priority order).
  *  •   Allows environment-specific overrides.
  *  •   Implements caching of config metadata for performance.
- *  •   Gives developers array-style access (via ArrayObject) as well as method access.
+ *  •   Gives developers read-only array-style access (via ArrayAccess) as well as method access;
+ *      offsetSet()/offsetUnset() throw, since a loaded config file is immutable for the life of the request.
  *
  * ⸻
  *
@@ -63,6 +65,7 @@ use orange\framework\exceptions\config\ConfigFileDidNotReturnAnArray;
  *  •   Magic getter (__get) → $config->database fetches the whole database.php array.
  *  •   offsetExists() → array-style access to checks if a config file exists.
  *  •   offsetGet() → array-style access to config file ($config['database']).
+ *  •   offsetSet() / offsetUnset() → always throw ImmutableAccess; Config is read-only.
  *  •   get($filename, $key = null, $default = null)
  *  •   Fetches entire config file (if $key is null).
  *  •   Fetches specific key with fallback default.
@@ -88,7 +91,7 @@ use orange\framework\exceptions\config\ConfigFileDidNotReturnAnArray;
  *
  * @package orange\framework
  */
-class Config extends SingletonArrayObject implements ConfigInterface
+class Config extends Singleton implements ConfigInterface, \ArrayAccess
 {
     /**
      * Stores loaded configurations indexed by filename.
@@ -191,6 +194,31 @@ class Config extends SingletonArrayObject implements ConfigInterface
     public function offsetGet(mixed $filename): mixed
     {
         return $this->get($filename);
+    }
+
+    /**
+     * Config is an immutable, loaded-once snapshot - it never accepts writes.
+     *
+     * @param mixed $filename
+     * @param mixed $value
+     * @return never
+     * @throws ImmutableAccess Always.
+     */
+    public function offsetSet(mixed $filename, mixed $value): never
+    {
+        throw new ImmutableAccess('cannot set "' . $filename . '" - Config is read-only');
+    }
+
+    /**
+     * Config is an immutable, loaded-once snapshot - it never accepts writes.
+     *
+     * @param mixed $filename
+     * @return never
+     * @throws ImmutableAccess Always.
+     */
+    public function offsetUnset(mixed $filename): never
+    {
+        throw new ImmutableAccess('cannot unset "' . $filename . '" - Config is read-only');
     }
 
     /**

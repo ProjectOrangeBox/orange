@@ -85,6 +85,8 @@ Config
  [x] Offset get
  [x] Offset exists
  [x] Offset exists false for unknown config does not throw
+ [x] Offset set throws
+ [x] Offset unset throws
  [x] Get with default returns default for missing key
  [x] Get with default returns value when key present
  [x] Load throws when config file does not return array
@@ -312,6 +314,9 @@ Event
 Helpers
  [x] Container
  [x] Log msg
+ [x] Is log enabled matches threshold
+ [x] Is log enabled guard skips building message when disabled
+ [x] Is log enabled cache does not go stale after change threshold
  [x] File put contents atomic
  [x] Concat
  [x] Config
@@ -372,6 +377,13 @@ Input
  [x] Uri segment out of range returns empty
  [x] Request uri returns empty string when url has no path
  [x] Request uri returns empty string for malformed url
+ [x] Array access get matches method accessors
+ [x] Array access is case insensitive
+ [x] Array access nested server key uses underscores
+ [x] Array access exists
+ [x] Array access get unknown offset throws
+ [x] Array access set throws
+ [x] Array access unset throws
 
 Log
  [x] Change threshold
@@ -381,6 +393,8 @@ Log
  [x] All psr 3 level methods write
  [x] Log writes context
  [x] Write with string level
+ [x] Is level enabled is memoized per level
+ [x] Is level enabled cache is invalidated by change threshold
  [x] Disabled level is not written
  [x] Custom handler does not require writable filepath
  [x] Mono logger exception

@@ -109,6 +109,11 @@ class Router extends Singleton implements RouterInterface
     // include ConfigurationTrait methods
     use ConfigurationTrait;
 
+    // Characters that make a route url a regex pattern rather than a plain
+    // literal. A url containing none of these matches by string equality, letting
+    // match() skip the regex engine for it. See addRoute() and match().
+    private const string REGEX_METACHARACTERS = '\\^$.|?*+()[]{}';
+
     // Base URL of the site, used for generating full URLs.
     protected string $siteUrl;
 
@@ -233,6 +238,11 @@ class Router extends Singleton implements RouterInterface
 
         // can't do anything without a url
         if (isset($options['url'])) {
+            // Precompute whether this url is a plain literal (no regex
+            // metacharacters) so match() can compare it by string equality
+            // instead of running the regex engine. Cached alongside the route.
+            $options['static'] = strpbrk($options['url'], self::REGEX_METACHARACTERS) === false;
+
             // is this a http routable method?
             if (isset($options['method'])) {
                 // is this the wildcard all an array or a single value
@@ -304,7 +314,10 @@ class Router extends Singleton implements RouterInterface
      */
     public function match(string $requestUri, string $requestMethod): self
     {
-        logMsg('DEBUG', __METHOD__, compact('requestUri', 'requestMethod'));
+        // only build the message/context if this level is enabled - logMsg() alone would build it regardless
+        if (isLogEnabled('DEBUG')) {
+            logMsg('DEBUG', __METHOD__, ['requestUri' => $requestUri, 'requestMethod' => $requestMethod]);
+        }
 
         // clear any previous match so a failed match here can never inherit a prior
         // successful match's (truthy) url and skip throwing RouteNotFound below
@@ -313,37 +326,57 @@ class Router extends Singleton implements RouterInterface
         // Normalize the request method
         $requestMethodUpper = mb_strtoupper($requestMethod);
 
+        // Normalize the request URI once instead of rebuilding it per route
+        $normalizedUri = '/' . trim($requestUri, '/');
+
         // Check for matching routes
         foreach ($this->routes[$requestMethodUpper] ?? [] as $route) {
-            // Check if the route matches the request URI
-            if (preg_match("@^" . $route['url'] . "$@D", '/' . trim($requestUri, '/'), $argv)) {
-                // Get the URL from the arguments
-                $url = array_shift($argv);
+            // A route whose url is a plain literal (no regex metacharacters) is
+            // matched by a direct string comparison, skipping the regex engine.
+            // strpbrk() is a fallback for routes cached before 'static' existed.
+            // Iteration order is unchanged, so route precedence is identical.
+            $isStatic = $route['static'] ?? (strpbrk($route['url'], self::REGEX_METACHARACTERS) === false);
 
-                // decode each argument
-                foreach ($argv as &$value) {
-                    $value = urldecode($value);
+            if ($isStatic) {
+                if ($normalizedUri !== $route['url']) {
+                    continue;
                 }
 
-                // Set the matched route information
-                $this->matched = [
-                    'request method' => $requestMethodUpper,
-                    'request uri' => $requestUri,
-                    'matched uri' => $route['url'],
-                    'matched method' => $route['method'],
-                    'url' => $url,
-                    'argv' => $argv,
-                    'argc' => count($argv),
-                    'args' => !empty($argv),
-                    'name' => $route['name'] ?? null,
-                    'callback' => $route['callback'] ?? null,
-                ];
+                // a literal route captures no arguments
+                $argv = [];
+            } elseif (preg_match("@^" . $route['url'] . "$@D", $normalizedUri, $matches)) {
+                // drop the full-match element, leaving only the captured arguments
+                array_shift($matches);
 
-                logMsg('DEBUG', 'Route matched.', $this->matched);
-
-                // we found a match break from foreach loop
-                break;
+                $argv = $matches;
+            } else {
+                continue;
             }
+
+            // decode each argument
+            foreach ($argv as &$value) {
+                $value = urldecode($value);
+            }
+            unset($value);
+
+            // Set the matched route information
+            $this->matched = [
+                'request method' => $requestMethodUpper,
+                'request uri' => $requestUri,
+                'matched uri' => $route['url'],
+                'matched method' => $route['method'],
+                'url' => $normalizedUri,
+                'argv' => $argv,
+                'argc' => count($argv),
+                'args' => !empty($argv),
+                'name' => $route['name'] ?? null,
+                'callback' => $route['callback'] ?? null,
+            ];
+
+            logMsg('DEBUG', 'Route matched.', $this->matched);
+
+            // we found a match break from foreach loop
+            break;
         }
 
         // every route has a url. (why else would you add it?)
@@ -363,7 +396,10 @@ class Router extends Singleton implements RouterInterface
      */
     public function getMatched(?string $key = null): mixed /* mixed string|array */
     {
-        logMsg('DEBUG', __METHOD__, ['key' => $key]);
+        // only build the message/context if this level is enabled - logMsg() alone would build it regardless
+        if (isLogEnabled('DEBUG')) {
+            logMsg('DEBUG', __METHOD__, ['key' => $key]);
+        }
 
         // Check if the key is valid
         if ($key != null && !\array_key_exists(mb_strtolower($key), $this->matched)) {
@@ -410,8 +446,15 @@ class Router extends Singleton implements RouterInterface
      */
     public function getUrl(string $searchName = '', array $arguments = [], ?bool $skipParameterTypeChecking = null): string
     {
-        logMsg('INFO', __METHOD__ . ' ' . $searchName);
-        logMsg('DEBUG', '', ['searchName' => $searchName, 'arguments' => $arguments, 'skipParameterTypeChecking' => $skipParameterTypeChecking]);
+        // only build the message/context if this level is enabled - logMsg() alone would build it regardless
+        if (isLogEnabled('INFO')) {
+            logMsg('INFO', __METHOD__ . ' ' . $searchName);
+        }
+
+        // only build the message/context if this level is enabled - logMsg() alone would build it regardless
+        if (isLogEnabled('DEBUG')) {
+            logMsg('DEBUG', '', ['searchName' => $searchName, 'arguments' => $arguments, 'skipParameterTypeChecking' => $skipParameterTypeChecking]);
+        }
 
         // default to site url
         $matchedUrl = $this->siteUrl;
@@ -465,7 +508,10 @@ class Router extends Singleton implements RouterInterface
             }
         }
 
-        logMsg('INFO', __METHOD__ . ' matched Url ' . $matchedUrl);
+        // only build the message/context if this level is enabled - logMsg() alone would build it regardless
+        if (isLogEnabled('INFO')) {
+            logMsg('INFO', __METHOD__ . ' matched Url ' . $matchedUrl);
+        }
 
         return $matchedUrl;
     }

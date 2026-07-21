@@ -144,6 +144,15 @@ class Log extends Singleton implements LogInterface, LoggerInterface
     protected array $psrLevelsInt = [];
 
     /**
+     * Memoized isLevelEnabled() results, keyed by normalized level (uppercase
+     * string levels, or the int as-is). Reset by changeThreshold() - the only
+     * thing that can change what a given level resolves to.
+     *
+     * @var array<string|int, bool>
+     */
+    protected array $levelEnabledCache = [];
+
+    /**
      * Constructor is protected to enforce the singleton pattern.
      *
      * @param array $config Configuration data.
@@ -191,6 +200,10 @@ class Log extends Singleton implements LogInterface, LoggerInterface
         $this->threshold = $threshold;
 
         $this->enabled = $this->threshold !== 0;
+
+        // the threshold just changed, so every previously memoized isLevelEnabled()
+        // answer is potentially wrong now - drop them all rather than risk a stale hit
+        $this->levelEnabledCache = [];
 
         // only the internal file-based handler needs a writable log directory; a custom
         // PSR-3 handler manages its own storage and shouldn't require 'filepath' to exist
@@ -309,12 +322,20 @@ class Log extends Singleton implements LogInterface, LoggerInterface
     /**
      * Checks if a log level is enabled based on the threshold.
      *
+     * Public so callers - e.g. the isLogEnabled() helper - can check this before
+     * doing any work to build a message/context that would just be thrown away if
+     * the level isn't enabled, instead of always building it and letting log()
+     * discard it. Memoized per level: convert2() and the threshold bitmask check
+     * only run once per distinct level until changeThreshold() invalidates the cache.
+     *
      * @param string|int $level Log level.
      * @return bool
      */
-    protected function isLevelEnabled(string|int $level): bool
+    public function isLevelEnabled(string|int $level): bool
     {
-        return $this->enabled && ($this->threshold & $this->convert2($level, 'int'));
+        $cacheKey = is_int($level) ? $level : strtoupper($level);
+
+        return $this->levelEnabledCache[$cacheKey] ??= $this->enabled && (bool) ($this->threshold & $this->convert2($level, 'int'));
     }
 
     /**

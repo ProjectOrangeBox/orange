@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 use orange\framework\Input;
 use orange\framework\interfaces\InputInterface;
+use orange\framework\exceptions\input\UnknownOffset;
+use orange\framework\exceptions\input\ImmutableAccess;
 
 final class InputTest extends UnitTestHelper
 {
@@ -143,7 +145,7 @@ final class InputTest extends UnitTestHelper
     {
         $instance = Input::newInstance([
             'input' => '{"name": "Joe","age": 24}',
-            'server' => ['content type' => 'application/json', 'request_method' => 'POST'],
+            'server' => ['content_type' => 'application/json', 'request_method' => 'POST'],
         ]);
 
         $this->assertEquals([
@@ -200,5 +202,58 @@ final class InputTest extends UnitTestHelper
         $instance = Input::newInstance(['server' => ['request_uri' => 'http://[invalid']]);
 
         $this->assertEquals('', $instance->requestUri());
+    }
+
+    public function testArrayAccessGetMatchesMethodAccessors(): void
+    {
+        $this->assertEquals($this->instance->query(), $this->instance['query']);
+        $this->assertEquals($this->instance->request(), $this->instance['request']);
+        $this->assertEquals($this->instance->cookie(), $this->instance['cookie']);
+        $this->assertEquals($this->instance->file(), $this->instance['file']);
+        $this->assertEquals($this->instance->server(), $this->instance['server']);
+        $this->assertEquals($this->instance->header(), $this->instance['header']);
+    }
+
+    public function testArrayAccessIsCaseInsensitive(): void
+    {
+        $this->assertEquals($this->instance->query(), $this->instance['QUERY']);
+    }
+
+    public function testArrayAccessNestedServerKeyUsesUnderscores(): void
+    {
+        // setUp server has 'HTTP_ACCEPT_LANGUAGE' - normalizeServerKey() now keeps
+        // underscores (rather than converting them to spaces) so this raw array
+        // access matches the exact same key server('accept_language') would use
+        $this->assertEquals(
+            'en-US,en;q=0.9,zh-CN;q=0.8,zh;q=0.7,fr;q=0.6,el;q=0.5',
+            $this->instance['server']['accept_language']
+        );
+    }
+
+    public function testArrayAccessExists(): void
+    {
+        $this->assertTrue(isset($this->instance['server']));
+        $this->assertFalse(isset($this->instance['bogus']));
+    }
+
+    public function testArrayAccessGetUnknownOffsetThrows(): void
+    {
+        $this->expectException(UnknownOffset::class);
+
+        $this->instance['bogus'];
+    }
+
+    public function testArrayAccessSetThrows(): void
+    {
+        $this->expectException(ImmutableAccess::class);
+
+        $this->instance['server'] = [];
+    }
+
+    public function testArrayAccessUnsetThrows(): void
+    {
+        $this->expectException(ImmutableAccess::class);
+
+        unset($this->instance['server']);
     }
 }

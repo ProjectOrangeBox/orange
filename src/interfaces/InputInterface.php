@@ -4,7 +4,13 @@ declare(strict_types=1);
 
 namespace orange\framework\interfaces;
 
-interface InputInterface
+/**
+ * Also exposes request data via array access - $input['server']['content_type'] -
+ * as a read-only alternative to the query()/request()/server()/etc. methods below.
+ * offsetSet()/offsetUnset() must throw: implementations of this interface are
+ * immutable snapshots of the request, not mutable state.
+ */
+interface InputInterface extends \ArrayAccess
 {
     // HTTP Methods
     public const GET       = 'GET';

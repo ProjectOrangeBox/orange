@@ -28,7 +28,10 @@ trait ConfigurationTrait
     public function changeOption(string $name, mixed $value): self
     {
         logMsg('INFO', __METHOD__ . ' ' . $name);
-        logMsg('DEBUG', __METHOD__, ['name' => $name, 'value' => $value]);
+        // only build the message/context if this level is enabled - logMsg() alone would build it regardless
+        if (isLogEnabled('DEBUG')) {
+            logMsg('DEBUG', __METHOD__, ['name' => $name, 'value' => $value]);
+        }
 
         if (!property_exists($this, 'changeableTypeCheck')) {
             throw new MissingRequired('Change not supported');
@@ -86,7 +89,10 @@ trait ConfigurationTrait
     protected function mergeConfigWith(array $config, mixed $path = null, bool $recursive = true): array
     {
         logMsg('INFO', __METHOD__);
-        logMsg('DEBUG', __METHOD__, ['config' => $config, 'path' => $path, 'recursive' => $recursive]);
+        // only build the message/context if this level is enabled - logMsg() alone would build it regardless
+        if (isLogEnabled('DEBUG')) {
+            logMsg('DEBUG', __METHOD__, ['config' => $config, 'path' => $path, 'recursive' => $recursive]);
+        }
 
         // if they send in $recursive as $path
         if (is_bool($path)) {
@@ -293,7 +299,10 @@ trait ConfigurationTrait
     protected function validateConfig(array $config, array $rules): void
     {
         logMsg('INFO', __METHOD__);
-        logMsg('DEBUG', __METHOD__, ['config' => $config, 'rules' => $rules]);
+        // only build the message/context if this level is enabled - logMsg() alone would build it regardless
+        if (isLogEnabled('DEBUG')) {
+            logMsg('DEBUG', __METHOD__, ['config' => $config, 'rules' => $rules]);
+        }
 
         $errors = [];
 

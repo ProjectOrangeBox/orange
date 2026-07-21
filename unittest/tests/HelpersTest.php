@@ -56,6 +56,77 @@ final class HelpersTest extends UnitTestHelper
         $this->assertEquals('12:00am ALERT This is an Alert!', file_get_contents($this->testFile));
     }
 
+    public function testIsLogEnabledMatchesThreshold(): void
+    {
+        $this->testFile = WORKINGDIR . '/writeable/test-log.txt';
+
+        $log = Log::getInstance([
+            'filepath' => $this->testFile,
+            'threshold' => LOG::ALERT, // DEBUG is not in the threshold
+            'line format' => '%level %message',
+        ]);
+
+        $container = Container::getInstance();
+        $container->set('log', $log);
+
+        $this->assertTrue(isLogEnabled(LOG::ALERT));
+        $this->assertFalse(isLogEnabled(LOG::DEBUG));
+    }
+
+    public function testIsLogEnabledGuardSkipsBuildingMessageWhenDisabled(): void
+    {
+        $this->testFile = WORKINGDIR . '/writeable/test-log.txt';
+
+        $log = Log::getInstance([
+            'filepath' => $this->testFile,
+            'threshold' => LOG::ALERT, // DEBUG is not in the threshold
+            'line format' => '%level %message',
+        ]);
+
+        $container = Container::getInstance();
+        $container->set('log', $log);
+
+        $built = false;
+
+        // this is the if (isLogEnabled(...)) { logMsg(...) } pattern call sites use
+        if (isLogEnabled(LOG::DEBUG)) {
+            $built = true;
+            logMsg(LOG::DEBUG, 'should never be built');
+        }
+
+        $this->assertFalse($built);
+        $this->assertFileDoesNotExist($this->testFile);
+    }
+
+    public function testIsLogEnabledCacheDoesNotGoStaleAfterChangeThreshold(): void
+    {
+        $this->testFile = WORKINGDIR . '/writeable/test-log.txt';
+
+        // start disabled, so isLevelEnabled('DEBUG') memoizes a `false` answer
+        $log = Log::getInstance([
+            'filepath' => $this->testFile,
+            'threshold' => 0,
+            'line format' => '%level %message',
+        ]);
+
+        $container = Container::getInstance();
+        $container->set('log', $log);
+
+        $this->assertFalse(isLogEnabled(LOG::DEBUG));
+
+        // enabling DEBUG must invalidate the memoized answer, not keep returning
+        // the stale `false` cached above
+        $log->changeThreshold(LOG::DEBUG);
+
+        $this->assertTrue(isLogEnabled(LOG::DEBUG));
+
+        if (isLogEnabled(LOG::DEBUG)) {
+            logMsg(LOG::DEBUG, 'now enabled');
+        }
+
+        $this->assertStringContainsString('now enabled', file_get_contents($this->testFile));
+    }
+
     public function testFile_put_contents_atomic(): void
     {
         $testFile = WORKINGDIR . '/writeable/test.txt';

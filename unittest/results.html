@@ -146,6 +146,8 @@
             <li class="success">Offset get</li>
             <li class="success">Offset exists</li>
             <li class="success">Offset exists false for unknown config does not throw</li>
+            <li class="success">Offset set throws</li>
+            <li class="success">Offset unset throws</li>
             <li class="success">Get with default returns default for missing key</li>
             <li class="success">Get with default returns value when key present</li>
             <li class="success">Load throws when config file does not return array</li>
@@ -386,6 +388,9 @@
         <ul>
             <li class="success">Container</li>
             <li class="success">Log msg</li>
+            <li class="success">Is log enabled matches threshold</li>
+            <li class="success">Is log enabled guard skips building message when disabled</li>
+            <li class="success">Is log enabled cache does not go stale after change threshold</li>
             <li class="success">File put contents atomic</li>
             <li class="success">Concat</li>
             <li class="success">Config</li>
@@ -448,6 +453,13 @@
             <li class="success">Uri segment out of range returns empty</li>
             <li class="success">Request uri returns empty string when url has no path</li>
             <li class="success">Request uri returns empty string for malformed url</li>
+            <li class="success">Array access get matches method accessors</li>
+            <li class="success">Array access is case insensitive</li>
+            <li class="success">Array access nested server key uses underscores</li>
+            <li class="success">Array access exists</li>
+            <li class="success">Array access get unknown offset throws</li>
+            <li class="success">Array access set throws</li>
+            <li class="success">Array access unset throws</li>
         </ul>
         <h2>Log</h2>
         <ul>
@@ -458,6 +470,8 @@
             <li class="success">All psr 3 level methods write</li>
             <li class="success">Log writes context</li>
             <li class="success">Write with string level</li>
+            <li class="success">Is level enabled is memoized per level</li>
+            <li class="success">Is level enabled cache is invalidated by change threshold</li>
             <li class="success">Disabled level is not written</li>
             <li class="success">Custom handler does not require writable filepath</li>
             <li class="success">Mono logger exception</li>

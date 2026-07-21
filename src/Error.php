@@ -266,7 +266,10 @@ class Error extends Singleton
      */
     public function show(int $code = 500, string $message = '', ?array $options = null): void
     {
-        logMsg('INFO', __METHOD__, ['code' => $code, 'message' => $message, 'options' => $options]);
+        // only build the message/context if this level is enabled - logMsg() alone would build it regardless
+        if (isLogEnabled('INFO')) {
+            logMsg('INFO', __METHOD__, ['code' => $code, 'message' => $message, 'options' => $options]);
+        }
 
         $this->data->merge([
             'code' => $code,
@@ -404,7 +407,10 @@ class Error extends Singleton
      */
     protected function getService(string $name, array $arguments): mixed
     {
-        logMsg('INFO', __METHOD__ . ' ' . $name, ['name' => $name, 'arguments' => $arguments]);
+        // only build the message/context if this level is enabled - logMsg() alone would build it regardless
+        if (isLogEnabled('INFO')) {
+            logMsg('INFO', __METHOD__ . ' ' . $name, ['name' => $name, 'arguments' => $arguments]);
+        }
 
         $service = null;
 

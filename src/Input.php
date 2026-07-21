@@ -7,6 +7,8 @@ namespace orange\framework;
 use orange\framework\base\Singleton;
 use orange\framework\interfaces\InputInterface;
 use orange\framework\traits\ConfigurationTrait;
+use orange\framework\exceptions\input\UnknownOffset;
+use orange\framework\exceptions\input\ImmutableAccess;
 
 /**
  * Class Input
@@ -95,7 +97,7 @@ use orange\framework\traits\ConfigurationTrait;
  * - Helps enforce a consistent and test-friendly way of handling input data.
  * - Acts as a bridge between raw HTTP layer and application logic.
  */
-class Input extends Singleton implements InputInterface
+class Input extends Singleton implements InputInterface, \ArrayAccess
 {
     /** include ConfigurationTrait methods */
     use ConfigurationTrait;
@@ -148,7 +150,10 @@ class Input extends Singleton implements InputInterface
      */
     public function request(?string $key = null, mixed $default = null): mixed
     {
-        logMsg('INFO', __METHOD__ . ' ' . $key);
+        // only build the message/context if this level is enabled - logMsg() alone would build it regardless
+        if (isLogEnabled('INFO')) {
+            logMsg('INFO', __METHOD__ . ' ' . $key);
+        }
 
         return $this->extract($this->request, $key, $default);
     }
@@ -163,7 +168,10 @@ class Input extends Singleton implements InputInterface
      */
     public function query(?string $key = null, mixed $default = null): mixed
     {
-        logMsg('INFO', __METHOD__ . ' ' . $key);
+        // only build the message/context if this level is enabled - logMsg() alone would build it regardless
+        if (isLogEnabled('INFO')) {
+            logMsg('INFO', __METHOD__ . ' ' . $key);
+        }
 
         return $this->extract($this->query, $key, $default);
     }
@@ -188,7 +196,10 @@ class Input extends Singleton implements InputInterface
      */
     public function cookie(?string $key = null, mixed $default = null): mixed
     {
-        logMsg('INFO', __METHOD__ . ' ' . $key);
+        // only build the message/context if this level is enabled - logMsg() alone would build it regardless
+        if (isLogEnabled('INFO')) {
+            logMsg('INFO', __METHOD__ . ' ' . $key);
+        }
 
         return $this->extract($this->cookies, $key, $default);
     }
@@ -203,7 +214,10 @@ class Input extends Singleton implements InputInterface
      */
     public function file(null|int|string $key = null, mixed $default = []): mixed
     {
-        logMsg('INFO', __METHOD__ . ' ' . $key);
+        // only build the message/context if this level is enabled - logMsg() alone would build it regardless
+        if (isLogEnabled('INFO')) {
+            logMsg('INFO', __METHOD__ . ' ' . $key);
+        }
 
         return $this->extract($this->files, $key, $default);
     }
@@ -218,7 +232,10 @@ class Input extends Singleton implements InputInterface
      */
     public function server(?string $key = null, mixed $default = null): mixed
     {
-        logMsg('INFO', __METHOD__ . ' ' . $key);
+        // only build the message/context if this level is enabled - logMsg() alone would build it regardless
+        if (isLogEnabled('INFO')) {
+            logMsg('INFO', __METHOD__ . ' ' . $key);
+        }
 
         $key = $key === null ? null : $this->normalizeServerKey($key);
 
@@ -235,11 +252,76 @@ class Input extends Singleton implements InputInterface
      */
     public function header(?string $key = null, mixed $default = null): mixed
     {
-        logMsg('INFO', __METHOD__ . ' ' . $key);
+        // only build the message/context if this level is enabled - logMsg() alone would build it regardless
+        if (isLogEnabled('INFO')) {
+            logMsg('INFO', __METHOD__ . ' ' . $key);
+        }
 
         $key = $key === null ? null : $this->normalizeServerKey($key);
 
         return $this->extract($this->headers, $key, $default);
+    }
+
+    /**
+     * Array-access read of a whole request dataset, e.g. $input['server']['content_type']
+     * or $input['request']['firstname']. The offset names match the singular accessor
+     * methods (query, request, cookie, file, server, header) - not the plural property
+     * names - so $input['x'] and $input->x() always refer to the same dataset.
+     *
+     * @param mixed $offset
+     * @return bool
+     */
+    public function offsetExists(mixed $offset): bool
+    {
+        return match (strtolower((string) $offset)) {
+            'query', 'request', 'cookie', 'file', 'server', 'header' => true,
+            default => false,
+        };
+    }
+
+    /**
+     * Retrieve a whole request dataset by offset name.
+     *
+     * @param mixed $offset
+     * @return array
+     * @throws UnknownOffset If $offset isn't one of query/request/cookie/file/server/header.
+     */
+    public function offsetGet(mixed $offset): mixed
+    {
+        return match (strtolower((string) $offset)) {
+            'query' => $this->query,
+            'request' => $this->request,
+            'cookie' => $this->cookies,
+            'file' => $this->files,
+            'server' => $this->server,
+            'header' => $this->headers,
+            default => throw new UnknownOffset('"' . $offset . '"'),
+        };
+    }
+
+    /**
+     * Input is an immutable snapshot of the request - it never accepts writes.
+     *
+     * @param mixed $offset
+     * @param mixed $value
+     * @return never
+     * @throws ImmutableAccess Always.
+     */
+    public function offsetSet(mixed $offset, mixed $value): never
+    {
+        throw new ImmutableAccess('cannot set "' . $offset . '" - Input is read-only');
+    }
+
+    /**
+     * Input is an immutable snapshot of the request - it never accepts writes.
+     *
+     * @param mixed $offset
+     * @return never
+     * @throws ImmutableAccess Always.
+     */
+    public function offsetUnset(mixed $offset): never
+    {
+        throw new ImmutableAccess('cannot unset "' . $offset . '" - Input is read-only');
     }
 
     /**
@@ -251,7 +333,10 @@ class Input extends Singleton implements InputInterface
      */
     public function getUrl(?int $component = null): mixed
     {
-        logMsg('INFO', __METHOD__ . ' ' . $component);
+        // only build the message/context if this level is enabled - logMsg() alone would build it regardless
+        if (isLogEnabled('INFO')) {
+            logMsg('INFO', __METHOD__ . ' ' . $component);
+        }
 
         $parseUrl = $this->server('request_uri', '');
 
@@ -271,7 +356,10 @@ class Input extends Singleton implements InputInterface
         // '' the same way a genuinely missing request_uri already does
         $uri = (string) parse_url((string) $this->server('request_uri', ''), self::PATH);
 
-        logMsg('INFO', __METHOD__ . ' ' . $uri);
+        // only build the message/context if this level is enabled - logMsg() alone would build it regardless
+        if (isLogEnabled('INFO')) {
+            logMsg('INFO', __METHOD__ . ' ' . $uri);
+        }
 
         return $uri;
     }
@@ -285,7 +373,10 @@ class Input extends Singleton implements InputInterface
      */
     public function uriSegment(int $segmentNumber): string
     {
-        logMsg('INFO', __METHOD__ . ' ' . $segmentNumber);
+        // only build the message/context if this level is enabled - logMsg() alone would build it regardless
+        if (isLogEnabled('INFO')) {
+            logMsg('INFO', __METHOD__ . ' ' . $segmentNumber);
+        }
 
         $segs = explode('/', ltrim($this->requestUri(), '/'));
 
@@ -301,9 +392,12 @@ class Input extends Singleton implements InputInterface
      */
     public function contentType(bool $asLowercase = true): string
     {
-        $type = $this->server('content type', '');
+        $type = $this->server('content_type', '');
 
-        logMsg('DEBUG', __METHOD__ . $type);
+        // only build the message/context if this level is enabled - logMsg() alone would build it regardless
+        if (isLogEnabled('DEBUG')) {
+            logMsg('DEBUG', __METHOD__ . $type);
+        }
 
         return $asLowercase ? strtolower((string) $type) : strtoupper((string) $type);
     }
@@ -335,7 +429,10 @@ class Input extends Singleton implements InputInterface
             $method = 'cli';
         }
 
-        logMsg('DEBUG', __METHOD__ . $method);
+        // only build the message/context if this level is enabled - logMsg() alone would build it regardless
+        if (isLogEnabled('DEBUG')) {
+            logMsg('DEBUG', __METHOD__ . $method);
+        }
 
         return $asLowercase ? strtolower((string) $method) : strtoupper((string) $method);
     }
@@ -358,7 +455,10 @@ class Input extends Singleton implements InputInterface
             $requestType = 'html';
         }
 
-        logMsg('DEBUG', __METHOD__ . $requestType);
+        // only build the message/context if this level is enabled - logMsg() alone would build it regardless
+        if (isLogEnabled('DEBUG')) {
+            logMsg('DEBUG', __METHOD__ . $requestType);
+        }
 
         return $asLowercase ? strtolower($requestType) : strtoupper($requestType);
     }
@@ -392,7 +492,10 @@ class Input extends Singleton implements InputInterface
      */
     public function isHttpsRequest(bool $asString = false): bool|string
     {
-        logMsg('INFO', __METHOD__ . ' ' . $asString);
+        // only build the message/context if this level is enabled - logMsg() alone would build it regardless
+        if (isLogEnabled('INFO')) {
+            logMsg('INFO', __METHOD__ . ' ' . $asString);
+        }
 
         // set the default to not https unless we find something else
         $isHttps = false;
@@ -401,7 +504,10 @@ class Input extends Singleton implements InputInterface
             $isHttps = true;
         }
 
-        logMsg('INFO', __METHOD__ . ' ' . ($isHttps ? 'true' : 'false'));
+        // only build the message/context if this level is enabled - logMsg() alone would build it regardless
+        if (isLogEnabled('INFO')) {
+            logMsg('INFO', __METHOD__ . ' ' . ($isHttps ? 'true' : 'false'));
+        }
 
         $return = $isHttps;
 
@@ -482,14 +588,20 @@ class Input extends Singleton implements InputInterface
     }
 
     /**
-     * Normalize server keys by lowercasing, replacing underscores with spaces, and stripping HTTP/Server prefixes.
+     * Normalize server keys by lowercasing and stripping HTTP/Server prefixes.
+     *
+     * Keys keep their underscores (e.g. 'HTTP_ACCEPT_LANGUAGE' -> 'accept_language')
+     * rather than converting them to spaces, so the exact same key string works for
+     * both method calls (server('accept_language')) and array access
+     * ($input['server']['accept_language']) - the latter indexes the returned array
+     * directly and has no chance to run back through this normalizer.
      *
      * @param string $key
      * @return string
      */
     protected function normalizeServerKey(string $key): string
     {
-        return str_replace('_', ' ', str_replace(['http_', 'server_'], '', strtolower($key)));
+        return str_replace(['http_', 'server_'], '', strtolower($key));
     }
 
     /**

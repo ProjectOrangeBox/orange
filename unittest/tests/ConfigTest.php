@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use orange\framework\Config;
+use orange\framework\exceptions\config\ImmutableAccess;
 
 final class ConfigTest extends UnitTestHelper
 {
@@ -81,6 +82,20 @@ final class ConfigTest extends UnitTestHelper
         // a filename with no discovered config files at all isn't in $foundConfigFiles;
         // count(null) is a TypeError under PHP 8, so this must not crash
         $this->assertFalse(isset($this->instance['thisConfigFileDoesNotExistAnywhere']));
+    }
+
+    public function testOffsetSetThrows(): void
+    {
+        $this->expectException(ImmutableAccess::class);
+
+        $this->instance['aaa'] = ['color' => 'red'];
+    }
+
+    public function testOffsetUnsetThrows(): void
+    {
+        $this->expectException(ImmutableAccess::class);
+
+        unset($this->instance['aaa']);
     }
 
     public function testGetWithDefaultReturnsDefaultForMissingKey(): void

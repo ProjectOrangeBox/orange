@@ -124,6 +124,39 @@ final class LogTest extends UnitTestHelper
         $this->assertStringContainsString('string level message', file_get_contents($this->config['filepath']));
     }
 
+    public function testIsLevelEnabledIsMemoizedPerLevel(): void
+    {
+        $this->instance->changeThreshold(LOG::ALERT | LOG::DEBUG);
+
+        // repeated calls for the same level must keep returning the same
+        // (correct) answer, whether served from the cache or computed fresh
+        $this->assertTrue($this->instance->isLevelEnabled(LOG::ALERT));
+        $this->assertTrue($this->instance->isLevelEnabled(LOG::ALERT));
+        $this->assertFalse($this->instance->isLevelEnabled(LOG::ERROR));
+        $this->assertFalse($this->instance->isLevelEnabled(LOG::ERROR));
+
+        // string and int forms of the same level must hit the same cache entry
+        $this->assertTrue($this->instance->isLevelEnabled('DEBUG'));
+        $this->assertTrue($this->instance->isLevelEnabled(LOG::DEBUG));
+    }
+
+    public function testIsLevelEnabledCacheIsInvalidatedByChangeThreshold(): void
+    {
+        $this->instance->changeThreshold(0);
+
+        $this->assertFalse($this->instance->isLevelEnabled(LOG::ERROR));
+
+        // must not keep returning the memoized `false` from before the threshold changed
+        $this->instance->changeThreshold(LOG::ERROR);
+
+        $this->assertTrue($this->instance->isLevelEnabled(LOG::ERROR));
+
+        // and the reverse: a memoized `true` must not survive being disabled again
+        $this->instance->changeThreshold(0);
+
+        $this->assertFalse($this->instance->isLevelEnabled(LOG::ERROR));
+    }
+
     public function testDisabledLevelIsNotWritten(): void
     {
         // threshold 0 disables logging entirely
