@@ -14,7 +14,7 @@
         "test:orange": "cd unittest && sh runUnitTests.sh",
         "test:orangeCoverage": "cd unittest && sh runCoverage.sh",
         "test:orangeMutation": "../../bin/infection",
-        "type-check": "../../bin/phpstan analyse",
+        "type-check": "../../bin/phpstan analyse --memory-limit=1G",
         "lint": "../../bin/phpcs",
         "lint:fix": "../../bin/phpcbf",
         "lint:phpmd": "../../bin/phpmd src text phpmd.xml",
