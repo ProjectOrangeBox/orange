@@ -153,7 +153,7 @@ abstract class ViewAbstract extends Singleton implements ViewInterface
      */
     protected function __construct(array $config, protected ?DataInterface $data = null, protected ?RouterInterface $router = null)
     {
-        logMsg('INFO', __METHOD__);
+        logMsg('DEBUG', __METHOD__);
 
         $this->config = $this->mergeConfigWith($config, false);
 
@@ -199,7 +199,7 @@ abstract class ViewAbstract extends Singleton implements ViewInterface
      */
     public function search(): DirectorySearchInterface
     {
-        logMsg('INFO', __METHOD__);
+        logMsg('DEBUG', __METHOD__);
         return $this->search;
     }
 
@@ -211,7 +211,7 @@ abstract class ViewAbstract extends Singleton implements ViewInterface
      */
     public function addAlias(string $view, string $aliasView): void
     {
-        logMsg('INFO', __METHOD__ . ' ' . $view . ' ' . $aliasView);
+        logMsg('DEBUG', __METHOD__ . ' ' . $view . ' ' . $aliasView);
         $this->alias[$view] = $aliasView;
     }
 
@@ -228,7 +228,7 @@ abstract class ViewAbstract extends Singleton implements ViewInterface
      */
     public function render(string $view = '', array $data = [], array $options = []): string
     {
-        logMsg('INFO', __METHOD__);
+        logMsg('DEBUG', __METHOD__);
         // only build the message/context if this level is enabled - logMsg() alone would build it regardless
         if (isLogEnabled('DEBUG')) {
             logMsg('DEBUG', '', ['view' => $view, 'data' => $data, 'options' => $options]);
@@ -267,7 +267,7 @@ abstract class ViewAbstract extends Singleton implements ViewInterface
      */
     public function renderString(string $string, array $data = [], array $options = []): string
     {
-        logMsg('INFO', __METHOD__);
+        logMsg('DEBUG', __METHOD__);
         // only build the message/context if this level is enabled - logMsg() alone would build it regardless
         if (isLogEnabled('DEBUG')) {
             logMsg('DEBUG', '', ['string' => $string, 'data' => $data, 'options' => $options]);
@@ -311,7 +311,7 @@ abstract class ViewAbstract extends Singleton implements ViewInterface
      */
     public function change(string $name, mixed $value): self
     {
-        logMsg('INFO', __METHOD__);
+        logMsg('DEBUG', __METHOD__);
         // only build the message/context if this level is enabled - logMsg() alone would build it regardless
         if (isLogEnabled('DEBUG')) {
             logMsg('DEBUG', '', ['name' => $name, 'value' => $value]);
@@ -347,7 +347,7 @@ abstract class ViewAbstract extends Singleton implements ViewInterface
      */
     protected function generate(string $__viewFilePath, array $__dataArray): string
     {
-        logMsg('INFO', __METHOD__ . ' ' . $__viewFilePath);
+        logMsg('DEBUG', __METHOD__ . ' ' . $__viewFilePath);
         // only build the message/context if this level is enabled - logMsg() alone would build it regardless
         if (isLogEnabled('DEBUG')) {
             logMsg('DEBUG', '', ['__viewFilePath' => $__viewFilePath, '__dataArray' => $__dataArray]);
@@ -416,7 +416,7 @@ abstract class ViewAbstract extends Singleton implements ViewInterface
         // Check if an alias exists for the given view
         $alias = $this->alias[$view] ?? $view;
 
-        logMsg('INFO', __METHOD__ . ' ' . $view . ' ' . $alias);
+        logMsg('DEBUG', __METHOD__ . ' ' . $view . ' ' . $alias);
 
         return $alias;
     }
@@ -450,7 +450,7 @@ abstract class ViewAbstract extends Singleton implements ViewInterface
      */
     protected function resolveDynamicView(string $view): string
     {
-        logMsg('INFO', __METHOD__ . ' argument: "' . $view . '"');
+        logMsg('DEBUG', __METHOD__ . ' argument: "' . $view . '"');
 
         // Define dynamic placeholders
         $prefix = '$';
@@ -508,7 +508,7 @@ abstract class ViewAbstract extends Singleton implements ViewInterface
             }
         }
 
-        logMsg('INFO', __METHOD__ . ' return: "' . $view . '"');
+        logMsg('DEBUG', __METHOD__ . ' return: "' . $view . '"');
 
         return $view;
     }

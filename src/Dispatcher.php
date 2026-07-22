@@ -118,8 +118,8 @@ class Dispatcher extends Singleton implements DispatcherInterface
     public function call(RouterCallback $routerCallback): string
     {
         // only build the message/context if this level is enabled - logMsg() alone would build it regardless
-        if (isLogEnabled('INFO')) {
-            logMsg('INFO', __METHOD__ . var_export($routerCallback, true));
+        if (isLogEnabled('DEBUG')) {
+            logMsg('DEBUG', __METHOD__ . var_export($routerCallback, true));
         }
 
         // let's make sure the controller is present and autoload it

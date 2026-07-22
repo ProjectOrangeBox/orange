@@ -159,7 +159,7 @@ class Router extends Singleton implements RouterInterface
      */
     protected function __construct(array $config, protected InputInterface $inputService, protected ?CacheInterface $cacheService = null)
     {
-        logMsg('INFO', __METHOD__);
+        logMsg('DEBUG', __METHOD__);
 
         // load the default configs
         $this->config = $this->mergeConfigWith($config, 'routes', false);
@@ -284,8 +284,8 @@ class Router extends Singleton implements RouterInterface
      */
     public function addRoutes(array $routes): self
     {
-        logMsg('INFO', __METHOD__);
-        logMsg('INFO', 'Routes ' . count($routes));
+        logMsg('DEBUG', __METHOD__);
+        logMsg('DEBUG', 'Routes ' . count($routes));
 
         // disable cache temporarily to avoid writing to cache while adding routes
         $this->disableCaching = true;
@@ -447,8 +447,8 @@ class Router extends Singleton implements RouterInterface
     public function getUrl(string $searchName = '', array $arguments = [], ?bool $skipParameterTypeChecking = null): string
     {
         // only build the message/context if this level is enabled - logMsg() alone would build it regardless
-        if (isLogEnabled('INFO')) {
-            logMsg('INFO', __METHOD__ . ' ' . $searchName);
+        if (isLogEnabled('DEBUG')) {
+            logMsg('DEBUG', __METHOD__ . ' ' . $searchName);
         }
 
         // only build the message/context if this level is enabled - logMsg() alone would build it regardless
@@ -509,8 +509,8 @@ class Router extends Singleton implements RouterInterface
         }
 
         // only build the message/context if this level is enabled - logMsg() alone would build it regardless
-        if (isLogEnabled('INFO')) {
-            logMsg('INFO', __METHOD__ . ' matched Url ' . $matchedUrl);
+        if (isLogEnabled('DEBUG')) {
+            logMsg('DEBUG', __METHOD__ . ' matched Url ' . $matchedUrl);
         }
 
         return $matchedUrl;

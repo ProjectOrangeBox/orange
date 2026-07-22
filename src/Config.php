@@ -138,7 +138,7 @@ class Config extends Singleton implements ConfigInterface, \ArrayAccess
      */
     protected function __construct(array $config = [], ?CacheInterface $cacheService = null)
     {
-        logMsg('INFO', __METHOD__);
+        logMsg('DEBUG', __METHOD__);
 
         $this->searchDirectories = $config['config directories'] ?? [];
         $this->separator = $config['config separator'] ?? $this->separator;

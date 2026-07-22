@@ -171,7 +171,7 @@ class Error extends Singleton
      */
     protected function __construct(array $config = [], public ?ContainerInterface $container = null, ?Throwable $thrown = null)
     {
-        logMsg('INFO', __METHOD__);
+        logMsg('DEBUG', __METHOD__);
 
         // if they didn't send in a container we try to attach the default
         $this->container = $container ?? container();
@@ -268,8 +268,8 @@ class Error extends Singleton
     public function show(int $code = 500, string $message = '', ?array $options = null): void
     {
         // only build the message/context if this level is enabled - logMsg() alone would build it regardless
-        if (isLogEnabled('INFO')) {
-            logMsg('INFO', __METHOD__, ['code' => $code, 'message' => $message, 'options' => $options]);
+        if (isLogEnabled('DEBUG')) {
+            logMsg('DEBUG', __METHOD__, ['code' => $code, 'message' => $message, 'options' => $options]);
         }
 
         $this->data->merge([
@@ -286,7 +286,7 @@ class Error extends Singleton
      */
     public function sendResponseCode(): void
     {
-        logMsg('INFO', __METHOD__);
+        logMsg('DEBUG', __METHOD__);
 
         if ($this->httpCode > 0) {
             $responseCode = $this->httpCode;
@@ -306,7 +306,7 @@ class Error extends Singleton
      */
     public function sendMimeType(): void
     {
-        logMsg('INFO', __METHOD__);
+        logMsg('DEBUG', __METHOD__);
 
         $type = ($this->requestType == 'ajax') ? 'json' : 'html';
 
@@ -321,7 +321,7 @@ class Error extends Singleton
      */
     public function sendOutput(string $content, int $exitCode = 1): void
     {
-        logMsg('INFO', __METHOD__ . ' ' . $exitCode);
+        logMsg('DEBUG', __METHOD__ . ' ' . $exitCode);
         logMsg('DEBUG', $content);
 
         $this->output->flush();
@@ -346,7 +346,7 @@ class Error extends Singleton
      */
     protected function renderViewBasedOnCode(int $code, int $httpCode = 0): string
     {
-        logMsg('INFO', __METHOD__ . ' ' . $code . ' ' . $httpCode);
+        logMsg('DEBUG', __METHOD__ . ' ' . $code . ' ' . $httpCode);
 
         // use the code as the view we are looking for
         $viewName = ($httpCode != 0) ? (string)$httpCode : (string)$code;
@@ -364,7 +364,7 @@ class Error extends Singleton
      */
     protected function findView(string $view): string
     {
-        logMsg('INFO', __METHOD__ . ' ' . $view);
+        logMsg('DEBUG', __METHOD__ . ' ' . $view);
 
         $foundViewPath = '';
 
@@ -404,7 +404,7 @@ class Error extends Singleton
             }
         }
 
-        logMsg('INFO', __METHOD__ . ' ' . $foundViewPath);
+        logMsg('DEBUG', __METHOD__ . ' ' . $foundViewPath);
 
         return $foundViewPath;
     }
@@ -419,8 +419,8 @@ class Error extends Singleton
     protected function getService(string $name, array $arguments): mixed
     {
         // only build the message/context if this level is enabled - logMsg() alone would build it regardless
-        if (isLogEnabled('INFO')) {
-            logMsg('INFO', __METHOD__ . ' ' . $name, ['name' => $name, 'arguments' => $arguments]);
+        if (isLogEnabled('DEBUG')) {
+            logMsg('DEBUG', __METHOD__ . ' ' . $name, ['name' => $name, 'arguments' => $arguments]);
         }
 
         $service = null;
@@ -460,7 +460,7 @@ class Error extends Singleton
      */
     protected function viewRaw(): string
     {
-        logMsg('INFO', __METHOD__);
+        logMsg('DEBUG', __METHOD__);
 
         // default output
         $finalOutput = '';
@@ -483,7 +483,7 @@ class Error extends Singleton
 
     protected function viewRawBuildHtml(string $finalOutput, array $finalData): string
     {
-        logMsg('INFO', __METHOD__);
+        logMsg('DEBUG', __METHOD__);
 
         $finalOutput .= '<pre>';
 

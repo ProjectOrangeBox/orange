@@ -195,7 +195,7 @@ class Log extends Singleton implements LogInterface, LoggerInterface
      */
     public function changeThreshold(int $threshold): self
     {
-        logMsg('INFO', __METHOD__ . ' ' . $threshold);
+        logMsg('DEBUG', __METHOD__ . ' ' . $threshold);
 
         $this->threshold = $threshold;
 

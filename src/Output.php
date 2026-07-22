@@ -147,7 +147,7 @@ class Output extends Singleton implements OutputInterface
      */
     protected function __construct(array $config, protected InputInterface $input)
     {
-        logMsg('INFO', __METHOD__);
+        logMsg('DEBUG', __METHOD__);
 
         // merge the provided config with the default config
         // ($input is promoted on the constructor signature; force https and accepts-type detection use it)
@@ -189,7 +189,7 @@ class Output extends Singleton implements OutputInterface
      */
     public function redirect(string $url, int $responseCode = 0, bool $exit = true): void
     {
-        logMsg('INFO', __METHOD__ . ' ' . $url . ' ' . $responseCode . ' ' . $exit);
+        logMsg('DEBUG', __METHOD__ . ' ' . $url . ' ' . $responseCode . ' ' . $exit);
 
         $responseCode = ($responseCode == 0) ? $this->config['default redirect code'] : $responseCode;
 
@@ -206,7 +206,7 @@ class Output extends Singleton implements OutputInterface
      */
     public function forceHttps(): void
     {
-        logMsg('INFO', __METHOD__);
+        logMsg('DEBUG', __METHOD__);
 
         if (!$this->input->isHttpsRequest()) {
             // The Host header is client-supplied; reflecting it straight into the redirect
@@ -251,7 +251,7 @@ class Output extends Singleton implements OutputInterface
      */
     public function flushAll(): self
     {
-        logMsg('INFO', __METHOD__);
+        logMsg('DEBUG', __METHOD__);
 
         return $this->flushHeaders()->flush();
     }
@@ -263,7 +263,7 @@ class Output extends Singleton implements OutputInterface
      */
     public function send(bool|int $exit = false): void
     {
-        logMsg('INFO', __METHOD__);
+        logMsg('DEBUG', __METHOD__);
 
         if (!$this->input->isCliRequest()) {
             foreach ($this->headers as $header) {
@@ -286,7 +286,7 @@ class Output extends Singleton implements OutputInterface
      */
     public function flush(): self
     {
-        logMsg('INFO', __METHOD__);
+        logMsg('DEBUG', __METHOD__);
 
         $this->output = '';
 
@@ -302,7 +302,7 @@ class Output extends Singleton implements OutputInterface
      */
     public function write(string $string, bool $append = true): self
     {
-        logMsg('INFO', __METHOD__);
+        logMsg('DEBUG', __METHOD__);
 
         $this->output = $append ? $this->output . $string : $string;
 
@@ -329,8 +329,8 @@ class Output extends Singleton implements OutputInterface
     public function contentType(string $type, string $fallback = ''): self
     {
         // only build the message/context if this level is enabled - logMsg() alone would build it regardless
-        if (isLogEnabled('INFO')) {
-            logMsg('INFO', __METHOD__ . ' ' . $type);
+        if (isLogEnabled('DEBUG')) {
+            logMsg('DEBUG', __METHOD__ . ' ' . $type);
         }
 
         // if they send in the shorthand content type convert it to a proper content type
@@ -347,8 +347,8 @@ class Output extends Singleton implements OutputInterface
         }
 
         // only build the message/context if this level is enabled - logMsg() alone would build it regardless
-        if (isLogEnabled('INFO')) {
-            logMsg('INFO', __METHOD__ . ' ' . $detectedContentType);
+        if (isLogEnabled('DEBUG')) {
+            logMsg('DEBUG', __METHOD__ . ' ' . $detectedContentType);
         }
 
         $this->contentType = $detectedContentType;
@@ -364,7 +364,7 @@ class Output extends Singleton implements OutputInterface
      */
     public function getContentType(): string
     {
-        logMsg('INFO', __METHOD__);
+        logMsg('DEBUG', __METHOD__);
 
         return $this->contentType;
     }
@@ -378,8 +378,8 @@ class Output extends Singleton implements OutputInterface
     public function charSet(string $charSet): self
     {
         // only build the message/context if this level is enabled - logMsg() alone would build it regardless
-        if (isLogEnabled('INFO')) {
-            logMsg('INFO', __METHOD__ . ' ' . $charSet);
+        if (isLogEnabled('DEBUG')) {
+            logMsg('DEBUG', __METHOD__ . ' ' . $charSet);
         }
 
         $this->charSet = $charSet;
@@ -396,7 +396,7 @@ class Output extends Singleton implements OutputInterface
      */
     public function getCharSet(): string
     {
-        logMsg('INFO', __METHOD__);
+        logMsg('DEBUG', __METHOD__);
 
         return $this->charSet;
     }
@@ -420,8 +420,8 @@ class Output extends Singleton implements OutputInterface
     public function header(string $value, int $replace = self::NO, bool $prepend = false): self
     {
         // only build the message/context if this level is enabled - logMsg() alone would build it regardless
-        if (isLogEnabled('INFO')) {
-            logMsg('INFO', __METHOD__ . ' ' . $value . ' ' . $replace . ' ' . $prepend);
+        if (isLogEnabled('DEBUG')) {
+            logMsg('DEBUG', __METHOD__ . ' ' . $value . ' ' . $replace . ' ' . $prepend);
         }
 
         if ($replace != self::NO) {
@@ -468,7 +468,7 @@ class Output extends Singleton implements OutputInterface
      */
     public function flushHeaders(): self
     {
-        logMsg('INFO', __METHOD__);
+        logMsg('DEBUG', __METHOD__);
 
         $this->headers = [];
 
@@ -514,7 +514,7 @@ class Output extends Singleton implements OutputInterface
      */
     public function getResponseCode(): int
     {
-        logMsg('INFO', __METHOD__);
+        logMsg('DEBUG', __METHOD__);
 
         return $this->responseCode;
     }

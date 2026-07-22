@@ -131,7 +131,7 @@ class Event extends Singleton implements EventInterface
    */
     protected function __construct(array $config)
     {
-        logMsg('INFO', __METHOD__);
+        logMsg('DEBUG', __METHOD__);
 
       // Merge provided configuration with default configuration.
         $this->config = $this->mergeConfigWith($config);
@@ -158,7 +158,7 @@ class Event extends Singleton implements EventInterface
    */
     public function disable(): void
     {
-        logMsg('INFO', __METHOD__);
+        logMsg('DEBUG', __METHOD__);
         $this->disabled = true;
     }
 
@@ -167,7 +167,7 @@ class Event extends Singleton implements EventInterface
    */
     public function enable(): void
     {
-        logMsg('INFO', __METHOD__);
+        logMsg('DEBUG', __METHOD__);
         $this->disabled = false;
     }
 
@@ -182,7 +182,7 @@ class Event extends Singleton implements EventInterface
    */
     public function register(string $trigger, \Closure|array $callable, int $priority = self::PRIORITY_NORMAL): int
     {
-        logMsg('INFO', __METHOD__);
+        logMsg('DEBUG', __METHOD__);
 
         // only build the message/context if this level is enabled - logMsg() alone would build it regardless
         if (isLogEnabled('DEBUG')) {
@@ -220,7 +220,7 @@ class Event extends Singleton implements EventInterface
    */
     public function trigger(string $trigger, &...$arguments): self
     {
-        logMsg('INFO', __METHOD__ . ' ' . $trigger);
+        logMsg('DEBUG', __METHOD__ . ' ' . $trigger);
 
         // only build the message/context if this level is enabled - logMsg() alone would build it regardless
         if (isLogEnabled('DEBUG')) {

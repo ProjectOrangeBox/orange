@@ -66,7 +66,7 @@ abstract class BaseController
                 throw new FileNotFound($libraryFilePath);
             }
 
-            logMsg('INFO', 'INCLUDE FILE "' . $libraryFilePath . '"');
+            logMsg('DEBUG', 'INCLUDE FILE "' . $libraryFilePath . '"');
 
             include_once $libraryFilePath;
         }

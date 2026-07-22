@@ -120,7 +120,7 @@ class Input extends Singleton implements InputInterface, \ArrayAccess
      */
     protected function __construct(array $config)
     {
-        logMsg('INFO', __METHOD__);
+        logMsg('DEBUG', __METHOD__);
 
         // merge the supplied config with defaults
         $this->config = $this->mergeConfigWith($config, false);
@@ -151,8 +151,8 @@ class Input extends Singleton implements InputInterface, \ArrayAccess
     public function request(?string $key = null, mixed $default = null): mixed
     {
         // only build the message/context if this level is enabled - logMsg() alone would build it regardless
-        if (isLogEnabled('INFO')) {
-            logMsg('INFO', __METHOD__ . ' ' . $key);
+        if (isLogEnabled('DEBUG')) {
+            logMsg('DEBUG', __METHOD__ . ' ' . $key);
         }
 
         return $this->extract($this->request, $key, $default);
@@ -169,8 +169,8 @@ class Input extends Singleton implements InputInterface, \ArrayAccess
     public function query(?string $key = null, mixed $default = null): mixed
     {
         // only build the message/context if this level is enabled - logMsg() alone would build it regardless
-        if (isLogEnabled('INFO')) {
-            logMsg('INFO', __METHOD__ . ' ' . $key);
+        if (isLogEnabled('DEBUG')) {
+            logMsg('DEBUG', __METHOD__ . ' ' . $key);
         }
 
         return $this->extract($this->query, $key, $default);
@@ -197,8 +197,8 @@ class Input extends Singleton implements InputInterface, \ArrayAccess
     public function cookie(?string $key = null, mixed $default = null): mixed
     {
         // only build the message/context if this level is enabled - logMsg() alone would build it regardless
-        if (isLogEnabled('INFO')) {
-            logMsg('INFO', __METHOD__ . ' ' . $key);
+        if (isLogEnabled('DEBUG')) {
+            logMsg('DEBUG', __METHOD__ . ' ' . $key);
         }
 
         return $this->extract($this->cookies, $key, $default);
@@ -215,8 +215,8 @@ class Input extends Singleton implements InputInterface, \ArrayAccess
     public function file(null|int|string $key = null, mixed $default = []): mixed
     {
         // only build the message/context if this level is enabled - logMsg() alone would build it regardless
-        if (isLogEnabled('INFO')) {
-            logMsg('INFO', __METHOD__ . ' ' . $key);
+        if (isLogEnabled('DEBUG')) {
+            logMsg('DEBUG', __METHOD__ . ' ' . $key);
         }
 
         return $this->extract($this->files, $key, $default);
@@ -233,8 +233,8 @@ class Input extends Singleton implements InputInterface, \ArrayAccess
     public function server(?string $key = null, mixed $default = null): mixed
     {
         // only build the message/context if this level is enabled - logMsg() alone would build it regardless
-        if (isLogEnabled('INFO')) {
-            logMsg('INFO', __METHOD__ . ' ' . $key);
+        if (isLogEnabled('DEBUG')) {
+            logMsg('DEBUG', __METHOD__ . ' ' . $key);
         }
 
         $key = $key === null ? null : $this->normalizeServerKey($key);
@@ -253,8 +253,8 @@ class Input extends Singleton implements InputInterface, \ArrayAccess
     public function header(?string $key = null, mixed $default = null): mixed
     {
         // only build the message/context if this level is enabled - logMsg() alone would build it regardless
-        if (isLogEnabled('INFO')) {
-            logMsg('INFO', __METHOD__ . ' ' . $key);
+        if (isLogEnabled('DEBUG')) {
+            logMsg('DEBUG', __METHOD__ . ' ' . $key);
         }
 
         $key = $key === null ? null : $this->normalizeServerKey($key);
@@ -334,8 +334,8 @@ class Input extends Singleton implements InputInterface, \ArrayAccess
     public function getUrl(?int $component = null): mixed
     {
         // only build the message/context if this level is enabled - logMsg() alone would build it regardless
-        if (isLogEnabled('INFO')) {
-            logMsg('INFO', __METHOD__ . ' ' . $component);
+        if (isLogEnabled('DEBUG')) {
+            logMsg('DEBUG', __METHOD__ . ' ' . $component);
         }
 
         $parseUrl = $this->server('request_uri', '');
@@ -357,8 +357,8 @@ class Input extends Singleton implements InputInterface, \ArrayAccess
         $uri = (string) parse_url((string) $this->server('request_uri', ''), self::PATH);
 
         // only build the message/context if this level is enabled - logMsg() alone would build it regardless
-        if (isLogEnabled('INFO')) {
-            logMsg('INFO', __METHOD__ . ' ' . $uri);
+        if (isLogEnabled('DEBUG')) {
+            logMsg('DEBUG', __METHOD__ . ' ' . $uri);
         }
 
         return $uri;
@@ -374,8 +374,8 @@ class Input extends Singleton implements InputInterface, \ArrayAccess
     public function uriSegment(int $segmentNumber): string
     {
         // only build the message/context if this level is enabled - logMsg() alone would build it regardless
-        if (isLogEnabled('INFO')) {
-            logMsg('INFO', __METHOD__ . ' ' . $segmentNumber);
+        if (isLogEnabled('DEBUG')) {
+            logMsg('DEBUG', __METHOD__ . ' ' . $segmentNumber);
         }
 
         $segs = explode('/', ltrim($this->requestUri(), '/'));
@@ -493,8 +493,8 @@ class Input extends Singleton implements InputInterface, \ArrayAccess
     public function isHttpsRequest(bool $asString = false): bool|string
     {
         // only build the message/context if this level is enabled - logMsg() alone would build it regardless
-        if (isLogEnabled('INFO')) {
-            logMsg('INFO', __METHOD__ . ' ' . $asString);
+        if (isLogEnabled('DEBUG')) {
+            logMsg('DEBUG', __METHOD__ . ' ' . $asString);
         }
 
         // set the default to not https unless we find something else
@@ -505,8 +505,8 @@ class Input extends Singleton implements InputInterface, \ArrayAccess
         }
 
         // only build the message/context if this level is enabled - logMsg() alone would build it regardless
-        if (isLogEnabled('INFO')) {
-            logMsg('INFO', __METHOD__ . ' ' . ($isHttps ? 'true' : 'false'));
+        if (isLogEnabled('DEBUG')) {
+            logMsg('DEBUG', __METHOD__ . ' ' . ($isHttps ? 'true' : 'false'));
         }
 
         $return = $isHttps;

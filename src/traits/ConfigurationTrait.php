@@ -27,7 +27,7 @@ trait ConfigurationTrait
      */
     public function changeOption(string $name, mixed $value): self
     {
-        logMsg('INFO', __METHOD__ . ' ' . $name);
+        logMsg('DEBUG', __METHOD__ . ' ' . $name);
         // only build the message/context if this level is enabled - logMsg() alone would build it regardless
         if (isLogEnabled('DEBUG')) {
             logMsg('DEBUG', __METHOD__, ['name' => $name, 'value' => $value]);
@@ -88,7 +88,7 @@ trait ConfigurationTrait
      */
     protected function mergeConfigWith(array $config, mixed $path = null, bool $recursive = true): array
     {
-        logMsg('INFO', __METHOD__);
+        logMsg('DEBUG', __METHOD__);
 
         // only build the message/context if this level is enabled - logMsg() alone would build it regardless
         if (isLogEnabled('DEBUG')) {
@@ -105,10 +105,10 @@ trait ConfigurationTrait
             $path = $this->determineConfigPath($path);
         }
 
-        logMsg('INFO', $path . ' ' . ($recursive ? 'recursive' : 'non-recursive'));
+        logMsg('DEBUG', $path . ' ' . ($recursive ? 'recursive' : 'non-recursive'));
 
         if (!isset(self::$alreadyIncludedFiles[$path])) {
-            logMsg('INFO', 'INCLUDE FILE "' . $path . '"');
+            logMsg('DEBUG', 'INCLUDE FILE "' . $path . '"');
 
             self::$alreadyIncludedFiles[$path] = include $path;
 
@@ -182,7 +182,7 @@ trait ConfigurationTrait
      */
     protected function setFromConfig(array $config, bool $throwException = false): void
     {
-        logMsg('INFO', __METHOD__);
+        logMsg('DEBUG', __METHOD__);
         logMsg('DEBUG', __METHOD__, $config);
 
         foreach ($config as $name => $value) {
@@ -215,7 +215,7 @@ trait ConfigurationTrait
      */
     protected function assignFromConfig(array $config, bool $throwException = false): void
     {
-        logMsg('INFO', __METHOD__);
+        logMsg('DEBUG', __METHOD__);
         logMsg('DEBUG', __METHOD__, $config);
 
         foreach ($config as $name => $value) {
@@ -299,7 +299,7 @@ trait ConfigurationTrait
      */
     protected function validateConfig(array $config, array $rules): void
     {
-        logMsg('INFO', __METHOD__);
+        logMsg('DEBUG', __METHOD__);
         // only build the message/context if this level is enabled - logMsg() alone would build it regardless
         if (isLogEnabled('DEBUG')) {
             logMsg('DEBUG', __METHOD__, ['config' => $config, 'rules' => $rules]);
