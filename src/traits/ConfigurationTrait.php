@@ -89,6 +89,7 @@ trait ConfigurationTrait
     protected function mergeConfigWith(array $config, mixed $path = null, bool $recursive = true): array
     {
         logMsg('INFO', __METHOD__);
+
         // only build the message/context if this level is enabled - logMsg() alone would build it regardless
         if (isLogEnabled('DEBUG')) {
             logMsg('DEBUG', __METHOD__, ['config' => $config, 'path' => $path, 'recursive' => $recursive]);
