@@ -6,6 +6,40 @@ declare(strict_types=1);
  * Wrapper to throw http exceptions for common http errors
  */
 
+// generic - throw the Http exception matching any status code
+if (!function_exists('show')) {
+    /**
+     * Throw the HTTP exception that matches a status code.
+     *
+     * The generic form of the show404()/show500()/etc. shortcuts:
+     *
+     *   show(404);              // same as show404()
+     *   show(404, 'No record'); // 404 with a custom message
+     *   show(301, '/new-home'); // 3xx: the string is the redirect (Location) URL
+     *
+     * Builds the orange\framework\exceptions\http\Http{code} class (Http404, Http500,
+     * ...) and throws it. A code without a dedicated class falls back to the base Http
+     * exception, which fills the reason phrase from statusCodes.php and treats an
+     * unknown code as 500.
+     *
+     * @param int $code HTTP status code (e.g. 404).
+     * @param string $message Optional message; for 3xx redirect codes this is the target URL.
+     * @return void
+     * @throws \orange\framework\exceptions\http\Http
+     */
+    function show(int $code, string $message = ''): void
+    {
+        $class = '\\orange\\framework\\exceptions\\http\\Http' . $code;
+
+        if (class_exists($class)) {
+            throw new $class($message);
+        }
+
+        // no dedicated Http{code} class - let the base Http resolve the code/message
+        throw new \orange\framework\exceptions\http\Http($message, $code);
+    }
+}
+
 // 400 Bad Request
 if (!function_exists('show400')) {
     function show400(string $message = ''): void
