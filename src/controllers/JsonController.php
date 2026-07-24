@@ -76,7 +76,7 @@ abstract class JsonController extends BaseController
      */
     protected function errorsResponse(array $errors, int $status = 422): string
     {
-        $this->data->errors = $errors;
+        $this->data['errors'] = $errors;
 
         return $this->response($status);
     }
@@ -91,7 +91,7 @@ abstract class JsonController extends BaseController
      */
     protected function notFoundResponse(string $msg = 'Not Found'): string
     {
-        $this->data->msg = $msg;
+        $this->data['msg'] = $msg;
 
         return $this->response(404);
     }
