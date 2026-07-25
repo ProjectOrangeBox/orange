@@ -215,6 +215,10 @@ Directory Search
  [x] Resource key style fullpath
  [x] Resource key style localpath
  [x] Resource key style apppath
+ [x] Prepend after a scan takes priority
+ [x] Append after a scan keeps lowest priority
+ [x] Re prepending an already scanned directory reorders
+ [x] Manually added resource ranks behind scanned ones
 
 Dispatcher
  [x] Call

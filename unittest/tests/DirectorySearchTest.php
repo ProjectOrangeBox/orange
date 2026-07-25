@@ -442,4 +442,129 @@ final class DirectorySearchTest extends unitTestHelper
     // directory under __ROOT__) isn't exercised: this checkout's __ROOT__ has no
     // htdocs directory, so __WWW__ is false in every test process here, and the
     // style's closure (DirectorySearch.php:751) would crash calling strlen(false).
+
+    /* directory priority ordering */
+
+    /**
+     * Build three directories that each hold a same-named file, so the order
+     * find() returns them in is entirely a question of directory priority.
+     *
+     * @return array{0: string, 1: array<string, string>}
+     */
+    protected function makePriorityTree(): array
+    {
+        $root = $this->makeTempDir('orange-priority-');
+        $paths = [];
+
+        foreach (['a', 'b', 'c'] as $name) {
+            mkdir($root . '/' . $name);
+            $file = $root . '/' . $name . '/shared.php';
+            file_put_contents($file, '<?php // ' . $name);
+
+            // DirectorySearch stores realpath()ed paths, and on macOS the temp
+            // directory is reached through a symlink (/var -> /private/var), so the
+            // expectations have to be resolved the same way to compare equal
+            $paths[$name] = realpath($file);
+        }
+
+        return [$root, $paths];
+    }
+
+    protected function priorityInstance(array $directories): DirectorySearch
+    {
+        return new DirectorySearch([
+            'quiet' => true,
+            'recursive' => true,
+            'resource key style' => 'filename',
+            'directories' => $directories,
+        ]);
+    }
+
+    /**
+     * A directory added with PREPEND after an earlier scan has to win. This used
+     * to fail: resources are never cleared between scans and re-assigning an
+     * existing key does not move it, so paths stayed frozen in discovery order
+     * and findFirst() kept returning whichever directory was scanned first.
+     */
+    public function testPrependAfterAScanTakesPriority(): void
+    {
+        [$root, $paths] = $this->makePriorityTree();
+
+        $instance = $this->priorityInstance([$root . '/a']);
+
+        // force the first scan so 'a' is already discovered
+        $this->assertEquals($paths['a'], $instance->findFirst('shared'));
+
+        $instance->addDirectory($root . '/b', DirectorySearchInterface::PREPEND);
+        $this->assertEquals($paths['b'], $instance->findFirst('shared'));
+
+        $instance->addDirectory($root . '/c', DirectorySearchInterface::PREPEND);
+        $this->assertEquals($paths['c'], $instance->findFirst('shared'));
+
+        // find() reports every match, highest priority first
+        $this->assertEquals([$paths['c'], $paths['b'], $paths['a']], $instance->find('shared'));
+
+        // and findLast() is the other end of that same list
+        $this->assertEquals($paths['a'], $instance->findLast('shared'));
+
+        $this->removeTempDir($root);
+    }
+
+    /**
+     * APPEND is the mirror image - a directory added last stays last.
+     */
+    public function testAppendAfterAScanKeepsLowestPriority(): void
+    {
+        [$root, $paths] = $this->makePriorityTree();
+
+        $instance = $this->priorityInstance([$root . '/a']);
+
+        $this->assertEquals($paths['a'], $instance->findFirst('shared'));
+
+        $instance->addDirectory($root . '/b', DirectorySearchInterface::APPEND);
+
+        $this->assertEquals($paths['a'], $instance->findFirst('shared'));
+        $this->assertEquals([$paths['a'], $paths['b']], $instance->find('shared'));
+
+        $this->removeTempDir($root);
+    }
+
+    /**
+     * Re-adding an already-scanned directory as PREPEND only reorders the
+     * priority list - nothing new is found - so the ordering still has to move.
+     */
+    public function testRePrependingAnAlreadyScannedDirectoryReorders(): void
+    {
+        [$root, $paths] = $this->makePriorityTree();
+
+        $instance = $this->priorityInstance([$root . '/a', $root . '/b']);
+
+        $this->assertEquals([$paths['a'], $paths['b']], $instance->find('shared'));
+
+        $instance->addDirectory($root . '/b', DirectorySearchInterface::PREPEND);
+
+        $this->assertEquals([$paths['b'], $paths['a']], $instance->find('shared'));
+        $this->assertEquals($paths['b'], $instance->findFirst('shared'));
+
+        $this->removeTempDir($root);
+    }
+
+    /**
+     * A path registered straight through addResource() belongs to no registered
+     * directory, so it ranks behind anything a scan turned up rather than
+     * landing wherever insertion order happened to put it.
+     */
+    public function testManuallyAddedResourceRanksBehindScannedOnes(): void
+    {
+        [$root, $paths] = $this->makePriorityTree();
+
+        $instance = $this->priorityInstance([$root . '/a']);
+
+        $instance->addResource('shared', $paths['c']);
+        $instance->addDirectory($root . '/b', DirectorySearchInterface::PREPEND);
+
+        $this->assertEquals([$paths['b'], $paths['a'], $paths['c']], $instance->find('shared'));
+
+        $this->removeTempDir($root);
+    }
 }

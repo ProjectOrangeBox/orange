@@ -27,6 +27,11 @@ class DirectorySearch implements DirectorySearchInterface
     // array of "found" files
     protected array $resources = [];
 
+    // set of resource keys matching more than one file - the only ones whose order
+    // can be wrong, so a rescan sorts these instead of walking every resource.
+    // Stale entries are harmless: the count check in the sort skips them.
+    protected array $multiMatch = [];
+
     // throw exception if resource not found?
     protected bool $quiet = false;
 
@@ -312,8 +317,15 @@ class DirectorySearch implements DirectorySearchInterface
         $this->ifLockedThrowException();
 
         if ($path = realpath($path)) {
+            $key = $this->normalizeKey($resource);
+
             // there may actually be multiple matching resources for 1 resource key
-            $this->resources[$this->normalizeKey($resource)][$path] = null;
+            $this->resources[$key][$path] = null;
+
+            // note the ones that need ordering by directory priority later
+            if (count($this->resources[$key]) > 1) {
+                $this->multiMatch[$key] = true;
+            }
         }
 
         $this->callback('addResource');
@@ -358,6 +370,7 @@ class DirectorySearch implements DirectorySearchInterface
     public function flushResources(): self
     {
         $this->resources = [];
+        $this->multiMatch = [];
 
         // every directory's findings just went away, so they all need re-walking
         $this->directories = array_fill_keys(array_keys($this->directories), false);
@@ -590,12 +603,99 @@ class DirectorySearch implements DirectorySearchInterface
                 $this->directories[$directory] = true;
             }
 
+            // a scan appends to whatever was already found, and addDirectory() can
+            // reorder the priority list without finding anything new, so re-derive
+            // the per-resource ordering here rather than at every read
+            $this->sortResourcesByDirectoryPriority();
+
             if ($this->lockAfterScan) {
                 $this->lock();
             }
 
             $this->rescan = false;
         }
+    }
+
+    /**
+     * Order each resource's matching paths by the current priority of the
+     * directory they were found under, so find() returns them highest priority
+     * first and findFirst() returns the winner.
+     *
+     * Without this the paths stay in the order they were discovered: resources
+     * are never cleared between scans and re-assigning an existing key does not
+     * move it, so a directory added with PREPEND/FIRST after an earlier scan
+     * never actually took precedence. That is precisely the case BaseController
+     * relies on when it registers a controller's own views directory as FIRST to
+     * override a same-named shared view.
+     *
+     * @return void
+     */
+    protected function sortResourcesByDirectoryPriority(): void
+    {
+        // nothing matched in two places means nothing can be out of order
+        if ($this->multiMatch === []) {
+            return;
+        }
+
+        // $this->directories is already in priority order, so its index is the rank
+        $directories = array_keys($this->directories);
+
+        foreach (array_keys($this->multiMatch) as $resource) {
+            $paths = $this->resources[$resource] ?? [];
+
+            // the set is only ever added to, so an entry can be stale by the time
+            // it is read - a removeResource()/removeDirectory() in between
+            if (count($paths) < 2) {
+                continue;
+            }
+
+            $ranked = [];
+
+            foreach (array_keys($paths) as $path) {
+                $ranked[$path] = $this->directoryRank((string)$path, $directories);
+            }
+
+            // sorts are stable as of PHP 8, so paths sharing a directory keep the
+            // order the scan found them in
+            asort($ranked);
+
+            $sorted = [];
+
+            foreach (array_keys($ranked) as $path) {
+                $sorted[$path] = $paths[$path];
+            }
+
+            $this->resources[$resource] = $sorted;
+        }
+    }
+
+    /**
+     * Rank a found path by which registered directory it lives under.
+     *
+     * Longest matching prefix wins, because registered directories can nest and
+     * the innermost one is the one that actually owns the file. A path under no
+     * registered directory - anything handed to addResource() directly - ranks
+     * last, keeping it a fallback behind whatever a scan turned up.
+     *
+     * @param string $path
+     * @param array $directories registered directories, already in priority order
+     * @return int
+     */
+    protected function directoryRank(string $path, array $directories): int
+    {
+        $rank = PHP_INT_MAX;
+        $longestMatch = -1;
+
+        foreach ($directories as $index => $directory) {
+            $length = strlen((string)$directory);
+
+            if ($length > $longestMatch && str_starts_with($path, $directory . DIRECTORY_SEPARATOR)) {
+                $longestMatch = $length;
+                $rank = $index;
+            }
+        }
+
+        return $rank;
     }
 
     /**
