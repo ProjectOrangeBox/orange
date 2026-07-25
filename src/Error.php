@@ -16,80 +16,37 @@ use orange\framework\interfaces\ContainerInterface;
 use orange\framework\exceptions\container\ServiceNotFound;
 
 /**
- * Overview of Error.php
+ * Last-resort handler for uncaught exceptions.
  *
- * This file defines the Error class in the orange\framework namespace.
- * It is a centralized error handler for the framework, designed to capture exceptions,
- * render meaningful error responses, and send them back to the client in a format appropriate to
- * the request type (HTML, JSON/AJAX, CLI). It extends Singleton, ensuring a single instance is used application-wide,
- * and uses the ConfigurationTrait for flexible setup.
+ * Application::preContainer() registers exceptionHandler() (helpers/errors.php) with
+ * set_exception_handler(), and that builds this class. It is not a general-purpose
+ * error reporter for application code - see the note on construction below.
  *
- * ⸻
+ * **Constructing this class sends the response and exits.** The constructor resolves
+ * its services, renders an error body, writes it, and ends with sendOutput(), which
+ * always exit()s. There is no way to build an Error and inspect it, and nothing after
+ * the call site runs. That is deliberate for a terminal handler, but it means this
+ * class cannot be used to produce an ordinary response from inside a controller - a
+ * controller returns its body and lets the normal pipeline (before.output, then
+ * Output::send()) deliver it.
  *
- * 1. Core Purpose
- *  •   Capture exceptions or error codes.
- *  •   Load error details into a data service.
- *  •   Select an appropriate error view (based on environment, request type, or error code).
- *  •   Render the view or provide a raw fallback output.
- *  •   Send the response to the client with correct HTTP code, content type, and exit code.
+ * A thrown exception can steer the response through three optional methods, checked
+ * in this order (see the constructor):
  *
- * ⸻
+ *   getHttpCode(): int     the HTTP status to send, overriding the exception code
+ *                          (orange\framework\exceptions\http\Http supplies this)
+ *   getOutput(): string    a ready-made body, skipping view resolution entirely
+ *   decorate(Error $self)  free rein over this object before it renders - the catch-all
+ *                          when the two above are not enough (Http301 uses it to add a
+ *                          Location header)
  *
- * 2. Key Properties
- *  •   Service instances:
- *  •   $data → holds error data (message, code, trace, etc.).
- *  •   $input → provides request type information (HTML, AJAX, CLI).
- *  •   $view → used to render error templates.
- *  •   $output → sends headers, status codes, and content to the client.
- *  •   $container → dependency injection container for resolving services.
- *  •   Error context:
- *  •   $code (default 500) → application error code.
- *  •   $httpCode → optional HTTP status code from the exception.
- *  •   $requestType → request channel (cli, html, ajax).
- *  •   $errorViewDirectory, $envDirectory, $requestTypeDirectory → directories to search for error views.
- *  •   $viewFile, $outputContent → resolved error template file or rendered output.
+ * That contract is why this class's state is public rather than protected.
  *
- * ⸻
- *
- * 3. Constructor Behavior
- *
- * When instantiated, the class:
- *  1.  Loads configuration and resolves dependencies (data, input, view, output).
- *  2.  Determines the environment (production, development, etc.) and request type.
- *  3.  If given a Throwable, extracts details (message, code, file, line, stack trace).
- *  4.  Supports custom exception methods (getHttpCode, getOutput, decorate) for enhanced control.
- *  5.  Attempts to resolve an error view file based on error/HTTP code.
- *  6.  If no template is found, falls back to raw output formatting (plain text, JSON, or HTML <pre>).
- *  7.  Immediately sends output to the client and terminates execution.
- *
- * ⸻
- *
- * 4. Key Methods
- *  •   show($code, $message, $options) → manually trigger and render an error with code and message.
- *  •   sendResponseCode() → sends appropriate HTTP status (defaults to 500).
- *  •   sendMimeType() → sets response type (html, json, or defaults).
- *  •   sendOutput($content, $exitCode) → flushes output buffer, writes content, sends headers, and exits.
- *  •   renderViewBasedOnCode($code, $httpCode) → looks for an error template by code or status.
- *  •   findView($view) → searches directories in a defined order (env + request type fallbacks).
- *  •   viewRaw() → fallback plain output if no template found (formats based on request type).
- *  •   getService($name, $arguments) → resolves dependencies from the container, falling back to Orange defaults.
- *
- * ⸻
- *
- * 5. Error Rendering Logic
- *  1.  Preferred → environment + request type-specific error view (e.g., errors/dev/html/404.php).
- *  2.  Fallbacks → environment-specific or general error views.
- *  3.  Last resort → raw inline response (JSON, HTML <pre>, or CLI print).
- *
- * ⸻
- *
- * 6. Big Picture
- *
- * Error.php is the last line of defense in the framework.
- * It ensures that all errors and exceptions result in a consistent,
- * informative, and environment-appropriate response.
- * It combines dependency-injected services (Input, Output, View, Data) with configuration to control behavior,
- * and it guarantees the response is always flushed and sent.
+ * The body comes from the first error view found by findView(), searching most to
+ * least specific - errors/{env}/{requestType}/404, errors/{requestType}/{env}/404,
+ * errors/{requestType}/404, errors/404, errors, 404. With no match it falls back to
+ * viewRaw(), which formats the collected data by request type: JSON for ajax/json,
+ * an escaped <pre> block for html, print_r for CLI.
  *
  * @package orange\framework
  */
@@ -99,63 +56,33 @@ class Error extends Singleton
     use ConfigurationTrait;
 
     /**
-     * Data service instance
+     * Everything below is public so a thrown exception's decorate() can reach it -
+     * see the class docblock. Treat it as this class's extension surface, not as
+     * incidentally-exposed internals.
      */
+
+    /** resolved from the container, or built directly when nothing is registered */
     public DataInterface $data;
-
-    /**
-     * Input service instance
-     */
     public InputInterface $input;
-
-    /**
-     * View service instance
-     */
     public ViewInterface $view;
-
-    /**
-     * Output service instance
-     */
     public OutputInterface $output;
 
-    /**
-     * Default error code
-     */
+    /** application error code - the exception's own code when it is non-zero */
     public int $code = 500;
 
-    /**
-     * HTTP status code
-     */
+    /** HTTP status from the exception's getHttpCode(); 0 means "fall back to $code" */
     public int $httpCode = 0;
 
-    /**
-     * Request type (e.g., 'cli', 'html', 'ajax')
-     */
+    /** 'cli', 'html' or 'ajax' - also used as a directory segment when finding a view */
     public string $requestType = '';
 
-    /**
-     * Directory for error views
-     */
+    /** path segments findView() assembles a candidate error view path from */
     public string $errorViewDirectory = '';
-
-    /**
-     * Directory for environment-specific views
-     */
     public string $envDirectory = '';
-
-    /**
-     * Directory for request type-specific views
-     */
     public string $requestTypeDirectory = '';
 
-    /**
-     * The view file used for rendering
-     */
+    /** set either of these from decorate() to take over what gets rendered/sent */
     public string $viewFile = '';
-
-    /**
-     * Content to be sent as output
-     */
     public string $outputContent = '';
 
     /**
@@ -462,9 +389,6 @@ class Error extends Singleton
     {
         logMsg('DEBUG', __METHOD__);
 
-        // default output
-        $finalOutput = '';
-
         // cast to array
         $finalData = (array)$this->data;
 
@@ -472,20 +396,18 @@ class Error extends Singleton
         // 'ajax' is the value Input::requestType() actually returns for AJAX requests
         // (sendMimeType() sends a "json" content type for it) - 'json' is kept too since
         // it's a reasonable requestType value for any other caller of this method
-        $finalOutput = match ($this->requestType) {
+        return match ($this->requestType) {
             'json', 'ajax' => json_encode($finalData, JSON_PRETTY_PRINT),
-            'html' => $this->viewRawBuildHtml($finalOutput, $finalData),
+            'html' => $this->viewRawBuildHtml($finalData),
             default => print_r($finalData, true) . PHP_EOL,
         };
-
-        return $finalOutput;
     }
 
-    protected function viewRawBuildHtml(string $finalOutput, array $finalData): string
+    protected function viewRawBuildHtml(array $finalData): string
     {
         logMsg('DEBUG', __METHOD__);
 
-        $finalOutput .= '<pre>';
+        $finalOutput = '<pre>';
 
         // exception messages, file paths, and trace data can echo back attacker-controlled
         // input (a bad route, a bad header, a validation message quoting the request value),

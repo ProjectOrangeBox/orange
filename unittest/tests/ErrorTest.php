@@ -194,7 +194,7 @@ final class ErrorTest extends unitTestHelper
             'options' => ['extra' => 'detail'],
         ];
 
-        $raw = $this->callMethod('viewRawBuildHtml', ['', $data]);
+        $raw = $this->callMethod('viewRawBuildHtml', [$data]);
 
         $this->assertStringContainsString('422', $raw);
         $this->assertStringContainsString('Unprocessable', $raw);
@@ -205,7 +205,7 @@ final class ErrorTest extends unitTestHelper
 
     public function testViewRawBuildHtmlOmitsMissingFields(): void
     {
-        $raw = $this->callMethod('viewRawBuildHtml', ['', ['message' => 'only a message']]);
+        $raw = $this->callMethod('viewRawBuildHtml', [['message' => 'only a message']]);
 
         $this->assertStringContainsString('only a message', $raw);
         $this->assertStringNotContainsString('File:', $raw);
@@ -223,7 +223,7 @@ final class ErrorTest extends unitTestHelper
             'options' => ['bad' => '<b>bold</b>'],
         ];
 
-        $raw = $this->callMethod('viewRawBuildHtml', ['', $data]);
+        $raw = $this->callMethod('viewRawBuildHtml', [$data]);
 
         $this->assertStringNotContainsString('<script>', $raw);
         $this->assertStringContainsString('&lt;script&gt;', $raw);
