@@ -236,7 +236,7 @@ class Error extends Singleton
 
             // if the thrown exception has the method decorate
             // allow the exception the chance to "decorate" the error class
-            // this is a catch all incase getHttpCode & getOutput aren't enough
+            // this is a catch all in case getHttpCode & getOutput aren't enough
             if (method_exists($thrown, 'decorate')) {
                 /** @disregard */
                 $thrown->decorate($this);

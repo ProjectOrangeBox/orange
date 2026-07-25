@@ -21,7 +21,7 @@ class DirectorySearch implements DirectorySearchInterface
     // wildcard match for files (glob syntax)
     protected string $match = '';
 
-    // array of directories to search for files
+    // directory path => has it been scanned yet? (see scanDirectories())
     protected array $directories = [];
 
     // array of "found" files
@@ -120,10 +120,16 @@ class DirectorySearch implements DirectorySearchInterface
         $pend ??= $this->pend;
 
         if ($found = realpath(rtrim($directory, DIRECTORY_SEPARATOR))) {
+            // re-adding a directory only moves it in the priority list - its
+            // resources are still in $this->resources, so carry the scanned flag
+            // over rather than making the next read walk it again
+            $scanned = $this->directories[$found] ?? false;
+
             if ($pend == self::PREPEND) {
-                $this->directories = [$found => null] + $this->directories;
+                // $found comes from the left operand, so it lands first
+                $this->directories = [$found => $scanned] + $this->directories;
             } else {
-                $this->directories[$found] = null;
+                $this->directories[$found] = $scanned;
             }
 
             // force a rescan on next read
@@ -353,6 +359,9 @@ class DirectorySearch implements DirectorySearchInterface
     {
         $this->resources = [];
 
+        // every directory's findings just went away, so they all need re-walking
+        $this->directories = array_fill_keys(array_keys($this->directories), false);
+
         $this->rescan();
 
         $this->callback('flushResources');
@@ -401,19 +410,23 @@ class DirectorySearch implements DirectorySearchInterface
      */
     public function find(string $resource): array
     {
-        $found = [];
-
         // search for all resources and put in $this->resources
         $this->scanDirectories();
 
+        // normalize once - going through exists() here repeated both the scan
+        // check and the normalize, and this is the path behind every view render
+        $key = $this->normalizeKey($resource);
+
         // we are looking for a specific resource
-        if ($this->exists($resource)) {
-            $found = array_keys($this->resources[$this->normalizeKey($resource)]);
-        } elseif (!$this->quiet) {
+        if (isset($this->resources[$key])) {
+            return array_keys($this->resources[$key]);
+        }
+
+        if (!$this->quiet) {
             throw new ResourceNotFound($resource);
         }
 
-        return $found;
+        return [];
     }
 
     /**
@@ -460,7 +473,10 @@ class DirectorySearch implements DirectorySearchInterface
     {
         $found = $this->find($resource);
 
-        return $found[array_key_first($found)] ?? '';
+        // guard the empty case explicitly - array_key_first([]) is null, and
+        // $found[null] is deprecated in 8.5 (a hard error in 9), so the ?? ''
+        // that used to absorb it was emitting a notice on every miss
+        return $found === [] ? '' : $found[array_key_first($found)];
     }
 
     /**
@@ -475,7 +491,8 @@ class DirectorySearch implements DirectorySearchInterface
     {
         $found = $this->find($resource);
 
-        return $found[array_key_last($found)] ?? '';
+        // same empty guard as findFirst()
+        return $found === [] ? '' : $found[array_key_last($found)];
     }
 
     /**
@@ -545,8 +562,21 @@ class DirectorySearch implements DirectorySearchInterface
     protected function scanDirectories(): void
     {
         if ($this->rescan) {
-            // do directory scan for resources append new resources
-            foreach (array_keys($this->directories) as $directory) {
+            // Only walk directories not already walked. Adding a directory used to
+            // invalidate the whole scan and re-glob every directory on the next
+            // read, which is the common case - BaseController adds the controller's
+            // own views directory on every request - so a request paid a full
+            // re-walk of the entire view tree to pick up one new directory.
+            //
+            // This produces the same $this->resources as the old full re-walk:
+            // addResource() assigns into an existing key without moving it, so
+            // re-adding an already-known path was always a no-op, and only the
+            // paths under a not-yet-scanned directory were ever appended.
+            foreach ($this->directories as $directory => $scanned) {
+                if ($scanned) {
+                    continue;
+                }
+
                 if ($searchPath = realpath(rtrim((string) $directory, DIRECTORY_SEPARATOR))) {
                     if ($this->recursive) {
                         $this->addMatches($searchPath, $this->recursiveGlob($searchPath, $this->match));
@@ -554,6 +584,10 @@ class DirectorySearch implements DirectorySearchInterface
                         $this->addMatches($searchPath, glob($searchPath . '/' . $this->match));
                     }
                 }
+
+                // mark scanned even when realpath() failed - a directory that does
+                // not resolve will not resolve on the next read either
+                $this->directories[$directory] = true;
             }
 
             if ($this->lockAfterScan) {
@@ -615,10 +649,12 @@ class DirectorySearch implements DirectorySearchInterface
     protected function addMatches(string $searchPath, array|false $matches): void
     {
         if (is_array($matches)) {
+            // hoisted out of the loop - it was re-read from the property per file
+            $closureFunction = $this->keyClosure;
+
             foreach ($matches as $file) {
                 $fileInfo = pathinfo((string) $file);
                 $fileInfo['searchpath'] = $searchPath;
-                $closureFunction = $this->keyClosure;
                 // extract the key based on the function you chose
                 $key = $closureFunction($fileInfo);
                 // now add the resource

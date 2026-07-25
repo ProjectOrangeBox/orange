@@ -20,4 +20,4 @@ for check in "${checks[@]}"; do
 done
 
 echo ""
-echo "All checks passed.”
+echo "All checks passed."
