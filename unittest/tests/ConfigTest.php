@@ -5,7 +5,7 @@ declare(strict_types=1);
 use orange\framework\Config;
 use orange\framework\exceptions\config\ImmutableAccess;
 
-final class ConfigTest extends UnitTestHelper
+final class ConfigTest extends unitTestHelper
 {
     protected $instance;
 

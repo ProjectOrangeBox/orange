@@ -27,4 +27,3 @@ define('ORANGEDIR', realpath(__DIR__ . '/../src'));
 require ORANGEDIR . '/helpers/helpers.php';
 require ORANGEDIR . '/helpers/errors.php';
 require ORANGEDIR . '/helpers/wrappers.php';
-require __DIR__ . '/unitTestHelper.php';

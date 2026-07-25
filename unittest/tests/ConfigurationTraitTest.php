@@ -6,7 +6,7 @@ use orange\framework\exceptions\InvalidValue;
 use orange\framework\exceptions\MissingRequired;
 use orange\framework\exceptions\config\ConfigFileNotFound;
 
-final class ConfigurationTraitTest extends UnitTestHelper
+final class ConfigurationTraitTest extends unitTestHelper
 {
     protected $instance;
 

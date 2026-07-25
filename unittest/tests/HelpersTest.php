@@ -6,7 +6,7 @@ use orange\framework\Log;
 use orange\framework\Config;
 use orange\framework\Container;
 
-final class HelpersTest extends UnitTestHelper
+final class HelpersTest extends unitTestHelper
 {
     private $testFile = '';
 

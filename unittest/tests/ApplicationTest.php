@@ -7,7 +7,7 @@ use orange\framework\interfaces\ContainerInterface;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 #[RunTestsInSeparateProcesses]
-final class ApplicationTest extends \UnitTestHelper
+final class ApplicationTest extends \unitTestHelper
 {
     public function testMakeReturnsSingletonInstance(): void
     {

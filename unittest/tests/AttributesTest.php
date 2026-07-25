@@ -13,7 +13,7 @@ use orange\framework\property\RouterCallback;
  * defaults, their promoted-property values and — for the attributes — that they
  * are actually readable back off a reflected target via getAttributes().
  */
-final class AttributesTest extends UnitTestHelper
+final class AttributesTest extends unitTestHelper
 {
     /* Route */
 

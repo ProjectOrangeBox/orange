@@ -9,7 +9,7 @@ use orange\framework\exceptions\dispatcher\MethodNotFound;
 use orange\framework\exceptions\InvalidValue;
 use orange\framework\property\RouterCallback;
 
-final class DispatcherTest extends UnitTestHelper
+final class DispatcherTest extends unitTestHelper
 {
     protected $instance;
 

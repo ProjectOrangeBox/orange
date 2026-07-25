@@ -11,7 +11,7 @@ use orange\framework\exceptions\container\FailedToAutoWire;
  * Covers Container features beyond the basic get/set exercised in ContainerTest:
  * autowiring, alias resolution/loops, singleton promotion, and introspection.
  */
-final class ContainerAdvancedTest extends UnitTestHelper
+final class ContainerAdvancedTest extends unitTestHelper
 {
     protected $instance;
 

@@ -9,7 +9,7 @@ use orange\framework\exceptions\MagicMethodNotFound;
  * Covers the ArrayObject helper methods (has/get/__get/__call/merge) beyond the
  * basic offset access exercised in BaseTest.
  */
-final class ArrayObjectTest extends UnitTestHelper
+final class ArrayObjectTest extends unitTestHelper
 {
     protected $instance;
 

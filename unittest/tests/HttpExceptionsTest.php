@@ -15,7 +15,7 @@ use PHPUnit\Framework\Attributes\DataProvider;
  * Http base class, the OrangeException parent, and instantiation of every
  * concrete status-code exception.
  */
-final class HttpExceptionsTest extends UnitTestHelper
+final class HttpExceptionsTest extends unitTestHelper
 {
     public function testHttp404DerivesCodeFromClassName(): void
     {

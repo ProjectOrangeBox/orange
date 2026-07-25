@@ -16,7 +16,7 @@ use orange\framework\exceptions\container\ServiceNotFound;
  * with newInstanceWithoutConstructor() and drive the individual helper methods,
  * injecting a recording mock for Output and a real Data store.
  */
-final class ErrorTest extends UnitTestHelper
+final class ErrorTest extends unitTestHelper
 {
     protected $instance;
 

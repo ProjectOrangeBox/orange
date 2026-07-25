@@ -7,7 +7,7 @@ use orange\framework\interfaces\InputInterface;
 use orange\framework\exceptions\input\UnknownOffset;
 use orange\framework\exceptions\input\ImmutableAccess;
 
-final class InputTest extends UnitTestHelper
+final class InputTest extends unitTestHelper
 {
     protected $instance;
 

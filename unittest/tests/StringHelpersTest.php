@@ -6,7 +6,7 @@ declare(strict_types=1);
  * Covers the standalone string/HTML helper functions declared in
  * src/helpers/helpers.php (the ones HelpersTest does not already exercise).
  */
-final class StringHelpersTest extends UnitTestHelper
+final class StringHelpersTest extends unitTestHelper
 {
     protected function setUp(): void
     {

@@ -11,7 +11,7 @@ use orange\framework\exceptions\filesystem\Directory;
 use orange\framework\exceptions\filesystem\FileNotWritable;
 use orange\framework\exceptions\filesystem\DirectoryNotWritable;
 
-final class ViewerTest extends UnitTestHelper
+final class ViewerTest extends unitTestHelper
 {
     protected $instance;
 

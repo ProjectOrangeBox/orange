@@ -14,7 +14,7 @@ use orange\framework\Container;
  * covered normally, resolving services through the real getService()
  * container-fallback path (see ErrorAdvancedTest for that path in isolation).
  */
-final class ErrorConstructorTest extends UnitTestHelper
+final class ErrorConstructorTest extends unitTestHelper
 {
     protected function setUp(): void
     {

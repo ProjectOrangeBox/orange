@@ -10,7 +10,7 @@ use orange\framework\exceptions\filesystem\FileAlreadyExists;
 use orange\framework\exceptions\filesystem\DirectoryNotWritable;
 use orange\framework\exceptions\security\Security as SecurityException;
 
-final class SecurityTest extends UnitTestHelper
+final class SecurityTest extends unitTestHelper
 {
     protected $instance;
 

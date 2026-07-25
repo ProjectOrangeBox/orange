@@ -13,7 +13,7 @@ use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
  * output all run for real without needing an actual web server request.
  */
 #[RunTestsInSeparateProcesses]
-final class ApplicationHttpTest extends \UnitTestHelper
+final class ApplicationHttpTest extends \unitTestHelper
 {
     public function testHttpRunsFullRequestLifecycle(): void
     {

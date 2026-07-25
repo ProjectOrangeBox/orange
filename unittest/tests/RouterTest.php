@@ -11,7 +11,7 @@ use orange\framework\exceptions\router\HttpMethodNotSupported;
 use orange\framework\Input;
 use orange\framework\interfaces\CacheInterface;
 
-final class RouterTest extends UnitTestHelper
+final class RouterTest extends unitTestHelper
 {
     protected $instance;
     protected $callback = ['\app\controllers\controller', 'index'];

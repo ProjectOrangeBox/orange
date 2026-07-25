@@ -6,7 +6,7 @@ use orange\framework\Input;
 use orange\framework\Output;
 use orange\framework\exceptions\output\Output as OutputException;
 
-final class OutputTest extends UnitTestHelper
+final class OutputTest extends unitTestHelper
 {
     protected $instance;
 

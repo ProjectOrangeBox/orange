@@ -12,7 +12,7 @@ use orange\framework\exceptions\http\Http500;
 use orange\framework\exceptions\http\Http503;
 use orange\framework\exceptions\http\Http301;
 
-final class ErrorsTest extends \UnitTestHelper
+final class ErrorsTest extends \unitTestHelper
 {
     protected function setUp(): void
     {

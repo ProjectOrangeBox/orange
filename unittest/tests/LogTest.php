@@ -8,7 +8,7 @@ use orange\framework\exceptions\InvalidValue;
 use orange\framework\exceptions\IncorrectInterface;
 use orange\framework\exceptions\filesystem\DirectoryNotWritable;
 
-final class LogTest extends UnitTestHelper
+final class LogTest extends unitTestHelper
 {
     protected $instance;
     protected $config = [

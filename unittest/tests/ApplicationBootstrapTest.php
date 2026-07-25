@@ -17,7 +17,7 @@ use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
  * full http()/run() lifecycle (which sends output and defines global state).
  */
 #[RunTestsInSeparateProcesses]
-final class ApplicationBootstrapTest extends \UnitTestHelper
+final class ApplicationBootstrapTest extends \unitTestHelper
 {
     protected $instance;
 

@@ -16,7 +16,7 @@ use orange\framework\interfaces\InputInterface;
  * renderViewBasedOnCode, getService) which need a real View/Container wired up.
  * The constructor itself calls exit(), so the instance is built without it.
  */
-final class ErrorAdvancedTest extends UnitTestHelper
+final class ErrorAdvancedTest extends unitTestHelper
 {
     protected $instance;
 

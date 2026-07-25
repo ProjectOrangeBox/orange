@@ -7,7 +7,7 @@ use orange\framework\base\SingletonArrayObject;
 use orange\framework\exceptions\container\CannotCloneSingleton;
 use orange\framework\exceptions\container\CannotUnserializeSingleton;
 
-final class BaseTest extends UnitTestHelper
+final class BaseTest extends unitTestHelper
 {
     public function testCloningIsForbidden(): void
     {

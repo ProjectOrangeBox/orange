@@ -6,7 +6,7 @@ use orange\framework\Container;
 use orange\framework\interfaces\ContainerInterface;
 use orange\framework\exceptions\container\ServiceNotFound;
 
-final class ContainerTest extends UnitTestHelper
+final class ContainerTest extends unitTestHelper
 {
     protected $instance;
     protected $services;
