@@ -108,6 +108,22 @@ final class SecurityTest extends unitTestHelper
         $this->assertEquals(' !"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~', $this->instance->removeInvisibleCharacters($input));
     }
 
+    /**
+     * Printable text in any alphabet must survive - this used to strip
+     * everything outside \x20-\x7E, which destroyed every accented or non-Latin
+     * string it was given.
+     */
+    public function testRemoveInvisibleCharactersPreservesPrintableUnicode(): void
+    {
+        $this->assertEquals('résumé-Ünïcode.pdf', $this->instance->removeInvisibleCharacters('résumé-Ünïcode.pdf'));
+        $this->assertEquals('日本語', $this->instance->removeInvisibleCharacters('日本語'));
+
+        // but the genuinely invisible still goes: a NUL and a zero-width space
+        $this->assertEquals('abc', $this->instance->removeInvisibleCharacters("a\x00b\u{200B}c"));
+        // as does a right-to-left override, which can disguise an extension
+        $this->assertEquals('evilphp', $this->instance->removeInvisibleCharacters("evil\u{202E}php"));
+    }
+
     public function testCleanFilename(): void
     {
         $input = '';
@@ -116,9 +132,42 @@ final class SecurityTest extends unitTestHelper
             $input .= chr($c);
         }
 
-        $this->assertEquals(' ()+,-.0123456789<=>@ABCDEFGHIJKLMNOPQRSTUVWXYZ[]_abcdefghijklmnopqrstuvwxyz{|}~', $this->instance->cleanFilename($input));
+        // everything up to the last separator is a directory component and is
+        // dropped; of what remains only the allowlisted characters survive
+        $this->assertEquals('_abcdefghijklmnopqrstuvwxyz', $this->instance->cleanFilename($input));
         $this->assertEquals('This is a test 2004-10-31 103100', $this->instance->cleanFilename('This is a test 2004-10-31 10:31:00'));
-        $this->assertEquals('This is a test <2004-10-31 103100>', $this->instance->cleanFilename('This is a test <2004-10-31 10:31:00>'));
+        $this->assertEquals('This is a test 2004-10-31 103100', $this->instance->cleanFilename('This is a test <2004-10-31 10:31:00>'));
+    }
+
+    /**
+     * Traversal is defeated by discarding the directory part outright, not by
+     * recognizing how it was spelled - so encoded and Windows-style forms fall
+     * out for free rather than needing their own denylist entries.
+     */
+    public function testCleanFilenameDiscardsAnyDirectoryComponent(): void
+    {
+        $this->assertEquals('passwd', $this->instance->cleanFilename('../../etc/passwd'));
+        $this->assertEquals('report.pdf', $this->instance->cleanFilename('/absolute/path/report.pdf'));
+        $this->assertEquals('cmd.exe', $this->instance->cleanFilename('..\\..\\windows\\system32\\cmd.exe'));
+        $this->assertEquals('x', $this->instance->cleanFilename('....//....//x'));
+    }
+
+    public function testCleanFilenameKeepsUnicodeNamesAndNeutralizesTricks(): void
+    {
+        // a legitimate name is not collateral damage
+        $this->assertEquals('résumé-Ünïcode.pdf', $this->instance->cleanFilename('résumé-Ünïcode.pdf'));
+
+        // a NUL can no longer truncate the name at a C-level call downstream
+        $this->assertEquals('evil.php.jpg', $this->instance->cleanFilename("evil.php\x00.jpg"));
+
+        // no leading dot (hidden file), no dot runs, no trailing dot/space -
+        // Windows would treat "x.php." and "x.php" as the same file
+        $this->assertEquals('htaccess', $this->instance->cleanFilename('.htaccess'));
+        $this->assertEquals('file.txt', $this->instance->cleanFilename('file...txt'));
+        $this->assertEquals('spaced name .txt', $this->instance->cleanFilename('  spaced name .txt  '));
+
+        // nothing allowlistable at all - callers must treat '' as "no usable name"
+        $this->assertEquals('', $this->instance->cleanFilename('???'));
     }
 
     public function testPasswordHash(): void

@@ -371,6 +371,11 @@ Input
  [x] Uri segment
  [x] Content type
  [x] Request method
+ [x] Server key normalization strips only a leading prefix
+ [x] Method override is ignored on get
+ [x] Method override is honored on post
+ [x] Unsupported method override leaves post unchanged
+ [x] Request method without override
  [x] Request type
  [x] Is ajax request
  [x] Is cli request
@@ -436,6 +441,10 @@ Output
  [x] Get response code
  [x] Send
  [x] Redirect
+ [x] Unknown but in range status code gets a generic reason phrase
+ [x] Redirect allows same origin targets
+ [x] Redirect refuses off site and non http targets
+ [x] Redirect honors allowed hosts for off site targets
  [x] Resolve trusted host honors allowed host
  [x] Resolve trusted host rejects spoofed host
  [x] Resolve trusted host fails closed without allowlist
@@ -484,6 +493,7 @@ Router
  [x] Constructor sets cache key and update cache writes through it
  [x] Get routes loads from valid cache
  [x] Get routes falls back to config when cache invalid
+ [x] Route url containing the regex delimiter still matches
 
 Security
  [x] Create keys sets private and auth key permissions to owner only
@@ -492,7 +502,10 @@ Security
  [x] Encrypt
  [x] Auth
  [x] Remove invisible characters
+ [x] Remove invisible characters preserves printable unicode
  [x] Clean filename
+ [x] Clean filename discards any directory component
+ [x] Clean filename keeps unicode names and neutralizes tricks
  [x] Password hash
  [x] Create keys throws config not found when key path missing
  [x] Create keys throws directory not writable when directory not writable
@@ -516,7 +529,8 @@ String Helpers
  [x] Convert label slug
  [x] Convert label normalize strips non alnum
  [x] Convert label invalid case throws
- [x] Esc escapes double quotes
+ [x] Backslash double quotes escapes double quotes
+ [x] Backslash double quotes is not an html escaper
  [x] E escapes html in string
  [x] E recurses into arrays
  [x] E leaves empty input untouched

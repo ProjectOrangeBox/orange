@@ -80,6 +80,89 @@ final class InputTest extends unitTestHelper
         $this->assertEquals('get', $this->instance->requestMethod());
     }
 
+    /**
+     * Build an Input from just the request bits a method-override test cares about.
+     */
+    protected function inputFor(array $server, array $query = [], array $request = []): InputInterface
+    {
+        return Input::newInstance([
+            'query' => $query,
+            'request' => $request,
+            'server' => $server,
+            'cookies' => [],
+            'files' => [],
+            'input' => '',
+        ]);
+    }
+
+    /**
+     * Only a leading HTTP_/SERVER_ prefix is stripped. Replacing every occurrence
+     * collapsed a client-supplied 'Server-Name:' header (HTTP_SERVER_NAME) onto
+     * the same key as the genuine SERVER_NAME, letting a request shadow a server
+     * value; it also ate the substring out of the middle of longer keys.
+     */
+    public function testServerKeyNormalizationStripsOnlyALeadingPrefix(): void
+    {
+        $input = $this->inputFor([
+            'SERVER_NAME' => 'real.example.com',
+            'HTTP_SERVER_NAME' => 'attacker.example.com',
+            'SERVER_PROTOCOL' => 'HTTP/1.1',
+            'HTTP_ACCEPT_LANGUAGE' => 'en-US',
+        ]);
+
+        // the two no longer collide
+        $this->assertEquals('real.example.com', $input->server('SERVER_NAME'));
+        $this->assertEquals('attacker.example.com', $input->server('HTTP_SERVER_NAME'));
+
+        // and the documented equivalence between the two access styles holds
+        $this->assertEquals('en-US', $input->server('accept_language'));
+        $this->assertEquals('en-US', $input['server']['accept_language']);
+        $this->assertEquals('HTTP/1.1', $input->server('server_protocol'));
+    }
+
+    /**
+     * A GET must never be re-labeled into a state-changing method. Otherwise a
+     * cross-site <img>/link - or a link-prefetching crawler - reaches a DELETE
+     * route with no preflight and no same-origin check.
+     */
+    public function testMethodOverrideIsIgnoredOnGet(): void
+    {
+        $this->assertEquals('get', $this->inputFor(['request_method' => 'GET'], ['_method' => 'delete'])->requestMethod());
+        $this->assertEquals('get', $this->inputFor(['request_method' => 'GET'], [], ['_method' => 'delete'])->requestMethod());
+        $this->assertEquals('get', $this->inputFor(['request_method' => 'GET', 'HTTP_X_HTTP_METHOD_OVERRIDE' => 'DELETE'])->requestMethod());
+    }
+
+    /**
+     * HTML forms can only send GET/POST, so a POST must still be able to reach
+     * PUT/PATCH/DELETE handlers - via header, query, or body.
+     */
+    public function testMethodOverrideIsHonoredOnPost(): void
+    {
+        $this->assertEquals('put', $this->inputFor(['request_method' => 'POST'], [], ['_method' => 'PUT'])->requestMethod());
+        $this->assertEquals('delete', $this->inputFor(['request_method' => 'POST'], ['_method' => 'delete'])->requestMethod());
+        $this->assertEquals('patch', $this->inputFor(['request_method' => 'POST', 'HTTP_X_HTTP_METHOD_OVERRIDE' => 'PATCH'])->requestMethod());
+    }
+
+    /**
+     * Only PUT/PATCH/DELETE are overridable; anything else leaves the POST alone
+     * rather than erroring.
+     */
+    public function testUnsupportedMethodOverrideLeavesPostUnchanged(): void
+    {
+        $this->assertEquals('post', $this->inputFor(['request_method' => 'POST'], [], ['_method' => 'GET'])->requestMethod());
+        $this->assertEquals('post', $this->inputFor(['request_method' => 'POST'], [], ['_method' => 'BOGUS'])->requestMethod());
+    }
+
+    /**
+     * A genuine DELETE still routes as one, and a request with no method at all
+     * is still treated as CLI.
+     */
+    public function testRequestMethodWithoutOverride(): void
+    {
+        $this->assertEquals('delete', $this->inputFor(['request_method' => 'DELETE'])->requestMethod());
+        $this->assertEquals('cli', $this->inputFor([])->requestMethod());
+    }
+
     public function testRequestType(): void
     {
         $this->assertEquals('ajax', $this->instance->requestType());

@@ -84,11 +84,22 @@ final class StringHelpersTest extends unitTestHelper
         convertLabel('Hello', 'bogus');
     }
 
-    /* esc() */
+    /* backslashDoubleQuotes() */
 
-    public function testEscEscapesDoubleQuotes(): void
+    public function testBackslashDoubleQuotesEscapesDoubleQuotes(): void
     {
-        $this->assertEquals('say \\"hi\\"', esc('say "hi"'));
+        $this->assertEquals('say \\"hi\\"', backslashDoubleQuotes('say "hi"'));
+    }
+
+    /**
+     * Pins the reason for the rename: this helper does nothing whatsoever to the
+     * characters that make HTML dangerous, so it must never be mistaken for e().
+     */
+    public function testBackslashDoubleQuotesIsNotAnHtmlEscaper(): void
+    {
+        $this->assertEquals('<script>', backslashDoubleQuotes('<script>'));
+        $this->assertEquals('&', backslashDoubleQuotes('&'));
+        $this->assertEquals("'", backslashDoubleQuotes("'"));
     }
 
     /* e() */

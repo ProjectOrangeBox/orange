@@ -158,14 +158,29 @@ if (!function_exists('convertLabel')) {
     }
 }
 
-if (!function_exists('esc')) {
+if (!function_exists('backslashDoubleQuotes')) {
     /**
-     * Escapes double quotes in a string by replacing them with backslash-double quote.
+     * Prefixes every double quote with a backslash. That is all it does.
+     *
+     * This is NOT an HTML escaper and must never be used to place a value into
+     * markup - `<input value="<?= backslashDoubleQuotes($v) ?>">` is still an XSS,
+     * because a backslash means nothing to an HTML parser and the quote goes on to
+     * close the attribute exactly as it would have unescaped. Use e() for anything
+     * that reaches a page. (It was called esc() for exactly long enough to make
+     * that mistake inviting.)
+     *
+     * It is also not sufficient for building a JavaScript string literal: it leaves
+     * backslashes, newlines, and `</script>` alone, so `\"` arrives as `\\"` and
+     * terminates the literal. Use json_encode() for that.
+     *
+     * What remains is the narrow case it is named for - quoting a value for a
+     * format whose only escape is a backslashed quote, such as a shell-style or
+     * CSV-ish double-quoted field you are assembling yourself.
      *
      * @param string $string The string to escape.
      * @return string The escaped string.
      */
-    function esc(string $string): string
+    function backslashDoubleQuotes(string $string): string
     {
         return str_replace('"', '\"', $string);
     }

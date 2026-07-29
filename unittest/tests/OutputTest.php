@@ -163,12 +163,92 @@ final class OutputTest extends unitTestHelper
     public function testRedirect(): void
     {
         ob_start();
-        $this->instance->redirect('http://www.example.com', 308, false);
+        // an off-site target the caller has explicitly vouched for
+        $this->instance->redirect('http://www.example.com', 308, false, true);
         $output = ob_get_clean();
 
         $this->assertEquals(308, $this->instance->getResponseCode());
         $this->assertContains('Location: http://www.example.com', $this->instance->getHeaders());
         $this->assertEquals('', $output);
+    }
+
+    /**
+     * responseCode() accepts anything in 100-599, but the status map has entries
+     * only for the codes it knows. Reading it blind raised an "Undefined array
+     * key" warning and emitted a status line ending in a bare space.
+     */
+    public function testUnknownButInRangeStatusCodeGetsAGenericReasonPhrase(): void
+    {
+        $this->instance->responseCode(299);
+
+        $this->assertEquals(299, $this->instance->getResponseCode());
+        $this->assertContains('HTTP/1.0 299 Success', $this->instance->getHeaders());
+
+        $this->instance->responseCode(499);
+        $this->assertContains('HTTP/1.0 499 Client Error', $this->instance->getHeaders());
+
+        $this->instance->responseCode(599);
+        $this->assertContains('HTTP/1.0 599 Server Error', $this->instance->getHeaders());
+
+        // a code the map does know is unaffected
+        $this->instance->responseCode(404);
+        $this->assertContains('HTTP/1.0 404 Not Found', $this->instance->getHeaders());
+    }
+
+    public function testRedirectAllowsSameOriginTargets(): void
+    {
+        foreach (['/dashboard', '/', 'foo/bar', '/path?a=b#c'] as $target) {
+            ob_start();
+            $this->instance->redirect($target, 302, false);
+            ob_get_clean();
+
+            $this->assertContains('Location: ' . $target, $this->instance->getHeaders());
+        }
+    }
+
+    /**
+     * The open-redirect cases. Each of these is a target an application could
+     * plausibly take straight off the request (a `?return=` parameter) and hand
+     * to redirect() - so each has to fail closed rather than lend the site's
+     * domain to whatever the attacker put there.
+     */
+    public function testRedirectRefusesOffSiteAndNonHttpTargets(): void
+    {
+        $targets = [
+            'https://evil.com',                 // plainly off-site
+            '//evil.com',                       // protocol-relative
+            '///evil.com',                      // extra slashes, still off-site
+            '/\\evil.com',                      // browsers read the backslash as a slash
+            'https:/\\evil.com',                // same trick with a scheme attached
+            'https://example.com@evil.com/',    // real host is evil.com, not the userinfo
+            'javascript:alert(1)',              // never a redirect scheme
+            'data:text/html;base64,PHM+',
+            "/ok\r\nX-Injected: 1",             // header splitting
+        ];
+
+        foreach ($targets as $target) {
+            try {
+                $this->instance->redirect($target, 302, false);
+                $this->fail('redirect() accepted an unsafe target: ' . $target);
+            } catch (OutputException) {
+                $this->assertTrue(true);
+            }
+        }
+    }
+
+    public function testRedirectHonorsAllowedHostsForOffSiteTargets(): void
+    {
+        $instance = Output::newInstance([
+            'contentType' => 'text/html',
+            'charSet' => 'utf-8',
+            'allowed hosts' => ['partner.example.com'],
+        ], Input::getInstance([]));
+
+        ob_start();
+        $instance->redirect('https://partner.example.com/checkout', 302, false);
+        ob_get_clean();
+
+        $this->assertContains('Location: https://partner.example.com/checkout', $instance->getHeaders());
     }
 
     public function testResolveTrustedHostHonorsAllowedHost(): void

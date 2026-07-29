@@ -51,15 +51,18 @@ use orange\framework\exceptions\security\Security as SecurityException;
  *  •   Verifies entered passwords against stored hashes.
  *  •   Protects against brute-force attacks.
  *  5.  Input Sanitization (removeInvisibleCharacters, cleanFilename)
- *  •   Removes non-printable characters from input.
- *  •   Cleans filenames by stripping dangerous characters and encodings (e.g., ../, <, ;, %).
+ *  •   Removes control and format characters from input, preserving printable Unicode.
+ *  •   Reduces a name to a single safe filename by allowlist, discarding any directory part.
  *  •   Reduces the risk of injection or traversal attacks.
  *
  * ⸻
  *
  * 3. Security Practices
  *  •   Uses Libsodium for modern cryptography.
- *  •   Always overwrites sensitive data in memory (sodium_memzero).
+ *  •   Overwrites key material it reads from disk (sodium_memzero). Note this cannot
+ *      extend to values passed IN: a by-value parameter can only be zeroed in this
+ *      class's own copy, leaving the caller's string intact, so those calls are
+ *      deliberately absent rather than misleading. Callers wipe their own secrets.
  *  •   Validates all inputs (hex checks, config paths).
  *  •   Throws descriptive exceptions for misconfiguration or invalid data.
  *
@@ -198,9 +201,13 @@ class Security extends Singleton implements SecurityInterface
         // Convert to hex without side-channels
         $encrypted = sodium_bin2hex(sodium_crypto_box_seal($data, $key));
 
-        // Overwrite a string with NUL characters
+        // Wipe the key material this method read. $data is deliberately not
+        // wiped: it is a by-value parameter, so zeroing it would only clear this
+        // function's own copy while the caller's string - the actual plaintext -
+        // stays in memory untouched. Wiping a parameter reads as a guarantee
+        // that isn't being made. A caller that needs its plaintext gone must
+        // sodium_memzero() its own variable.
         sodium_memzero($key);
-        sodium_memzero($data);
 
         return $encrypted;
     }
@@ -233,7 +240,8 @@ class Security extends Singleton implements SecurityInterface
         // ciphertext was forged, truncated, or encrypted for a different key
         $decrypt = sodium_crypto_box_seal_open($data, $key);
 
-        // Overwrite a string with NUL characters
+        // both are local: $key is secret key material, and $data was reassigned
+        // above to a locally-decoded binary copy
         sodium_memzero($data);
         sodium_memzero($key);
 
@@ -259,9 +267,9 @@ class Security extends Singleton implements SecurityInterface
         // Convert to hex without side-channels
         $token = sodium_bin2hex(sodium_crypto_auth($message, $key));
 
-        // Overwrite a string with NUL characters
+        // only the key is wipeable here - $message is a by-value parameter, so
+        // zeroing it would clear this copy and leave the caller's untouched
         sodium_memzero($key);
-        sodium_memzero($message);
 
         return $token;
     }
@@ -291,15 +299,14 @@ class Security extends Singleton implements SecurityInterface
                 // Secret-key message verification - HMAC SHA-512/256
                 $isValid = sodium_crypto_auth_verify($signature, $message, $key);
 
-                // Overwrite a string with NUL characters
+                // secret key material this method read - worth wiping
                 sodium_memzero($key);
             }
         }
 
-        // Overwrite a string with NUL characters
-        sodium_memzero($signature);
-        sodium_memzero($message);
-
+        // $signature and $message are by-value parameters and are not secrets in
+        // any case; wiping them here would only clear these copies, so it is left
+        // out rather than implying a guarantee that isn't made.
         return $isValid;
     }
 
@@ -314,9 +321,10 @@ class Security extends Singleton implements SecurityInterface
         // Get a formatted password hash (for storage)
         $encoded = sodium_crypto_pwhash_str($password, SODIUM_CRYPTO_PWHASH_OPSLIMIT_INTERACTIVE, SODIUM_CRYPTO_PWHASH_MEMLIMIT_INTERACTIVE);
 
-        // Overwrite a string with NUL characters
-        sodium_memzero($password);
-
+        // $password is a by-value parameter: zeroing it clears this copy only,
+        // and the caller still holds the plaintext. A caller that wants it gone
+        // must wipe its own variable - that is not something this method can do
+        // on its behalf, and pretending otherwise is worse than not trying.
         return $encoded;
     }
 
@@ -332,83 +340,90 @@ class Security extends Singleton implements SecurityInterface
         // Verify a password against a hash
         $isValid = sodium_crypto_pwhash_str_verify($hash, $userEntered);
 
-        // Overwrite a string with NUL characters
-        sodium_memzero($hash);
-        sodium_memzero($userEntered);
-
+        // both are by-value parameters - see encodePassword() for why they are
+        // not wiped here
         return $isValid;
     }
 
     /**
-     * Removes invisible characters from a string.
+     * Removes control and format characters from a string.
+     *
+     * Printable text survives intact whatever alphabet it is written in - this
+     * used to strip everything outside \x20-\x7E, which quietly destroyed every
+     * accented or non-Latin string handed to it ("résumé-Ünïcode.pdf" came back
+     * as "rsum-ncode.pdf") in a framework that otherwise runs on UTF-8
+     * throughout. What goes is the genuinely invisible: NULs and other C0/C1
+     * controls, and the format characters (zero-width joiners, bidi overrides)
+     * used to disguise what a string actually says.
      *
      * @param string $string Input string.
      * @return string Sanitized string.
      */
     public function removeInvisibleCharacters(string $string): string
     {
-        // remove anything not in the displayable range
-        $nonDisplayables = '/[^\x20-\x7E]/';
+        // A string that isn't valid UTF-8 has no Unicode reading worth
+        // preserving, and preg's /u mode refuses such a subject outright
+        // (returning null) - so drop the invalid sequences first. The
+        // substitute character is forced to 'none' rather than trusted from
+        // ini, so a malformed byte is removed instead of becoming a literal '?'.
+        if (!mb_check_encoding($string, 'UTF-8')) {
+            $previousSubstitute = mb_substitute_character();
+            mb_substitute_character('none');
+            $string = mb_convert_encoding($string, 'UTF-8', 'UTF-8');
+            mb_substitute_character($previousSubstitute);
+        }
 
-        do {
-            // Perform a regular expression search and replace
-            $string = preg_replace($nonDisplayables, '', (string) $string, -1, $count);
-        } while ($count);
-
-        return $string;
+        // \p{Cc} control, \p{Cf} format. Removing characters in a class can
+        // never produce another character in that class, so one pass is enough -
+        // the old implementation looped because a substring replace can join two
+        // halves into a new match, which a character class cannot.
+        return preg_replace('/[\p{Cc}\p{Cf}]/u', '', $string) ?? '';
     }
 
     /**
-     * Sanitizes a filename by removing malicious characters.
+     * Reduces a caller-supplied name to something safe to use as a single
+     * filename.
+     *
+     * Works by allowlist. The denylist this replaced tried to enumerate the ways
+     * a traversal can be written - '../', '%3c', '%2528' and twenty-odd more -
+     * which is a game a denylist does not win: it had no entry for overlong or
+     * double-encoded forms it hadn't thought of, and it stripped '%' everywhere
+     * as a blunt approximation. Deciding what may stay is bounded in a way that
+     * deciding what must go is not.
+     *
+     * Note this returns a *filename*, never a path: any directory component is
+     * discarded rather than sanitized. It can return '' (a name with nothing
+     * allowlistable in it), which callers must treat as "no usable name" rather
+     * than writing to it.
      *
      * @param string $filename Input filename.
-     * @return string Sanitized filename.
+     * @return string Sanitized filename, possibly empty.
      */
     public function cleanFilename(string $filename): string
     {
-        $bad = [
-            '../',
-            '<!--',
-            '-->',
-            "'",
-            '"',
-            '&',
-            '$',
-            '#',
-            ';',
-            '?',
-            '%20',
-            '%22',
-            '/',
-            '*',
-            ':',
-            '\\',
-            '!',
-            '%',
-            '`',
-            '^',
-            '%3c',        // <
-            '%253c',      // <
-            '%3e',        // >
-            '%0e',        // >
-            '%28',        // (
-            '%29',        // )
-            '%2528',      // (
-            '%26',        // &
-            '%24',        // $
-            '%3f',        // ?
-            '%3b',        // ;
-            '%3d'         // =
-        ];
-
+        // First, because these are how a name sneaks past everything after them:
+        // a NUL truncates the string in any C-level call downstream, and a bidi
+        // override can make "evil.php" render to a human as "evil.gpj".
         $filename = $this->removeInvisibleCharacters($filename);
 
-        do {
-            $old = $filename;
-            $filename = str_replace($bad, '', $filename);
-        } while ($old !== $filename);
+        // a backslash separates directories on Windows, and basename() on Linux
+        // would not recognize it as one
+        $filename = str_replace('\\', '/', $filename);
 
-        return $filename;
+        // Drop every directory component. This is what actually defeats
+        // traversal - not pattern-matching the spelling of it.
+        $filename = basename($filename);
+
+        // Unicode letters and digits (so "résumé.pdf" survives) plus the
+        // punctuation filenames genuinely use.
+        $filename = preg_replace('/[^\p{L}\p{N}._\- ]/u', '', $filename) ?? '';
+
+        // collapse dot runs so nothing is left resembling a traversal segment
+        $filename = preg_replace('/\.{2,}/', '.', $filename) ?? '';
+
+        // A leading dot hides the file; Windows silently ignores trailing dots
+        // and spaces, which would make "x.php." and "x.php" the same file there.
+        return trim($filename, ' .');
     }
 
     /**

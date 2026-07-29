@@ -123,7 +123,9 @@ through (headers, commands, etc.).
 
 Security isn't only this service. Elsewhere the framework already helps:
 
-- **Output escaping** — use `e()`/`esc()` in views to prevent XSS ([Views](06-views.md)).
+- **Output escaping** — use `e()` in views to prevent XSS ([Views](06-views.md)). Note that
+  `backslashDoubleQuotes()` (formerly `esc()`) is *not* an HTML escaper and never substitutes
+  for it.
 - **Open‑redirect protection** — `output`'s `force https`/redirects check the `allowed hosts`
   allowlist ([Request & response](09-request-and-response.md)).
 - **Immutable request** — `input` is a read‑only snapshot with superglobals unset

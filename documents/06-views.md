@@ -72,8 +72,9 @@ return $this->view->render('main/index', ['cash' => '19.95']);
 ```
 
 Inside the template, each key is a local variable. **Escape output** with the `e()` helper
-(recursive `htmlspecialchars`) unless the value is trusted HTML — `esc()` only escapes double
-quotes and is for attribute/JS‑string contexts, not general HTML escaping:
+(recursive `htmlspecialchars`) unless the value is trusted HTML. That includes attribute
+values — `backslashDoubleQuotes()` is not an alternative for them, and is not an HTML
+escaper at all:
 
 ```php
 <!-- .../views/main/index.php -->
@@ -172,7 +173,7 @@ segment. It's off by default; enable it only if you use that pattern.
 
 - Templates are plain PHP; `render('path/name')` finds `path/name.php` and returns a string.
 - Put shared data on the `data` service; pass per‑render data as `render()`'s second argument.
-- Escape output with `e()`/`esc()`.
+- Escape output with `e()` — including inside attributes.
 - Partials are `include`; the search path is front‑wins, and a controller's `$view` property
   auto‑registers its module's `views/` at the front.
 

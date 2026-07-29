@@ -86,6 +86,24 @@ before.router → router->match() → before.controller
 Each `before.*` stage is an event you can subscribe to. See
 [The request lifecycle](documents/03-request-lifecycle.md).
 
+### Security responsibilities the framework does not take on
+
+Some protections need per-application state or policy, so the kernel deliberately leaves them
+to the layer above rather than shipping a half-opinion:
+
+- **CSRF tokens.** Token generation, storage, and per-form verification depend on the session
+  and on which routes you consider state-changing — so there is no `csrf` service. Build it as
+  a `before.controller` listener (the `security` service provides HMAC signing via
+  `createSignature()`/`verifySignature()` if you want stateless tokens). Two things the
+  framework *does* do on your behalf: `Input::requestMethod()` only honors a `_method` /
+  `X-HTTP-Method-Override` override on a real `POST`, and only to `PUT`/`PATCH`/`DELETE`, so a
+  cross-site `GET` can never reach a destructive route; and `orange/cookies` defaults to
+  `SameSite=Lax`, `HttpOnly`, and `Secure`.
+- **Rate limiting and account lockout.** Shared cross-request state; see the same note in
+  [orange/auth](https://github.com/ProjectOrangeBox/auth).
+- **Authorization.** `orange/acl` answers "what may this user do"; the framework itself has no
+  concept of a current user.
+
 ---
 
 ## Testing & tooling

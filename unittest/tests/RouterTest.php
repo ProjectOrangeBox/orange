@@ -325,4 +325,30 @@ final class RouterTest extends unitTestHelper
         $instance->match('/configfallback', 'get');
         $this->assertEquals('configfallback', $instance->getMatched('name'));
     }
+
+    /**
+     * '@' is a legal URI path character, so a route may contain one. While it was
+     * also the pattern delimiter, such a route failed to compile and matched
+     * nothing - preg_match() returns false rather than throwing, so the route
+     * simply went dead with no indication why.
+     */
+    public function testRouteUrlContainingTheRegexDelimiterStillMatches(): void
+    {
+        $instance = Router::newInstance(
+            [
+                'site url' => 'www.example.com',
+                '404' => [],
+                'home' => [],
+                'routes' => [
+                    ['method' => 'get', 'name' => 'handle', 'url' => '/mail/@([a-z]+)', 'callback' => $this->callback],
+                ],
+            ],
+            Input::newInstance(['force https' => false]),
+        );
+
+        $instance->match('/mail/@dmyers', 'get');
+
+        $this->assertEquals('handle', $instance->getMatched('name'));
+        $this->assertEquals(['dmyers'], $instance->getMatched('argv'));
+    }
 }

@@ -21,6 +21,13 @@ interface InputInterface extends \ArrayAccess
     public const OPTIONS   = 'OPTIONS';
     public const TRACE     = 'TRACE';
     public const CONNECT   = 'CONNECT';
+    public const PATCH     = 'PATCH';
+
+    // The only methods a POST may re-label itself as via _method /
+    // X-HTTP-Method-Override. GET is deliberately absent: letting a POST
+    // downgrade to a safe method is pointless, and letting anything upgrade
+    // TO these from a GET is the hole requestMethod() exists to close.
+    public const OVERRIDABLE_METHODS = [self::PUT, self::PATCH, self::DELETE];
 
     public const SCHEME = PHP_URL_SCHEME;
     public const HOST = PHP_URL_HOST;

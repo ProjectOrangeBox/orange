@@ -405,28 +405,51 @@ class Input extends Singleton implements InputInterface, \ArrayAccess
     /**
      * Determine the effective HTTP method, honoring override conventions.
      *
+     * An override is only honored on a real POST, and only when it names one of
+     * OVERRIDABLE_METHODS. Both restrictions matter: a GET carrying
+     * `?_method=delete` (or an X-HTTP-Method-Override header) would otherwise let
+     * any cross-site <img>, link, or link-prefetching crawler reach a route the
+     * application registered as DELETE - a state-changing request disguised as a
+     * safe one, issued without the CORS preflight that a genuine cross-origin
+     * DELETE would require. Restricting overrides to POST keeps the browser's own
+     * protections in front of every destructive route, while still letting HTML
+     * forms (which can only submit GET/POST) reach PUT/PATCH/DELETE handlers.
+     *
      * @param bool $asLowercase True to return lowercase; false returns uppercase.
      *
      * @return string
      */
     public function requestMethod(bool $asLowercase = true): string
     {
-        /**
-         * You can override the http method by setting on of the following in your http request
-         */
         $null = chr(0);
 
-        if ($this->server('http_x_http_method_override', $null) !== $null) {
-            $method = $this->server('http_x_http_method_override', '');
-        } elseif ($this->query('_method', $null) !== $null) {
-            $method = $this->query('_method');
-        } elseif ($this->request('_method', $null) !== $null) {
-            $method = $this->request('_method');
-        } elseif ($this->server('request_method', $null) !== $null) {
-            $method = $this->server('request_method', '');
-        } else {
-            // I guess it's a CLI request?
-            $method = 'cli';
+        // the method the client actually used - the only one a browser's
+        // same-origin and preflight rules were applied against
+        $actual = $this->server('request_method', $null);
+
+        // no request method at all? I guess it's a CLI request
+        $method = $actual === $null ? 'cli' : (string) $actual;
+
+        if (strtoupper($method) === 'POST') {
+            /**
+             * You can override the http method by setting one of the following in
+             * your http request - checked in this order, first one present wins.
+             */
+            $candidate = $null;
+
+            if ($this->server('http_x_http_method_override', $null) !== $null) {
+                $candidate = $this->server('http_x_http_method_override', '');
+            } elseif ($this->query('_method', $null) !== $null) {
+                $candidate = $this->query('_method');
+            } elseif ($this->request('_method', $null) !== $null) {
+                $candidate = $this->request('_method');
+            }
+
+            // an unknown or unsafe override is ignored, not an error - the request
+            // simply stays the POST it already was
+            if ($candidate !== $null && in_array(strtoupper((string) $candidate), self::OVERRIDABLE_METHODS, true)) {
+                $method = (string) $candidate;
+            }
         }
 
         // only build the message/context if this level is enabled - logMsg() alone would build it regardless
@@ -434,7 +457,7 @@ class Input extends Singleton implements InputInterface, \ArrayAccess
             logMsg('DEBUG', __METHOD__ . $method);
         }
 
-        return $asLowercase ? strtolower((string) $method) : strtoupper((string) $method);
+        return $asLowercase ? strtolower($method) : strtoupper($method);
     }
 
     /**
@@ -588,7 +611,8 @@ class Input extends Singleton implements InputInterface, \ArrayAccess
     }
 
     /**
-     * Normalize server keys by lowercasing and stripping HTTP/Server prefixes.
+     * Normalize server keys by lowercasing and stripping a leading HTTP_/SERVER_
+     * prefix.
      *
      * Keys keep their underscores (e.g. 'HTTP_ACCEPT_LANGUAGE' -> 'accept_language')
      * rather than converting them to spaces, so the exact same key string works for
@@ -596,12 +620,28 @@ class Input extends Singleton implements InputInterface, \ArrayAccess
      * ($input['server']['accept_language']) - the latter indexes the returned array
      * directly and has no chance to run back through this normalizer.
      *
+     * Only a *leading* prefix is removed. Stripping every occurrence (which is what
+     * a plain str_replace does) collapsed distinct keys onto each other: the request
+     * header 'Server-Name:' arrives as HTTP_SERVER_NAME and would have normalized to
+     * 'name' - the same key as the genuine SERVER_NAME - letting a client shadow a
+     * server value depending only on which one $_SERVER happened to list last. It
+     * also ate the substring out of the middle of legitimate keys, turning
+     * HTTP_X_HTTP_METHOD_OVERRIDE into 'x_method_override'.
+     *
      * @param string $key
      * @return string
      */
     protected function normalizeServerKey(string $key): string
     {
-        return str_replace(['http_', 'server_'], '', strtolower($key));
+        $key = strtolower($key);
+
+        foreach (['http_', 'server_'] as $prefix) {
+            if (str_starts_with($key, $prefix)) {
+                return substr($key, strlen($prefix));
+            }
+        }
+
+        return $key;
     }
 
     /**

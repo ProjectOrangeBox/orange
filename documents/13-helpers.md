@@ -77,12 +77,19 @@ either by defining your own before the framework's is loaded. See
 | Function | Purpose |
 |----------|---------|
 | `e($input, $flags, $encoding, $doubleEncode)` | HTML‑escape a **string or array** (recursive `htmlspecialchars`, `ENT_QUOTES\|ENT_SUBSTITUTE\|ENT_HTML401`). **Use this in views for XSS safety.** |
-| `esc($string)` | Escape double quotes only (`"` → `\"`) — for embedding inside a double‑quoted attribute/JS string, *not* general HTML escaping. |
+| `backslashDoubleQuotes($string)` | Backslashes double quotes (`"` → `\"`) and nothing else. **Not an escaper for HTML or JavaScript** — see the warning below. |
 
 ```php
 <h1><?= e($title) ?></h1>                     <!-- HTML escaping -->
-<input value="<?= esc($value) ?>">            <!-- quote escaping -->
+<input value="<?= e($value) ?>">              <!-- also e() - attributes are HTML too -->
 ```
+
+> `backslashDoubleQuotes()` was previously named `esc()`, which read like a general
+> escaper and is not one. A backslash means nothing to an HTML parser, so
+> `<input value="<?= backslashDoubleQuotes($v) ?>">` is still an XSS — the quote
+> closes the attribute either way. It is not enough for a JavaScript string literal
+> either (it leaves backslashes, newlines, and `</script>` untouched); use
+> `json_encode()` there. Reach for `e()` for anything that reaches a page.
 
 ### Building & inspecting strings
 
@@ -136,7 +143,7 @@ if (!function_exists('logMsg')) {
 - Service shortcuts: `container()`, `config()`, `input()`, `output()`, `getUrl()`, `env()`.
 - Logging: `logMsg()`, `isLogEnabled()`.
 - HTTP errors: `show($code, $msg)` (generic), the `show400()`…`show503()` shortcuts, `redirect301()`.
-- HTML/strings/files: `e()` (HTML‑escape), `esc()`, `element()`, `forceDownload()`,
+- HTML/strings/files: `e()` (HTML‑escape), `backslashDoubleQuotes()`, `element()`, `forceDownload()`,
   `file_put_contents_atomic()`, and the substring family.
 
 ---

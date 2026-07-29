@@ -183,13 +183,27 @@ class Output extends Singleton implements OutputInterface
     /**
      * Redirects the client to a specified URL.
      *
+     * Same-origin targets (a path, or anything without a host) always pass. An
+     * off-site target has to name a host in the "allowed hosts" allowlist, or the
+     * call has to say `allowExternal: true`. That default is what keeps the common
+     * mistake - handing this a `?return=` parameter straight off the request -
+     * from being an open redirect used to lend a phishing page your domain.
+     *
      * @param string $url Target URL for redirection.
      * @param int $responseCode HTTP status code for the redirection.
      * @param bool $exit Whether to terminate script execution after redirection.
+     * @param bool $allowExternal Skip the off-site check for a target the caller
+     *        knows is trustworthy (a payment provider, an OAuth endpoint). Keep it
+     *        false for anything derived from the request.
+     * @throws OutputException If the target is off-site and neither allowlisted nor
+     *         explicitly permitted, uses a scheme other than http/https, or contains
+     *         control characters.
      */
-    public function redirect(string $url, int $responseCode = 0, bool $exit = true): void
+    public function redirect(string $url, int $responseCode = 0, bool $exit = true, bool $allowExternal = false): void
     {
         logMsg('DEBUG', __METHOD__ . ' ' . $url . ' ' . $responseCode . ' ' . $exit);
+
+        $url = $this->resolveRedirectTarget($url, $allowExternal);
 
         $responseCode = ($responseCode == 0) ? $this->config['default redirect code'] : $responseCode;
 
@@ -197,6 +211,67 @@ class Output extends Singleton implements OutputInterface
             ->header('Location: ' . $url, self::REPLACEALL)
             ->responseCode($responseCode)
             ->send($exit);
+    }
+
+    /**
+     * Decide whether a redirect target is safe to put in a Location header.
+     *
+     * @param string $url The requested target.
+     * @param bool $allowExternal Whether the caller has vouched for an off-site target.
+     * @return string The target, unchanged, when it is permitted.
+     * @throws OutputException When it is not.
+     */
+    protected function resolveRedirectTarget(string $url, bool $allowExternal): string
+    {
+        // A Location header is one line. PHP's header() already refuses embedded
+        // CR/LF, but failing here says why, and also catches the other control
+        // characters browsers quietly strip before following the URL - which is
+        // how "java\nscript:" style filter evasion works.
+        if (preg_match('/[\x00-\x1F\x7F]/', $url) === 1) {
+            throw new OutputException('Redirect target contains control characters.');
+        }
+
+        // the caller has taken responsibility for this one
+        if ($allowExternal) {
+            return $url;
+        }
+
+        // Browsers treat a backslash in the authority like a forward slash, so
+        // "/\evil.com" and "https:/\evil.com" are off-site even though parse_url()
+        // reads them as paths. Normalize before deciding - but redirect to the
+        // original string, since it is only the decision that needs the rewrite.
+        $parts = parse_url(str_replace('\\', '/', $url));
+
+        if ($parts === false) {
+            throw new OutputException('Redirect target is not a parsable url: "' . $url . '"');
+        }
+
+        $scheme = $parts['scheme'] ?? null;
+        $host = $parts['host'] ?? null;
+
+        // no host and no scheme - a path or a relative reference, so same origin
+        // by construction. (A leading "//" parses as a host, so it lands below.)
+        if ($host === null && $scheme === null) {
+            return $url;
+        }
+
+        // "javascript:", "data:", "mailto:" and friends never belong in a redirect
+        if ($scheme !== null && !in_array(strtolower($scheme), ['http', 'https'], true)) {
+            throw new OutputException('Redirect target scheme "' . $scheme . '" is not allowed.');
+        }
+
+        // a scheme with no host ("http:foo") is malformed enough to refuse
+        if ($host === null) {
+            throw new OutputException('Redirect target has a scheme but no host: "' . $url . '"');
+        }
+
+        // An empty allowlist means no off-site target is trusted, so this fails
+        // closed rather than waving the redirect through.
+        if (!in_array($host, $this->config['allowed hosts'] ?? [], true)) {
+            throw new OutputException('Refusing to redirect off-site to "' . $host . '". Add it to the "allowed hosts" config, or pass allowExternal: true if this target is deliberate.');
+        }
+
+        return $url;
     }
 
     /**
@@ -564,7 +639,33 @@ class Output extends Singleton implements OutputInterface
      */
     protected function getResponseHeader(int $responseCode): string
     {
-        return $this->input->server('server_protocol', 'HTTP/1.0') . ' ' . $responseCode . ' ' . $this->config['status codes'][$responseCode];
+        // responseCode() only guarantees the code is within 100-599, not that it
+        // is one the status map knows - 299 is accepted and has no entry. Reading
+        // it blind raised an "Undefined array key" warning and produced a status
+        // line with a trailing space and no reason phrase. Fall back to the
+        // generic phrase for the code's class instead, which is what RFC 9110
+        // says a recipient should assume for an unrecognized code anyway.
+        $reason = $this->config['status codes'][$responseCode] ?? $this->genericReasonPhrase($responseCode);
+
+        return $this->input->server('server_protocol', 'HTTP/1.0') . ' ' . $responseCode . ' ' . $reason;
+    }
+
+    /**
+     * The reason phrase for a status code the status map has no entry for.
+     *
+     * @param int $responseCode
+     * @return string
+     */
+    protected function genericReasonPhrase(int $responseCode): string
+    {
+        return match (intdiv($responseCode, 100)) {
+            1 => 'Informational',
+            2 => 'Success',
+            3 => 'Redirection',
+            4 => 'Client Error',
+            5 => 'Server Error',
+            default => 'Unknown',
+        };
     }
 
     /**

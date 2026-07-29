@@ -35,7 +35,7 @@ interface OutputInterface
     public function getResponseCode(): int;
 
     public function flushAll(): self;
-    public function redirect(string $url, int $responseCode = -1, bool $exit = true): void;
+    public function redirect(string $url, int $responseCode = -1, bool $exit = true, bool $allowExternal = false): void;
     public function forceHttps(): void;
 
     public function send(bool|int $exit = false): void;

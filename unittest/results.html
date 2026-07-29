@@ -447,6 +447,11 @@
             <li class="success">Uri segment</li>
             <li class="success">Content type</li>
             <li class="success">Request method</li>
+            <li class="success">Server key normalization strips only a leading prefix</li>
+            <li class="success">Method override is ignored on get</li>
+            <li class="success">Method override is honored on post</li>
+            <li class="success">Unsupported method override leaves post unchanged</li>
+            <li class="success">Request method without override</li>
             <li class="success">Request type</li>
             <li class="success">Is ajax request</li>
             <li class="success">Is cli request</li>
@@ -514,6 +519,10 @@
             <li class="success">Get response code</li>
             <li class="success">Send</li>
             <li class="success">Redirect</li>
+            <li class="success">Unknown but in range status code gets a generic reason phrase</li>
+            <li class="success">Redirect allows same origin targets</li>
+            <li class="success">Redirect refuses off site and non http targets</li>
+            <li class="success">Redirect honors allowed hosts for off site targets</li>
             <li class="success">Resolve trusted host honors allowed host</li>
             <li class="success">Resolve trusted host rejects spoofed host</li>
             <li class="success">Resolve trusted host fails closed without allowlist</li>
@@ -563,6 +572,7 @@
             <li class="success">Constructor sets cache key and update cache writes through it</li>
             <li class="success">Get routes loads from valid cache</li>
             <li class="success">Get routes falls back to config when cache invalid</li>
+            <li class="success">Route url containing the regex delimiter still matches</li>
         </ul>
         <h2>Security</h2>
         <ul>
@@ -572,7 +582,10 @@
             <li class="success">Encrypt</li>
             <li class="success">Auth</li>
             <li class="success">Remove invisible characters</li>
+            <li class="success">Remove invisible characters preserves printable unicode</li>
             <li class="success">Clean filename</li>
+            <li class="success">Clean filename discards any directory component</li>
+            <li class="success">Clean filename keeps unicode names and neutralizes tricks</li>
             <li class="success">Password hash</li>
             <li class="success">Create keys throws config not found when key path missing</li>
             <li class="success">Create keys throws directory not writable when directory not writable</li>
@@ -597,7 +610,8 @@
             <li class="success">Convert label slug</li>
             <li class="success">Convert label normalize strips non alnum</li>
             <li class="success">Convert label invalid case throws</li>
-            <li class="success">Esc escapes double quotes</li>
+            <li class="success">Backslash double quotes escapes double quotes</li>
+            <li class="success">Backslash double quotes is not an html escaper</li>
             <li class="success">E escapes html in string</li>
             <li class="success">E recurses into arrays</li>
             <li class="success">E leaves empty input untouched</li>

@@ -114,6 +114,19 @@ class Router extends Singleton implements RouterInterface
     // match() skip the regex engine for it. See addRoute() and match().
     private const string REGEX_METACHARACTERS = '\\^$.|?*+()[]{}';
 
+    // Delimiter wrapping a route url when it is compiled into a pattern.
+    //
+    // Deliberately a control character rather than something readable: the route
+    // url is interpolated between these, so any delimiter the url might itself
+    // contain ends the pattern early and breaks the route. '@' was the previous
+    // choice and is a legal URI path character - a perfectly reasonable route
+    // like '/mail/@(\w+)' silently stopped matching anything, because preg_match()
+    // failed to compile rather than throwing. Escaping instead would have to
+    // reason about already-escaped delimiters; a character that cannot appear in
+    // a URI at all, and that nobody writes into a route regex, simply cannot
+    // collide.
+    private const string PATTERN_DELIMITER = "\x01";
+
     // Base URL of the site, used for generating full URLs.
     protected string $siteUrl;
 
@@ -344,7 +357,7 @@ class Router extends Singleton implements RouterInterface
 
                 // a literal route captures no arguments
                 $argv = [];
-            } elseif (preg_match("@^" . $route['url'] . "$@D", $normalizedUri, $matches)) {
+            } elseif (preg_match(self::PATTERN_DELIMITER . '^' . $route['url'] . '$' . self::PATTERN_DELIMITER . 'D', $normalizedUri, $matches)) {
                 // drop the full-match element, leaving only the captured arguments
                 array_shift($matches);
 
