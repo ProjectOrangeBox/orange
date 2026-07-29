@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace orange\framework;
 
 use orange\framework\base\Singleton;
-use orange\framework\interfaces\CacheInterface;
 use orange\framework\interfaces\ConfigInterface;
 use orange\framework\exceptions\config\ImmutableAccess;
+use orange\framework\exceptions\config\ConfigSnapshotNotFound;
 use orange\framework\exceptions\config\ConfigFileDidNotReturnAnArray;
 
 /**
@@ -24,7 +24,7 @@ use orange\framework\exceptions\config\ConfigFileDidNotReturnAnArray;
  *  •   Provides a unified way to load configuration files.
  *  •   Supports multiple directories (with priority order).
  *  •   Allows environment-specific overrides.
- *  •   Implements caching of config metadata for performance.
+ *  •   In production, loads a pre-built snapshot instead of discovering anything.
  *  •   Gives developers read-only array-style access (via ArrayAccess) as well as method access;
  *      offsetSet()/offsetUnset() throw, since a loaded config file is immutable for the life of the request.
  *
@@ -40,13 +40,12 @@ use orange\framework\exceptions\config\ConfigFileDidNotReturnAnArray;
  *
  * 3. Initialization
  *  •   Constructor is protected (Singleton enforced).
- *  •   Accepts:
- *  •   $config → array of directories to search.
- *  •   $cacheService → optional cache service implementing CacheInterface.
- *  •   If caching is enabled:
- *  •   Tries to load cached map of config files.
- *  •   If cache is missing, builds the map and stores it.
- *  •   If no cache service, always builds the map fresh.
+ *  •   Accepts $config, holding the directories to search and - in production -
+ *      the path to the pre-built snapshot.
+ *  •   In production the snapshot is included and that is the whole of it: no
+ *      directory is globbed and no per-section file is included.
+ *  •   In development the cascade is discovered and merged per section, lazily,
+ *      so an edit takes effect on the next request.
  *
  * ⸻
  *
@@ -131,30 +130,97 @@ class Config extends Singleton implements ConfigInterface, \ArrayAccess
     /**
      * Protected constructor to enforce Singleton usage.
      *
+     * A cache service used to be accepted here to avoid rescanning the search
+     * directories on every instantiation. Caching a scan is the wrong shape for
+     * something that cannot change between deploys: the snapshot below replaces
+     * it, and needs no invalidation because regenerating it *is* the deploy step.
+     *
      * @param array $config Initial configuration array.
-     * @param CacheInterface|null $cacheService Optional cache used to persist the discovered
-     *        config-file map (keyed by ENVIRONMENT + class name) instead of rescanning the
-     *        search directories on every instantiation.
+     * @throws ConfigSnapshotNotFound In production, when the snapshot is absent.
      */
-    protected function __construct(array $config = [], ?CacheInterface $cacheService = null)
+    protected function __construct(array $config = [])
     {
         logMsg('DEBUG', __METHOD__);
 
         $this->searchDirectories = $config['config directories'] ?? [];
         $this->separator = $config['config separator'] ?? $this->separator;
 
-        if ($cacheService) {
-            // cache key
-            $cacheKey = ENVIRONMENT . '\\' . self::class;
-
-            if ($cached = $cacheService->get($cacheKey)) {
-                $this->foundConfigFiles = $cached;
-            } else {
-                $cacheService->set($cacheKey, $this->foundConfigFiles = $this->findAllConfigFilesInEachDirectory());
-            }
-        } else {
-            $this->foundConfigFiles = $this->findAllConfigFilesInEachDirectory();
+        // in production every section is already merged and on disk, so nothing
+        // here globs a directory or includes a file per section
+        if ($this->loadSnapshot($config['config snapshot'] ?? null)) {
+            return;
         }
+
+        $this->foundConfigFiles = $this->findAllConfigFilesInEachDirectory();
+    }
+
+    /**
+     * Load the pre-built snapshot, when there is supposed to be one.
+     *
+     * Only production uses it. Development discovers and merges as it always
+     * has, so an edit to a config file takes effect on the next request rather
+     * than after a rebuild.
+     *
+     * A missing snapshot in production is a deploy that did not finish, not
+     * something to paper over: falling back to scanning would run the site on
+     * whatever the cascade happens to produce and hide that the build step never
+     * ran. So it throws, naming the file and the command that writes it.
+     *
+     * @param string|null $snapshot absolute path, or null when the caller has no opinion
+     * @return bool whether configuration was loaded from it
+     * @throws ConfigSnapshotNotFound
+     */
+    protected function loadSnapshot(?string $snapshot): bool
+    {
+        if ($snapshot === null || !defined('ENVIRONMENT') || ENVIRONMENT !== 'production') {
+            return false;
+        }
+
+        if (!is_file($snapshot)) {
+            throw new ConfigSnapshotNotFound('"' . $snapshot . '" is missing. Generate it with "composer config:export" and commit it.');
+        }
+
+        $loaded = include $snapshot;
+
+        if (!is_array($loaded) || !isset($loaded['config'], $loaded['deferred'])) {
+            throw new ConfigFileDidNotReturnAnArray('"' . $snapshot . '" did not return a config/deferred array.');
+        }
+
+        // merged values, ready to serve: load() finds these already present and
+        // never goes near the filesystem for them
+        $this->configuration = $loaded['config'];
+
+        // sections that cannot be baked because they are not really
+        // configuration - see ConfigDetector. Their file paths were recorded at
+        // build time, so they still get included per request without anything
+        // having to glob a directory to find them again
+        $this->foundConfigFiles = $loaded['deferred'];
+
+        logMsg('DEBUG', __METHOD__ . ' loaded ' . count($loaded['config']) . ' sections from ' . $snapshot);
+
+        return true;
+    }
+
+    /**
+     * Every configuration section name that has been discovered.
+     *
+     * @return list<string>
+     */
+    public function sections(): array
+    {
+        return array_keys($this->configuration + $this->foundConfigFiles);
+    }
+
+    /**
+     * The files a section is merged from, in priority order.
+     *
+     * Empty for a section that came from a snapshot already merged.
+     *
+     * @return list<string>
+     */
+    public function files(string $section): array
+    {
+        return $this->foundConfigFiles[$section] ?? [];
     }
 
     /**

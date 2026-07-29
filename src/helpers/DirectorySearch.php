@@ -7,6 +7,8 @@ namespace orange\framework\helpers;
 use Closure;
 use orange\framework\exceptions\NotFound;
 use orange\framework\exceptions\ClassLocked;
+use orange\framework\exceptions\InvalidValue;
+use orange\framework\interfaces\CacheInterface;
 use orange\framework\traits\ConfigurationTrait;
 use orange\framework\exceptions\ResourceNotFound;
 use orange\framework\interfaces\DirectorySearchInterface;
@@ -62,6 +64,18 @@ class DirectorySearch implements DirectorySearchInterface
     // callback method
     protected array $callback = [];
 
+    // directory names never descended into during a recursive scan.
+    // These cannot hold resources but can easily dwarf the tree that does -
+    // a checked-out .git is routinely thousands of entries deep in a search
+    // path that holds a dozen views
+    protected array $prune = [];
+
+    // optional persistence for per-directory scan results (see scanForMatches())
+    protected ?CacheInterface $cache = null;
+
+    // ttl handed to the cache on write, null to use the cache's own default
+    protected ?int $cacheTtl = null;
+
     protected array $defaults = [
         'match' => '*.php', // glob format
         'quiet' => false, // throw exceptions when resource not found?
@@ -75,6 +89,12 @@ class DirectorySearch implements DirectorySearchInterface
         'resource key style' => 'view', // can also be a custom closure
         'directories' => [], // startup defaults
         'resources' => [],
+        // directory names skipped (subtree and all) by a recursive scan.
+        // 'vendor' is deliberately absent - it is a legitimate directory name
+        // that a resource tree can nest, unlike the tool directories below
+        'prune' => ['.git', '.svn', '.hg', '.idea', '.vscode', 'node_modules'],
+        'cache' => null, // a CacheInterface to persist scan results across requests
+        'cache ttl' => null, // ttl for those entries, null to use the cache's default
     ];
 
     /**
@@ -87,10 +107,17 @@ class DirectorySearch implements DirectorySearchInterface
      * and adds any default directories and resources.
      *
      * @param array $config Configuration array for the DirectorySearch instance.
+     * @throws InvalidValue If 'cache' is set to something that is not a CacheInterface.
      */
     public function __construct(array $config)
     {
         $config = array_replace($this->defaults, $config);
+
+        // assignFromConfig() would surface a bad 'cache' as a raw TypeError on a
+        // property assignment, which says nothing about which config key was wrong
+        if ($config['cache'] !== null && !$config['cache'] instanceof CacheInterface) {
+            throw new InvalidValue('"cache" must be a ' . CacheInterface::class . ', ' . get_debug_type($config['cache']) . ' given.');
+        }
 
         // assign class properties based on config values where applicable
         $this->assignFromConfig($config);
@@ -522,6 +549,58 @@ class DirectorySearch implements DirectorySearchInterface
     }
 
     /**
+     * Attach (or detach, with null) a cache to persist scan results across
+     * requests.
+     *
+     * Attach it before the first read. Directories already scanned in this
+     * process stay scanned, so a cache attached afterwards has nothing to hand
+     * back and only starts paying off on the next request.
+     *
+     * The cache is not part of the constructor's config in every case because
+     * the natural place to get one is the container, and a config file is loaded
+     * too early to reach into it. Config or setter, either works.
+     *
+     * @param CacheInterface|null $cache
+     * @param int|null $ttl ttl for written entries, null for the cache's default
+     * @return self
+     */
+    public function setCache(?CacheInterface $cache, ?int $ttl = null): self
+    {
+        $this->cache = $cache;
+        $this->cacheTtl = $ttl;
+
+        return $this;
+    }
+
+    /**
+     * Drop the cached scan results for the currently registered directories.
+     *
+     * Nothing about a stored entry expires when a file is added or removed - the
+     * paths were true when they were written and there is no cheap way to notice
+     * otherwise - so this is what a deploy calls. It only knows about the
+     * directories registered right now; a directory that has since been removed
+     * from the list keeps its entry until the cache's own ttl retires it.
+     *
+     * @return self
+     */
+    public function flushCache(): self
+    {
+        if ($this->cache !== null) {
+            $keys = [];
+
+            foreach (array_keys($this->directories) as $directory) {
+                $keys[] = $this->cacheKey((string)$directory);
+            }
+
+            if ($keys !== []) {
+                $this->cache->deleteMulti($keys);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
      * lock the class from further modification
      *
      * @return DirectorySearch
@@ -591,11 +670,7 @@ class DirectorySearch implements DirectorySearchInterface
                 }
 
                 if ($searchPath = realpath(rtrim((string) $directory, DIRECTORY_SEPARATOR))) {
-                    if ($this->recursive) {
-                        $this->addMatches($searchPath, $this->recursiveGlob($searchPath, $this->match));
-                    } else {
-                        $this->addMatches($searchPath, glob($searchPath . '/' . $this->match));
-                    }
+                    $this->addMatches($searchPath, $this->cachedMatches($searchPath));
                 }
 
                 // mark scanned even when realpath() failed - a directory that does
@@ -614,6 +689,107 @@ class DirectorySearch implements DirectorySearchInterface
 
             $this->rescan = false;
         }
+    }
+
+    /**
+     * Return the matching files under one search path, going through the cache
+     * when one is attached.
+     *
+     * Caching happens per directory rather than per instance on purpose. The
+     * directory set is not fixed for the life of the process - BaseController
+     * registers the running controller's own views directory on every request -
+     * so a single cached blob keyed on the whole set would miss constantly.
+     * Keyed per directory, every request reuses the entries for the directories
+     * it shares with previous requests and only pays for genuinely new ones,
+     * and the cross-directory work (the union, and the priority sort below)
+     * stays in process where it is cheap.
+     *
+     * What a cached entry skips is the tree walk, not every filesystem call:
+     * addMatches() still puts each path through addResource(), which realpath()s
+     * it. So a file deleted since the entry was written drops out on its own,
+     * and a stale entry degrades to a miss rather than to a resource that cannot
+     * be read. A file *added* since the write is the case nothing here can
+     * notice - that is what flushCache() and the ttl are for.
+     *
+     * @param string $searchPath an already realpath()ed directory
+     * @return array
+     */
+    protected function cachedMatches(string $searchPath): array
+    {
+        if ($this->cache === null) {
+            return $this->scanForMatches($searchPath);
+        }
+
+        $key = $this->cacheKey($searchPath);
+
+        // an is_array() check, not isset()/!== null: an empty result is a real
+        // answer worth caching, and every cache returns null for a miss
+        $cached = $this->cache->get($key);
+
+        if (is_array($cached)) {
+            return $cached;
+        }
+
+        $matches = $this->scanForMatches($searchPath);
+
+        $this->cache->set($key, $matches, $this->cacheTtl);
+
+        return $matches;
+    }
+
+    /**
+     * Walk one search path for matching files, with no caching in between.
+     *
+     * @param string $searchPath an already realpath()ed directory
+     * @return array
+     */
+    protected function scanForMatches(string $searchPath): array
+    {
+        if ($this->recursive) {
+            return $this->recursiveGlob($searchPath, $this->match);
+        }
+
+        // glob() reports failure as false, which is not something the caller
+        // should have to keep re-checking
+        return glob($searchPath . DIRECTORY_SEPARATOR . $this->match) ?: [];
+    }
+
+    /**
+     * Cache key for one search path's scan results.
+     *
+     * Every input scanForMatches() reads has to be in here, or two instances
+     * configured differently silently share one entry and the second one gets
+     * the first one's answer. That is the whole list: the path, the pattern, the
+     * recursion flag, and the prune list.
+     *
+     * What is deliberately *not* in here is anything applied after the scan -
+     * 'resource key style', 'normalize keys', 'hash keys'. Those shape the keys
+     * of $this->resources, not which files were found, and addMatches() re-derives
+     * them per instance from the cached path list. Two instances that disagree
+     * only about key style share an entry and both stay correct, which is the
+     * point: one scan feeds however many differently-keyed views of it.
+     *
+     * Instances of DirectorySearch are otherwise free to differ - 'quiet',
+     * 'locked', 'pend', 'callback' and the directory list itself cannot change
+     * what a scan of one directory turns up. The directory list in particular is
+     * why this is keyed per directory in the first place.
+     *
+     * @param string $searchPath
+     * @return string
+     */
+    protected function cacheKey(string $searchPath): string
+    {
+        // prune is a set, so a differently ordered but equivalent list must not
+        // produce a different key
+        $prune = $this->prune;
+        sort($prune);
+
+        return 'directorysearch.' . sha1(implode('|', [
+            $searchPath,
+            $this->match,
+            $this->recursive ? 'r' : 'n',
+            implode(',', $prune),
+        ]));
     }
 
     /**
@@ -637,8 +813,18 @@ class DirectorySearch implements DirectorySearchInterface
             return;
         }
 
-        // $this->directories is already in priority order, so its index is the rank
-        $directories = array_keys($this->directories);
+        // $this->directories is already in priority order, so its index is the
+        // rank. Prepare the comparison form once here rather than inside
+        // directoryRank(): the separator concatenation and the strlen() are the
+        // same for every path ranked below, and this used to redo both per
+        // directory per path
+        $directories = [];
+
+        foreach (array_keys($this->directories) as $index => $directory) {
+            $prefix = (string)$directory . DIRECTORY_SEPARATOR;
+
+            $directories[] = [$prefix, strlen($prefix), $index];
+        }
 
         foreach (array_keys($this->multiMatch) as $resource) {
             $paths = $this->resources[$resource] ?? [];
@@ -678,7 +864,8 @@ class DirectorySearch implements DirectorySearchInterface
      * last, keeping it a fallback behind whatever a scan turned up.
      *
      * @param string $path
-     * @param array $directories registered directories, already in priority order
+     * @param array $directories prepared [prefix, prefix length, rank] triples,
+     *        already in priority order - see sortResourcesByDirectoryPriority()
      * @return int
      */
     protected function directoryRank(string $path, array $directories): int
@@ -686,10 +873,8 @@ class DirectorySearch implements DirectorySearchInterface
         $rank = PHP_INT_MAX;
         $longestMatch = -1;
 
-        foreach ($directories as $index => $directory) {
-            $length = strlen((string)$directory);
-
-            if ($length > $longestMatch && str_starts_with($path, $directory . DIRECTORY_SEPARATOR)) {
+        foreach ($directories as [$prefix, $length, $index]) {
+            if ($length > $longestMatch && str_starts_with($path, (string) $prefix)) {
                 $longestMatch = $length;
                 $rank = $index;
             }
@@ -711,6 +896,14 @@ class DirectorySearch implements DirectorySearchInterface
      * pass walks the tree once, with no depth limit, and is both faster (one
      * tree walk instead of up to eight) and more correct.
      *
+     * The walk's cost tracks entries *traversed*, not files matched, so the two
+     * things that make it fast are not descending into trees that cannot hold a
+     * resource ($this->prune) and not paying a stat() per entry to decide
+     * whether to keep it (see the suffix fast path below). Measured against a
+     * search path holding checked-out git repositories, pruning alone took the
+     * walk from ~63ms to ~13ms for an identical match list - the .git
+     * directories were two thirds of everything visited.
+     *
      * @param string $searchPath
      * @param string $pattern
      * @return array
@@ -719,14 +912,55 @@ class DirectorySearch implements DirectorySearchInterface
     {
         $matches = [];
 
-        $iterator = new \RecursiveIteratorIterator(
-            new \RecursiveDirectoryIterator($searchPath, \FilesystemIterator::SKIP_DOTS),
-            \RecursiveIteratorIterator::LEAVES_ONLY
+        // CURRENT_AS_PATHNAME hands back a plain string per entry instead of
+        // constructing an SplFileInfo for it, which is what makes the stat-free
+        // suffix test below possible
+        $directory = new \RecursiveDirectoryIterator(
+            $searchPath,
+            \FilesystemIterator::SKIP_DOTS | \FilesystemIterator::CURRENT_AS_PATHNAME
         );
 
-        foreach ($iterator as $file) {
-            if ($file->isFile() && fnmatch($pattern, $file->getFilename())) {
-                $matches[] = $file->getPathname();
+        if ($this->prune !== []) {
+            $prune = $this->prune;
+
+            $directory = new \RecursiveCallbackFilterIterator(
+                $directory,
+                // rejecting a directory here prunes the whole subtree - the
+                // iterator never descends into an entry the filter rejected.
+                // Leaves are always accepted; the pattern test below is what
+                // decides those, and re-testing them here would just duplicate it
+                static fn($current, $key, $iterator): bool => !$iterator->hasChildren() || !in_array(basename((string)$current), $prune, true)
+            );
+        }
+
+        $iterator = new \RecursiveIteratorIterator($directory, \RecursiveIteratorIterator::LEAVES_ONLY);
+
+        // LEAVES_ONLY already excludes directories - hasChildren() makes them
+        // containers, so they are never yielded as leaves - which means the
+        // is-this-a-file question only needs answering for exotic entries
+        // (dangling symlinks, sockets, fifos). Those used to be filtered by an
+        // isFile() stat() on every entry in the tree; a resource directory
+        // holding one is pathological, and a dangling view path still surfaces
+        // as ViewNotFound when generate() checks file_exists() on it
+        $suffix = $this->literalSuffix($pattern);
+
+        if ($suffix !== null) {
+            $suffixLength = strlen($suffix);
+
+            foreach ($iterator as $path) {
+                // an entry yielded as a leaf is a file, so its pathname ends
+                // with the pattern's suffix exactly when its basename does
+                if (substr_compare((string)$path, $suffix, -$suffixLength) === 0) {
+                    $matches[] = (string)$path;
+                }
+            }
+        } else {
+            // patterns with metacharacters anywhere but a leading star still
+            // need the real matcher
+            foreach ($iterator as $path) {
+                if (fnmatch($pattern, basename((string)$path))) {
+                    $matches[] = (string)$path;
+                }
             }
         }
 
@@ -739,27 +973,55 @@ class DirectorySearch implements DirectorySearchInterface
     }
 
     /**
+     * Reduce a glob pattern to the literal suffix every match must end with, or
+     * null when the pattern needs a real glob matcher.
+     *
+     * Only the "leading star, literal tail" shape qualifies - which is the shape
+     * every caller in the framework actually uses, because the pattern is always
+     * built as '*.' . $extension. Anything else (a bare '*', an inner star, a
+     * character class, a brace) falls back to fnmatch().
+     *
+     * @param string $pattern
+     * @return string|null
+     */
+    protected function literalSuffix(string $pattern): ?string
+    {
+        if (!str_starts_with($pattern, '*')) {
+            return null;
+        }
+
+        $suffix = substr($pattern, 1);
+
+        // a bare '*' has no suffix to compare against - substr_compare() with a
+        // zero-length needle does not return 0, so it cannot express "match all"
+        if ($suffix === '') {
+            return null;
+        }
+
+        // any remaining glob metacharacter means the tail is not literal
+        return strpbrk($suffix, '*?[]{}\\') === false ? $suffix : null;
+    }
+
+    /**
      * add the matching resources
      *
      * @param string $searchPath
-     * @param array|false $matches
+     * @param array $matches
      * @return void
      * @throws NotFound
      */
-    protected function addMatches(string $searchPath, array|false $matches): void
+    protected function addMatches(string $searchPath, array $matches): void
     {
-        if (is_array($matches)) {
-            // hoisted out of the loop - it was re-read from the property per file
-            $closureFunction = $this->keyClosure;
+        // hoisted out of the loop - it was re-read from the property per file
+        $closureFunction = $this->keyClosure;
 
-            foreach ($matches as $file) {
-                $fileInfo = pathinfo((string) $file);
-                $fileInfo['searchpath'] = $searchPath;
-                // extract the key based on the function you chose
-                $key = $closureFunction($fileInfo);
-                // now add the resource
-                $this->addResource($key, $file);
-            }
+        foreach ($matches as $file) {
+            $fileInfo = pathinfo((string) $file);
+            $fileInfo['searchpath'] = $searchPath;
+            // extract the key based on the function you chose
+            $key = $closureFunction($fileInfo);
+            // now add the resource
+            $this->addResource($key, $file);
         }
     }
 

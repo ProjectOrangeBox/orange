@@ -6,6 +6,7 @@ use orange\framework\Data;
 use orange\framework\View;
 use orange\framework\Input;
 use orange\framework\Error;
+use orange\framework\ViewFinder;
 use orange\framework\Router;
 use orange\framework\Container;
 use orange\framework\interfaces\DataInterface;
@@ -26,8 +27,6 @@ final class ErrorAdvancedTest extends unitTestHelper
 
         $view = View::getInstance(
             [
-                'view paths' => [WORKINGDIR . '/views'],
-                'view aliases' => [],
                 'temp directory' => sys_get_temp_dir(),
                 'debug' => false,
             ],
@@ -36,6 +35,10 @@ final class ErrorAdvancedTest extends unitTestHelper
         );
 
         $this->setPrivatePublic('view', $view);
+        // empty on purpose: an application that has not generated a view map has
+        // nothing here, and the error views that ship beside Error.php still have
+        // to resolve - see findView()'s bundled fallback
+        $this->setPrivatePublic('viewFinder', ViewFinder::newInstance([]));
         $this->setPrivatePublic('data', Data::getInstance([]));
         $this->setPrivatePublic('errorViewDirectory', 'errors');
         $this->setPrivatePublic('envDirectory', 'production');
@@ -45,12 +48,31 @@ final class ErrorAdvancedTest extends unitTestHelper
 
     /* findView() */
 
+    /**
+     * findView() returns a path now, not a name - the view engine does not
+     * search any more, so nothing downstream could resolve a name.
+     */
     public function testFindViewLocatesRequestTypeView(): void
     {
-        // the framework ships src/views/errors/html/404.php
         $found = $this->callMethod('findView', ['404']);
 
-        $this->assertEquals('errors/html/404', $found);
+        $this->assertEquals(ORANGEDIR . '/views/errors/html/404.php', $found);
+        $this->assertFileExists($found);
+    }
+
+    /**
+     * With a view map that does hold the name, the application's copy wins -
+     * error pages are overridable exactly like any other view.
+     */
+    public function testFindViewPrefersTheViewFinderOverTheBundledCopy(): void
+    {
+        $this->setPrivatePublic('viewFinder', ViewFinder::newInstance([
+            'view fallbacks' => ['errors/html/404' => WORKINGDIR . '/views/errors/html/404.php'],
+        ]));
+
+        $found = $this->callMethod('findView', ['404']);
+
+        $this->assertEquals(WORKINGDIR . '/views/errors/html/404.php', $found);
     }
 
     public function testFindViewReturnsEmptyWhenNotFound(): void

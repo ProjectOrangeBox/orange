@@ -6,9 +6,9 @@ namespace orange\framework;
 
 use Throwable;
 use orange\framework\base\Singleton;
-use orange\framework\helpers\DirectorySearch;
 use orange\framework\interfaces\DataInterface;
 use orange\framework\interfaces\ViewInterface;
+use orange\framework\interfaces\ViewFinderInterface;
 use orange\framework\interfaces\InputInterface;
 use orange\framework\traits\ConfigurationTrait;
 use orange\framework\interfaces\OutputInterface;
@@ -65,6 +65,9 @@ class Error extends Singleton
     public DataInterface $data;
     public InputInterface $input;
     public ViewInterface $view;
+
+    /** turns an error view name into a path; the view engine only renders */
+    public ViewFinderInterface $viewFinder;
     public OutputInterface $output;
 
     /** application error code - the exception's own code when it is non-zero */
@@ -81,7 +84,12 @@ class Error extends Singleton
     public string $envDirectory = '';
     public string $requestTypeDirectory = '';
 
-    /** set either of these from decorate() to take over what gets rendered/sent */
+    /**
+     * set either of these from decorate() to take over what gets rendered/sent.
+     * $viewFile takes a view name ('errors/html/404') or an absolute path -
+     * resolveViewFile() accepts both, since decorate() hooks predate the view
+     * engine wanting a path
+     */
     public string $viewFile = '';
     public string $outputContent = '';
 
@@ -112,6 +120,8 @@ class Error extends Singleton
         $this->data = $this->getService('data', []);
         $this->input = $this->getService('input', [[]]);
         $this->view = $this->getService('view', [[], $this->data]);
+        // resolves an error view name to a file - see findView()
+        $this->viewFinder = $this->getService('viewFinder', [[]], 'ViewFinder');
         $this->output = $this->getService('output', [[], $this->input]);
 
         // base view directory to search for error views
@@ -178,7 +188,11 @@ class Error extends Singleton
 
         // if a view file is setup by $thrown or from renderViewBasedOnCode use that
         if (!empty($this->viewFile)) {
-            $this->outputContent = $this->view->render($this->viewFile);
+            $resolved = $this->resolveViewFile($this->viewFile);
+
+            // never let a missing error view become a second, harder to read
+            // error - fall through to the raw dump instead
+            $this->outputContent = $resolved !== '' ? $this->view->render($resolved) : $this->viewRaw();
         }
 
         // if we still don't have output content then use the raw fallback
@@ -295,19 +309,6 @@ class Error extends Singleton
 
         $foundViewPath = '';
 
-        $viewSearch = $this->view->search();
-
-        // let's make sure our local views directory is added to the search as a last alternative -
-        // only add it if it's not already registered: addDirectory() unconditionally forces a
-        // rescan of every registered directory on the next exists() call (even when the directory
-        // is already present), so calling it on every findView() invocation was forcing a full
-        // filesystem re-glob on every single error rendered
-        $localViewsDirectory = __DIR__ . DIRECTORY_SEPARATOR . 'views';
-
-        if (!$viewSearch->directoryExists($localViewsDirectory)) {
-            $viewSearch->addDirectory($localViewsDirectory, DirectorySearch::LAST);
-        }
-
         // did someone already attach output?
         $searchPaths = [
             // search env directory /errors/dev/html/404.php
@@ -325,8 +326,7 @@ class Error extends Singleton
         ];
 
         foreach ($searchPaths as $searchPath) {
-            if ($viewSearch->exists($searchPath)) {
-                $foundViewPath = $searchPath;
+            if ($foundViewPath = $this->locateView($searchPath)) {
                 break;
             }
         }
@@ -337,13 +337,57 @@ class Error extends Singleton
     }
 
     /**
+     * Turn one error view name into a path, or '' when there is no such view.
+     *
+     * @param string $name eg. 'errors/html/404'
+     * @return string absolute path, or '' when nothing has it
+     */
+    protected function locateView(string $name): string
+    {
+        // the finder first, so an application can override any error view just
+        // by owning its name, exactly like any other view
+        if ($this->viewFinder->exists($name)) {
+            return $this->viewFinder->find($name);
+        }
+
+        // then the copies that ship next to this class. These are the
+        // last-resort pages an error handler cannot afford to be missing, and
+        // an application that has not generated a view map yet has nothing in
+        // the finder at all - so they are addressed directly rather than
+        // looked up
+        $bundled = __DIR__ . DIRECTORY_SEPARATOR . 'views' . DIRECTORY_SEPARATOR . $name . '.php';
+
+        return is_file($bundled) ? $bundled : '';
+    }
+
+    /**
+     * Resolve whatever ended up in $viewFile to a path the view engine can render.
+     *
+     * Two things set that property. renderViewBasedOnCode() puts a path there,
+     * and a thrown exception's decorate() hook has always put a *name* there -
+     * that hook is a documented extension surface, so both keep working rather
+     * than the name silently rendering nothing.
+     *
+     * @return string absolute path, or '' when nothing has it
+     */
+    protected function resolveViewFile(string $viewFile): string
+    {
+        return is_file($viewFile) ? $viewFile : $this->locateView($viewFile);
+    }
+
+    /**
      * Retrieves a service instance by its name.
      *
      * @param string $name Service name.
      * @param array $arguments Arguments to pass to the service constructor, if necessary.
+     * @param string|null $className Short class name backing this service. Only
+     *        needed when it is not simply the ucfirst'd service name - deriving
+     *        it that way lower cases the rest, which turns 'viewFinder' into
+     *        'Viewfinder' and stops matching the file on a case-sensitive
+     *        filesystem (it happens to work on macOS, which hides the bug).
      * @return mixed The service instance.
      */
-    protected function getService(string $name, array $arguments): mixed
+    protected function getService(string $name, array $arguments, ?string $className = null): mixed
     {
         // only build the message/context if this level is enabled - logMsg() alone would build it regardless
         if (isLogEnabled('DEBUG')) {
@@ -361,7 +405,7 @@ class Error extends Singleton
             // here would also swallow a real failure while building an actually-registered
             // service (e.g. a bad autowired dependency), silently masking it behind a
             // fallback instance instead of letting the real error surface
-            $className = ucfirst(mb_strtolower($name));
+            $className ??= ucfirst(mb_strtolower($name));
 
             // same folder as this class
             require_once __DIR__ . DIRECTORY_SEPARATOR . $className . '.php';

@@ -125,4 +125,53 @@ final class ConfigTest extends unitTestHelper
             unlink($badFile);
         }
     }
+
+    /* snapshot */
+
+    /**
+     * The snapshot is a production-only shortcut. Everywhere else the cascade is
+     * discovered and merged live, so an edit to a config file takes effect on
+     * the next request - which means a missing snapshot outside production is
+     * not an error, it is simply not consulted.
+     */
+    public function testSnapshotIsIgnoredOutsideProduction(): void
+    {
+        $instance = Config::newInstance([
+            'config directories' => [WORKINGDIR . '/config'],
+            'config snapshot' => WORKINGDIR . '/config/definitely-not-here.php',
+        ]);
+
+        // no ConfigSnapshotNotFound, and the cascade still resolves. Only the
+        // base directory is registered here, so this is the un-overridden value
+        $this->assertEquals('red', $instance->get('aaa')['color']);
+    }
+
+    public function testSectionsListsEveryDiscoveredSection(): void
+    {
+        $sections = $this->instance->sections();
+
+        $this->assertContains('aaa', $sections);
+        $this->assertContains('bbb', $sections);
+    }
+
+    /**
+     * files() is what lets the exporter record where a deferred section lives
+     * instead of baking what it currently evaluates to.
+     */
+    public function testFilesReportsTheMergeOrderForASection(): void
+    {
+        $files = $this->instance->files('aaa');
+
+        $this->assertNotEmpty($files);
+
+        foreach ($files as $file) {
+            $this->assertFileExists($file);
+            $this->assertEquals('aaa.php', basename($file));
+        }
+    }
+
+    public function testFilesIsEmptyForAnUnknownSection(): void
+    {
+        $this->assertEquals([], $this->instance->files('no-such-section'));
+    }
 }

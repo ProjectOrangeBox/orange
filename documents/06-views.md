@@ -144,7 +144,7 @@ chaining:
 ```php
 $this->view
     ->change('debug', true)
-    ->change('allow dynamic views', true);
+    ->change('tempDirectory', __ROOT__ . '/var/views');
 ```
 
 Common options mirror the config keys below.
@@ -162,12 +162,21 @@ in your `config/view.php`):
 | `temp directory` | `sys_get_temp_dir()` | Where `renderString()` writes its compiled cache. |
 | `debug` | `DEBUG` | Verbose view diagnostics. |
 | `extension` | `.php` | Template file extension. |
-| `allow dynamic views` | `false` | Enables `$c`/`$m`/`$1`/`$2` placeholders resolved from the matched route (controller/method/URL segments). |
 | `sub path size` | `6` | Internal bucketing size for the temp cache. |
 
-Dynamic views (`allow dynamic views`) let a view name include placeholders that the engine fills
-from the current route — for example rendering `errors/$c` where `$c` is the matched controller
-segment. It's off by default; enable it only if you use that pattern.
+### Route-derived view names
+
+A view name may be built from the matched route — `$c` (controller), `$m` (method), `$1`/`$2`
+(namespace segments) — but that is **not** the view engine's job. `BaseController::renderView()`
+resolves the placeholders and hands the finished name to `render()`:
+
+```php
+return $this->renderView();            // '' -> '$c/$m' -> 'main/index'
+return $this->renderView('errors/$c'); // -> 'errors/main'
+return $this->renderView('main/index');// no placeholders, passed straight through
+```
+
+The view engine itself knows nothing about routing, which is why it takes no router.
 
 ## Summary
 

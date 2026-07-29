@@ -37,3 +37,13 @@ parameters:
             # signature, which is exactly what this factory exists to avoid.
             identifier: new.static
             path: src/base/traits/BaseTraits.php
+        -
+            # ENVIRONMENT is genuinely a runtime-variable string
+            # ('development', 'production', ...). .phpstan-bootstrap.php stubs it
+            # as one fixed literal so the constant is defined at all, which makes
+            # PHPStan read any comparison against that same literal as
+            # statically always-false. Config::loadSnapshot() really does behave
+            # differently per environment - this is a stubbing limitation, not a
+            # dead branch.
+            identifier: notIdentical.alwaysFalse
+            path: src/Config.php

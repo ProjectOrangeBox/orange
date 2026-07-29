@@ -8,14 +8,10 @@ use Throwable;
 use orange\framework\base\Singleton;
 use orange\framework\exceptions\InvalidValue;
 use orange\framework\exceptions\filesystem\Directory;
-use orange\framework\helpers\DirectorySearch;
 use orange\framework\interfaces\DataInterface;
 use orange\framework\interfaces\ViewInterface;
 use orange\framework\traits\ConfigurationTrait;
-use orange\framework\interfaces\RouterInterface;
-use orange\framework\exceptions\ResourceNotFound;
 use orange\framework\exceptions\view\ViewNotFound;
-use orange\framework\interfaces\DirectorySearchInterface;
 use orange\framework\exceptions\filesystem\FileNotWritable;
 use orange\framework\exceptions\filesystem\DirectoryNotWritable;
 use orange\framework\exceptions\IncorrectInterface;
@@ -33,70 +29,68 @@ use orange\framework\exceptions\IncorrectInterface;
  *
  * 1. Core Purpose
  *  •   Provide a foundation for rendering views (templates) in different formats.
- *  •   Manage configuration, view paths, aliases, caching, and data injection.
- *  •   Allow support for dynamic view resolution based on routing.
  *  •   Handle file-based and string-based rendering consistently.
+ *
+ * One concern, stated as a sentence: render this template with this data.
+ *
+ * Everything about *which* file that is has moved out. Routing did first - the
+ * $c/$m/$1/$2 placeholders live on BaseController::renderView(), where the
+ * routing context already is. Naming followed: aliases, module namespaces and
+ * the fallback a package's views live under are ViewFinder's, and so is the
+ * directory searching this class used to do on every render.
+ *
+ * So render() takes a path. It does not search, and it does not interpret the
+ * string it is given - if no file is there, that is a ViewNotFound and not
+ * something to go looking around for.
  *
  * ⸻
  *
  * 2. Key Properties
- *  •   $search → a DirectorySearch instance for locating view files.
  *  •   $data → a data source (implements DataInterface) passed into views.
- *  •   $router → optional router instance for resolving dynamic view names.
  *  •   $debug → toggles debug mode (forces re-rendering, no caching).
- *  •   $allowDynamicViews → enables placeholders like $c/$m in view paths.
  *  •   $tempDirectory → directory for temporary cached view files (string templates).
- *  •   $alias → maps view names to alternate paths.
  *  •   $subPathSize → determines subdirectory depth for hashing string templates.
  *  •   $changeableTypeCheck → defines which properties can be updated at runtime and their type checks.
  *
  * ⸻
  *
  * 3. Initialization
- *  •   Constructor merges config, sets debug/dynamic flags, validates the temp directory, loads aliases, and builds the DirectorySearch utility with configured view paths.
- *  •   Can also preload resources into the search utility.
+ *  •   Constructor merges config, sets the debug flag and validates the temp directory.
  *
  * ⸻
  *
  * 4. Key Methods
- *  1.  Searching and Aliasing
- *  •   search() → returns the directory search utility.
- *  •   addAlias($view, $aliasView) → registers a view alias.
- *  •   resolveAlias($view) → replaces a view name with its alias.
- *  2.  Rendering Views
- *  •   render($view, $data, $options) → locates a view file and renders it with merged data.
+ *  1.  Rendering Views
+ *  •   render($viewFile, $data, $options) → renders the given view file with merged data.
  *  •   renderString($string, $data, $options) → renders directly from a string (compiled into a temp file).
  *  •   generate($__viewFilePath, $__dataArray) → internal method that executes the view file with provided data.
- *  3.  Dynamic View Resolution
- *  •   resolveDynamicView($view) → replaces placeholders like $c (controller), $m (method), $1, $2 (namespace segments) using the matched route.
- *  4.  Data Handling
+ *  2.  Data Handling
  *  •   data($data) → merges new data with the view’s internal DataInterface.
- *  5.  Configuration
+ *  3.  Configuration
  *  •   change($name, $value) → safely update configurable properties (e.g., enable debug mode, change temp directory).
- *  6.  File Safety
+ *  4.  File Safety
  *  •   isFileWritable($file) → ensures the target file or directory is writable (creates directories if needed).
  *
  * ⸻
  *
  * 5. Error Handling
  *  •   Throws Directory (constructor) if the configured temp directory does not exist.
- *  •   Throws ViewNotFound if a view file cannot be located.
+ *  •   Throws ViewNotFound if the given view file does not exist.
  *  •   Throws DirectoryNotWritable or FileNotWritable if caching directories are inaccessible.
- *  •   Throws InvalidValue for incorrect config changes, or when dynamic view resolution is
- *      missing the controller/method needed to fill in a placeholder.
+ *  •   Throws InvalidValue for incorrect config changes.
  *  •   Wraps low-level errors into framework exceptions for consistency.
  *
  * ⸻
  *
  * 6. Big Picture
  *  •   ViewAbstract is the backbone of Orange’s view system.
- *  •   It standardizes how views are located, resolved, cached, and rendered, while allowing flexible engines to be built on top.
- *  •   By combining search, aliasing, dynamic resolution, and rendering, it ensures all view engines behave consistently across the framework.
+ *  •   It standardizes how templates are compiled, cached and executed, while allowing flexible engines to be built on top.
+ *  •   By sharing rendering, it ensures all view engines behave consistently across the framework.
  *
  * ⸻
  *
  * Recommendation: Treat ViewAbstract as the template engine foundation.
- * All custom view renderers should extend it to inherit search, caching, and rendering logic.
+ * All custom view renderers should extend it to inherit caching and rendering logic.
  */
 abstract class ViewAbstract extends Singleton implements ViewInterface
 {
@@ -104,29 +98,14 @@ abstract class ViewAbstract extends Singleton implements ViewInterface
     use ConfigurationTrait;
 
     /**
-     * View file search utility
-     */
-    public DirectorySearch $search;
-
-    /**
      * Debug mode toggle
      */
     protected bool $debug = false;
 
     /**
-     * Allow dynamic views toggle
-     */
-    protected bool $allowDynamicViews = false;
-
-    /**
      * Temporary directory for cached view files
      */
     protected string $tempDirectory = '';
-
-    /**
-     * Aliases for view names
-     */
-    protected array $alias = [];
 
     /**
      * Number of characters for sub-directory path hashing
@@ -139,7 +118,6 @@ abstract class ViewAbstract extends Singleton implements ViewInterface
     protected array $changeableTypeCheck = [
         'tempDirectory' => 'is_string',
         'debug' => 'is_bool',
-        'allowDynamicViews' => 'is_bool',
     ];
 
     /**
@@ -148,110 +126,48 @@ abstract class ViewAbstract extends Singleton implements ViewInterface
      *
      * @param array $config Configuration array.
      * @param DataInterface|null $data Optional data source for the view.
-     * @param RouterInterface|null $router Optional router used to resolve dynamic view names.
      * @throws Directory If the configured temp directory does not exist.
      */
-    protected function __construct(array $config, protected ?DataInterface $data = null, protected ?RouterInterface $router = null)
+    protected function __construct(array $config, protected ?DataInterface $data = null)
     {
         logMsg('DEBUG', __METHOD__);
 
         $this->config = $this->mergeConfigWith($config, false);
 
-        if ($data) {
-            $this->data = $data;
-        }
-
-        if ($router) {
-            $this->router = $router;
-        }
-
         $this->debug = $this->config['debug'];
-        $this->allowDynamicViews = $this->config['allow dynamic views'];
         $this->tempDirectory = rtrim($this->config['temp directory'], DIRECTORY_SEPARATOR);
 
         if (!is_dir($this->tempDirectory)) {
             throw new Directory('Unknown Directory "' . $this->tempDirectory . '".');
         }
 
-        $this->alias = $this->config['view aliases'];
         $this->subPathSize = $this->config['sub path size'];
-
-        // Initialize DirectorySearch for locating views
-        $this->search = new DirectorySearch([
-            'quiet' => false,
-            'directories' => $this->config['view paths'] + $this->config['default view paths'],
-            'match' => '*.' . trim($this->config['extension'], '.'),
-            'recursive' => true,
-            'lock after scan' => false,
-            'normalize keys' => true,
-            'resource key style' => 'view',
-            'pend' => DirectorySearchInterface::PREPEND,
-        ]);
-        if (isset($this->config['resources'])) {
-            $this->search->addResources($this->config['resources']);
-        }
-    }
-
-    /**
-     * Returns the search utility.
-     *
-     * @return DirectorySearchInterface
-     */
-    public function search(): DirectorySearchInterface
-    {
-        logMsg('DEBUG', __METHOD__);
-        return $this->search;
-    }
-
-    /**
-     * Add an alias for a view.
-     *
-     * @param string $view Original view name.
-     * @param string $aliasView Alias name.
-     */
-    public function addAlias(string $view, string $aliasView): void
-    {
-        logMsg('DEBUG', __METHOD__ . ' ' . $view . ' ' . $aliasView);
-        $this->alias[$view] = $aliasView;
     }
 
     /**
      * Render a view file.
      *
-     * @param string $view View name or path.
+     * Takes a path, not a name. Working out which file a name means - module
+     * namespaces, package fallbacks, aliases - is ViewFinder's job, and getting
+     * that path here is the caller's: BaseController::renderView() resolves it
+     * for controllers, findView() for everyone else.
+     *
+     * @param string $viewFile Absolute path to the view file.
      * @param array $data Data to pass into the view.
      * @param array $options Rendering options.
      * @return string Rendered view content.
-     * @throws ViewNotFound If the view file cannot be located.
-     * @throws InvalidValue If dynamic view resolution is enabled but the matched route is missing
-     *         the controller or method needed to resolve a placeholder.
+     * @throws ViewNotFound If the file does not exist.
      */
-    public function render(string $view = '', array $data = [], array $options = []): string
+    public function render(string $viewFile = '', array $data = [], array $options = []): string
     {
         logMsg('DEBUG', __METHOD__);
         // only build the message/context if this level is enabled - logMsg() alone would build it regardless
         if (isLogEnabled('DEBUG')) {
-            logMsg('DEBUG', '', ['view' => $view, 'data' => $data, 'options' => $options]);
+            logMsg('DEBUG', '', ['viewFile' => $viewFile, 'data' => $data, 'options' => $options]);
         }
 
-
-        // allow dynamic views only if router ALSO provided
-        if ($this->allowDynamicViews && isset($this->router)) {
-            $view = $this->resolveDynamicView($view);
-        }
-
-        $view = $this->resolveAlias($view);
-
-        try {
-            $found = $this->search->findFirst($view);
-        } catch (ResourceNotFound $e) {
-            // convert Resource Not Found into View Not Found Exception
-            // because the resource is a view when used in this context
-            throw new ViewNotFound($view, 500, $e);
-        }
-
-        // generate the view based on the found view file
-        return $this->generate($found, $this->data($data));
+        // generate() is what checks the file exists and throws ViewNotFound
+        return $this->generate($viewFile, $this->data($data));
     }
 
     /**
@@ -406,22 +322,6 @@ abstract class ViewAbstract extends Singleton implements ViewInterface
     }
 
     /**
-     * Resolve an alias to its mapped view path if an alias exists.
-     *
-     * @param string $view The original view name.
-     * @return string The resolved view name after alias mapping.
-     */
-    protected function resolveAlias(string $view): string
-    {
-        // Check if an alias exists for the given view
-        $alias = $this->alias[$view] ?? $view;
-
-        logMsg('DEBUG', __METHOD__ . ' ' . $view . ' ' . $alias);
-
-        return $alias;
-    }
-
-    /**
      * Merge incoming data with the view's existing data source, if available.
      *
      * @param array $data Incoming data array for the view.
@@ -436,80 +336,5 @@ abstract class ViewAbstract extends Singleton implements ViewInterface
 
         // Ensure the result is an array, not a Data Object
         return $data;
-    }
-
-    /**
-     * Resolve dynamic view paths based on router callback information.
-     *
-     * Dynamic placeholders in the view string (e.g., $c, $m, $1, $2) are replaced with
-     * controller, method, or namespace segments dynamically.
-     *
-     * @param string $view The view string with possible dynamic placeholders.
-     * @return string The dynamically resolved view string.
-     * @throws InvalidValue If controller or method is missing while resolving placeholders.
-     */
-    protected function resolveDynamicView(string $view): string
-    {
-        logMsg('DEBUG', __METHOD__ . ' argument: "' . $view . '"');
-
-        // Define dynamic placeholders
-        $prefix = '$';
-        $controllerString = $prefix . 'c';
-        $methodString = $prefix . 'm';
-
-        // Retrieve controller and method from the router's matched callback
-        [$controller, $method] = $this->router->getMatched('callback');
-
-        // Check if placeholders exist or if the view string is dynamic
-        if (str_contains($view, $prefix) || str_contains($view, '*') || $view === '') {
-            // Handle default controller and method placeholders
-            if ($view == '') {
-                $view = $controllerString . '/' . $methodString;
-            } elseif (str_ends_with($view, '*/*')) {
-                $view = substr($view, 0, -3) . $controllerString . '/' . $methodString;
-            }
-
-            if (str_ends_with($view, '/*')) {
-                $view = substr($view, 0, -2) . '/' . $methodString;
-            }
-
-            // Replace method placeholder
-            if (str_contains($view, $methodString)) {
-                if (!isset($method)) {
-                    throw new InvalidValue('Missing Method and therefore cannot generate dynamic view.');
-                }
-                $view = str_replace($methodString, $method, $view);
-            }
-
-            // Replace controller placeholder and namespace segments
-            if (str_contains($view, $prefix)) {
-                if (!isset($controller)) {
-                    throw new InvalidValue('Missing Controller and therefore cannot generate dynamic view.');
-                }
-
-                // Normalize the controller string
-                $namespacedController = mb_strtolower((string) $controller);
-
-                // Remove "controller" suffix if it exists
-                if (str_ends_with($namespacedController, 'controller')) {
-                    $namespacedController = substr($namespacedController, 0, -10);
-                }
-
-                // Break controller namespace into segments
-                foreach (explode('/', str_replace('\\', '/', $namespacedController)) as $index => $segment) {
-                    $view = str_replace($prefix . ($index + 1), $segment, $view);
-
-                    // Store the last segment
-                    $controllerName = $segment;
-                }
-
-                // Replace the controller placeholder with the final segment
-                $view = str_replace($controllerString, $controllerName, $view);
-            }
-        }
-
-        logMsg('DEBUG', __METHOD__ . ' return: "' . $view . '"');
-
-        return $view;
     }
 }

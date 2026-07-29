@@ -267,6 +267,17 @@ class Application
         // set the application config in the container
         $this->config['config directories'] = $this->configDirectories;
 
+        // where the pre-built snapshot lives for this environment. Config only
+        // reads it in production; development keeps discovering the cascade so
+        // an edit takes effect on the next request rather than after a rebuild.
+        //
+        // array_key_exists, not ??=: passing null has to mean "there is no
+        // snapshot, discover the cascade", which is how bin/configExport runs as
+        // production without demanding the file it is about to write
+        if (!array_key_exists('config snapshot', $this->config)) {
+            $this->config['config snapshot'] = __ROOT__ . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . ENVIRONMENT . DIRECTORY_SEPARATOR . 'config.php';
+        }
+
         // config also has some additional application setup variables
         ini_set('display_errors', $this->config['display_errors']);
         ini_set('display_startup_errors', $this->config['display_startup_errors']);

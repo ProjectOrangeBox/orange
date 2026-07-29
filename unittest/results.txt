@@ -77,6 +77,24 @@ Base
  [x] Singleton
  [x] Singleton array object
 
+Base Controller
+ [x] Resolve dynamic view empty uses controller and method
+ [x] Resolve dynamic view replaces placeholders
+ [x] Resolve dynamic view replaces method only
+ [x] Resolve dynamic view ends with slash star
+ [x] Resolve dynamic view ends with star star
+ [x] Resolve dynamic view namespaced controller segments
+ [x] Resolve dynamic view leaves a plain name alone
+ [x] Resolve dynamic view missing method throws
+ [x] Resolve dynamic view missing controller throws
+ [x] Render view resolves and renders
+ [x] Render view passes a plain name straight through
+ [x] View namespace strips the controllers segment with data set "module controller"
+ [x] View namespace strips the controllers segment with data set "no controllers segment"
+ [x] View namespace strips the controllers segment with data set "nested module"
+ [x] View namespace is empty without a namespace
+ [x] Render view throws without a view property
+
 Config
  [x] Get
  [x] Get key
@@ -90,6 +108,10 @@ Config
  [x] Get with default returns default for missing key
  [x] Get with default returns value when key present
  [x] Load throws when config file does not return array
+ [x] Snapshot is ignored outside production
+ [x] Sections lists every discovered section
+ [x] Files reports the merge order for a section
+ [x] Files is empty for an unknown section
 
 Configuration Trait
  [x] Change option sets property
@@ -219,6 +241,27 @@ Directory Search
  [x] Append after a scan keeps lowest priority
  [x] Re prepending an already scanned directory reorders
  [x] Manually added resource ranks behind scanned ones
+ [x] Default prune skips tool directories entirely
+ [x] Empty prune walks everything
+ [x] Prune is configurable
+ [x] Prune only applies to recursive scans
+ [x] Leading star pattern matches by suffix
+ [x] Bare star pattern falls back to fnmatch and matches everything
+ [x] Pattern with metacharacters falls back to fnmatch
+ [x] Pattern without leading star falls back to fnmatch
+ [x] Directory named like the match pattern is not a resource
+ [x] Scan results are persisted to the cache
+ [x] A second instance reads the cache instead of walking the tree
+ [x] Cached paths that no longer exist are dropped
+ [x] Cache entries are keyed per directory pattern and recursion
+ [x] Cache entries are keyed per prune list
+ [x] Prune list order does not change the cache key
+ [x] Instances differing only in key style share one entry
+ [x] An empty scan result is cached rather than rescanned
+ [x] Flush cache drops entries for registered directories
+ [x] Set cache attaches and detaches
+ [x] Flush cache without a cache is a noop
+ [x] Constructor rejects a non cache
 
 Dispatcher
  [x] Call
@@ -272,13 +315,15 @@ Error
  [x] View raw build html includes all known fields
  [x] View raw build html omits missing fields
  [x] View raw build html escapes untrusted fields
- [x] Find view skips add directory when local views directory already registered
- [x] Find view adds local views directory when not yet registered
+ [x] Find view prefers the view finder
+ [x] Find view falls back to the bundled views
+ [x] Find view returns empty when neither has it
  [x] Get service falls back to orange default when service not found
  [x] Get service propagates real construction errors
 
 Error Advanced
  [x] Find view locates request type view
+ [x] Find view prefers the view finder over the bundled copy
  [x] Find view returns empty when not found
  [x] Render view based on code renders found template
  [x] Render view based on code uses http code when provided
@@ -553,34 +598,42 @@ String Helpers
  [x] Sanitize download filename escapes quotes and backslashes
  [x] Sanitize download filename strips control characters
 
+View Finder
+ [x] Namespaced view wins
+ [x] Module override beats the shared view
+ [x] Falls back when the namespace has no copy
+ [x] Without a namespace only the fallback map is consulted
+ [x] A namespace does not leak other namespaces entries
+ [x] Missing view throws
+ [x] The exception names both attempted keys
+ [x] Exists does not throw
+ [x] Surrounding slashes are ignored
+ [x] Matching is case insensitive
+ [x] Alias resolves to its target
+ [x] Alias is case insensitive too
+ [x] Alias follows the normal fallback order
+ [x] Aliases are not followed transitively
+ [x] An alias shadows a real name of the same key
+ [x] The exception names the alias target
+ [x] Existence of the file on disk is not checked
+ [x] All returns both maps
+ [x] Empty config still constructs and misses cleanly
+ [x] Debug info reports both maps
+
 Viewer
  [x] Render
  [x] Render string
  [x] Render string cache directory is not group or world writable
- [x] Add path
- [x] Add paths
  [x] Render view not found exception
  [x] Change option
- [x] Recursive
- [x] Search method returns directory search
- [x] Add alias resolves on render
+ [x] Does not interpret a view name
  [x] Change valid option
  [x] Change returns self
  [x] Change unknown option throws
  [x] Change wrong type throws
  [x] Change wrong type with array value does not warn
  [x] Render merges view level data
- [x] Resolve dynamic view empty uses controller and method
- [x] Resolve dynamic view replaces placeholders
- [x] Resolve dynamic view replaces method only
- [x] Resolve dynamic view ends with slash star
- [x] Resolve dynamic view namespaced controller segments
- [x] Resolve dynamic view missing method throws
- [x] Resolve dynamic view missing controller throws
- [x] Resolve dynamic view ends with star star
  [x] Constructor throws when temp directory missing
- [x] Constructor adds resources
- [x] Render resolves dynamic view when enabled with router
  [x] Generate throws view not found for missing file
  [x] Is file writable creates missing directory
  [x] Is file writable throws when directory creation fails

@@ -32,7 +32,7 @@ $html = $this->view->renderString('Hello, <?= e($name) ?>!', ['name' => 'World']
 Set a single engine option at runtime (mirrors the config keys). Chainable.
 
 ```php
-$this->view->change('debug', true)->change('allow dynamic views', true);
+$this->view->change('debug', true)->change('tempDirectory', $dir);
 ```
 
 ### `search(): DirectorySearchInterface`
@@ -65,13 +65,13 @@ where a directory is inserted.
 | `temp directory` | `sys_get_temp_dir()` | `renderString()` cache location |
 | `debug` | `DEBUG` | Verbose diagnostics |
 | `extension` | `.php` | Template extension |
-| `allow dynamic views` | `false` | Enable `$c`/`$m`/`$1`/`$2` route placeholders in view names |
 | `sub path size` | `6` | Temp cache bucketing |
 
-## Dynamic view placeholders
+## Route-derived view names
 
-With `allow dynamic views` enabled, a view name may contain placeholders resolved from the matched
-route: `$c` (controller segment), `$m` (method segment), `$1`/`$2` (URL segments). Off by default.
+`$c` (controller), `$m` (method) and `$1`/`$2` (namespace segments) are resolved by
+[`BaseController::renderView()`](../06-views.md#route-derived-view-names), not by the view engine —
+which takes no router and knows nothing about routing.
 
 ---
 

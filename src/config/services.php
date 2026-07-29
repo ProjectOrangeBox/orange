@@ -13,6 +13,7 @@ use orange\framework\Output;
 use orange\framework\Router;
 use orange\framework\Container;
 use orange\framework\Dispatcher;
+use orange\framework\ViewFinder;
 use orange\framework\interfaces\EnvInterface;
 use orange\framework\interfaces\LogInterface;
 use orange\framework\interfaces\DataInterface;
@@ -24,6 +25,7 @@ use orange\framework\interfaces\OutputInterface;
 use orange\framework\interfaces\RouterInterface;
 use orange\framework\interfaces\ContainerInterface;
 use orange\framework\interfaces\DispatcherInterface;
+use orange\framework\interfaces\ViewFinderInterface;
 
 /*
  * By placing the services inside a closure they are not created UNTIL they are called
@@ -52,7 +54,10 @@ return [
     '@request' => 'input',
     '@response' => 'output',
 
-    '$mimes' => include_once __DIR__ . '/mimes.php',
+    // require, not include_once: the return value is what gets registered, and
+    // include_once yields true rather than the array whenever the file has
+    // already been loaded - which output.php below does with its own require
+    '$mimes' => require __DIR__ . '/mimes.php',
     'container' => Container::getInstance(...),
     'config' => fn(ContainerInterface $container): ConfigInterface => Config::getInstance($container->get('$application')),
     'log' => fn(ContainerInterface $container): LogInterface => Log::getInstance($container->config->log),
@@ -61,6 +66,10 @@ return [
     'output' => fn(ContainerInterface $container): OutputInterface => Output::getInstance($container->config->output, $container->input),
     'router' => fn(ContainerInterface $container): RouterInterface => Router::getInstance($container->config->routes, $container->input),
     'data' => fn(ContainerInterface $container): DataInterface => Data::getInstance($container->config->data),
-    'view' => fn(ContainerInterface $container): ViewInterface => View::getInstance($container->config->view, $container->data, $container->router),
+    // get(), not ->views: an application without a generated view map should
+    // still boot and simply miss every lookup, rather than fail on a config file
+    // that does not exist
+    'viewFinder' => fn(ContainerInterface $container): ViewFinderInterface => ViewFinder::getInstance($container->config->get('views', [])),
+    'view' => fn(ContainerInterface $container): ViewInterface => View::getInstance($container->config->view, $container->data),
     'dispatcher' => Dispatcher::getInstance(...),
 ];

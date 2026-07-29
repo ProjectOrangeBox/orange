@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use orange\framework\Data;
 use orange\framework\Error;
+use orange\framework\ViewFinder;
 use orange\framework\interfaces\OutputInterface;
 use orange\framework\interfaces\ViewInterface;
 use orange\framework\interfaces\ContainerInterface;
@@ -233,44 +234,52 @@ final class ErrorTest extends unitTestHelper
 
     /* findView() */
 
-    public function testFindViewSkipsAddDirectoryWhenLocalViewsDirectoryAlreadyRegistered(): void
+    /**
+     * The finder is asked first, so an application can override any error view
+     * simply by owning its name.
+     */
+    public function testFindViewPrefersTheViewFinder(): void
     {
-        // addDirectory() unconditionally forces a full filesystem rescan of every
-        // registered search directory on the next exists() call, even when the directory
-        // being "added" is already present - findView() must only add its local views
-        // directory once, not on every single call (i.e. every error rendered)
-        $search = $this->createMock(DirectorySearchInterface::class);
-        $search->expects($this->once())->method('directoryExists')->willReturn(true);
-        $search->expects($this->never())->method('addDirectory');
-        $search->method('exists')->willReturn(false);
-
-        $view = $this->createMock(ViewInterface::class);
-        $view->expects($this->once())->method('search')->willReturn($search);
-        $this->setPrivatePublic('view', $view);
+        $this->setPrivatePublic('viewFinder', ViewFinder::newInstance([
+            'view fallbacks' => ['errors/html/404' => '/app/custom/404.php'],
+        ]));
 
         $this->instance->errorViewDirectory = 'errors';
         $this->instance->envDirectory = 'testing';
         $this->instance->requestTypeDirectory = 'html';
 
-        $this->assertSame('', $this->callMethod('findView', ['404']));
+        $this->assertSame('/app/custom/404.php', $this->callMethod('findView', ['404']));
     }
 
-    public function testFindViewAddsLocalViewsDirectoryWhenNotYetRegistered(): void
+    /**
+     * With nothing in the finder - which is every application that has not
+     * generated a view map yet - the copies shipped beside Error.php are still
+     * found. An error handler that cannot render its own error page is worse
+     * than useless, so these are addressed directly rather than looked up.
+     */
+    public function testFindViewFallsBackToTheBundledViews(): void
     {
-        $search = $this->createMock(DirectorySearchInterface::class);
-        $search->expects($this->once())->method('directoryExists')->willReturn(false);
-        $search->expects($this->once())->method('addDirectory');
-        $search->method('exists')->willReturn(false);
-
-        $view = $this->createMock(ViewInterface::class);
-        $view->expects($this->once())->method('search')->willReturn($search);
-        $this->setPrivatePublic('view', $view);
+        $this->setPrivatePublic('viewFinder', ViewFinder::newInstance([]));
 
         $this->instance->errorViewDirectory = 'errors';
         $this->instance->envDirectory = 'testing';
         $this->instance->requestTypeDirectory = 'html';
 
-        $this->assertSame('', $this->callMethod('findView', ['404']));
+        $found = $this->callMethod('findView', ['404']);
+
+        $this->assertSame(ORANGEDIR . '/views/errors/html/404.php', $found);
+        $this->assertFileExists($found);
+    }
+
+    public function testFindViewReturnsEmptyWhenNeitherHasIt(): void
+    {
+        $this->setPrivatePublic('viewFinder', ViewFinder::newInstance([]));
+
+        $this->instance->errorViewDirectory = 'errors';
+        $this->instance->envDirectory = 'testing';
+        $this->instance->requestTypeDirectory = 'html';
+
+        $this->assertSame('', $this->callMethod('findView', ['no-such-code']));
     }
 
     /* getService() */

@@ -77,6 +77,21 @@ interface DirectorySearchInterface
     public function flushResources(): self;
 
     /**
+     * attach a cache to persist per-directory scan results across requests,
+     * or null to detach one
+     *
+     * attach it before the first read - directories already scanned in this
+     * process are not re-scanned, so a late attachment caches nothing until
+     * the next request
+     *
+     * flushCache() drops the entries for the currently registered directories,
+     * which is what a deploy calls - stored entries do not otherwise notice a
+     * file being added or removed
+     */
+    public function setCache(?CacheInterface $cache, ?int $ttl = null): self;
+    public function flushCache(): self;
+
+    /**
      * find all or the first or last matching resource
      */
     public function find(string $resource): array;

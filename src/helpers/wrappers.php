@@ -117,6 +117,28 @@ if (!function_exists('getUrl')) {
     }
 }
 
+/*
+ * Wrapper for the view finder.
+ *
+ * Resolving a view name to a path is separate from rendering it, so this is how
+ * a caller that is not a controller gets a path to hand to the view engine.
+ * Controllers do not need it - BaseController::renderView() supplies the
+ * controller's own namespace automatically. Reach for this when you want a
+ * specific view rather than whatever the calling module would resolve to:
+ *
+ *     findView('errors/html/404')                        // the shared one
+ *     findView('main/index', 'application/welcome')       // that module's, if it has one
+ *
+ * Throws ViewNotFound naming both attempted keys.
+ */
+if (!function_exists('findView')) {
+    function findView(string $view, string $namespace = ''): string
+    {
+        // throws an exception if the viewFinder service isn't setup
+        return container()->viewFinder->find($view, $namespace);
+    }
+}
+
 /* wrapper for input */
 if (!function_exists('input')) {
     function input(): \orange\framework\interfaces\InputInterface

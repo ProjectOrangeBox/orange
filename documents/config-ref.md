@@ -112,7 +112,6 @@ Template search paths, extension, temp cache, and dynamic‑view toggles. Guide:
 | `temp directory` | `sys_get_temp_dir()` | string | Where `renderString()` writes its compiled cache. |
 | `debug` | `DEBUG` | bool | Verbose view diagnostics (the `DEBUG` constant). |
 | `extension` | `'.php'` | string | Template file extension. |
-| `allow dynamic views` | `false` | bool | Enable `$c`/`$m`/`$1`/`$2` route placeholders in view names. |
 | `sub path size` | `6` | int | Internal bucketing size for the temp cache. |
 
 ---
