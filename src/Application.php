@@ -98,12 +98,15 @@ class Application
     // singleton instance
     protected static Application $self;
     // application (this class) config
+    /** @var array<string, mixed> */
     protected array $config;
     // Dependency Injection Container
     protected ContainerInterface $container;
     // this classes configuration array
+    /** @var list<string> */
     protected array $configDirectories;
     // environment variables
+    /** @var array<string, mixed> */
     protected array $env = [];
 
     // singleton pattern
@@ -116,8 +119,8 @@ class Application
     /**
      * singleton pattern
      *
-     * @param null|array $environmentalFiles
-     * @param null|array $configDirectories
+     * @param list<string> $environmentalFiles
+     * @param list<string> $configDirectories
      * @return Application
      * @throws FileNotFound If an environmental file passed in $environmentalFiles cannot be found.
      * @throws InvalidConfigurationValue If an environmental file passed in $environmentalFiles is not a valid INI file.
@@ -156,7 +159,7 @@ class Application
     /**
      * start a http application
      *
-     * @param array $config
+     * @param array<string, mixed> $config
      * @return ContainerInterface
      * @throws InvalidValue
      * @throws DirectoryNotFound
@@ -209,6 +212,7 @@ class Application
      * @throws MissingRequired
      * @throws FileNotFound
      * @throws IncorrectInterface
+     * @param array<string, mixed> $config
      */
     public function run(array $config = []): ContainerInterface
     {
@@ -227,6 +231,7 @@ class Application
      * @throws MissingRequired
      * @throws FileNotFound
      * @throws IncorrectInterface
+     * @param array<string, mixed> $config
      */
     protected function bootstrap(string $mode, array $config): ContainerInterface
     {
@@ -366,6 +371,7 @@ class Application
      * @return void
      * @throws InvalidValue
      * @throws IncorrectInterface
+     * @param array<string, mixed> $services
      */
     protected function bootstrapContainer(array $services): void
     {
@@ -492,7 +498,7 @@ class Application
      * load a config file from the config directories
      *
      * @param string $configFilename
-     * @return array
+     * @return array<string, mixed>
      * @throws ConfigFileDidNotReturnAnArray
      */
     protected function loadConfigFile(string $configFilename): array

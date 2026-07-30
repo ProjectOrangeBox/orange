@@ -23,6 +23,7 @@ class Output extends RealOutput implements OutputInterface
     // attached "output" from the php functions to a shared array
     // instead of sending it "out"
     // you can then read test if needed
+    /** @var array<string, mixed> */
     public array $test = [];
 
     #[\Override]

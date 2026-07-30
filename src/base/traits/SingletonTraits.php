@@ -13,6 +13,8 @@ trait SingletonTraits
      * The actual singleton's instance almost always resides inside a static
      * field. In this case, the static field is an array, where each subclass of
      * the Singleton stores its own instance.
+     *
+     * @var array<string, static>
      */
     private static array $instances = [];
 

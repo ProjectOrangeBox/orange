@@ -95,6 +95,8 @@ class Container extends Singleton implements ContainerInterface
 
     /**
      * List of registered services.
+     *
+     * @var array<string, mixed>
      */
     protected array $registeredServices = [];
 
@@ -102,6 +104,8 @@ class Container extends Singleton implements ContainerInterface
      * Container constructor.
      *
      * Initializes the container and registers itself as a service.
+     *
+     * @param array<string, mixed> $services
      */
     protected function __construct(array $services = [])
     {
@@ -277,7 +281,7 @@ class Container extends Singleton implements ContainerInterface
     /**
      * Return a debug array of the registered services.
      *
-     * @return array The debug information of the registered services.
+     * @return array<string, mixed> The debug information of the registered services.
      * @throws NotFound If a registered service has an unknown type.
      */
     public function __debugInfo(): array
@@ -288,7 +292,7 @@ class Container extends Singleton implements ContainerInterface
     /**
      * Return a debug array of the registered services.
      *
-     * @return array The debug information of the registered services.
+     * @return array<string, mixed> The debug information of the registered services.
      * @throws NotFound If a registered service has an unknown type.
      */
     public function debugInfo(): array
@@ -305,7 +309,7 @@ class Container extends Singleton implements ContainerInterface
     /**
      * Get all registered service names.
      *
-     * @return array The list of all service names.
+     * @return list<string> The list of all service names.
      */
     public function getServices(): array
     {
@@ -459,7 +463,7 @@ class Container extends Singleton implements ContainerInterface
     /**
      * Set multiple services at one time
      *
-     * @param array $many
+     * @param array<string, mixed> $many
      * @return void
      */
     protected function setMany(array $many): void
@@ -501,7 +505,7 @@ class Container extends Singleton implements ContainerInterface
     /**
      * If this is a child of the orange singleton class then we don't need to recreate it over and over
      *
-     * @param string $serviceName
+     * @param string $service Name
      * @param object $service
      * @return void
      */
@@ -542,7 +546,14 @@ class Container extends Singleton implements ContainerInterface
      */
     protected function autoWire(string $normalizedName, string $fullyQualifiedClass): mixed
     {
-        // Use reflection to analyze the class and its constructor
+        // Use reflection to analyze the class and its constructor.
+        // class_exists() both narrows this to a class-string and turns a
+        // mis-registered service name into the framework's own exception
+        // instead of a raw ReflectionException
+        if (!class_exists($fullyQualifiedClass)) {
+            throw new ServiceNotFound($normalizedName);
+        }
+
         $classReflection = new ReflectionClass($fullyQualifiedClass);
 
         // These will hold the reflection methods if they exist
@@ -595,7 +606,7 @@ class Container extends Singleton implements ContainerInterface
      * getInstance method, in declaration order, ready to pass to newInstanceArgs()/invokeArgs().
      *
      * @param \ReflectionMethod $method
-     * @return array
+     * @return array<array-key, mixed>
      * @throws ServiceNotFound If a requested service is not registered.
      * @throws InvalidValue If resolving a requested service's alias exceeds the maximum allowed depth.
      * @throws FailedToAutoWire If a requested service is itself an auto-wired class that cannot be instantiated.

@@ -6,6 +6,7 @@ namespace orange\framework;
 
 use orange\framework\base\Singleton;
 use orange\framework\interfaces\ConfigInterface;
+use orange\framework\exceptions\InvalidValue;
 use orange\framework\exceptions\config\ImmutableAccess;
 use orange\framework\exceptions\config\ConfigSnapshotNotFound;
 use orange\framework\exceptions\config\ConfigFileDidNotReturnAnArray;
@@ -89,26 +90,34 @@ use orange\framework\exceptions\config\ConfigFileDidNotReturnAnArray;
  *  •   Provides flexible access ($config->file, $config['file'], $config->get('file.key')).
  *
  * @package orange\framework
+ *
+ * @implements \ArrayAccess<string, mixed>
  */
 class Config extends Singleton implements ConfigInterface, \ArrayAccess
 {
     /**
      * Stores loaded configurations indexed by filename.
+     *
+     * @var array<string, mixed>
      */
     protected array $configuration = [];
 
     /**
      * Array of directories to search for configuration files, in order of priority.
+     *
+     * @var list<string>
      */
     protected array $searchDirectories = [];
 
-    /*
+    /**
      * Map of config file names to their discovered file paths across directories.
      * Example:
      * [
      *   'database' => ['/path/to/config/database.php', '/path/to/env/database.php'],
      *   'app' => ['/path/to/config/app.php']
      * ]
+     *
+     * @var array<string, list<string>>
      */
     protected array $foundConfigFiles = [];
 
@@ -116,15 +125,20 @@ class Config extends Singleton implements ConfigInterface, \ArrayAccess
      * Memoized get() results keyed by the full "$filenameKey" string.
      * Only successful lookups are stored here; values are never null, so a
      * cheap isset() is a valid hit test.
+     *
+     * @var array<string, mixed>
      */
     protected array $resolved = [];
 
     /**
      * Lookups known to have no value ("file.key" → true). Tracked separately
      * from $resolved because each caller supplies its own default value.
+     *
+     * @var array<string, bool>
      */
     protected array $missingKeys = [];
 
+    /** @var non-empty-string */
     protected string $separator = '.';
 
     /**
@@ -135,7 +149,7 @@ class Config extends Singleton implements ConfigInterface, \ArrayAccess
      * something that cannot change between deploys: the snapshot below replaces
      * it, and needs no invalidation because regenerating it *is* the deploy step.
      *
-     * @param array $config Initial configuration array.
+     * @param array<string, mixed> $config Initial configuration array.
      * @throws ConfigSnapshotNotFound In production, when the snapshot is absent.
      */
     protected function __construct(array $config = [])
@@ -143,7 +157,15 @@ class Config extends Singleton implements ConfigInterface, \ArrayAccess
         logMsg('DEBUG', __METHOD__);
 
         $this->searchDirectories = $config['config directories'] ?? [];
-        $this->separator = $config['config separator'] ?? $this->separator;
+        $separator = $config['config separator'] ?? $this->separator;
+
+        // explode() in get() rejects an empty separator with a ValueError that
+        // says nothing about the configuration that caused it
+        if (!is_string($separator) || $separator === '') {
+            throw new InvalidValue('config separator cannot be empty');
+        }
+
+        $this->separator = $separator;
 
         // in production every section is already merged and on disk, so nothing
         // here globs a directory or includes a file per section
@@ -338,7 +360,7 @@ class Config extends Singleton implements ConfigInterface, \ArrayAccess
      * Load a configuration file into memory.
      *
      * @param string $filename Name of the configuration file.
-     * @return array The configuration array.
+     * @return array<string, mixed> The configuration array.
      * @throws ConfigFileDidNotReturnAnArray If the configuration file doesn't return an array.
      */
     protected function load(string $filename): array
@@ -369,7 +391,7 @@ class Config extends Singleton implements ConfigInterface, \ArrayAccess
      * Find configuration files by name across search directories.
      * In production this can be cached.
      *
-     * @return array
+     * @return array<string, list<string>>
      */
     protected function findAllConfigFilesInEachDirectory(): array
     {
@@ -387,7 +409,11 @@ class Config extends Singleton implements ConfigInterface, \ArrayAccess
             // GLOB_NOSORT: order within a directory can't matter - a basename
             // appears at most once per directory, and merge priority comes from
             // the searchDirectories order
-            foreach (glob($realDirectory . DIRECTORY_SEPARATOR . '*.php', GLOB_NOSORT) as $file) {
+            // glob() returns false when the directory cannot be read, which
+            // foreach cannot take
+            $files = glob($realDirectory . DIRECTORY_SEPARATOR . '*.php', GLOB_NOSORT) ?: [];
+
+            foreach ($files as $file) {
                 $found[basename($file, '.php')][] = $file;
             }
         }

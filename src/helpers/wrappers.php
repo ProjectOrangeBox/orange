@@ -56,6 +56,9 @@ if (!function_exists('isLogEnabled')) {
  * override as needed
  */
 if (!function_exists('logMsg')) {
+    /**
+     * @param array<array-key, mixed> $context
+     */
     function logMsg(mixed $level, string $msg, array $context = []): void
     {
         static $logInstance;
@@ -110,6 +113,9 @@ if (!function_exists('config')) {
 
 /* wrapper for router get url */
 if (!function_exists('getUrl')) {
+    /**
+     * @param array<array-key, mixed> $arguments
+     */
     function getUrl(string $searchName = '', array $arguments = [], ?bool $skipCheckingType = null): string
     {
         // throws an exception if the router service isn't setup

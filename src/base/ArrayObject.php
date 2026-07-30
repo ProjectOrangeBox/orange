@@ -9,11 +9,17 @@ use orange\framework\base\traits\BaseTraits;
 use orange\framework\base\traits\FactoryTraits;
 use orange\framework\exceptions\MagicMethodNotFound;
 
+/**
+ * @extends PHPArrayObject<array-key, mixed>
+ */
 class ArrayObject extends PHPArrayObject
 {
     use BaseTraits;
     use FactoryTraits;
 
+    /**
+     * @param array<array-key, mixed> $input
+     */
     protected function __construct(array $input = [])
     {
         parent::__construct($input, PHPArrayObject::ARRAY_AS_PROPS);
@@ -35,7 +41,7 @@ class ArrayObject extends PHPArrayObject
      * let "some" of the array_ functions work
      *
      * @param string $name
-     * @param array $arguments
+     * @param array<array-key, mixed> $arguments
      * @return mixed
      * @throws MagicMethodNotFound
      */
@@ -86,7 +92,7 @@ class ArrayObject extends PHPArrayObject
     /**
      * Allow ArrayObject "merging"
      *
-     * @param array $array
+     * @param array<array-key, mixed> $array
      * @param bool $recursive
      * @param bool $replace
      * @return static
@@ -117,8 +123,8 @@ class ArrayObject extends PHPArrayObject
      * merge() can keep using array_replace_recursive()/array_merge_recursive() on
      * them (those only recurse into plain arrays, not ArrayObject instances).
      *
-     * @param array $data
-     * @return array
+     * @param array<array-key, mixed> $data
+     * @return array<array-key, mixed>
      */
     protected function buildArrayObjects(array $data)
     {

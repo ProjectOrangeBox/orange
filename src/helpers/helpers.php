@@ -57,7 +57,7 @@ if (!function_exists('element')) {
      * Builds a standard HTML element with attributes and content.
      *
      * @param string $tag The HTML tag name.
-     * @param array $attr An array of attributes.
+     * @param array<string, mixed> $attr An array of attributes.
      * @param string $content The inner content of the element.
      * @param bool $escape Whether to escape the content.
      * @return string The generated HTML element.
@@ -90,7 +90,13 @@ if (!function_exists('dataUri')) {
      */
     function dataUri(string $file)
     {
-        echo 'data:' . mime_content_type($file) . ';base64,' . base64_encode(file_get_contents($file));
+        $contents = file_get_contents($file);
+
+        if ($contents === false) {
+            throw new \RuntimeException('could not read ' . $file);
+        }
+
+        echo 'data:' . mime_content_type($file) . ';base64,' . base64_encode($contents);
     }
 }
 
@@ -108,47 +114,47 @@ if (!function_exists('convertLabel')) {
     {
         switch ($case) {
             case 'normalize':
-                $value = mb_convert_case($value, MB_CASE_LOWER, mb_detect_encoding($value));
-                $value = preg_replace('/[^a-z0-9]/i', '', $value);
+                $value = mb_convert_case($value, MB_CASE_LOWER, mb_detect_encoding($value) ?: null);
+                $value = preg_replace('/[^a-z0-9]/i', '', $value) ?? '';
                 break;
             case 'lower':
-                $value = substr($value, 0, 1) . implode(' ', preg_split('/(?=[A-Z])/', substr($value, 1)));
-                $value = mb_convert_case($value, MB_CASE_LOWER, mb_detect_encoding($value));
+                $value = substr($value, 0, 1) . implode(' ', preg_split('/(?=[A-Z])/', substr($value, 1)) ?: []);
+                $value = mb_convert_case($value, MB_CASE_LOWER, mb_detect_encoding($value) ?: null);
                 $value = str_replace('_', ' ', $value);
                 break;
             case 'upper':
-                $value = substr($value, 0, 1) . implode(' ', preg_split('/(?=[A-Z])/', substr($value, 1)));
-                $value = mb_convert_case($value, MB_CASE_UPPER, mb_detect_encoding($value));
+                $value = substr($value, 0, 1) . implode(' ', preg_split('/(?=[A-Z])/', substr($value, 1)) ?: []);
+                $value = mb_convert_case($value, MB_CASE_UPPER, mb_detect_encoding($value) ?: null);
                 $value = str_replace('_', ' ', $value);
                 break;
             case 'title':
-                $value = substr($value, 0, 1) . implode(' ', preg_split('/(?=[A-Z])/', substr($value, 1)));
-                $value = mb_convert_case($value, MB_CASE_TITLE, mb_detect_encoding($value));
+                $value = substr($value, 0, 1) . implode(' ', preg_split('/(?=[A-Z])/', substr($value, 1)) ?: []);
+                $value = mb_convert_case($value, MB_CASE_TITLE, mb_detect_encoding($value) ?: null);
                 $value = str_replace('_', ' ', $value);
                 break;
             case 'ucfirst':
-                $value = substr($value, 0, 1) . implode(' ', preg_split('/(?=[A-Z])/', substr($value, 1)));
-                $value = mb_convert_case($value, MB_CASE_LOWER, mb_detect_encoding($value));
+                $value = substr($value, 0, 1) . implode(' ', preg_split('/(?=[A-Z])/', substr($value, 1)) ?: []);
+                $value = mb_convert_case($value, MB_CASE_LOWER, mb_detect_encoding($value) ?: null);
                 $value = ucfirst(str_replace('_', ' ', $value));
                 break;
             case 'camel':
             case 'pascal':
-                $value = preg_replace('/([a-z])([A-Z])/', '\\1 \\2', $value);
-                $value = preg_replace('@[^a-zA-Z0-9\-_ ]+@', '', (string) $value);
+                $value = preg_replace('/([a-z])([A-Z])/', '\\1 \\2', $value) ?? '';
+                $value = preg_replace('@[^a-zA-Z0-9\-_ ]+@', '', (string) $value) ?? '';
                 $value = str_replace(['-', '_'], ' ', $value);
                 $value = str_replace(' ', '', ucwords(convertLabel($value, 'lower')));
                 $value = substr(convertLabel($value, 'lower'), 0, 1) . substr($value, 1);
                 $value = ($case === 'camel') ? lcfirst($value) : ucfirst($value);
                 break;
             case 'snake':
-                $value = preg_replace('@[^a-zA-Z0-9\-_ ]+@', '', $value);
-                $value = mb_convert_case((string) $value, MB_CASE_LOWER, mb_detect_encoding((string) $value));
+                $value = preg_replace('@[^a-zA-Z0-9\-_ ]+@', '', $value) ?? '';
+                $value = mb_convert_case((string) $value, MB_CASE_LOWER, mb_detect_encoding((string) $value) ?: null);
                 $value = str_replace([' ', '-'], '_', $value);
                 break;
             case 'slug':
-                $value = preg_replace('/[^a-zA-Z0-9 -]/', '', $value);
+                $value = preg_replace('/[^a-zA-Z0-9 -]/', '', $value) ?? '';
                 $value = mb_strtolower(str_replace(' ', '-', trim((string) $value)));
-                $value = preg_replace('/-+/', '-', $value);
+                $value = preg_replace('/-+/', '-', $value) ?? '';
                 break;
             default:
                 throw new InvalidArgumentException('Invalid case: ' . $case);
@@ -197,7 +203,7 @@ if (!function_exists('e')) {
      * @param int $flags Flags for htmlspecialchars.
      * @param string|null $encoding Character encoding.
      * @param bool $doubleEncode Whether to double encode.
-     * @return string|array The escaped input.
+     * @return string|array<array-key, mixed> The escaped input.
      */
     function e(mixed $input, int $flags = ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401, ?string $encoding = null, bool $doubleEncode = true): string|array
     {
@@ -211,7 +217,10 @@ if (!function_exists('e')) {
             }
         }
 
-        return $input;
+        // an empty scalar - null, false, 0, '' - skipped the branch above and
+        // was returned as-is from a function declared string|array, which is a
+        // TypeError under strict_types rather than an escaped value
+        return is_array($input) ? $input : (string) $input;
     }
 }
 
@@ -244,7 +253,7 @@ if (!function_exists('nthfield')) {
      * Retrieves the nth field from a string split by a separator.
      *
      * @param string $string The string to split.
-     * @param string $separator The separator to use.
+     * @param non-empty-string $separator The separator to use; explode() rejects an empty one.
      * @param int $nth The 1-based index of the field to retrieve.
      * @return mixed The nth field or null if not found.
      */
@@ -280,7 +289,11 @@ if (!function_exists('before')) {
      */
     function before(string $tag, string $string): string
     {
-        return substr($string, 0, strpos($string, $tag));
+        // strpos() returns false when the tag is absent, and substr()'s
+        // $length is int|null - so a missing tag was a TypeError, not ''
+        $position = strpos($string, $tag);
+
+        return $position === false ? '' : substr($string, 0, $position);
     }
 }
 
@@ -346,7 +359,7 @@ if (!function_exists('isAssociative')) {
     /**
      * Checks if an array is associative (i.e., has non-numeric keys).
      *
-     * @param array $array The array to check.
+     * @param array<array-key, mixed> $array The array to check.
      * @return bool True if associative, false otherwise.
      */
     function isAssociative(array $array): bool

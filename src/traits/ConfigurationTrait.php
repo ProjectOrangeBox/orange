@@ -10,7 +10,9 @@ use orange\framework\exceptions\config\ConfigFileNotFound;
 
 trait ConfigurationTrait
 {
+    /** @var array<string, mixed> config file path to whatever that file returned */
     private static array $alreadyIncludedFiles = [];
+    /** @var array<class-string, array{string|false, string}> class to [defining file, lower-cased short name] */
     private static array $configPathFilenameCache = [];
 
     /**
@@ -78,11 +80,11 @@ trait ConfigurationTrait
      * if the absolute path to the file does not exsist try to auto detect based on the file location + /config/{name}.php
      * optionally doing a recursive merge
      *
-     * @param array $config
+     * @param array<string, mixed> $config
      * @param string|bool|null $path Absolute path to the config file, or a bool to be
      *        reinterpreted as $recursive when the caller omits $path (see is_bool() below).
      * @param bool $recursive
-     * @return array
+     * @return array<string, mixed>
      * @throws ConfigFileNotFound
      * @throws InvalidValue
      */
@@ -124,9 +126,9 @@ trait ConfigurationTrait
      * Wrapper for mergeConfigWith with slightly different signature
      *
      * @param string|null $path
-     * @param array $configArray
+     * @param array<string, mixed> $configArray
      * @param bool $recursive
-     * @return array
+     * @return array<string, mixed>
      * @throws ConfigFileNotFound
      * @throws InvalidValue
      */
@@ -175,7 +177,7 @@ trait ConfigurationTrait
      * $config['foo bar'] = 123;
      * would call $this->setFooBar(123);
      *
-     * @param array $config
+     * @param array<string, mixed> $config
      * @param bool $throwException
      * @return void
      * @throws InvalidValue
@@ -208,7 +210,7 @@ trait ConfigurationTrait
      * $config['foo bar'] = 123;
      * would set $this->fooBar = 123;
 
-     * @param array $config
+     * @param array<string, mixed> $config
      * @param bool $throwException
      * @return void
      * @throws InvalidValue
@@ -239,7 +241,10 @@ trait ConfigurationTrait
      */
     protected function normalize(string $str): string
     {
-        return mb_convert_case($str, MB_CASE_LOWER, mb_detect_encoding($str));
+        // mb_detect_encoding() returns false when it cannot decide, and
+        // mb_convert_case() takes string|null - null meaning "use the internal
+        // encoding", which is the sensible reading of "could not detect"
+        return mb_convert_case($str, MB_CASE_LOWER, mb_detect_encoding($str) ?: null);
     }
 
     /**
@@ -292,8 +297,8 @@ trait ConfigurationTrait
      *
      * ]
      *
-     * @param array $config
-     * @param array $rules
+     * @param array<string, mixed> $config
+     * @param array<string, mixed> $rules
      * @return void
      * @throws InvalidValue
      */

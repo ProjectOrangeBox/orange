@@ -9,6 +9,8 @@ namespace orange\framework\interfaces;
  * as a read-only alternative to the query()/request()/server()/etc. methods below.
  * offsetSet()/offsetUnset() must throw: implementations of this interface are
  * immutable snapshots of the request, not mutable state.
+ *
+ * @extends \ArrayAccess<string, mixed>
  */
 interface InputInterface extends \ArrayAccess
 {
@@ -38,6 +40,9 @@ interface InputInterface extends \ArrayAccess
     public const QUERY = PHP_URL_QUERY;
     public const FRAGMENT = PHP_URL_FRAGMENT;
 
+    /**
+     * @return mixed the whole parsed URL, or the requested component
+     */
     public function getUrl(int $component = -1);
     public function requestUri(): string;
     public function uriSegment(int $segmentNumber): string;

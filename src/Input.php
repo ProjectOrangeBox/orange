@@ -96,6 +96,8 @@ use orange\framework\exceptions\input\ImmutableAccess;
  * - Enhances testability by injecting custom data via config.
  * - Helps enforce a consistent and test-friendly way of handling input data.
  * - Acts as a bridge between raw HTTP layer and application logic.
+ *
+ * @implements \ArrayAccess<string, mixed>
  */
 class Input extends Singleton implements InputInterface, \ArrayAccess
 {
@@ -103,11 +105,17 @@ class Input extends Singleton implements InputInterface, \ArrayAccess
     use ConfigurationTrait;
 
     // individual storage for each of the input variables
+    /** @var array<string, mixed> */
     protected array $query = [];
+    /** @var array<string, mixed> */
     protected array $request = [];
+    /** @var array<string, mixed> */
     protected array $cookies = [];
+    /** @var array<string, mixed> */
     protected array $files = [];
+    /** @var array<string, mixed> */
     protected array $server = [];
+    /** @var array<string, mixed> */
     protected array $headers = [];
 
     // input stream
@@ -116,7 +124,7 @@ class Input extends Singleton implements InputInterface, \ArrayAccess
     /**
      * Protected constructor to enforce the singleton pattern.
      *
-     * @param array $config Configuration data.
+     * @param array<string, mixed> $config Configuration data.
      */
     protected function __construct(array $config)
     {
@@ -285,6 +293,8 @@ class Input extends Singleton implements InputInterface, \ArrayAccess
      * @param mixed $offset
      * @return array
      * @throws UnknownOffset If $offset isn't one of query/request/cookie/file/server/header.
+     *
+     * @return mixed
      */
     public function offsetGet(mixed $offset): mixed
     {
@@ -544,8 +554,10 @@ class Input extends Singleton implements InputInterface, \ArrayAccess
     /**
      * Set the Application globals array
      *
-     * @param array $globals Overrides merged over the captured superglobals.
+     * @param array<string, mixed> $globals Overrides merged over the captured superglobals.
      * @return array
+     *
+     * @return array<string, mixed>
      */
     public static function setGlobals(array $globals = []): array
     {
@@ -583,6 +595,8 @@ class Input extends Singleton implements InputInterface, \ArrayAccess
      * Wrapper to get the globals from setGlobals
      *
      * @return array
+     *
+     * @return array<string, mixed>
      */
     public static function fromGlobals(): array
     {
@@ -592,9 +606,12 @@ class Input extends Singleton implements InputInterface, \ArrayAccess
     /**
      * Normalize and store server parameters, extracting HTTP headers.
      *
-     * @param array $server Raw server parameters.
+     * @param array<string, mixed> $server Raw server parameters.
      *
      * @return void
+     *
+     * @param array<string, mixed> $headers
+     * @param array<string, mixed> $input
      */
     protected function detectServerHeaders(array &$server, array &$headers, array $input): void
     {
@@ -651,8 +668,10 @@ class Input extends Singleton implements InputInterface, \ArrayAccess
      *
      * @param string $contentType
      * @param string $inputStream
-     * @param array $postedRequest
+     * @param array<string, mixed> $postedRequest
      * @return array
+     *
+     * @return array<string, mixed>
      */
     protected function detectRequest(string $contentType, string $inputStream, array $postedRequest): array
     {
@@ -690,7 +709,7 @@ class Input extends Singleton implements InputInterface, \ArrayAccess
      * if the key is null; returns default if the key is not found
      * used by request(), query(), cookie(), file(), server(), header()
      *
-     * @param array $array
+     * @param array<string, mixed> $array
      * @param mixed $key
      * @param mixed|null $default
      * @return mixed

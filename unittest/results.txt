@@ -598,6 +598,26 @@ String Helpers
  [x] Sanitize download filename escapes quotes and backslashes
  [x] Sanitize download filename strips control characters
 
+Viewer
+ [x] Render
+ [x] Render string
+ [x] Render string cache directory is not group or world writable
+ [x] Render view not found exception
+ [x] Change option
+ [x] Does not interpret a view name
+ [x] Change valid option
+ [x] Change returns self
+ [x] Change unknown option throws
+ [x] Change wrong type throws
+ [x] Change wrong type with array value does not warn
+ [x] Render merges view level data
+ [x] Constructor throws when temp directory missing
+ [x] Generate throws view not found for missing file
+ [x] Is file writable creates missing directory
+ [x] Is file writable throws when directory creation fails
+ [x] Is file writable throws when directory not writable
+ [x] Render string throws file not writable when atomic write fails
+
 View Finder
  [x] Namespaced view wins
  [x] Module override beats the shared view
@@ -619,24 +639,4 @@ View Finder
  [x] All returns both maps
  [x] Empty config still constructs and misses cleanly
  [x] Debug info reports both maps
-
-Viewer
- [x] Render
- [x] Render string
- [x] Render string cache directory is not group or world writable
- [x] Render view not found exception
- [x] Change option
- [x] Does not interpret a view name
- [x] Change valid option
- [x] Change returns self
- [x] Change unknown option throws
- [x] Change wrong type throws
- [x] Change wrong type with array value does not warn
- [x] Render merges view level data
- [x] Constructor throws when temp directory missing
- [x] Generate throws view not found for missing file
- [x] Is file writable creates missing directory
- [x] Is file writable throws when directory creation fails
- [x] Is file writable throws when directory not writable
- [x] Render string throws file not writable when atomic write fails
 

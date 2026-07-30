@@ -114,6 +114,8 @@ abstract class ViewAbstract extends Singleton implements ViewInterface
 
     /**
      * Validations for changeable properties
+     *
+     * @var array<string, callable-string> config key => the is_* function that validates it
      */
     protected array $changeableTypeCheck = [
         'tempDirectory' => 'is_string',
@@ -124,7 +126,7 @@ abstract class ViewAbstract extends Singleton implements ViewInterface
      * Constructor is protected to enforce Singleton pattern.
      * Use Singleton::getInstance() to create an instance.
      *
-     * @param array $config Configuration array.
+     * @param array<string, mixed> $config Configuration array.
      * @param DataInterface|null $data Optional data source for the view.
      * @throws Directory If the configured temp directory does not exist.
      */
@@ -153,8 +155,8 @@ abstract class ViewAbstract extends Singleton implements ViewInterface
      * for controllers, findView() for everyone else.
      *
      * @param string $viewFile Absolute path to the view file.
-     * @param array $data Data to pass into the view.
-     * @param array $options Rendering options.
+     * @param array<string, mixed> $data Data to pass into the view.
+     * @param array<string, mixed> $options Rendering options.
      * @return string Rendered view content.
      * @throws ViewNotFound If the file does not exist.
      */
@@ -174,8 +176,8 @@ abstract class ViewAbstract extends Singleton implements ViewInterface
      * Render a view from a string.
      *
      * @param string $string Template content.
-     * @param array $data Data for the template.
-     * @param array $options Rendering options.
+     * @param array<string, mixed> $data Data for the template.
+     * @param array<string, mixed> $options Rendering options.
      * @return string Rendered output.
      * @throws DirectoryNotWritable If the temp directory does not exist and cannot be created.
      * @throws FileNotWritable If the temp directory exists but is not writable, or the compiled
@@ -258,7 +260,7 @@ abstract class ViewAbstract extends Singleton implements ViewInterface
      * Generate the final rendered view content.
      *
      * @param string $__viewFilePath File path to the view.
-     * @param array $__dataArray Data for rendering.
+     * @param array<string, mixed> $__dataArray Data for rendering.
      * @return string Rendered output.
      */
     protected function generate(string $__viewFilePath, array $__dataArray): string
@@ -283,8 +285,11 @@ abstract class ViewAbstract extends Singleton implements ViewInterface
         // load in view (which now has access to the in scope view data
         require $__viewFilePath;
 
-        // capture cache and return
-        return ob_get_clean();
+        // capture cache and return. ob_get_clean() returns false when there is
+        // no active buffer, and this method is declared string
+        $rendered = ob_get_clean();
+
+        return $rendered === false ? '' : $rendered;
     }
 
     /**
@@ -324,8 +329,8 @@ abstract class ViewAbstract extends Singleton implements ViewInterface
     /**
      * Merge incoming data with the view's existing data source, if available.
      *
-     * @param array $data Incoming data array for the view.
-     * @return array The merged data array.
+     * @param array<string, mixed> $data Incoming data array for the view.
+     * @return array<string, mixed> The merged data array.
      */
     protected function data(array $data): array
     {

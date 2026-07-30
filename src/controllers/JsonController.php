@@ -35,13 +35,13 @@ abstract class JsonController extends BaseController
      * top-level JSON array ([{...},{...}]) instead of the object an
      * ArrayObject-backed data service always encodes to.
      *
-     * @param array $list
+     * @param array<array-key, mixed> $list
      * @param int $status
      * @return string
      */
     protected function listResponse(array $list, int $status = 200): string
     {
-        return $this->response($status, json_encode(array_values($list), $this->jsonFlags));
+        return $this->response($status, json_encode(array_values($list), $this->jsonFlags | JSON_THROW_ON_ERROR));
     }
 
     /**
@@ -57,7 +57,7 @@ abstract class JsonController extends BaseController
     {
         $this->output->responseCode($status)->contentType('json');
 
-        return $raw ?? json_encode($this->data, $this->jsonFlags);
+        return $raw ?? json_encode($this->data, $this->jsonFlags | JSON_THROW_ON_ERROR);
     }
 
     /**
@@ -70,7 +70,7 @@ abstract class JsonController extends BaseController
      * array so callers can pass errors from any source (a Dto's errors(),
      * hand-built messages, ...).
      *
-     * @param array $errors messages grouped by field name
+     * @param array<string, mixed> $errors messages grouped by field name
      * @param int $status
      * @return string
      */

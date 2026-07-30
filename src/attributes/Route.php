@@ -53,6 +53,9 @@ use Attribute;
 #[Attribute(Attribute::TARGET_METHOD)]
 class Route
 {
+    /**
+     * @param string|list<string> $method
+     */
     public function __construct(public string|array $method = [], public string $url = '', public string $name = '')
     {
     }

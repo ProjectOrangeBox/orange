@@ -88,26 +88,26 @@ use orange\framework\interfaces\ViewFinderInterface;
  *
  * Singleton::getInstance() cannot be redeclared with a narrower type in a
  * subclass without a fatal, so the concrete type is documented instead.
- * @method static self getInstance(array $config)
+ * @method static self getInstance(array<string, mixed> $config)
  */
 class ViewFinder extends Singleton implements ViewFinderInterface
 {
     use ConfigurationTrait;
 
-    /** namespaced and unique: 'application/welcome/main/index' => absolute path */
+    /** @var array<string, string> namespaced and unique: 'application/welcome/main/index' => absolute path */
     protected array $views = [];
 
-    /** un-namespaced and first-wins: 'main/index' => absolute path */
+    /** @var array<string, string> un-namespaced and first-wins: 'main/index' => absolute path */
     protected array $viewFallbacks = [];
 
-    /** name => name, applied before either map is consulted */
+    /** @var array<string, string> name => name, applied before either map is consulted */
     protected array $viewAliases = [];
 
     /**
      * is not allowed to call from outside to prevent from creating multiple instances,
      * to use the singleton, you have to obtain the instance from Singleton::getInstance() instead
      *
-     * @param array $config expects 'views', 'view fallbacks' and 'view aliases'
+     * @param array<string, mixed> $config expects 'views', 'view fallbacks' and 'view aliases'
      *        sections, all with already lower cased keys
      */
     protected function __construct(array $config)
@@ -166,7 +166,7 @@ class ViewFinder extends Singleton implements ViewFinderInterface
     /**
      * output sent when var_dump is used on this class
      *
-     * @return array{views: array, 'view fallbacks': array, 'view aliases': array}
+     * @return array<string, mixed> array, 'view fallbacks': array, 'view aliases': array}
      */
     public function __debugInfo(): array
     {

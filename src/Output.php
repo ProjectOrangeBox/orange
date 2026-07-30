@@ -108,6 +108,8 @@ class Output extends Singleton implements OutputInterface
 
     /**
      * Stores HTTP headers to be sent
+     *
+     * @var array<array-key, string>
      */
     protected array $headers = [];
 
@@ -118,6 +120,8 @@ class Output extends Singleton implements OutputInterface
 
     /**
      * Maps internal string keys to HTTP status codes
+     *
+     * @var array<string, int>
      */
     protected array $responseCodesInternalStringKeys = [];
 
@@ -133,6 +137,8 @@ class Output extends Singleton implements OutputInterface
 
     /**
      * MIME type mappings for content types
+     *
+     * @var array<string, string>
      */
     protected array $mimes = [];
 
@@ -140,7 +146,7 @@ class Output extends Singleton implements OutputInterface
      * Constructor is protected to enforce Singleton pattern.
      * Use Singleton::getInstance() to obtain an instance.
      *
-     * @param array $config Configuration array.
+     * @param array<string, mixed> $config Configuration array.
      * @param InputInterface $input Input interface instance.
      * @throws OutputException If "force https" is enabled but no trusted host can be resolved,
      *         or if the configured/detected content type is not a known MIME type.
@@ -501,7 +507,10 @@ class Output extends Singleton implements OutputInterface
 
         if ($replace != self::NO) {
             $splitOn = ($replace == self::REPLACEALL) ? '/(:| )/' : '/(;|=|,)/';
-            $prefix = strtolower(preg_split($splitOn, $value)[0]);
+            // preg_split() returns false if the pattern fails to compile;
+            // indexing that is a fatal rather than a header comparison
+            $split = preg_split($splitOn, $value) ?: [$value];
+            $prefix = strtolower($split[0]);
             $prefixLength = strlen($prefix);
 
             foreach ($this->headers as $index => $headerValue) {
@@ -525,7 +534,7 @@ class Output extends Singleton implements OutputInterface
      *
      * This method returns all headers prepared for the response.
      *
-     * @return array An array of HTTP headers.
+     * @return array<array-key, string> An array of HTTP headers.
      */
     public function getHeaders(): array
     {

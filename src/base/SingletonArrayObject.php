@@ -17,6 +17,9 @@ class SingletonArrayObject extends ArrayObject
     // here, that trait copy would win over the inherited ArrayObject::__construct(),
     // silently discarding whatever $input subclasses (e.g. Data) pass to
     // parent::__construct().
+    /**
+     * @param array<array-key, mixed> $input
+     */
     protected function __construct(array $input = [])
     {
         parent::__construct($input);

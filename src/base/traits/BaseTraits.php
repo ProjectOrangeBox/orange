@@ -9,6 +9,7 @@ use orange\framework\exceptions\container\CannotUnserializeSingleton;
 
 trait BaseTraits
 {
+    /** @var array<array-key, mixed> a numeric config key such as 404 is an int, not a string */
     protected array $config;
 
     /**

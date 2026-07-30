@@ -25,6 +25,9 @@ class Log extends FrameworkLog implements LogInterface, LoggerInterface
     }
 
     #[\Override]
+    /**
+     * @param array<string, mixed> $context
+     */
     public function write(string|int $level, string|\Stringable $message, array $context = []): void
     {
         // write nothing

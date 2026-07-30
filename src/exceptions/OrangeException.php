@@ -15,7 +15,7 @@ class OrangeException extends \Exception
     public string $className;
     public string $classMsg;
 
-    public function __construct($message = '', $code = 0, ?Throwable $previous = null)
+    public function __construct(string $message = '', int $code = 0, ?Throwable $previous = null)
     {
         /* since we must pass an array by ref into array_pop we need to put it into a variable */
         $this->namespacedClass = static::class;
@@ -23,7 +23,7 @@ class OrangeException extends \Exception
         $segments = explode('\\', $this->namespacedClass);
         $this->className = array_pop($segments);
 
-        $this->classMsg = implode(' ', preg_split('/(?=[A-Z])/', $this->className));
+        $this->classMsg = implode(' ', preg_split('/(?=[A-Z])/', $this->className) ?: [$this->className]);
 
         parent::__construct(trim($this->classMsg . ' ' . $message), $code, $previous);
     }

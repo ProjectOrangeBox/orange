@@ -31,7 +31,9 @@ if (!function_exists('show')) {
     {
         $class = '\\orange\\framework\\exceptions\\http\\Http' . $code;
 
-        if (class_exists($class)) {
+        // is_subclass_of() rather than class_exists(): the name is built from a
+        // caller-supplied code, and only a Throwable can actually be thrown
+        if (is_subclass_of($class, \Throwable::class)) {
             throw new $class($message);
         }
 

@@ -106,6 +106,8 @@ class Log extends Singleton implements LogInterface, LoggerInterface
 
     /**
      * Logging handler instance (PSR-3 compatible or internal handler).
+     *
+     * @var LoggerInterface|self
      */
     protected $handler;
 
@@ -155,7 +157,7 @@ class Log extends Singleton implements LogInterface, LoggerInterface
     /**
      * Constructor is protected to enforce the singleton pattern.
      *
-     * @param array $config Configuration data.
+     * @param array<string, mixed> $config Configuration data.
      * @throws InvalidValue If the handler is not an object.
      * @throws IncorrectInterface If the handler does not implement LoggerInterface.
      * @throws DirectoryNotWritable If the log file directory is not writable.
@@ -239,7 +241,7 @@ class Log extends Singleton implements LogInterface, LoggerInterface
      *
      * @param string|int $level Log level.
      * @param string|\Stringable $message Log message.
-     * @param array $context Contextual information.
+     * @param array<string, mixed> $context Contextual information.
      * @return void
      */
     public function write(string|int $level, string|\Stringable $message, array $context = []): void
@@ -249,7 +251,7 @@ class Log extends Singleton implements LogInterface, LoggerInterface
 
             $data = str_replace(
                 ['%timestamp', '%level', '%message', '%context'],
-                [date($this->config['timestamp format']), strtoupper((string) $this->convert2($level, 'string')), $message, $contextString],
+                [date($this->config['timestamp format']), strtoupper((string) $this->convert2($level, 'string')), (string) $message, $contextString],
                 $this->config['line format']
             );
 

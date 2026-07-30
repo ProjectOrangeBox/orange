@@ -109,6 +109,8 @@ class Event extends Singleton implements EventInterface
 
   /**
    * Stores all registered events grouped by triggers.
+     *
+     * @var array<string, array<int, \Closure|callable>> trigger => [event id => listener], highest priority first
    */
     protected array $events = [];
 
@@ -126,7 +128,7 @@ class Event extends Singleton implements EventInterface
   /**
    * Constructor is protected to enforce Singleton usage.
    *
-   * @param array $config Configuration array.
+   * @param array<string, mixed> $config Configuration array.
    * @throws InvalidValue If a configured event listener is not a closure, string, or two-element array.
    */
     protected function __construct(array $config)
@@ -175,7 +177,7 @@ class Event extends Singleton implements EventInterface
    * Register a single event listener.
    *
    * @param string $trigger Event trigger name.
-   * @param \Closure|array $callable Event callback (closure or class-method pair).
+   * @param \Closure|array{0: object|string, 1: string} $callable Event callback (closure or class-method pair).
    * @param int $priority Priority of the event listener.
    * @return int Event ID for reference.
    * @throws InvalidValue If $callable is not a closure or a two-element array.
@@ -195,9 +197,9 @@ class Event extends Singleton implements EventInterface
   /**
    * Register multiple event listeners at once.
    *
-   * @param array $multiple Array of event trigger => callable pairs.
+   * @param array<array-key, mixed> $multiple Array of event trigger => callable pairs.
    * @param int $priority Priority for all listeners.
-   * @return array Array of registered event IDs.
+   * @return array<array-key, int> Array of registered event IDs.
    * @throws InvalidValue If a $multiple callable is not a closure, string, or two-element array.
    */
     public function registerMultiple(array $multiple, int $priority = self::PRIORITY_NORMAL): array
@@ -262,7 +264,7 @@ class Event extends Singleton implements EventInterface
   /**
    * Retrieve all registered event triggers.
    *
-   * @return array List of all registered event triggers.
+   * @return list<string> List of all registered event triggers.
    */
     public function triggers(): array
     {
@@ -334,7 +336,7 @@ class Event extends Singleton implements EventInterface
    * Retrieve listeners for a given trigger, sorted by priority.
    *
    * @param string $trigger Event trigger name.
-   * @return array Sorted array of listeners.
+   * @return array<int, \Closure|callable> Sorted array of listeners.
    */
     protected function listeners(string $trigger): array
     {
@@ -348,7 +350,7 @@ class Event extends Singleton implements EventInterface
    * Register an event listener.
    *
    * @param string $trigger Event trigger name.
-   * @param \Closure|array|string $callable Callback: a closure, a [ClassName, 'method'] pair, or a 'ClassName::method' string.
+   * @param \Closure|array{0: object|string, 1: string}|string $callable Callback: a closure, a [ClassName, 'method'] pair, or a 'ClassName::method' string.
    * @param int $priority Priority level.
    * @return int Event ID.
    * @throws InvalidValue If $callable is not a closure, string, or two-element array.

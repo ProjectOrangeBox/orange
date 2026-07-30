@@ -14,7 +14,7 @@ use orange\framework\controllers\BaseController;
  */
 class FourohfourController extends BaseController
 {
-    public function index()
+    public function index(): void
     {
         show404();
     }

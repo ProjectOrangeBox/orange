@@ -17,6 +17,9 @@ interface ContainerInterface
     public function __get(string $serviceName): mixed;
     public function get(string $serviceName): mixed;
 
+    /**
+     * @param mixed $arg
+     */
     public function __set(string $serviceName, $arg): void;
     public function set(string $serviceName, mixed $arg = null): void;
 
@@ -29,5 +32,8 @@ interface ContainerInterface
     public function remove(string $serviceName): void;
 
     public function __debugInfo(): array;
+    /**
+     * @return array<string, mixed>
+     */
     public function debugInfo(): array;
 }

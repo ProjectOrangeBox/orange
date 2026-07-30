@@ -131,6 +131,7 @@ class Router extends Singleton implements RouterInterface
     protected string $siteUrl;
 
     // Routes by HTTP method
+    /** @var array<string, array<array-key, array<string, mixed>>> */
     protected array $routes = [
         'CONNECT' => [],
         'DELETE' => [],
@@ -144,16 +145,19 @@ class Router extends Singleton implements RouterInterface
     ];
 
     // Stores information about the last matched route.
+    /** @var array<string, mixed> */
     protected array $matched = [];
 
     // Determines whether URL validation during generation can be skipped.
     protected bool $skipParameterTypeChecking = false;
 
     // Array of routes sorted by the route name
+    /** @var array<string, string> route name => its url */
     protected array $routesByName = [];
 
     // On Match All routes use these methods
     // e.g., ['GET', 'POST', 'PUT', 'DELETE']
+    /** @var list<string> */
     protected array $onMatchAll = [];
 
     // the caching key for routes
@@ -164,7 +168,7 @@ class Router extends Singleton implements RouterInterface
     /**
      * Protected constructor to enforce Singleton usage.
      *
-     * @param array $config Configuration array for routing settings.
+     * @param array<string, mixed> $config Configuration array for routing settings.
      * @param InputInterface $inputService Provides request-related data.
      * @param CacheInterface|null $cacheService optional cache service
      * @throws MissingRequired If neither the 'site url' config value nor the request's HTTP_HOST
@@ -241,7 +245,7 @@ class Router extends Singleton implements RouterInterface
     /**
      * Adds a single route definition.
      *
-     * @param array $options Route configuration (e.g., method, URL pattern, callback).
+     * @param array<string, mixed> $options Route configuration (e.g., method, URL pattern, callback).
      * @return self
      * @throws HttpMethodNotSupported If $options['method'] is not one of the supported HTTP methods.
      */
@@ -291,7 +295,7 @@ class Router extends Singleton implements RouterInterface
     /**
      * Adds multiple routes in bulk.
      *
-     * @param array $routes Array of route configurations.
+     * @param array<array-key, array<string, mixed>> $routes Array of route configurations.
      * @return self
      * @throws HttpMethodNotSupported If any route's method is not one of the supported HTTP methods.
      */
@@ -448,7 +452,7 @@ class Router extends Singleton implements RouterInterface
      * Generates a URL from a named route and arguments.
      *
      * @param string $searchName Route name.
-     * @param array $arguments Arguments for dynamic segments.
+     * @param array<array-key, mixed> $arguments Arguments for dynamic segments.
      * @param bool|null $skipParameterTypeChecking Overrides the router's configured default for
      *        this call only; null uses the configured default ($this->skipParameterTypeChecking).
      * @return string The generated URL.

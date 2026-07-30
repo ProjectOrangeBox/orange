@@ -85,7 +85,7 @@ class Security extends Singleton implements SecurityInterface
      * This protected constructor enforces the Singleton pattern by preventing
      * direct instantiation. It initializes the configuration settings.
      *
-     * @param array $config Security configuration settings.
+     * @param array<string, mixed> $config Security configuration settings.
      */
     protected function __construct(array $config)
     {
@@ -196,7 +196,7 @@ class Security extends Singleton implements SecurityInterface
      */
     public function encrypt(string $data): string
     {
-        $key = file_get_contents($this->getKeyFilePath('public'));
+        $key = $this->readKeyFile('public');
 
         // Convert to hex without side-channels
         $encrypted = sodium_bin2hex(sodium_crypto_box_seal($data, $key));
@@ -234,7 +234,7 @@ class Security extends Singleton implements SecurityInterface
         $data = sodium_hex2bin($data);
 
         // Get the private key
-        $key = file_get_contents($this->getKeyFilePath('private'));
+        $key = $this->readKeyFile('private');
 
         // Anonymous public-key encryption (decrypt); returns false if the
         // ciphertext was forged, truncated, or encrypted for a different key
@@ -262,7 +262,7 @@ class Security extends Singleton implements SecurityInterface
      */
     public function createSignature(string $message): string
     {
-        $key = file_get_contents($this->getKeyFilePath('auth'));
+        $key = $this->readKeyFile('auth');
 
         // Convert to hex without side-channels
         $token = sodium_bin2hex(sodium_crypto_auth($message, $key));
@@ -294,7 +294,7 @@ class Security extends Singleton implements SecurityInterface
             $signature = sodium_hex2bin($signature);
 
             if (mb_strlen($signature, '8bit') === SODIUM_CRYPTO_AUTH_BYTES) {
-                $key = file_get_contents($this->getKeyFilePath('auth'));
+                $key = $this->readKeyFile('auth');
 
                 // Secret-key message verification - HMAC SHA-512/256
                 $isValid = sodium_crypto_auth_verify($signature, $message, $key);
@@ -435,7 +435,28 @@ class Security extends Singleton implements SecurityInterface
      * @throws InvalidValue
      * @throws ConfigNotFound
      * @throws FileNotFound
+     *
+     * Read one of the key files, failing with this package's own exception.
+     *
+     * file_get_contents() returns false for a key file that exists but cannot
+     * be read - a permissions problem, most often - and handing false to
+     * libsodium raises a TypeError about an argument rather than saying the key
+     * could not be read.
+     *
+     * @throws FileNotFound
      */
+    protected function readKeyFile(string $which): string
+    {
+        $path = $this->getKeyFilePath($which);
+        $key = file_get_contents($path);
+
+        if ($key === false) {
+            throw new FileNotFound('could not read the ' . $which . ' key file ' . $path);
+        }
+
+        return $key;
+    }
+
     protected function getKeyFilePath(string $which): string
     {
         if (!in_array($which, ['public', 'private', 'auth'])) {

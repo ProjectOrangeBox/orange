@@ -61,7 +61,7 @@ interface DataInterface extends ArrayAccess
     /**
      * Merge an array into the container.
      *
-     * @param array $array
+     * @param array<array-key, mixed> $array
      * @param bool $recursive
      * @param bool $replace
      * @return static

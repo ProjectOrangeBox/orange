@@ -14,7 +14,15 @@ namespace orange\framework\interfaces;
  */
 interface ViewInterface
 {
+    /**
+     * @param array<string, mixed> $data
+     * @param array<string, mixed> $options
+     */
     public function render(string $viewFile = '', array $data = [], array $options = []): string;
+    /**
+     * @param array<string, mixed> $data
+     * @param array<string, mixed> $options
+     */
     public function renderString(string $string, array $data = [], array $options = []): string;
     public function change(string $name, mixed $value): self;
 }

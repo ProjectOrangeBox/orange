@@ -31,6 +31,8 @@ class Data extends SingletonArrayObject implements DataInterface
     /**
      * is not allowed to call from outside to prevent from creating multiple instances,
      * to use the singleton, you have to obtain the instance from Singleton::getInstance() instead
+     *
+     * @param array<string, mixed> $data
      */
     protected function __construct(array $data = [])
     {

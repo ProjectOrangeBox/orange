@@ -14,23 +14,33 @@ use orange\framework\exceptions\InvalidValue;
 
 class Dot
 {
+    /** @var non-empty-string */
     protected static string $delimiter = '.';
 
     /**
      * Changes the delimiter used for dot notation.
      *
+     * An empty delimiter cannot work: str_contains() finds '' in every key, so
+     * every lookup would take the split path and explode() rejects an empty
+     * separator with a ValueError that says nothing about the delimiter.
+     *
      * @param string $delimiter The new delimiter to use.
      * @return void
+     * @throws InvalidValue When the delimiter is empty.
      */
     public static function changeDelimiter(string $delimiter): void
     {
+        if ($delimiter === '') {
+            throw new InvalidValue('the dot notation delimiter cannot be empty');
+        }
+
         static::$delimiter = $delimiter;
     }
 
     /**
      * Sets a value in an array or object using dot notation.
      *
-     * @param array|\StdClass &$data The data structure to modify.
+     * @param array<array-key, mixed>|\StdClass &$data The data structure to modify.
      * @param string $key The dot-notated key.
      * @param mixed $value The value to set.
      * @return void
@@ -71,7 +81,7 @@ class Dot
     /**
      * Gets a value from an array or object using dot notation.
      *
-     * @param array|\StdClass $data The data structure to access.
+     * @param array<array-key, mixed>|\StdClass $data The data structure to access.
      * @param string $key The dot-notated key.
      * @param mixed $default The default value if key not found.
      * @return mixed The value or default.
@@ -126,7 +136,7 @@ class Dot
     /**
      * Checks if a key exists in the data using dot notation.
      *
-     * @param array|\StdClass &$data The data structure to check.
+     * @param array<array-key, mixed>|\StdClass &$data The data structure to check.
      * @param string $key The dot-notated key.
      * @return bool True if the key exists, false otherwise.
      */
@@ -144,7 +154,7 @@ class Dot
     /**
      * Unset a key in the data using dot notation.
      *
-     * @param array|\StdClass &$data The data structure to modify.
+     * @param array<array-key, mixed>|\StdClass &$data The data structure to modify.
      * @param string $key The dot-notated key to unset.
      * @return void
      */
@@ -192,9 +202,9 @@ class Dot
     /**
      * Flattens a nested array or StdClass object into a single-level array with dot-notated keys.
      *
-     * @param array|\StdClass $array The nested array or object to flatten.
+     * @param array<array-key, mixed>|\StdClass $array The nested array or object to flatten.
      * @param string $prepend Internal parameter for recursion, the current key prefix.
-     * @return array The flattened array with dot-notated keys.
+     * @return array<string, mixed> The flattened array with dot-notated keys.
      */
     public static function flatten(array|\StdClass $array, string $prepend = ''): array
     {
@@ -220,8 +230,8 @@ class Dot
     /**
      * Expands a flat array or StdClass with dot-notated keys into a nested array structure.
      *
-     * @param array|\StdClass $array The flat array or object with dot-notated keys.
-     * @return array The nested array.
+     * @param array<array-key, mixed>|\StdClass $array The flat array or object with dot-notated keys.
+     * @return array<array-key, mixed> The nested array.
      */
     public static function expand(array|\StdClass $array): array
     {

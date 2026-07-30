@@ -9,9 +9,9 @@ class Ary
     /**
      * Remaps array keys based on a provided mapping array.
      *
-     * @param array $input The input array to remap.
-     * @param array $map An associative array where keys are old keys and values are new keys.
-     * @return array The array with remapped keys.
+     * @param array<array-key, mixed> $input The input array to remap.
+     * @param array<array-key, array-key> $map An associative array where keys are old keys and values are new keys.
+     * @return array<array-key, mixed> The array with remapped keys.
      */
     public static function remapKey(array $input, array $map): array
     {
@@ -28,9 +28,9 @@ class Ary
     /**
      * Remaps array values based on a provided mapping array.
      *
-     * @param array $input The input array to remap.
-     * @param array $map An associative array where keys are old values and values are new values.
-     * @return array The array with remapped values.
+     * @param array<array-key, mixed> $input The input array to remap.
+     * @param array<array-key, mixed> $map An associative array where keys are old values and values are new values.
+     * @return array<array-key, mixed> The array with remapped values.
      */
     public static function remapValue(array $input, array $map): array
     {
@@ -49,6 +49,7 @@ class Ary
      * @param array $array The array of strings to wrap.
      * @param string $prefix The prefix to add to each string.
      * @param string $suffix The suffix to add to each string.
+     * @param array<array-key, mixed> $array The array to wrap.
      * @param string $separator The separator between wrapped strings.
      * @param string $parentPrefix The prefix for the entire output.
      * @param string $parentSuffix The suffix for the entire output.
@@ -75,7 +76,8 @@ class Ary
      *                     or any of 'asort', 'arsort', 'ksort', 'krsort', 'natcasesort', 'natsort',
      *                     'shuffle', 'sort', 'rsort' to call that function directly; null for no sort.
      * @param int $flags Optional flags passed as the second argument to the sort function; -1 (default) omits the argument.
-     * @return array The associative array.
+     * @param array<array-key, mixed> $array The rows to index.
+     * @return array<array-key, mixed> The associative array.
      * @throws \Exception If $sort is set but doesn't match a known sort option.
      */
     public static function makeAssociated(array $array, string $key = 'id', string $value = '*', ?string $sort = null, int $flags = -1): array
@@ -127,7 +129,7 @@ class Ary
      * If the element is empty it returns NULL (or whatever you specify as the default value.)
      *
      * @param string $item The key to check in the array.
-     * @param array $array The array to search.
+     * @param array<array-key, mixed> $array The array to search.
      * @param mixed $default The default value to return if the key is not set.
      * @return mixed The value of the array key or the default.
      */
@@ -141,7 +143,7 @@ class Ary
     /**
      * Random Element - Takes an array as input and returns a random element
      *
-     * @param array $array The input array.
+     * @param array<array-key, mixed> $array The input array.
      * @return mixed A random element from the array.
      */
     public static function randomElement(array $array)
@@ -158,7 +160,7 @@ class Ary
      * it is not set.
      *
      * @param mixed $items The key(s) to retrieve; can be a string or array of strings.
-     * @param array $array The array to search.
+     * @param array<array-key, mixed> $array The array to search.
      * @param mixed $default The default value to return for missing keys.
      * @return mixed An array of the requested items with defaults for missing ones.
      */

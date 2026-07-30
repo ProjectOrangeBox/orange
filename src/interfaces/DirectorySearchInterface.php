@@ -15,16 +15,20 @@ interface DirectorySearchInterface
      * add one or more directories
      */
     public function addDirectory(string $directory, ?int $pend = null): self;
+    /** @param array<array-key, string> $directories */
     public function addDirectories(array $directories, ?int $pend = null): self;
 
     /**
      * remove one or more attached directories
      */
     public function removeDirectory(string $directory, bool $removeFoundResources = false): self;
+    /** @param array<array-key, string> $directories */
     public function removeDirectories(array $directories, bool $removeFoundResources = false): self;
 
     /**
      * list all directories
+     *
+     * @return list<string> absolute directory paths, highest priority first
      */
     public function listDirectories(): array;
 
@@ -37,6 +41,8 @@ interface DirectorySearchInterface
      * replace ALL directories or resources
      *
      * This can be used if loading from a cache for example
+     *
+     * @param array<array-key, string> $directories
      */
     public function replaceDirectories(array $directories, bool $removeFoundResources = false): self;
 
@@ -52,13 +58,17 @@ interface DirectorySearchInterface
      * use the second argument $removeFoundResources if this is a problem
      */
     public function addResource(string $resource, string $absolutePath): self;
+    /** @param array<array-key, string> $resources */
     public function addResources(array $resources): self;
 
     public function removeResource(string $resource): self;
+    /** @param array<array-key, string> $resources */
     public function removeResources(array $resources): self;
 
     /**
      * get a list of all the resources
+     *
+     * @return list<string> every known resource key
      */
     public function list(): array;
 
@@ -69,6 +79,8 @@ interface DirectorySearchInterface
 
     /**
      * NOTE this does not trigger a rescan of the current directories
+     *
+     * @param array<array-key, string> $resources
      */
     public function replaceResources(array $resources): self;
 
@@ -93,10 +105,13 @@ interface DirectorySearchInterface
 
     /**
      * find all or the first or last matching resource
+     *
+     * @return list<string> absolute paths of every file matching this key
      */
     public function find(string $resource): array;
     public function findFirst(string $resource): string;
     public function findLast(string $resource): string;
+    /** @return array<string, list<string>> resource key => its matching paths */
     public function findAll(): array;
 
     /**

@@ -42,12 +42,13 @@ abstract class BaseController
     protected ViewFinderInterface $viewFinder;
 
     // this is the reflection of the extending controller class
+    /** @var ReflectionClass<static> */
     protected ReflectionClass $reflection;
 
     /**
      * This array holds the local libraries you want to autoload on instantiation.
      *
-     * @var array
+     * @var list<string>
      */
     protected array $libraries = [];
 
@@ -63,8 +64,11 @@ abstract class BaseController
         // auto attach services defined with the #[AttachService] Attribute
         $this->autoAttachService();
 
-        // path to the parent directory of the parent class
-        $parentPath = dirname($this->reflection->getFileName(), 2);
+        // path to the parent directory of the parent class.
+        // getFileName() returns false for a class defined in PHP itself rather
+        // than in a file, which dirname() cannot take
+        $fileName = $this->reflection->getFileName();
+        $parentPath = $fileName === false ? '' : dirname($fileName, 2);
 
         // try to load (local to extending controller) libraries
         foreach ($this->libraries as $library) {
@@ -113,8 +117,8 @@ abstract class BaseController
      *     return $this->renderView('admin/$m');     // -> 'admin/edit'
      *
      * @param string $view View name, optionally containing $c/$m/$1/$2 or *
-     * @param array $data Data to pass into the view
-     * @param array $options Rendering options, forwarded untouched
+     * @param array<string, mixed> $data Data to pass into the view
+     * @param array<string, mixed> $options Rendering options, forwarded untouched
      * @throws InvalidValue When the controller has no $view property, or the
      *     matched route is missing the controller/method a placeholder needs
      */

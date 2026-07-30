@@ -21,5 +21,8 @@ interface LogInterface
     public function getThreshold(): int;
     public function isEnabled(): bool;
     public function isLevelEnabled(string|int $level): bool;
+    /**
+     * @param array<string, mixed> $context
+     */
     public function write(int $level, string $message, array $context = []): void;
 }

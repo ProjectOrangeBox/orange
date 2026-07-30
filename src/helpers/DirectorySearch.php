@@ -24,14 +24,17 @@ class DirectorySearch implements DirectorySearchInterface
     protected string $match = '';
 
     // directory path => has it been scanned yet? (see scanDirectories())
+    /** @var array<string, bool> */
     protected array $directories = [];
 
     // array of "found" files
+    /** @var array<string, array<string, null>> resource key => set of paths, ordered */
     protected array $resources = [];
 
     // set of resource keys matching more than one file - the only ones whose order
     // can be wrong, so a rescan sorts these instead of walking every resource.
     // Stale entries are harmless: the count check in the sort skips them.
+    /** @var array<string, bool> */
     protected array $multiMatch = [];
 
     // throw exception if resource not found?
@@ -62,12 +65,14 @@ class DirectorySearch implements DirectorySearchInterface
     protected int $pend = self::FIRST;
 
     // callback method
+    /** @var array{}|array{0: object|string, 1: string} */
     protected array $callback = [];
 
     // directory names never descended into during a recursive scan.
     // These cannot hold resources but can easily dwarf the tree that does -
     // a checked-out .git is routinely thousands of entries deep in a search
     // path that holds a dozen views
+    /** @var array<array-key, string> */
     protected array $prune = [];
 
     // optional persistence for per-directory scan results (see scanForMatches())
@@ -76,6 +81,7 @@ class DirectorySearch implements DirectorySearchInterface
     // ttl handed to the cache on write, null to use the cache's own default
     protected ?int $cacheTtl = null;
 
+    /** @var array<string, mixed> */
     protected array $defaults = [
         'match' => '*.php', // glob format
         'quiet' => false, // throw exceptions when resource not found?
@@ -106,7 +112,7 @@ class DirectorySearch implements DirectorySearchInterface
      * Merges the config with defaults, assigns properties, sets up resource key style,
      * and adds any default directories and resources.
      *
-     * @param array $config Configuration array for the DirectorySearch instance.
+     * @param array<string, mixed> $config Configuration array for the DirectorySearch instance.
      * @throws InvalidValue If 'cache' is set to something that is not a CacheInterface.
      */
     public function __construct(array $config)
@@ -178,7 +184,7 @@ class DirectorySearch implements DirectorySearchInterface
      * add new directories
      * use the 3rd argument 'asBlock' to keep the directories array in order when adding
      *
-     * @param array $directories
+     * @param array<array-key, string> $directories
      * @param int|null $pend
      * @param bool $asBlock
      * @return self
@@ -245,7 +251,7 @@ class DirectorySearch implements DirectorySearchInterface
     /**
      * remove multiple directories
      *
-     * @param array $directories
+     * @param array<array-key, string> $directories
      * @param bool $removeFoundResources
      * @return self
      * @throws ClassLocked
@@ -262,7 +268,7 @@ class DirectorySearch implements DirectorySearchInterface
     /**
      * list all directories
      *
-     * @return array
+     * @return list<string> absolute directory paths, highest priority first
      */
     public function listDirectories(): array
     {
@@ -272,7 +278,7 @@ class DirectorySearch implements DirectorySearchInterface
     /**
      * replace all directories
      *
-     * @param array $directories
+     * @param array<array-key, string> $directories
      * @param bool $removeFoundResources
      * @return self
      * @throws ClassLocked
@@ -304,7 +310,12 @@ class DirectorySearch implements DirectorySearchInterface
      */
     public function directoryExists(string $directory): bool
     {
-        return array_key_exists(realpath(rtrim($directory, DIRECTORY_SEPARATOR)), $this->directories);
+        // realpath() returns false for a path that does not exist, and
+        // array_key_exists() takes int|string - so asking about a missing
+        // directory raised a TypeError instead of answering false
+        $resolved = realpath(rtrim($directory, DIRECTORY_SEPARATOR));
+
+        return $resolved !== false && array_key_exists($resolved, $this->directories);
     }
 
     /**
@@ -363,7 +374,7 @@ class DirectorySearch implements DirectorySearchInterface
     /**
      * add multiple resources
      *
-     * @param array $resources
+     * @param array<array-key, string> $resources
      * @return self
      */
     public function addResources(array $resources): self
@@ -378,7 +389,7 @@ class DirectorySearch implements DirectorySearchInterface
     /**
      * replace all resources
      *
-     * @param array $resources
+     * @param array<array-key, string> $resources
      * @return self
      */
     public function replaceResources(array $resources): self
@@ -429,7 +440,7 @@ class DirectorySearch implements DirectorySearchInterface
     /**
      * remove multiple resources
      *
-     * @param array $resources
+     * @param array<array-key, string> $resources
      * @return self
      */
     public function removeResources(array $resources): self
@@ -445,7 +456,7 @@ class DirectorySearch implements DirectorySearchInterface
      * find all matching resources for a given key
      *
      * @param string $resource
-     * @return array
+     * @return list<string> absolute paths of every file matching this key
      * @throws ResourceNotFound
      */
     public function find(string $resource): array
@@ -472,7 +483,7 @@ class DirectorySearch implements DirectorySearchInterface
     /**
      * find all resources
      *
-     * @return array
+     * @return array<string, list<string>> resource key => its matching paths
      */
     public function findAll(): array
     {
@@ -491,7 +502,7 @@ class DirectorySearch implements DirectorySearchInterface
     /**
      * get a list of all resources
      *
-     * @return array
+     * @return list<string> every known resource key
      * @throws NotFound
      */
     public function list(): array
@@ -638,7 +649,7 @@ class DirectorySearch implements DirectorySearchInterface
     /**
      * output sent when var_dump is used on this class
      *
-     * @return array{resources: array, directories: array}
+     * @return array{resources: array<string, array<string, null>>, directories: array<string, bool>}
      */
     public function __debugInfo()
     {
@@ -712,7 +723,7 @@ class DirectorySearch implements DirectorySearchInterface
      * notice - that is what flushCache() and the ttl are for.
      *
      * @param string $searchPath an already realpath()ed directory
-     * @return array
+     * @return list<string> absolute paths of the matching files
      */
     protected function cachedMatches(string $searchPath): array
     {
@@ -727,6 +738,7 @@ class DirectorySearch implements DirectorySearchInterface
         $cached = $this->cache->get($key);
 
         if (is_array($cached)) {
+            /** @var list<string> $cached a previous scanForMatches() result */
             return $cached;
         }
 
@@ -741,7 +753,7 @@ class DirectorySearch implements DirectorySearchInterface
      * Walk one search path for matching files, with no caching in between.
      *
      * @param string $searchPath an already realpath()ed directory
-     * @return array
+     * @return list<string> absolute paths of the matching files
      */
     protected function scanForMatches(string $searchPath): array
     {
@@ -864,7 +876,7 @@ class DirectorySearch implements DirectorySearchInterface
      * last, keeping it a fallback behind whatever a scan turned up.
      *
      * @param string $path
-     * @param array $directories prepared [prefix, prefix length, rank] triples,
+     * @param array<array-key, array{string, int, int}> $directories prepared [prefix, prefix length, rank] triples,
      *        already in priority order - see sortResourcesByDirectoryPriority()
      * @return int
      */
@@ -906,7 +918,7 @@ class DirectorySearch implements DirectorySearchInterface
      *
      * @param string $searchPath
      * @param string $pattern
-     * @return array
+     * @return list<string> absolute paths of the matching files
      */
     protected function recursiveGlob(string $searchPath, string $pattern): array
     {
@@ -1006,7 +1018,7 @@ class DirectorySearch implements DirectorySearchInterface
      * add the matching resources
      *
      * @param string $searchPath
-     * @param array $matches
+     * @param array<array-key, string> $matches
      * @return void
      * @throws NotFound
      */
@@ -1087,7 +1099,12 @@ class DirectorySearch implements DirectorySearchInterface
             }
 
             // call the callback and pass the action and this object
-            call_user_func($this->callback, [$action, $this]);
+            // (as one array argument - that is the established signature)
+            $callback = $this->callback;
+
+            if (is_callable($callback)) {
+                $callback([$action, $this]);
+            }
         }
 
         return $this;
@@ -1099,7 +1116,7 @@ class DirectorySearch implements DirectorySearchInterface
      * The resource key style determines how filenames are translated into
      * resource keys (e.g., view paths, filenames, full paths, etc.).
      *
-     * @param array $config The configuration array, must include a 'resource key style' entry.
+     * @param array<string, mixed> $config The configuration array, must include a 'resource key style' entry.
      *                      Can be a closure or one of the built-in style strings:
      *                      'filename', 'basename', 'fullpath', 'localpath', 'apppath', 'wwwpath', or 'view'.
      */

@@ -32,7 +32,6 @@ use Attribute;
  *   public function getInstance(PDO $db, User $user, Logger $logger) {
  *       // The database, user, logger services will be automatically injected
  *   }
- *
  */
 
 #[Attribute(Attribute::TARGET_METHOD)]

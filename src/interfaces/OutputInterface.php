@@ -22,6 +22,9 @@ interface OutputInterface
     public function flush(): self;
 
     public function header(string $value, int $replace = self::NO, bool $prepend = false): self;
+    /**
+     * @return array<string, string>
+     */
     public function getHeaders(): array;
     public function flushHeaders(): self;
 

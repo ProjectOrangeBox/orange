@@ -98,7 +98,7 @@ class Error extends Singleton
      *
      * Initializes the Error class with the given configuration and optional exception.
      *
-     * @param array $config Configuration options.
+     * @param array<string, mixed> $config Configuration options.
      * @param ContainerInterface|null $container Optional DI container used to resolve the
      *        data/input/view/output services; falls back to the container() helper, and
      *        then to Orange's own default classes, when not provided.
@@ -204,7 +204,7 @@ class Error extends Singleton
      *
      * @param int $code Error code.
      * @param string $message Error message.
-     * @param array|null $options Additional options for error details.
+     * @param array<string, mixed> $options Additional options for error details.
      */
     public function show(int $code = 500, string $message = '', ?array $options = null): void
     {
@@ -379,7 +379,7 @@ class Error extends Singleton
      * Retrieves a service instance by its name.
      *
      * @param string $name Service name.
-     * @param array $arguments Arguments to pass to the service constructor, if necessary.
+     * @param array<array-key, mixed> $arguments Arguments to pass to the service constructor, if necessary.
      * @param string|null $className Short class name backing this service. Only
      *        needed when it is not simply the ucfirst'd service name - deriving
      *        it that way lower cases the rest, which turns 'viewFinder' into
@@ -397,7 +397,13 @@ class Error extends Singleton
         $service = null;
 
         try {
-            // try to get the service from the container first
+            // try to get the service from the container first.
+            // $container is nullable and the container() fallback in the
+            // constructor can itself return null, so this is not a given
+            if ($this->container === null) {
+                throw new ServiceNotFound($name);
+            }
+
             $service = $this->container->get($name);
         } catch (ServiceNotFound) {
             // only fall back to orange's own default classes/services when the container
@@ -441,12 +447,18 @@ class Error extends Singleton
         // (sendMimeType() sends a "json" content type for it) - 'json' is kept too since
         // it's a reasonable requestType value for any other caller of this method
         return match ($this->requestType) {
-            'json', 'ajax' => json_encode($finalData, JSON_PRETTY_PRINT),
+            // JSON_THROW_ON_ERROR: json_encode() returns false on failure and
+            // this method is declared string, so the alternative is a TypeError
+            // that says nothing about what failed to encode
+            'json', 'ajax' => json_encode($finalData, JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR),
             'html' => $this->viewRawBuildHtml($finalData),
             default => print_r($finalData, true) . PHP_EOL,
         };
     }
 
+    /**
+     * @param array<string, mixed> $finalData
+     */
     protected function viewRawBuildHtml(array $finalData): string
     {
         logMsg('DEBUG', __METHOD__);

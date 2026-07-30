@@ -9,6 +9,8 @@ namespace orange\framework\interfaces;
  * read-only alternative to get()/__get(). offsetSet()/offsetUnset() must throw:
  * implementations of this interface are immutable, loaded-once configuration,
  * not mutable state.
+ *
+ * @extends \ArrayAccess<string, mixed>
  */
 interface ConfigInterface extends \ArrayAccess
 {
