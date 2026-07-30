@@ -12,7 +12,8 @@ interface CacheInterface
     public function flush(): bool;
     /**
      * @param array<array-key, string> $keys
-     * @return array<string, mixed> key => value, misses omitted
+     * @return array<string, mixed> key => value, with a miss present as null -
+     *     every backend answers with one entry per requested key
      */
     public function getMulti(array $keys): array;
     /**
@@ -22,7 +23,9 @@ interface CacheInterface
     public function setMulti(array $data, ?int $ttl = null): array;
     /**
      * @param array<array-key, string> $keys
-     * @return array<string, bool> key => whether it was deleted
+     * @return array<string, bool> key => whether it was deleted. Backends
+     *     disagree on a key that was not there: FilesCache reports true, the
+     *     others false - so this is not a reliable existence check
      */
     public function deleteMulti(array $keys): array;
     public function increment(string $key, int $offset = 1, ?int $ttl = null): int;
