@@ -53,6 +53,7 @@
         "installModule": "Install a module, e.g. `composer installModule <module-name>`."
     },
     "require-dev": {
-        "orange/testkit": "dev-master"
+        "orange/testkit": "dev-master",
+        "phpunit/phpunit": "^13.2"
     }
 }

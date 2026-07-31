@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-use orange\framework\Env;
 use orange\framework\Log;
 use orange\framework\Data;
 use orange\framework\View;
@@ -14,7 +13,6 @@ use orange\framework\Router;
 use orange\framework\Container;
 use orange\framework\Dispatcher;
 use orange\framework\ViewFinder;
-use orange\framework\interfaces\EnvInterface;
 use orange\framework\interfaces\LogInterface;
 use orange\framework\interfaces\DataInterface;
 use orange\framework\interfaces\ViewInterface;
@@ -71,5 +69,5 @@ return [
     // that does not exist
     'viewFinder' => fn(ContainerInterface $container): ViewFinderInterface => ViewFinder::getInstance($container->config->get('views', [])),
     'view' => fn(ContainerInterface $container): ViewInterface => View::getInstance($container->config->view, $container->data),
-    'dispatcher' => Dispatcher::getInstance(...),
+    'dispatcher' => fn(): DispatcherInterface => Dispatcher::getInstance(),
 ];

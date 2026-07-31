@@ -1,0 +1,13 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  gauntlet:
+    # phpcs, phpstan level 8, rector --dry-run and the package's own test
+    # runner. Defined once in OrangePackages so all 27 packages stay in step.
+    uses: ProjectOrangeBox/OrangePackages/.github/workflows/package-gauntlet.yml@main
