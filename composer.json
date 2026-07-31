@@ -2,6 +2,18 @@
     "name": "orange/framework",
     "description": "Orange Framework core package",
     "type": "library",
+    "homepage": "https://github.com/ProjectOrangeBox/orange",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Don Myers",
+            "email": "donmyers@me.com"
+        }
+    ],
+    "support": {
+        "issues": "https://github.com/ProjectOrangeBox/orange/issues",
+        "source": "https://github.com/ProjectOrangeBox/orange"
+    },
     "autoload": {
         "psr-4": {
             "orange\\framework\\": "src/"
