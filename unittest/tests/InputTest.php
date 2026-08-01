@@ -28,7 +28,7 @@ final class InputTest extends unitTestHelper
             'name' => 'Jon Appleseed',
             'age' => 26,
         ],
-        'cookies' => [
+        'cookie' => [
             'name' => 'James Appleseed',
             'age' => 28,
         ],
@@ -89,7 +89,7 @@ final class InputTest extends unitTestHelper
             'query' => $query,
             'request' => $request,
             'server' => $server,
-            'cookies' => [],
+            'cookie' => [],
             'files' => [],
             'input' => '',
         ]);
@@ -206,6 +206,32 @@ final class InputTest extends unitTestHelper
             'name' => 'James Appleseed',
             'age' => 28,
         ], $this->instance->cookie());
+    }
+
+    /**
+     * setGlobals() names the cookie array, and the constructor reads it back.
+     *
+     * Those two spellings disagreed - 'cookie' out, 'cookies' in - so cookie()
+     * returned an empty array for every real request, while every test here
+     * passed because they all constructed Input by hand using the same
+     * misspelling the constructor expected. Nothing exercised the path an
+     * actual request takes, which is the only place the two meet.
+     *
+     * Asserting on setGlobals()'s own key rather than a literal is the point:
+     * renaming it on one side alone fails here instead of silently dropping
+     * every cookie again.
+     */
+    public function testCookiesSurviveTheShapeSetGlobalsProduces(): void
+    {
+        $shape = Input::setGlobals();
+
+        $this->assertArrayHasKey('cookie', $shape, 'setGlobals() no longer emits a "cookie" key');
+
+        $input = Input::newInstance(array_replace($shape, [
+            'cookie' => ['session_id' => 'abc123'],
+        ]));
+
+        $this->assertSame(['session_id' => 'abc123'], $input->cookie());
     }
 
     public function testServer(): void

@@ -134,8 +134,15 @@ class Input extends Singleton implements InputInterface, \ArrayAccess
         $this->config = $this->mergeConfigWith($config, false);
 
         // store the various input arrays
+        //
+        // 'cookie', singular. setGlobals() emits that key, offsetGet() exposes
+        // that key, and the accessor is cookie() - this line asked for 'cookies'
+        // and so never found them, which meant cookie() returned an empty array
+        // for every request the framework has ever served. It went unnoticed
+        // because the only code constructing an Input by hand was this package's
+        // own tests, which passed the same misspelling and agreed with it.
         $this->query = $this->config['query'] ?? [];
-        $this->cookies = $this->config['cookies'] ?? [];
+        $this->cookies = $this->config['cookie'] ?? [];
         $this->files = $this->config['files'] ?? [];
 
         // build normalized server and headers arrays
