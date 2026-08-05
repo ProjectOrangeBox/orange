@@ -4,239 +4,342 @@
 declare(strict_types=1);
 
 /**
- * This copy's assets from
- * bin, htdocs, support, var, config inside a package into the global equivalent
+ * Install the assets a composer package ships into this application.
  *
- * for bin this could be a shell script
- * for htdocs this can include css, js, images, etc...
- * for support this could be a migration
- * for var a additional directory
- * for config this can include any configuration file except these are merged into a matching config file between the comments / * merged content below * / and / * end merged contents * /
- *   (added spaced in the above code to not break the comment line)
+ * A package puts an install/ directory at its root whose contents mirror the
+ * application root - config/, database/migrations/, database/seeds/, htdocs/,
+ * bin/, support/, var/ - and this copies them into place. See
+ * src/installer/ModuleInstaller.php for the layout and the rules.
  *
- * use: ./copyAsset.php /application/welcome/assets
+ *   vendor/bin/installModule orange/acl              install a package
+ *   vendor/bin/installModule orange/acl --dry-run    show what would happen
+ *   vendor/bin/installModule orange/acl -o           replace what is there
+ *   vendor/bin/installModule application/welcome/install    a local directory
  *
- * the contents in assets directory must then match the absolute path from the root directory of the matching directory or file
+ * Deliberately standalone: no container, no console service, no application
+ * bootstrap. This is registered as a composer bin, so it lands in vendor/bin
+ * for anyone who installs orange/framework - including someone who installed
+ * only orange/framework, where none of those things exist. It requires its own
+ * classes directly for the same reason.
+ *
+ * Exit codes: 0 all good, 1 something was refused or failed. Conflicts count
+ * as a failure so a scripted install cannot report success while leaving files
+ * uncopied.
  */
 
-use peels\console\ConsoleInterface;
-use orange\framework\traits\ConfigurationTrait;
-use orange\framework\interfaces\ContainerInterface;
+use orange\framework\installer\InstallAction;
+use orange\framework\installer\ModuleInstaller;
+use orange\framework\exceptions\InstallerException;
 
-$container = require __DIR__ . '/../../../../bootstrapCli.php';
+$src = dirname(__DIR__) . '/src';
 
-$app = new App($container);
-$app->mergeDirectories();
-$app->mergeFiles();
-exit(0);
+require_once $src . '/exceptions/OrangeException.php';
+require_once $src . '/exceptions/InstallerException.php';
+require_once $src . '/installer/InstallAction.php';
+require_once $src . '/installer/Manifest.php';
+require_once $src . '/installer/Receipt.php';
+require_once $src . '/installer/ModuleInstaller.php';
 
-class App
+exit((new InstallModuleCommand($argv))->run());
+
+final class InstallModuleCommand
 {
-    use ConfigurationTrait;
-
-    protected array $config = [
-        'install directory' => 'install',
-        'merge prefix' => '@',
-        'merge after' => '/* merged content below */',
-        'empty config file' => '<?php
-
-    declare(strict_types=1);
-
-    /* if a simple array you don\'t need the strict_types=1 because you can\'t declare type on arrays yet */
-
-    return [
-        **ARRAY**
-    ];
-    ',
-        'empty config file merge variable' => '**ARRAY**',
-        'valid directories' => [
-            '/bin',
-            '/htdocs',
-            '/support',
-            '/var',
-            '/config',
-        ],
-        'valid files' => [
-            '/config'
-        ],
-    ];
-    protected ConsoleInterface $console;
-    protected string $path = '';
+    protected bool $color;
+    protected bool $dryRun = false;
     protected bool $overwrite = false;
-    protected string $rootPath = '';
-    protected string $fullPath = '';
+    protected string $root = '';
+    protected string $target = '';
 
-    public function __construct(protected ContainerInterface $container)
+    /** @param string[] $argv */
+    public function __construct(protected array $argv)
     {
-        // cli application is now set up so away we go!
-        $this->console = $container->console;
-
-        $this->console->minimumArguments(1, 'Please include the path to the assets you would like to add as your last argument.');
-
-        $this->overwrite = $this->console->getArgumentExists('-o');
-
-        if ($this->overwrite) {
-            $this->console->warning('Overwriting files');
-        } else {
-            $this->console->info('Non-Overwriting');
-        }
-
-        $this->path = trim($this->console->getLastArgument(), '/');
-
-        $this->verifyPath();
+        $this->color = (bool) @stream_isatty(STDOUT);
     }
 
-    public function mergeDirectories(): void
+    public function run(): int
     {
-        foreach ($this->config['valid directories'] as $directory) {
-            $this->merge($directory);
-        }
-    }
+        try {
+            $this->parse();
+        } catch (InstallerException $e) {
+            $this->fail($e->getMessage());
 
-    public function mergeFiles(): void
-    {
-        foreach ($this->config['valid files'] as $file) {
-            $this->mergeConfig($file);
+            return 1;
+        }
+
+        if ($this->target === '') {
+            $this->usage();
+
+            return 1;
+        }
+
+        try {
+            return $this->install();
+        } catch (InstallerException $e) {
+            $this->fail($e->getMessage());
+
+            return 1;
         }
     }
 
-    protected function verifyPath(): void
+    /**
+     * @throws InstallerException
+     */
+    protected function install(): int
     {
-        // if path isn't found abs Path is false
-        $fullPathTest = realpath(__ROOT__ . '/' . $this->path);
+        [$package, $source] = $this->resolve();
 
-        if ($fullPathTest === false || !is_dir($fullPathTest)) {
-            $this->console->stop('Unable to locate "' . $this->path . '".');
-        } else {
-            $this->fullPath = $fullPathTest;
-            $this->console->echo('<primary>Using directory "' . $this->fullPath . '".');
+        $installer = new ModuleInstaller($this->root, $source, $package, $this->overwrite);
+
+        $unmet = $installer->manifest()->unmet();
+
+        if ($unmet !== []) {
+            $this->fail('"' . $package . '" cannot be installed here:');
+
+            foreach ($unmet as $reason) {
+                $this->line('  ' . $reason);
+            }
+
+            return 1;
         }
+
+        $this->line($this->paint('Installing ', 'bold') . $this->paint($package, 'cyan')
+            . ' from ' . $this->shorten($source));
+
+        if ($this->dryRun) {
+            $this->line($this->paint('Dry run - nothing will be written.', 'yellow'));
+        }
+
+        $actions = $installer->plan();
+
+        if ($actions === []) {
+            $this->line('Nothing to install - the install directory holds no files this can place.');
+
+            return 0;
+        }
+
+        $this->report($actions);
+
+        if (!$this->dryRun) {
+            $installer->apply($actions);
+        }
+
+        return $this->summarize($actions, $installer->manifest()->after);
     }
 
-    protected function mergeConfig(string $dest): void
+    /**
+     * @param InstallAction[] $actions
+     */
+    protected function report(array $actions): void
     {
-        $this->merge($dest, true);
+        $this->line('');
+
+        foreach ($actions as $action) {
+            [$label, $tint] = match ($action->type) {
+                InstallAction::COPY => ['copy ', 'green'],
+                InstallAction::MERGE => ['merge', 'green'],
+                InstallAction::SKIP => ['skip ', 'grey'],
+                default => ['REFUSE', 'red'],
+            };
+
+            $this->line(
+                '  ' . $this->paint($label, $tint) . '  ' . $this->shorten($action->destination)
+                . ($action->reason === '' ? '' : $this->paint('  (' . $action->reason . ')', 'grey'))
+            );
+        }
+
+        $this->line('');
     }
 
-    protected function merge(string $dest, bool $isConfigFile = false): void
+    /**
+     * @param InstallAction[] $actions
+     * @param string[]        $after
+     */
+    protected function summarize(array $actions, array $after): int
     {
-        $dest = trim($dest, '/');
+        $counts = [InstallAction::COPY => 0, InstallAction::MERGE => 0, InstallAction::SKIP => 0, InstallAction::CONFLICT => 0];
 
-        if (is_dir($this->fullPath . '/' . $dest)) {
-            $matches = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($this->fullPath . '/' . $dest, FilesystemIterator::SKIP_DOTS));
+        foreach ($actions as $action) {
+            $counts[$action->type]++;
+        }
 
-            foreach ($matches as $file) {
-                $this->doMerge($file, $isConfigFile);
+        $written = $counts[InstallAction::COPY] + $counts[InstallAction::MERGE];
+        $verb = $this->dryRun ? 'would be written' : 'written';
+
+        $this->line(
+            $written . ' ' . $verb . ', ' . $counts[InstallAction::SKIP] . ' skipped, '
+            . $counts[InstallAction::CONFLICT] . ' refused'
+        );
+
+        if ($counts[InstallAction::CONFLICT] > 0) {
+            $this->line($this->paint('Some files were refused. Re-run with -o to replace them.', 'yellow'));
+
+            return 1;
+        }
+
+        if ($after !== [] && !$this->dryRun && $written > 0) {
+            $this->line('');
+            $this->line($this->paint('Next:', 'bold'));
+
+            foreach ($after as $note) {
+                $this->line('  ' . $note);
             }
         }
+
+        return 0;
     }
 
-    protected function doMerge(SplFileInfo $file, bool $isConfigFile)
+    /**
+     * Work out the composer name and the install directory being installed from.
+     *
+     * Two forms are accepted. A composer name resolves through vendor/, which
+     * is what a user actually has to hand. A path is for a module inside this
+     * application, which has no vendor directory to be found in.
+     *
+     * @return array{0: string, 1: string}
+     *
+     * @throws InstallerException
+     */
+    protected function resolve(): array
     {
-        $from = $file->getPathname();
-        $to = str_replace($this->fullPath, '', $from);
-        $to = str_replace('/' . $this->config['merge prefix'], '/', $to);
-        $to = __ROOT__ . $to;
+        $target = trim($this->target, '/');
 
-        // Create an empty config file if there isn't one already
-        if (!file_exists($to) && $isConfigFile) {
-            file_put_contents($to, $this->emptyConfig($this->config['merge after']));
+        $vendored = $this->root . '/vendor/' . $target;
+
+        if (is_dir($vendored . '/install')) {
+            return [$target, $vendored . '/install'];
         }
 
-        // if the first character is @ then merge with the file which has the matching name
-        if (substr($file->getFilename(), 0, strlen($this->config['merge prefix'])) == $this->config['merge prefix']) {
-            $this->mergeContents($from, $to);
-        } else {
-            $this->copy($from, $to);
+        $local = $this->root . '/' . $target;
+
+        if (is_dir($local . '/install')) {
+            return [$target, $local . '/install'];
         }
+
+        if (is_dir($local)) {
+            // a path pointed straight at the install directory itself; name it
+            // after the directory above so the receipt still says something
+            return [$this->nameFor($target), $local];
+        }
+
+        throw new InstallerException(
+            'Could not find an install directory for "' . $this->target . '". Looked in '
+            . $this->shorten($vendored . '/install') . ' and ' . $this->shorten($local) . '.'
+        );
     }
 
-    protected function mergeContents(string $from, string $to): void
+    protected function nameFor(string $path): string
     {
-        $this->console->info('Merge ' . str_replace(__ROOT__, '', $from) . ' into ' . str_replace(__ROOT__, '', $to));
+        $trimmed = preg_replace('#/install$#', '', $path) ?? $path;
 
-        if (!$this->hasString($to, $this->config['merge after'])) {
-            $this->console->warning('Could not locate "' . $this->config['merge after'] . '" skipping file');
-        } else {
-            $mergeContent = file_get_contents($from);
-            $toContent = file_get_contents($to);
+        return str_starts_with($trimmed, 'vendor/') ? substr($trimmed, 7) : $trimmed;
+    }
 
-            if (strpos($this->normalizedString($toContent), $this->normalizedString($mergeContent)) !== false) {
-                $this->console->warning('Seems merged content may already be in destination file. Skipping');
+    /**
+     * @throws InstallerException
+     */
+    protected function parse(): void
+    {
+        foreach (array_slice($this->argv, 1) as $argument) {
+            if ($argument === '--dry-run' || $argument === '-n') {
+                $this->dryRun = true;
+            } elseif ($argument === '--overwrite' || $argument === '-o') {
+                $this->overwrite = true;
+            } elseif ($argument === '--no-color') {
+                $this->color = false;
+            } elseif ($argument === '--help' || $argument === '-h') {
+                $this->target = '';
+
+                return;
+            } elseif (str_starts_with($argument, '--root=')) {
+                $this->root = rtrim(substr($argument, 7), '/');
+            } elseif (str_starts_with($argument, '-')) {
+                throw new InstallerException('Unknown option "' . $argument . '".');
             } else {
-                file_put_contents($to, $this->putAfter($to, $this->config['merge after'], $mergeContent), LOCK_EX);
-            }
-        }
-    }
-
-    protected function normalizedString(string $input): string
-    {
-        return preg_replace("/[^a-z0-9]/", '', strtolower($input));
-    }
-
-    protected function copy(string $source, string $dest): void
-    {
-        $this->console->info('Copying "' . str_replace(__ROOT__, '', $source) . '" to "' . str_replace(__ROOT__, '', $dest) . '".');
-
-        if (file_exists($dest)) {
-            if (!$this->overwrite) {
-                $this->console->warning('"' . str_replace(__ROOT__, '', $dest) . '" already exists.');
-            } else {
-                $this->console->warning('Removing "' . str_replace(__ROOT__, '', $dest) . '".');
-                unlink($dest);
+                $this->target = $argument;
             }
         }
 
-        $dirname = pathinfo($dest, PATHINFO_DIRNAME);
-
-        if (!file_exists($dirname)) {
-            mkdir($dirname, 0777, true);
+        if ($this->root === '') {
+            $this->root = $this->findRoot();
         }
 
-        if (!copy($source, $dest)) {
-            $this->console->stop('Could not copy "' . str_replace(__ROOT__, '', $source) . '"  to "' . str_replace(__ROOT__, '', $dest) . '".');
+        if (!is_dir($this->root)) {
+            throw new InstallerException('Application root "' . $this->root . '" is not a directory.');
         }
     }
 
-    protected function hasString(string $path, string $string): bool
+    /**
+     * The application root this script is installed under.
+     *
+     * Everything before the last '/vendor/' in this file's own path: that is
+     * the directory composer installed into, whatever it is called and however
+     * deeply nested. Falling back to walking up for a composer.json covers
+     * running this from a checkout of the framework itself, where there is no
+     * vendor segment at all.
+     *
+     * @throws InstallerException
+     */
+    protected function findRoot(): string
     {
-        $found = false;
-        $lines = file($path);
+        $here = str_replace('\\', '/', __DIR__);
+        $marker = strrpos($here, '/vendor/');
 
-        foreach ($lines as $line) {
-            if (trim($line) == $string) {
-                $found = true;
+        if ($marker !== false) {
+            return substr($here, 0, $marker);
+        }
 
-                break;
+        $directory = $here;
+
+        while ($directory !== '' && $directory !== '/' && $directory !== dirname($directory)) {
+            if (is_file($directory . '/composer.json')) {
+                return $directory;
             }
+
+            $directory = dirname($directory);
         }
 
-        return $found;
+        throw new InstallerException('Could not find the application root. Pass --root=/path/to/app.');
     }
 
-    protected function putAfter(string $path, string $after, string $put): string
+    protected function usage(): void
     {
-        $success = false;
-        $newFile = '';
-        $lines = file($path);
+        $this->line('Install the files a composer package ships into this application.');
+        $this->line('');
+        $this->line($this->paint('  installModule <package|path> [options]', 'bold'));
+        $this->line('');
+        $this->line('  <package>       composer name, e.g. orange/acl');
+        $this->line('  <path>          directory under the application root');
+        $this->line('');
+        $this->line('  -n, --dry-run   report what would happen, write nothing');
+        $this->line('  -o, --overwrite replace destinations that already exist');
+        $this->line('      --root=DIR  application root (default: auto-detected)');
+        $this->line('      --no-color  plain output');
+        $this->line('  -h, --help      this message');
+    }
 
-        foreach ($lines as $line) {
-            $newFile .= $line;
+    protected function shorten(string $path): string
+    {
+        return $this->root === '' ? $path : ltrim(str_replace($this->root, '', $path), '/');
+    }
 
-            if (trim($line) == $after && !$success) {
-                $newFile .= PHP_EOL;
-                $newFile .= $put;
-                $newFile .= PHP_EOL;
+    protected function fail(string $message): void
+    {
+        fwrite(STDERR, $this->paint($message, 'red') . PHP_EOL);
+    }
 
-                $success = true;
-            }
+    protected function line(string $message): void
+    {
+        fwrite(STDOUT, $message . PHP_EOL);
+    }
+
+    protected function paint(string $text, string $tint): string
+    {
+        if (!$this->color) {
+            return $text;
         }
 
-        return $newFile;
-    }
+        $codes = ['bold' => '1', 'red' => '31', 'green' => '32', 'yellow' => '33', 'cyan' => '36', 'grey' => '90'];
 
-    protected function emptyConfig(string $content): string
-    {
-        return str_replace($this->config['empty config file merge variable'], $content, $this->config['empty config file']);
+        return isset($codes[$tint]) ? "\033[" . $codes[$tint] . 'm' . $text . "\033[0m" : $text;
     }
 }

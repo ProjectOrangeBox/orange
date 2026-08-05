@@ -19,6 +19,9 @@
             "orange\\framework\\": "src/"
         }
     },
+    "bin": [
+        "bin/installModule"
+    ],
     "require": {
         "php": ">=8.4",
         "psr/log": "^3.0"
