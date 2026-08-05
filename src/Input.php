@@ -298,10 +298,8 @@ class Input extends Singleton implements InputInterface, \ArrayAccess
      * Retrieve a whole request dataset by offset name.
      *
      * @param mixed $offset
-     * @return array
-     * @throws UnknownOffset If $offset isn't one of query/request/cookie/file/server/header.
-     *
      * @return mixed
+     * @throws UnknownOffset If $offset isn't one of query/request/cookie/file/server/header.
      */
     public function offsetGet(mixed $offset): mixed
     {
@@ -562,8 +560,6 @@ class Input extends Singleton implements InputInterface, \ArrayAccess
      * Set the Application globals array
      *
      * @param array<string, mixed> $globals Overrides merged over the captured superglobals.
-     * @return array
-     *
      * @return array<string, mixed>
      */
     public static function setGlobals(array $globals = []): array
@@ -600,8 +596,6 @@ class Input extends Singleton implements InputInterface, \ArrayAccess
 
     /**
      * Wrapper to get the globals from setGlobals
-     *
-     * @return array
      *
      * @return array<string, mixed>
      */
@@ -676,8 +670,6 @@ class Input extends Singleton implements InputInterface, \ArrayAccess
      * @param string $contentType
      * @param string $inputStream
      * @param array<string, mixed> $postedRequest
-     * @return array
-     *
      * @return array<string, mixed>
      */
     protected function detectRequest(string $contentType, string $inputStream, array $postedRequest): array

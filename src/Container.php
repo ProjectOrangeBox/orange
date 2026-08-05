@@ -505,7 +505,7 @@ class Container extends Singleton implements ContainerInterface
     /**
      * If this is a child of the orange singleton class then we don't need to recreate it over and over
      *
-     * @param string $service Name
+     * @param string $serviceName
      * @param object $service
      * @return void
      */

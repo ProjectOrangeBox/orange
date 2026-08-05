@@ -46,10 +46,9 @@ class Ary
     /**
      * Wraps an array of strings with prefixes, suffixes, and separators for output.
      *
-     * @param array $array The array of strings to wrap.
+     * @param array<array-key, mixed> $array The array of strings to wrap.
      * @param string $prefix The prefix to add to each string.
      * @param string $suffix The suffix to add to each string.
-     * @param array<array-key, mixed> $array The array to wrap.
      * @param string $separator The separator between wrapped strings.
      * @param string $parentPrefix The prefix for the entire output.
      * @param string $parentSuffix The suffix for the entire output.
@@ -69,14 +68,13 @@ class Ary
     /**
      * Collapses an array of arrays or objects into an associative array.
      *
-     * @param array $array The input array of arrays or objects.
+     * @param array<array-key, mixed> $array The input array of arrays or objects.
      * @param string $key The key to use as the associative key (default 'id').
      * @param string $value The key to use as the value; use '*' for the entire row (default '*').
      * @param string|null $sort Sort the result: 'asc'/'a' (alias for ksort), 'desc'/'d' (alias for krsort),
      *                     or any of 'asort', 'arsort', 'ksort', 'krsort', 'natcasesort', 'natsort',
      *                     'shuffle', 'sort', 'rsort' to call that function directly; null for no sort.
      * @param int $flags Optional flags passed as the second argument to the sort function; -1 (default) omits the argument.
-     * @param array<array-key, mixed> $array The rows to index.
      * @return array<array-key, mixed> The associative array.
      * @throws \Exception If $sort is set but doesn't match a known sort option.
      */

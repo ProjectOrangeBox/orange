@@ -4,6 +4,39 @@ declare(strict_types=1);
 
 namespace orange\framework\interfaces;
 
+/**
+ * A priority-ordered set of directories, and the pool of resources found across
+ * them.
+ *
+ * This is the "same name in several places" problem, factored out: config files,
+ * views and modules all need a name to resolve against an ordered list of roots
+ * where an earlier root wins. Directories carry the order - $pend says whether a
+ * new one is PREPEND (higher priority) or APPEND - and resources are what the
+ * scan turned up, keyed by name.
+ *
+ * A key can legitimately match in more than one directory, so the read side is
+ * three methods rather than one, and the choice is the caller's: find() returns
+ * every match in priority order, findFirst() the highest-priority one - the
+ * usual "this overrides that" answer - and findLast() the lowest, which is what
+ * an inheritance chain that builds up from a base wants.
+ *
+ * Resources may also be registered directly with addResource(), which is how a
+ * cached or generated map is loaded without touching the filesystem. Those
+ * entries are indistinguishable from scanned ones afterwards, which is why the
+ * directory-removal methods take $removeFoundResources - by default they leave
+ * behind what a removed directory contributed.
+ *
+ * Two mechanisms exist for the cost of scanning. setCache() persists per-
+ * directory results across requests and must be attached before the first read.
+ * lock() freezes the directory and resource sets so any later mutation throws
+ * rather than silently invalidating a configuration that was loaded once from a
+ * cache and is assumed final.
+ *
+ * FIRST/PREPEND and LAST/APPEND are two spellings of the same two values, used
+ * interchangeably for the $pend argument - FIRST and PREPEND are both 1. They
+ * describe where a directory lands, and have nothing to do with findFirst() and
+ * findLast(), which take no constant.
+ */
 interface DirectorySearchInterface
 {
     public const FIRST = 1;

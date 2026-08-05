@@ -4,6 +4,31 @@ declare(strict_types=1);
 
 namespace orange\framework\interfaces;
 
+/**
+ * Named hook points listeners attach to.
+ *
+ * The framework fires a handful of these around the request pipeline -
+ * before.router, before.controller, before.output, before.shutdown - and an
+ * application registers against them in its event config rather than editing
+ * the pipeline. Anything may define and fire its own; a trigger is just a name.
+ *
+ * Two things about trigger() are load-bearing and easy to miss. Its arguments
+ * are taken by reference, so a listener can rewrite the payload and the change
+ * is what later listeners and the caller see - this is the mechanism, not a
+ * side effect, and it is how before.output listeners amend a response. And a
+ * listener returning exactly false stops the chain: remaining listeners do not
+ * run. Any other return value, null included, continues.
+ *
+ * Priority orders listeners, highest first. Listeners registered at equal
+ * priority run in reverse registration order - the most recently added goes
+ * first - so priority is the only ordering worth relying on. The order is
+ * established once at register() time rather than on each trigger, since a
+ * trigger may fire many times per request.
+ *
+ * register() returns an id, which is the only handle unregister() accepts -
+ * keep it if a listener is ever meant to be removed individually, otherwise
+ * unregisterAll() clears a whole trigger.
+ */
 interface EventInterface
 {
     public const PRIORITY_LOWEST = 10;

@@ -475,6 +475,76 @@ final class OutputTest extends unitTestHelper
         $this->assertEquals([0], $instance->phpExitCalls);
     }
 
+    /**
+     * The regression this guards: a browser attaches Origin to its own site's form
+     * posts, so running that through the cross-origin allowlist replied to every
+     * <form method="post"> with an empty 200 and no page.
+     */
+    public function testHandleCorsSameOriginRequestIsNotTreatedAsCrossOrigin(): void
+    {
+        $instance = $this->makeCorsOutput(
+            ['allowed cors' => ['http://good.example']],
+            [
+                'HTTP_ORIGIN' => 'http://localhost:8080',
+                'HTTP_HOST' => 'localhost:8080',
+                'REQUEST_METHOD' => 'POST',
+            ]
+        );
+
+        $before = $instance->getHeaders();
+        $instance->handleCors();
+
+        // no CORS headers, and above all no send-and-exit: the request carries on
+        // to the router exactly as it would have without an Origin header
+        $this->assertEquals($before, $instance->getHeaders());
+        $this->assertEmpty($instance->phpExitCalls);
+    }
+
+    /**
+     * Same host, different scheme, is a different origin - and https is decided by
+     * the request, so an http request from https://localhost is still cross-origin.
+     */
+    public function testHandleCorsSameHostDifferentSchemeIsCrossOrigin(): void
+    {
+        $instance = $this->makeCorsOutput(
+            ['allowed cors' => ['http://good.example']],
+            [
+                'HTTP_ORIGIN' => 'https://localhost:8080',
+                'HTTP_HOST' => 'localhost:8080',
+                'REQUEST_METHOD' => 'POST',
+            ]
+        );
+
+        ob_start();
+        $instance->handleCors();
+        ob_get_clean();
+
+        $this->assertEquals([0], $instance->phpExitCalls);
+    }
+
+    /**
+     * The port is part of the origin: another port on the same host is the very case
+     * the allowlist exists for (the Vite dev server), and must not slip through as
+     * same-origin.
+     */
+    public function testHandleCorsSameHostDifferentPortIsCrossOrigin(): void
+    {
+        $instance = $this->makeCorsOutput(
+            ['allowed cors' => ['http://localhost:3000']],
+            [
+                'HTTP_ORIGIN' => 'http://localhost:3000',
+                'HTTP_HOST' => 'localhost:8080',
+                'REQUEST_METHOD' => 'POST',
+            ]
+        );
+
+        $instance->handleCors();
+
+        // still handled as cross-origin - and allowed, so it gets its headers
+        $this->assertContains('Access-Control-Allow-Origin: http://localhost:3000', $instance->getHeaders());
+        $this->assertEmpty($instance->phpExitCalls);
+    }
+
     public function testHandleCorsWithoutOriginLeavesHeadersUntouched(): void
     {
         $instance = $this->makeCorsOutput(

@@ -718,12 +718,16 @@ class Output extends Singleton implements OutputInterface
     /**
      * Handles Cross-Origin Resource Sharing (CORS) for the current request.
      *
-     * Reads the Origin header; when it is present and listed in the "allowed cors" config, sets
-     * Access-Control-Allow-Origin (plus a Vary: Origin header and, if opted into via config,
-     * Access-Control-Allow-Credentials). When the Origin is present but not allowed, the response
-     * is sent and the script exits immediately without the Access-Control-Allow-Origin header.
-     * For OPTIONS preflight requests, echoes back the requested method/headers as
-     * Access-Control-Allow-Methods/Access-Control-Allow-Headers, then sends and exits.
+     * Reads the Origin header; when it names a cross-origin caller listed in the "allowed cors"
+     * config, sets Access-Control-Allow-Origin (plus a Vary: Origin header and, if opted into via
+     * config, Access-Control-Allow-Credentials). When the Origin is cross-origin but not allowed,
+     * the response is sent and the script exits immediately without the
+     * Access-Control-Allow-Origin header. For OPTIONS preflight requests, echoes back the requested
+     * method/headers as Access-Control-Allow-Methods/Access-Control-Allow-Headers, then sends and
+     * exits.
+     *
+     * A request that names this application's own origin is not cross-origin and is left alone -
+     * see isSameOrigin().
      *
      * @return void
      */
@@ -731,8 +735,15 @@ class Output extends Singleton implements OutputInterface
     {
         $httpOrigin = $this->input->server('HTTP_ORIGIN');
 
-        // Allow from any origin
-        if ($httpOrigin !== null) {
+        // Allow from any origin.
+        //
+        // Same-origin requests are excluded rather than run through the allowlist:
+        // a browser attaches Origin to same-origin requests too - to every non-GET
+        // navigation, so an ordinary <form method="post"> carries one. Present is
+        // therefore not the same as cross-origin, and treating it so answered this
+        // site's own form posts with an empty 200, killed here before the router
+        // ever ran.
+        if ($httpOrigin !== null && !$this->isSameOrigin($httpOrigin)) {
             logMsg('DEBUG', 'CORS Http Origin: ' . $httpOrigin);
 
             // The Spec-Compliant Standard
@@ -780,5 +791,35 @@ class Output extends Singleton implements OutputInterface
             // send and exit;
             $this->send(true);
         }
+    }
+
+    /**
+     * Whether an Origin header names the origin this very request was made to.
+     *
+     * Derived from the request (scheme + Host) rather than from config: "same origin"
+     * is a property of the request, not of the deployment, so this needs no setting to
+     * keep in step with the port the app happens to be served on.
+     *
+     * The Host header is client-supplied, but nothing is trusted to it here - a forged
+     * Host makes a genuinely cross-origin request look same-origin only to a caller who
+     * already controls both halves of the comparison, and the only thing it can win is
+     * the absence of Access-Control-Allow-Origin headers it was never going to be given.
+     * That is why this compares rather than calling resolveTrustedHost(), which exists
+     * to keep an attacker's Host out of a Location header.
+     *
+     * @param string $httpOrigin The request's Origin header.
+     * @return bool
+     */
+    protected function isSameOrigin(string $httpOrigin): bool
+    {
+        $host = (string) $this->input->server('http_host', '');
+
+        if ($host === '') {
+            return false;
+        }
+
+        // scheme and host are case-insensitive; the browser sends both lowercased and
+        // omits the port when it is the scheme's default, which is how Host arrives too
+        return strcasecmp($httpOrigin, (string) $this->input->isHttpsRequest(true) . '://' . $host) === 0;
     }
 }
