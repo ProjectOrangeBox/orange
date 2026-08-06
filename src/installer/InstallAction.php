@@ -16,7 +16,7 @@ namespace orange\framework\installer;
  * - a migration whose class had to be renamed, or a config file with merged
  * content spliced in. Null means a straight copy.
  */
-final class InstallAction
+final readonly class InstallAction
 {
     /** Write the file; it is not there yet, or -o was given. */
     public const string COPY = 'copy';
@@ -31,11 +31,11 @@ final class InstallAction
     public const string CONFLICT = 'conflict';
 
     public function __construct(
-        public readonly string $type,
-        public readonly string $source,
-        public readonly string $destination,
-        public readonly string $reason = '',
-        public readonly ?string $contents = null,
+        public string $type,
+        public string $source,
+        public string $destination,
+        public string $reason = '',
+        public ?string $contents = null,
     ) {
     }
 

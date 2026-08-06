@@ -26,17 +26,17 @@ use orange\framework\exceptions\InstallerException;
  *       'after' => ['Run: composer db:migrate', 'Run: composer db:seed'],
  *   ];
  */
-final class Manifest
+final readonly class Manifest
 {
     /**
      * @param string[] $requires PHP extensions that must be loaded.
      * @param string[] $after    Lines printed once the install succeeds.
      */
     public function __construct(
-        public readonly string $name = '',
-        public readonly array $requires = [],
-        public readonly string $php = '',
-        public readonly array $after = [],
+        public string $name = '',
+        public array $requires = [],
+        public string $php = '',
+        public array $after = [],
     ) {
     }
 

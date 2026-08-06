@@ -433,13 +433,7 @@ final class ModuleInstaller
 
     protected function hasMarker(string $contents): bool
     {
-        foreach (explode("\n", $contents) as $line) {
-            if (trim($line) === self::MERGE_MARKER) {
-                return true;
-            }
-        }
-
-        return false;
+        return array_any(explode("\n", $contents), fn($line) => trim($line) === self::MERGE_MARKER);
     }
 
     protected function splice(string $contents, string $addition): string
